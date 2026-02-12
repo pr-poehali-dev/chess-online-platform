@@ -33,7 +33,10 @@ const Navbar = ({
     <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
+          <button 
+            onClick={() => setActiveSection('home')}
+            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+          >
             <img 
               src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/70fa1147-826f-4c89-8da6-773ff084ce53.jpg" 
               alt="Logo" 
@@ -42,7 +45,7 @@ const Navbar = ({
             <h1 className="text-2xl font-bold tracking-wide text-slate-900 dark:text-white" style={{ fontFamily: 'Montserrat, sans-serif' }}>
               Лига Шахмат
             </h1>
-          </div>
+          </button>
 
           <div className="flex items-center gap-3">
             <button
