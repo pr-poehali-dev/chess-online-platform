@@ -121,23 +121,24 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
           <div className="flex flex-col md:flex-row gap-8">
             <div className="flex flex-col items-center gap-4">
               <div 
-                className={`relative ${isEditing ? 'cursor-pointer group' : ''}`}
+                className="relative cursor-pointer group"
                 onClick={handleAvatarClick}
               >
-                <Avatar className="w-32 h-32 ring-4 ring-blue-400/50">
+                <div className="w-40 h-56 rounded-2xl ring-4 ring-blue-400/50 overflow-hidden bg-gradient-to-br from-blue-500 to-purple-600 flex items-center justify-center">
                   {editData.avatar ? (
-                    <AvatarImage src={editData.avatar} alt={editData.name} />
+                    <img src={editData.avatar} alt={editData.name} className="w-full h-full object-cover" />
                   ) : (
-                    <AvatarFallback className="text-4xl gradient-primary text-white">
+                    <div className="text-6xl font-bold text-white">
                       {getInitials(editData.name)}
-                    </AvatarFallback>
+                    </div>
                   )}
-                </Avatar>
-                {isEditing && (
-                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
-                    <Icon name="Camera" size={32} className="text-white" />
+                </div>
+                <div className="absolute inset-0 bg-black/50 rounded-2xl flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="text-center">
+                    <Icon name="Camera" size={40} className="text-white mx-auto mb-2" />
+                    <p className="text-white text-sm font-medium">Загрузить фото</p>
                   </div>
-                )}
+                </div>
               </div>
               <input
                 ref={fileInputRef}
@@ -146,11 +147,6 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
                 className="hidden"
                 onChange={handleFileChange}
               />
-              {isEditing && (
-                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
-                  Нажмите на аватар для загрузки фото
-                </p>
-              )}
             </div>
 
             <div className="flex-1 space-y-6">
