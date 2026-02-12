@@ -1,6 +1,13 @@
-import { Board, Piece, Position } from './gameTypes';
+import { Board, Piece, Position, CastlingRights } from './gameTypes';
 
-export const isValidMove = (board: Board, from: Position, to: Position, piece: Piece): boolean => {
+export const isValidMove = (
+  board: Board, 
+  from: Position, 
+  to: Position, 
+  piece: Piece, 
+  castlingRights?: CastlingRights, 
+  enPassantTarget?: Position | null
+): boolean => {
   const dx = to.col - from.col;
   const dy = to.row - from.row;
   const targetPiece = board[to.row][to.col];
@@ -17,7 +24,10 @@ export const isValidMove = (board: Board, from: Position, to: Position, piece: P
         if (from.row === startRow && dy === direction * 2 && !board[from.row + direction][from.col]) return true;
       }
       
-      if (Math.abs(dx) === 1 && dy === direction && targetPiece) return true;
+      if (Math.abs(dx) === 1 && dy === direction) {
+        if (targetPiece) return true;
+        if (enPassantTarget && to.row === enPassantTarget.row && to.col === enPassantTarget.col) return true;
+      }
       return false;
     }
     case 'knight':
@@ -31,8 +41,34 @@ export const isValidMove = (board: Board, from: Position, to: Position, piece: P
     case 'queen':
       if (dx !== 0 && dy !== 0 && Math.abs(dx) !== Math.abs(dy)) return false;
       return !isPathBlocked(board, from, to);
-    case 'king':
-      return Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+    case 'king': {
+      if (Math.abs(dx) <= 1 && Math.abs(dy) <= 1) return true;
+      
+      if (castlingRights && dy === 0 && Math.abs(dx) === 2) {
+        const isKingSide = dx > 0;
+        const baseRow = piece.color === 'white' ? 7 : 0;
+        
+        if (from.row !== baseRow || from.col !== 4) return false;
+        
+        if (piece.color === 'white') {
+          if (isKingSide && !castlingRights.whiteKingSide) return false;
+          if (!isKingSide && !castlingRights.whiteQueenSide) return false;
+        } else {
+          if (isKingSide && !castlingRights.blackKingSide) return false;
+          if (!isKingSide && !castlingRights.blackQueenSide) return false;
+        }
+        
+        const rookCol = isKingSide ? 7 : 0;
+        const direction = isKingSide ? 1 : -1;
+        
+        for (let col = from.col + direction; col !== rookCol; col += direction) {
+          if (board[from.row][col]) return false;
+        }
+        
+        return true;
+      }
+      return false;
+    }
     default:
       return false;
   }
@@ -52,14 +88,19 @@ export const isPathBlocked = (board: Board, from: Position, to: Position): boole
   return false;
 };
 
-export const getPossibleMoves = (board: Board, pos: Position): Position[] => {
+export const getPossibleMoves = (
+  board: Board, 
+  pos: Position, 
+  castlingRights?: CastlingRights, 
+  enPassantTarget?: Position | null
+): Position[] => {
   const piece = board[pos.row][pos.col];
   if (!piece) return [];
 
   const moves: Position[] = [];
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
-      if (isValidMove(board, pos, { row, col }, piece)) {
+      if (isValidMove(board, pos, { row, col }, piece, castlingRights, enPassantTarget)) {
         moves.push({ row, col });
       }
     }

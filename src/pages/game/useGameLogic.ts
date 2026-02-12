@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Board, Position, initialBoard, getInitialTime } from './gameTypes';
+import { Board, Position, initialBoard, getInitialTime, CastlingRights } from './gameTypes';
 import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove } from './gameLogic';
 
 export const useGameLogic = (
@@ -34,6 +34,13 @@ export const useGameLogic = (
   const [inactivityTimer, setInactivityTimer] = useState(40);
   const [capturedByWhite, setCapturedByWhite] = useState<{type: string; color: string}[]>(savedState?.capturedByWhite || []);
   const [capturedByBlack, setCapturedByBlack] = useState<{type: string; color: string}[]>(savedState?.capturedByBlack || []);
+  const [castlingRights, setCastlingRights] = useState<CastlingRights>(savedState?.castlingRights || {
+    whiteKingSide: true,
+    whiteQueenSide: true,
+    blackKingSide: true,
+    blackQueenSide: true
+  });
+  const [enPassantTarget, setEnPassantTarget] = useState<Position | null>(savedState?.enPassantTarget || null);
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
@@ -142,13 +149,15 @@ export const useGameLogic = (
         difficulty,
         timeControl,
         capturedByWhite,
-        capturedByBlack
+        capturedByBlack,
+        castlingRights,
+        enPassantTarget
       };
       localStorage.setItem('activeGame', JSON.stringify(gameState));
     } else {
       localStorage.removeItem('activeGame');
     }
-  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack]);
+  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget]);
 
   const makeMove = (from: Position, to: Position) => {
     const newBoard = board.map(row => [...row]);
@@ -157,6 +166,34 @@ export const useGameLogic = (
     if (!piece) return;
 
     const capturedPiece = newBoard[to.row][to.col];
+    const newCastlingRights = { ...castlingRights };
+    let newEnPassantTarget: Position | null = null;
+
+    // Рокировка
+    if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
+      const isKingSide = to.col > from.col;
+      const rookFromCol = isKingSide ? 7 : 0;
+      const rookToCol = isKingSide ? to.col - 1 : to.col + 1;
+      
+      newBoard[from.row][rookToCol] = newBoard[from.row][rookFromCol];
+      newBoard[from.row][rookFromCol] = null;
+    }
+
+    // Взятие на проходе
+    if (piece.type === 'pawn' && enPassantTarget && to.row === enPassantTarget.row && to.col === enPassantTarget.col) {
+      const capturedRow = piece.color === 'white' ? to.row + 1 : to.row - 1;
+      const enPassantCaptured = newBoard[capturedRow][to.col];
+      if (enPassantCaptured) {
+        if (piece.color === 'white') {
+          setCapturedByWhite(prev => [...prev, {type: enPassantCaptured.type, color: enPassantCaptured.color}]);
+        } else {
+          setCapturedByBlack(prev => [...prev, {type: enPassantCaptured.type, color: enPassantCaptured.color}]);
+        }
+      }
+      newBoard[capturedRow][to.col] = null;
+    }
+
+    // Обычное взятие
     if (capturedPiece) {
       if (piece.color === 'white') {
         setCapturedByWhite(prev => [...prev, {type: capturedPiece.type, color: capturedPiece.color}]);
@@ -165,8 +202,45 @@ export const useGameLogic = (
       }
     }
 
-    newBoard[to.row][to.col] = piece;
+    // Превращение пешки
+    const promotionRow = piece.color === 'white' ? 0 : 7;
+    if (piece.type === 'pawn' && to.row === promotionRow) {
+      newBoard[to.row][to.col] = { type: 'queen', color: piece.color };
+    } else {
+      newBoard[to.row][to.col] = piece;
+    }
     newBoard[from.row][from.col] = null;
+
+    // Обновление прав на рокировку
+    if (piece.type === 'king') {
+      if (piece.color === 'white') {
+        newCastlingRights.whiteKingSide = false;
+        newCastlingRights.whiteQueenSide = false;
+      } else {
+        newCastlingRights.blackKingSide = false;
+        newCastlingRights.blackQueenSide = false;
+      }
+    }
+    if (piece.type === 'rook') {
+      if (piece.color === 'white') {
+        if (from.col === 0) newCastlingRights.whiteQueenSide = false;
+        if (from.col === 7) newCastlingRights.whiteKingSide = false;
+      } else {
+        if (from.col === 0) newCastlingRights.blackQueenSide = false;
+        if (from.col === 7) newCastlingRights.blackKingSide = false;
+      }
+    }
+
+    // Установка цели взятия на проходе
+    if (piece.type === 'pawn' && Math.abs(to.row - from.row) === 2) {
+      newEnPassantTarget = {
+        row: piece.color === 'white' ? from.row - 1 : from.row + 1,
+        col: from.col
+      };
+    }
+
+    setCastlingRights(newCastlingRights);
+    setEnPassantTarget(newEnPassantTarget);
 
     const moveNotation = `${String.fromCharCode(97 + from.col)}${8 - from.row}-${String.fromCharCode(97 + to.col)}${8 - to.row}`;
     const newMoveHistory = [...moveHistory, moveNotation];
@@ -229,14 +303,14 @@ export const useGameLogic = (
         makeMove(selectedSquare, { row, col });
       } else if (piece && piece.color === 'white') {
         setSelectedSquare({ row, col });
-        setPossibleMoves(getPossibleMoves(board, { row, col }));
+        setPossibleMoves(getPossibleMoves(board, { row, col }, castlingRights, enPassantTarget));
       } else {
         setSelectedSquare(null);
         setPossibleMoves([]);
       }
     } else if (piece && piece.color === 'white') {
       setSelectedSquare({ row, col });
-      setPossibleMoves(getPossibleMoves(board, { row, col }));
+      setPossibleMoves(getPossibleMoves(board, { row, col }, castlingRights, enPassantTarget));
     }
   };
 

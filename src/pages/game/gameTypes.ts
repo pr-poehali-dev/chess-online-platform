@@ -6,6 +6,13 @@ export type Piece = {
 export type Board = (Piece | null)[][];
 export type Position = { row: number; col: number };
 
+export type CastlingRights = {
+  whiteKingSide: boolean;
+  whiteQueenSide: boolean;
+  blackKingSide: boolean;
+  blackQueenSide: boolean;
+};
+
 export const initialBoard: Board = [
   [
     { type: 'rook', color: 'black' }, { type: 'knight', color: 'black' }, { type: 'bishop', color: 'black' },
