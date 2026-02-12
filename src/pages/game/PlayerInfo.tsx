@@ -85,7 +85,9 @@ export const PlayerInfo = ({
             </div>
             <div className="flex items-center gap-2">
               <div className={`text-[10px] md:text-xs whitespace-nowrap ${
-                theme === 'light' ? 'text-slate-600' : 'text-stone-400'
+                playerColor === 'black' 
+                  ? 'text-stone-900 font-semibold'
+                  : (theme === 'light' ? 'text-slate-600' : 'text-stone-400')
               }`}>
                 {playerColor === 'white' ? 'Белые' : 'Черные'}
               </div>
@@ -105,12 +107,11 @@ export const PlayerInfo = ({
               {group.map((piece, index) => (
                 <span 
                   key={index} 
-                  className={`text-xl md:text-2xl ${
-                    piece.color === 'white' ? 'text-stone-200' : 'text-stone-500'
-                  }`}
+                  className={`text-xl md:text-2xl`}
                   style={{ 
                     marginLeft: index > 0 ? '-0.4em' : '0',
-                    zIndex: index 
+                    zIndex: index,
+                    color: piece.color === 'white' ? '#e7e5e4' : '#1c1917'
                   }}
                 >
                   {pieceSymbols[piece.color][piece.type]}
