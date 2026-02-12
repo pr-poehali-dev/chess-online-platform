@@ -33,12 +33,15 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                   hover:brightness-110 transition-all
                 `}
                 style={{ 
-                  background: isLight 
-                    ? 'linear-gradient(135deg, #f0d9b5 0%, #e8d1ad 100%)'
-                    : 'linear-gradient(135deg, #b58863 0%, #a0745f 100%)',
+                  backgroundImage: 'url(https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/79c4520d-63b3-4e07-8bba-0b7b41c53435.jpg)',
+                  backgroundSize: '800%',
+                  backgroundPosition: isLight 
+                    ? `${colIndex * 12.5}% ${rowIndex * 12.5}%`
+                    : `${colIndex * 12.5}% ${rowIndex * 12.5}%`,
+                  filter: isLight ? 'brightness(1.15)' : 'brightness(0.85)',
                   boxShadow: isLight 
                     ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
-                    : 'inset 0 1px 2px rgba(255,255,255,0.1), inset 0 -1px 2px rgba(0,0,0,0.1)'
+                    : 'inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.1)'
                 }}
               >
                 {colIndex === 0 && (
