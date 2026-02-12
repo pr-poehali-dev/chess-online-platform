@@ -286,6 +286,23 @@ export const ChatSection = ({
     setShowEmojiPicker(false);
   };
 
+  const handleBlockUser = () => {
+    if (!selectedChat) return;
+    
+    if (confirm(`Вы действительно хотите заблокировать ${selectedChat.participantName}?`)) {
+      const blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
+      blockedUsers.push(selectedChat.participantId);
+      localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
+      
+      const updatedChats = chats.filter(chat => chat.id !== selectedChat.id);
+      setChats(updatedChats);
+      localStorage.setItem('chessChats', JSON.stringify(updatedChats));
+      
+      setSelectedChat(null);
+      alert(`Пользователь ${selectedChat.participantName} заблокирован`);
+    }
+  };
+
   if (selectedChat) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -319,6 +336,15 @@ export const ChatSection = ({
                   </div>
                 </div>
               </div>
+              <Button
+                onClick={handleBlockUser}
+                variant="outline"
+                size="sm"
+                className="border-red-400/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20"
+              >
+                <Icon name="Ban" size={16} className="mr-1" />
+                Заблокировать
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
