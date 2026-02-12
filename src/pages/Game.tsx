@@ -44,6 +44,8 @@ const Game = () => {
     capturedByWhite,
     capturedByBlack,
     kingInCheckPosition,
+    showPossibleMoves,
+    setShowPossibleMoves,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -96,6 +98,8 @@ const Game = () => {
         handleSurrender={handleSurrender}
         handleNewGame={handleNewGame}
         setShowNotifications={setShowNotifications}
+        showPossibleMoves={showPossibleMoves}
+        setShowPossibleMoves={setShowPossibleMoves}
       />
 
       <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 overflow-y-auto">
@@ -110,6 +114,8 @@ const Game = () => {
               handleSurrender={handleSurrender}
               handleNewGame={handleNewGame}
               setShowNotifications={setShowNotifications}
+              showPossibleMoves={showPossibleMoves}
+              setShowPossibleMoves={setShowPossibleMoves}
             />
           </div>
 
@@ -132,6 +138,7 @@ const Game = () => {
             isSquareSelected={isSquareSelected}
             isSquarePossibleMove={isSquarePossibleMove}
             kingInCheckPosition={kingInCheckPosition}
+            showPossibleMoves={showPossibleMoves}
           />
 
           <PlayerInfo

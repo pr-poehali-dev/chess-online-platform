@@ -42,6 +42,9 @@ export const useGameLogic = (
   });
   const [enPassantTarget, setEnPassantTarget] = useState<Position | null>(savedState?.enPassantTarget || null);
   const [kingInCheckPosition, setKingInCheckPosition] = useState<Position | null>(null);
+  const [showPossibleMoves, setShowPossibleMoves] = useState<boolean>(
+    savedState?.showPossibleMoves !== undefined ? savedState.showPossibleMoves : true
+  );
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
@@ -152,7 +155,8 @@ export const useGameLogic = (
         capturedByWhite,
         capturedByBlack,
         castlingRights,
-        enPassantTarget
+        enPassantTarget,
+        showPossibleMoves
       };
       localStorage.setItem('activeGame', JSON.stringify(gameState));
     } else {
@@ -375,6 +379,8 @@ export const useGameLogic = (
     capturedByWhite,
     capturedByBlack,
     kingInCheckPosition,
+    showPossibleMoves,
+    setShowPossibleMoves,
     historyRef,
     handleSquareClick,
     isSquareSelected,
