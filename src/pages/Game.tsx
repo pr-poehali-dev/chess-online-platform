@@ -10,6 +10,7 @@ import { ExitDialog } from './game/ExitDialog';
 import { GameChatModal } from './game/GameChatModal';
 import { DrawOfferModal } from './game/DrawOfferModal';
 import { NotificationsModal } from './game/NotificationsModal';
+import { RematchModal } from './game/RematchModal';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -37,6 +38,7 @@ const Game = () => {
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [showDrawOffer, setShowDrawOffer] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
+  const [showRematchOffer, setShowRematchOffer] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -288,6 +290,15 @@ const Game = () => {
     }
   };
 
+  const handleAcceptRematch = () => {
+    setShowRematchOffer(false);
+    window.location.reload();
+  };
+
+  const handleDeclineRematch = () => {
+    setShowRematchOffer(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
       <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
@@ -396,13 +407,24 @@ const Game = () => {
             />
 
             {gameStatus !== 'playing' && (
-              <div className="bg-blue-600/90 backdrop-blur-sm rounded-lg p-4 text-center border border-blue-500/50 w-full max-w-[400px]">
+              <div className="bg-blue-600/90 backdrop-blur-sm rounded-lg p-4 text-center border border-blue-500/50 w-full max-w-[400px] space-y-4">
                 <div className="text-lg font-bold text-white">
                   {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли!'}
                   {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы победили!'}
                   {gameStatus === 'stalemate' && 'Ничья - пат'}
                   {gameStatus === 'draw' && 'Ничья'}
                 </div>
+                <button
+                  onClick={() => {
+                    setTimeout(() => {
+                      setShowRematchOffer(true);
+                    }, 1000);
+                  }}
+                  className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 mx-auto"
+                >
+                  <Icon name="RotateCcw" size={20} />
+                  Предложить реванш
+                </button>
               </div>
             )}
 
@@ -452,6 +474,12 @@ const Game = () => {
       <NotificationsModal
         showModal={showNotifications}
         onClose={() => setShowNotifications(false)}
+      />
+
+      <RematchModal
+        showModal={showRematchOffer}
+        onAccept={handleAcceptRematch}
+        onDecline={handleDeclineRematch}
       />
     </div>
   );
