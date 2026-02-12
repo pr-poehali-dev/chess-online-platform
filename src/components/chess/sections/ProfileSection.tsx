@@ -29,6 +29,8 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
     city: '',
     avatar: ''
   });
+  const [citySearch, setCitySearch] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
@@ -41,6 +43,10 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
   }, []);
 
   const cities = Object.keys(cityRegions).sort();
+
+  const filteredCities = citySearch 
+    ? cities.filter(city => city.toLowerCase().startsWith(citySearch.toLowerCase()))
+    : [];
 
   const handleAvatarClick = () => {
     if (fileInputRef.current) {
@@ -75,7 +81,15 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
 
   const handleCancel = () => {
     setEditData(userData);
+    setCitySearch('');
+    setShowCityDropdown(false);
     setIsEditing(false);
+  };
+
+  const handleCitySelect = (city: string) => {
+    setEditData({ ...editData, city });
+    setCitySearch('');
+    setShowCityDropdown(false);
   };
 
   const getInitials = (name: string) => {
@@ -197,23 +211,37 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
                   )}
                 </div>
 
-                <div>
+                <div className="relative">
                   <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
                     Город
                   </label>
                   {isEditing ? (
-                    <select
-                      value={editData.city}
-                      onChange={(e) => setEditData({ ...editData, city: e.target.value })}
-                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                    >
-                      <option value="">Выберите город</option>
-                      {cities.map((city) => (
-                        <option key={city} value={city}>
-                          {city}
-                        </option>
-                      ))}
-                    </select>
+                    <>
+                      <input
+                        type="text"
+                        value={citySearch || editData.city}
+                        onChange={(e) => {
+                          setCitySearch(e.target.value);
+                          setShowCityDropdown(true);
+                        }}
+                        onFocus={() => setShowCityDropdown(true)}
+                        className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                        placeholder="Начните вводить название города"
+                      />
+                      {showCityDropdown && filteredCities.length > 0 && (
+                        <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg shadow-lg">
+                          {filteredCities.slice(0, 10).map((city) => (
+                            <div
+                              key={city}
+                              onClick={() => handleCitySelect(city)}
+                              className="px-4 py-2 hover:bg-blue-50 dark:hover:bg-blue-900/20 cursor-pointer text-gray-900 dark:text-white"
+                            >
+                              {city}
+                            </div>
+                          ))}
+                        </div>
+                      )}
+                    </>
                   ) : (
                     <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5 text-gray-900 dark:text-white">
                       {userData.city || 'Не указано'}
