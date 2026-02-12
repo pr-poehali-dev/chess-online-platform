@@ -1,7 +1,10 @@
+import { useState, useEffect, useRef } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Avatar, AvatarFallback } from '@/components/ui/avatar';
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { cityRegions } from '@/components/chess/data/cities';
 
 interface ProfileSectionProps {
   stats: {
@@ -13,17 +16,218 @@ interface ProfileSectionProps {
 }
 
 export const ProfileSection = ({ stats }: ProfileSectionProps) => {
+  const [isEditing, setIsEditing] = useState(false);
+  const [userData, setUserData] = useState({
+    name: '',
+    email: '',
+    city: '',
+    avatar: ''
+  });
+  const [editData, setEditData] = useState({
+    name: '',
+    email: '',
+    city: '',
+    avatar: ''
+  });
+  const fileInputRef = useRef<HTMLInputElement>(null);
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('chessUser');
+    if (savedUser) {
+      const user = JSON.parse(savedUser);
+      setUserData(user);
+      setEditData(user);
+    }
+  }, []);
+
+  const cities = Object.keys(cityRegions).sort();
+
+  const handleAvatarClick = () => {
+    if (isEditing && fileInputRef.current) {
+      fileInputRef.current.click();
+    }
+  };
+
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setEditData({ ...editData, avatar: reader.result as string });
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleSave = () => {
+    setUserData(editData);
+    localStorage.setItem('chessUser', JSON.stringify(editData));
+    setIsEditing(false);
+  };
+
+  const handleCancel = () => {
+    setEditData(userData);
+    setIsEditing(false);
+  };
+
+  const getInitials = (name: string) => {
+    if (!name) return 'ВЫ';
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return parts[0][0] + parts[1][0];
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  const userRegion = cityRegions[userData.city] || userData.city;
+
   return (
     <div className="space-y-6 animate-fade-in">
       <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
         <CardHeader>
-          <div className="flex items-center gap-6">
-            <Avatar className="w-24 h-24 ring-4 ring-blue-400/50">
-              <AvatarFallback className="text-3xl gradient-primary text-white">ВЫ</AvatarFallback>
-            </Avatar>
-            <div className="flex-1">
-              <h2 className="text-3xl font-bold mb-2 text-gray-900 dark:text-white">Ваш профиль</h2>
-              <div className="flex items-center gap-4">
+          <div className="flex items-center justify-between">
+            <CardTitle className="text-2xl text-gray-900 dark:text-white">Профиль пользователя</CardTitle>
+            {!isEditing ? (
+              <Button
+                onClick={() => setIsEditing(true)}
+                variant="outline"
+                className="border-blue-400/50 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+              >
+                <Icon name="Edit" size={18} className="mr-2" />
+                Редактировать
+              </Button>
+            ) : (
+              <div className="flex gap-2">
+                <Button
+                  onClick={handleCancel}
+                  variant="outline"
+                  className="border-slate-200 dark:border-white/20"
+                >
+                  <Icon name="X" size={18} className="mr-2" />
+                  Отмена
+                </Button>
+                <Button
+                  onClick={handleSave}
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0"
+                >
+                  <Icon name="Check" size={18} className="mr-2" />
+                  Сохранить
+                </Button>
+              </div>
+            )}
+          </div>
+        </CardHeader>
+        <CardContent>
+          <div className="flex flex-col md:flex-row gap-8">
+            <div className="flex flex-col items-center gap-4">
+              <div 
+                className={`relative ${isEditing ? 'cursor-pointer group' : ''}`}
+                onClick={handleAvatarClick}
+              >
+                <Avatar className="w-32 h-32 ring-4 ring-blue-400/50">
+                  {editData.avatar ? (
+                    <AvatarImage src={editData.avatar} alt={editData.name} />
+                  ) : (
+                    <AvatarFallback className="text-4xl gradient-primary text-white">
+                      {getInitials(editData.name)}
+                    </AvatarFallback>
+                  )}
+                </Avatar>
+                {isEditing && (
+                  <div className="absolute inset-0 bg-black/50 rounded-full flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                    <Icon name="Camera" size={32} className="text-white" />
+                  </div>
+                )}
+              </div>
+              <input
+                ref={fileInputRef}
+                type="file"
+                accept="image/*"
+                className="hidden"
+                onChange={handleFileChange}
+              />
+              {isEditing && (
+                <p className="text-xs text-gray-500 dark:text-gray-400 text-center">
+                  Нажмите на аватар для загрузки фото
+                </p>
+              )}
+            </div>
+
+            <div className="flex-1 space-y-6">
+              <div className="grid md:grid-cols-2 gap-6">
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                    Имя и фамилия
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="text"
+                      value={editData.name}
+                      onChange={(e) => setEditData({ ...editData, name: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      placeholder="Введите имя и фамилию"
+                    />
+                  ) : (
+                    <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5 text-gray-900 dark:text-white">
+                      {userData.name || 'Не указано'}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                    Email
+                  </label>
+                  {isEditing ? (
+                    <input
+                      type="email"
+                      value={editData.email}
+                      onChange={(e) => setEditData({ ...editData, email: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                      placeholder="Введите email"
+                    />
+                  ) : (
+                    <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5 text-gray-900 dark:text-white">
+                      {userData.email || 'Не указано'}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                    Город
+                  </label>
+                  {isEditing ? (
+                    <select
+                      value={editData.city}
+                      onChange={(e) => setEditData({ ...editData, city: e.target.value })}
+                      className="w-full px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    >
+                      <option value="">Выберите город</option>
+                      {cities.map((city) => (
+                        <option key={city} value={city}>
+                          {city}
+                        </option>
+                      ))}
+                    </select>
+                  ) : (
+                    <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5 text-gray-900 dark:text-white">
+                      {userData.city || 'Не указано'}
+                    </div>
+                  )}
+                </div>
+
+                <div>
+                  <label className="text-sm font-medium text-gray-700 dark:text-gray-300 mb-2 block">
+                    Регион
+                  </label>
+                  <div className="px-4 py-2 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5 text-gray-600 dark:text-gray-400">
+                    {userRegion || 'Не указано'}
+                  </div>
+                </div>
+              </div>
+
+              <div className="flex items-center gap-4 pt-4 border-t border-slate-200 dark:border-white/10">
                 <Badge variant="outline" className="border-blue-400/50 text-blue-400">
                   <Icon name="TrendingUp" className="mr-1" size={14} />
                   Рейтинг: {stats.rating}
@@ -35,28 +239,48 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
               </div>
             </div>
           </div>
-        </CardHeader>
-        <CardContent>
-          <div className="grid md:grid-cols-4 gap-6">
-            <div className="text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5">
-              <div className="text-3xl font-bold text-blue-600 dark:text-blue-400">{stats.games}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Всего партий</div>
-            </div>
-            <div className="text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5">
-              <div className="text-3xl font-bold text-green-600 dark:text-green-400">{stats.wins}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Побед</div>
-            </div>
-            <div className="text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5">
-              <div className="text-3xl font-bold text-orange-600 dark:text-orange-400">{Math.round(stats.wins / stats.games * 100)}%</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Винрейт</div>
-            </div>
-            <div className="text-center p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5">
-              <div className="text-3xl font-bold text-purple-600 dark:text-purple-400">{stats.rating}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">Рейтинг</div>
-            </div>
-          </div>
         </CardContent>
       </Card>
+
+      <div className="grid md:grid-cols-4 gap-6">
+        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-blue-600 dark:text-blue-400">{stats.games}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">Всего партий</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-green-600 dark:text-green-400">{stats.wins}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">Побед</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-orange-600 dark:text-orange-400">
+                {Math.round(stats.wins / stats.games * 100)}%
+              </div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">Винрейт</div>
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
+          <CardContent className="pt-6">
+            <div className="text-center">
+              <div className="text-4xl font-bold text-purple-600 dark:text-purple-400">{stats.rating}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400 mt-2">Рейтинг</div>
+            </div>
+          </CardContent>
+        </Card>
+      </div>
 
       <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
         <CardHeader>
