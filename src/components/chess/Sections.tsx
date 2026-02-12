@@ -145,38 +145,25 @@ export const HomeSection = ({
 
           {showRussiaModal && (
             <div className="absolute top-full left-0 right-0 mt-2 z-50 animate-slide-down">
-              <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-2xl">
-                <CardHeader className="border-b border-slate-200 dark:border-white/10 py-3">
-                  <CardTitle className="flex items-center justify-between text-gray-900 dark:text-white text-base">
-                    <div className="flex items-center gap-2">
-                      <Icon name="Globe" className="text-blue-600 dark:text-blue-400" size={18} />
-                      Топ-10 России
-                    </div>
-                    <button onClick={() => setShowRussiaModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
-                      <Icon name="X" size={18} />
-                    </button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-[400px] overflow-y-auto pt-3">
-                  <div className="space-y-2">
-                    {fullRussiaRanking.slice(4).map((player) => (
-                      <div 
-                        key={player.rank}
-                        className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5"
-                      >
-                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-blue-600 dark:bg-blue-500 text-white font-bold text-xs">
-                          {player.rank}
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-900 dark:text-white text-sm">{player.name}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
-                        </div>
-                        <div className="text-sm font-bold text-blue-600 dark:text-blue-400">{player.rating}</div>
+              <div className="bg-white dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-white/10 p-4">
+                <div className="space-y-3">
+                  {fullRussiaRanking.slice(4).map((player) => (
+                    <div 
+                      key={player.rank}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5"
+                    >
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 dark:bg-blue-500 text-white font-bold text-sm">
+                        {player.rank}
                       </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{player.name}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
+                      </div>
+                      <div className="text-sm font-bold text-blue-600 dark:text-blue-400">{player.rating}</div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </Card>
@@ -223,41 +210,25 @@ export const HomeSection = ({
 
           {showRegionModal && (
             <div className="absolute top-full left-0 right-0 mt-2 z-50 animate-slide-down">
-              <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-2xl">
-                <CardHeader className="border-b border-slate-200 dark:border-white/10 py-3">
-                  <CardTitle className="flex items-center justify-between text-gray-900 dark:text-white text-base">
-                    <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2">
-                        <Icon name="Map" className="text-purple-600 dark:text-purple-400" size={18} />
-                        Топ-10 региона
+              <div className="bg-white dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-white/10 p-4">
+                <div className="space-y-3">
+                  {fullRegionRanking.slice(4).map((player) => (
+                    <div 
+                      key={player.rank}
+                      className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5"
+                    >
+                      <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 dark:bg-purple-500 text-white font-bold text-sm">
+                        {player.rank}
                       </div>
-                      <div className="text-xs font-normal text-gray-600 dark:text-gray-400">{userRegion}</div>
+                      <div className="flex-1">
+                        <div className="font-semibold text-gray-900 dark:text-white text-sm">{player.name}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
+                      </div>
+                      <div className="text-sm font-bold text-purple-600 dark:text-purple-400">{player.rating}</div>
                     </div>
-                    <button onClick={() => setShowRegionModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
-                      <Icon name="X" size={18} />
-                    </button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-[400px] overflow-y-auto pt-3">
-                  <div className="space-y-2">
-                    {fullRegionRanking.slice(4).map((player) => (
-                      <div 
-                        key={player.rank}
-                        className="flex items-center gap-3 p-2.5 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5"
-                      >
-                        <div className="flex items-center justify-center w-7 h-7 rounded-full bg-purple-600 dark:bg-purple-500 text-white font-bold text-xs">
-                          {player.rank}
-                        </div>
-                        <div className="flex-1">
-                          <div className="font-semibold text-gray-900 dark:text-white text-sm">{player.name}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
-                        </div>
-                        <div className="text-sm font-bold text-purple-600 dark:text-purple-400">{player.rating}</div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </Card>
@@ -320,57 +291,41 @@ export const HomeSection = ({
 
           {showCityModal && (
             <div className="absolute top-full left-0 right-0 mt-2 z-50 animate-slide-down">
-              <Card className="bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 shadow-2xl">
-                <CardHeader className="border-b border-slate-200 dark:border-white/10 py-3">
-                  <CardTitle className="flex items-center justify-between text-gray-900 dark:text-white text-base">
-                    <div className="flex flex-col gap-0.5">
-                      <div className="flex items-center gap-2">
-                        <Icon name="Home" className="text-orange-600 dark:text-orange-400" size={18} />
-                        Топ-10 города
+              <div className="bg-white dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-white/10 p-4">
+                <div className="space-y-3">
+                  {fullCityRanking.slice(4).map((player) => (
+                    <div 
+                      key={player.rank}
+                      className={`flex items-center gap-3 p-3 rounded-lg border ${
+                        player.highlight 
+                          ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-500/30' 
+                          : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
+                      }`}
+                    >
+                      <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${
+                        player.highlight 
+                          ? 'bg-orange-600 dark:bg-orange-500 text-white' 
+                          : 'bg-orange-600 dark:bg-orange-500 text-white'
+                      }`}>
+                        {player.rank}
                       </div>
-                      <div className="text-xs font-normal text-gray-600 dark:text-gray-400">{userCity}</div>
+                      <div className="flex-1">
+                        <div className={`font-semibold text-sm ${
+                          player.highlight 
+                            ? 'text-orange-900 dark:text-orange-300' 
+                            : 'text-gray-900 dark:text-white'
+                        }`}>{player.name}</div>
+                        <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
+                      </div>
+                      <div className={`text-sm font-bold ${
+                        player.highlight 
+                          ? 'text-orange-600 dark:text-orange-400' 
+                          : 'text-orange-600 dark:text-orange-400'
+                      }`}>{player.rating}</div>
                     </div>
-                    <button onClick={() => setShowCityModal(false)} className="p-1 hover:bg-slate-100 dark:hover:bg-slate-800 rounded transition-colors">
-                      <Icon name="X" size={18} />
-                    </button>
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="max-h-[400px] overflow-y-auto pt-3">
-                  <div className="space-y-2">
-                    {fullCityRanking.slice(4).map((player) => (
-                      <div 
-                        key={player.rank}
-                        className={`flex items-center gap-3 p-2.5 rounded-lg border ${
-                          player.highlight 
-                            ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-500/30' 
-                            : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
-                        }`}
-                      >
-                        <div className={`flex items-center justify-center w-7 h-7 rounded-full font-bold text-xs ${
-                          player.highlight 
-                            ? 'bg-orange-600 dark:bg-orange-500 text-white' 
-                            : 'bg-orange-600 dark:bg-orange-500 text-white'
-                        }`}>
-                          {player.rank}
-                        </div>
-                        <div className="flex-1">
-                          <div className={`font-semibold text-sm ${
-                            player.highlight 
-                              ? 'text-orange-900 dark:text-orange-300' 
-                              : 'text-gray-900 dark:text-white'
-                          }`}>{player.name}</div>
-                          <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
-                        </div>
-                        <div className={`text-sm font-bold ${
-                          player.highlight 
-                            ? 'text-orange-600 dark:text-orange-400' 
-                            : 'text-orange-600 dark:text-orange-400'
-                        }`}>{player.rating}</div>
-                      </div>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
+                  ))}
+                </div>
+              </div>
             </div>
           )}
         </Card>
