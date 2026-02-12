@@ -82,10 +82,10 @@ export const HomeSection = ({
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="text-center pt-2 pb-12">
-        <div className="flex flex-col items-center gap-4 mb-8 animate-slide-up">
+        <div className="flex flex-col items-center gap-4 mb-8 animate-slide-up max-w-md mx-auto">
           <Button 
             size="lg" 
-            className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
+            className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
             onClick={() => {
               if (isAuthenticated) {
                 setShowGameSettings(true);
@@ -98,37 +98,35 @@ export const HomeSection = ({
             Играть онлайн
           </Button>
           
-          <div className="flex gap-4">
-            <Button 
-              size="lg" 
-              className="bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-8 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
-              onClick={() => {
-                if (isAuthenticated) {
-                  setShowGameSettings(true);
-                } else {
-                  setShowAuthModal(true);
-                }
-              }}
-            >
-              <Icon name="Gamepad2" className="mr-2" size={24} />
-              Играть офлайн
-            </Button>
-            
-            <Button 
-              size="lg" 
-              className="bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-8 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
-              onClick={() => {
-                if (isAuthenticated) {
-                  setShowGameSettings(true);
-                } else {
-                  setShowAuthModal(true);
-                }
-              }}
-            >
-              <Icon name="Trophy" className="mr-2" size={24} />
-              Участвовать в турнире
-            </Button>
-          </div>
+          <Button 
+            size="lg" 
+            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
+            onClick={() => {
+              if (isAuthenticated) {
+                setShowGameSettings(true);
+              } else {
+                setShowAuthModal(true);
+              }
+            }}
+          >
+            <Icon name="Gamepad2" className="mr-2" size={24} />
+            Играть офлайн
+          </Button>
+          
+          <Button 
+            size="lg" 
+            className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
+            onClick={() => {
+              if (isAuthenticated) {
+                setShowGameSettings(true);
+              } else {
+                setShowAuthModal(true);
+              }
+            }}
+          >
+            <Icon name="Trophy" className="mr-2" size={24} />
+            Участвовать в турнире
+          </Button>
         </div>
         <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up" style={{ animationDelay: '0.1s' }}>
           Играйте в шахматы онлайн
