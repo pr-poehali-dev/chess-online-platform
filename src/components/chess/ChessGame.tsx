@@ -209,8 +209,10 @@ export const ChessGame = ({ difficulty, timeControl, onClose }: ChessGameProps) 
         selectedMove = moves[Math.floor(Math.random() * Math.min(3, moves.length))];
         break;
       case 'hard':
+        selectedMove = getBestMove(moves, false);
+        break;
       case 'master':
-        selectedMove = getBestMove(moves);
+        selectedMove = getBestMove(moves, true);
         break;
       default:
         selectedMove = moves[0];
@@ -236,25 +238,50 @@ export const ChessGame = ({ difficulty, timeControl, onClose }: ChessGameProps) 
     return moves;
   };
 
-  const getBestMove = (moves: { from: Position; to: Position }[]): { from: Position; to: Position } => {
+  const getBestMove = (moves: { from: Position; to: Position }[], isDifficult: boolean): { from: Position; to: Position } => {
     const pieceValues: Record<string, number> = {
       pawn: 1, knight: 3, bishop: 3, rook: 5, queen: 9, king: 0
     };
+
+    const positionBonus = [
+      [0, 0, 0, 0, 0, 0, 0, 0],
+      [5, 5, 5, 5, 5, 5, 5, 5],
+      [1, 2, 3, 4, 4, 3, 2, 1],
+      [0.5, 1, 2, 3, 3, 2, 1, 0.5],
+      [0, 0.5, 1, 2, 2, 1, 0.5, 0],
+      [0, 0, 0, 1, 1, 0, 0, 0],
+      [0, 0, 0, -1, -1, 0, 0, 0],
+      [0, 0, 0, 0, 0, 0, 0, 0]
+    ];
 
     let bestMove = moves[0];
     let bestScore = -Infinity;
 
     moves.forEach(move => {
       const targetPiece = board[move.to.row][move.to.col];
-      let score = Math.random() * 0.5;
+      const movingPiece = board[move.from.row][move.from.col];
+      let score = 0;
       
       if (targetPiece) {
-        score += pieceValues[targetPiece.type];
+        score += pieceValues[targetPiece.type] * 10;
       }
 
-      const movingPiece = board[move.from.row][move.from.col];
       if (movingPiece) {
-        score += (move.to.row < 4 ? 0.1 : 0);
+        score += positionBonus[move.to.row][move.to.col];
+        
+        if (movingPiece.type === 'pawn' && move.to.row <= 1) {
+          score += 8;
+        }
+        
+        if (move.to.row >= 2 && move.to.row <= 5 && move.to.col >= 2 && move.to.col <= 5) {
+          score += 1;
+        }
+      }
+
+      if (isDifficult) {
+        score += Math.random() * 0.1;
+      } else {
+        score += Math.random() * 2;
       }
 
       if (score > bestScore) {
@@ -321,30 +348,33 @@ export const ChessGame = ({ difficulty, timeControl, onClose }: ChessGameProps) 
                 </div>
               </div>
 
-              <div className="grid grid-cols-8 gap-0 border-4 border-slate-800 dark:border-slate-600" style={{ width: 'min(90vw, 512px)', height: 'min(90vw, 512px)' }}>
-                {board.map((row, rowIndex) => (
-                  row.map((piece, colIndex) => {
-                    const isLight = (rowIndex + colIndex) % 2 === 0;
-                    const isSelected = isSquareSelected(rowIndex, colIndex);
-                    const isPossible = isSquarePossibleMove(rowIndex, colIndex);
-                    
-                    return (
-                      <div
-                        key={`${rowIndex}-${colIndex}`}
-                        onClick={() => handleSquareClick(rowIndex, colIndex)}
-                        className={`
-                          flex items-center justify-center text-4xl sm:text-5xl cursor-pointer
-                          ${isLight ? 'bg-amber-100 dark:bg-amber-200' : 'bg-amber-700 dark:bg-amber-800'}
-                          ${isSelected ? 'ring-4 ring-blue-500' : ''}
-                          ${isPossible ? 'ring-4 ring-green-500' : ''}
-                          hover:opacity-80 transition-all
-                        `}
-                      >
-                        {piece && pieceSymbols[piece.color][piece.type]}
-                      </div>
-                    );
-                  })
-                ))}
+              <div className="inline-block border-4 border-slate-800 dark:border-slate-600">
+                <div className="grid grid-cols-8 gap-0" style={{ width: '480px', height: '480px' }}>
+                  {board.map((row, rowIndex) => (
+                    row.map((piece, colIndex) => {
+                      const isLight = (rowIndex + colIndex) % 2 === 0;
+                      const isSelected = isSquareSelected(rowIndex, colIndex);
+                      const isPossible = isSquarePossibleMove(rowIndex, colIndex);
+                      
+                      return (
+                        <div
+                          key={`${rowIndex}-${colIndex}`}
+                          onClick={() => handleSquareClick(rowIndex, colIndex)}
+                          className={`
+                            flex items-center justify-center text-4xl cursor-pointer select-none
+                            ${isLight ? 'bg-amber-100 dark:bg-amber-200' : 'bg-amber-700 dark:bg-amber-800'}
+                            ${isSelected ? 'ring-4 ring-inset ring-blue-500' : ''}
+                            ${isPossible ? 'ring-4 ring-inset ring-green-500' : ''}
+                            hover:opacity-80 transition-opacity
+                          `}
+                          style={{ width: '60px', height: '60px' }}
+                        >
+                          {piece && pieceSymbols[piece.color][piece.type]}
+                        </div>
+                      );
+                    })
+                  ))}
+                </div>
               </div>
 
               <div className="flex items-center justify-between w-full max-w-lg bg-slate-100 dark:bg-slate-800 rounded-lg p-3">
