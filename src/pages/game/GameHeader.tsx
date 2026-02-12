@@ -23,13 +23,24 @@ export const GameHeader = ({
   handleOfferDraw,
   handleSurrender,
   handleNewGame,
-  setShowNotifications
+  setShowNotifications,
+  theme
 }: GameHeaderProps) => {
   return (
-    <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
-      <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 tracking-wide" style={{
+    <header className={`backdrop-blur-sm border-b px-4 py-3 flex items-center justify-center ${
+      theme === 'light'
+        ? 'bg-white/80 border-slate-300'
+        : 'bg-stone-900/80 border-stone-700/50'
+    }`}>
+      <h1 className={`text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r tracking-wide ${
+        theme === 'light'
+          ? 'from-amber-600 via-yellow-500 to-amber-600'
+          : 'from-amber-200 via-yellow-400 to-amber-200'
+      }`} style={{
         fontFamily: 'Montserrat, sans-serif',
-        textShadow: '0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)',
+        textShadow: theme === 'light' 
+          ? '0 2px 10px rgba(217, 119, 6, 0.2), 0 0 30px rgba(217, 119, 6, 0.1)'
+          : '0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)',
         letterSpacing: '0.05em'
       }}>
         ЛигаШахмат
@@ -56,7 +67,11 @@ export const GameControls = ({
     <div className="flex gap-3">
         <button
           onClick={handleExitClick}
-          className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
+          className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
+            theme === 'light'
+              ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
+              : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
+          }`}
           title="Выход из игры"
         >
           <div className="rotate-180">
@@ -65,7 +80,11 @@ export const GameControls = ({
         </button>
         <button
           onClick={() => setShowChat(true)}
-          className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
+          className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
+            theme === 'light'
+              ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
+              : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
+          }`}
           title="Чат"
         >
           <Icon name="MessageCircle" size={24} />
@@ -73,7 +92,11 @@ export const GameControls = ({
         <div className="relative">
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
+            className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
+              theme === 'light'
+                ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
+                : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
+            }`}
             title="Опции"
           >
             <Icon name="Settings" size={24} />
@@ -84,7 +107,11 @@ export const GameControls = ({
                 className="fixed inset-0 z-40" 
                 onClick={() => setShowSettingsMenu(false)}
               />
-              <div className="absolute right-0 mt-2 w-56 bg-stone-800 rounded-lg shadow-xl border border-stone-700/50 overflow-hidden z-50 animate-scale-in">
+              <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-xl border overflow-hidden z-50 animate-scale-in ${
+                theme === 'light'
+                  ? 'bg-white border-slate-300'
+                  : 'bg-stone-800 border-stone-700/50'
+              }`}>
                 <button
                   onClick={() => {
                     if (setTheme) {
@@ -93,7 +120,11 @@ export const GameControls = ({
                       localStorage.setItem('chessTheme', newTheme);
                     }
                   }}
-                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center justify-between text-stone-300 hover:text-stone-100"
+                  className={`w-full px-4 py-3 text-left transition-colors flex items-center justify-between ${
+                    theme === 'light'
+                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                      : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon name={theme === 'dark' ? 'Moon' : 'Sun'} size={20} />
@@ -109,7 +140,11 @@ export const GameControls = ({
                       setShowPossibleMoves(!showPossibleMoves);
                     }
                   }}
-                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center justify-between text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
+                  className={`w-full px-4 py-3 text-left transition-colors flex items-center justify-between border-t ${
+                    theme === 'light'
+                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
+                      : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50 border-stone-700/50'
+                  }`}
                 >
                   <div className="flex items-center gap-3">
                     <Icon name="Eye" size={20} />
@@ -121,14 +156,22 @@ export const GameControls = ({
                 </button>
                 <button
                   onClick={handleOfferDraw}
-                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
+                  className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 border-t ${
+                    theme === 'light'
+                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
+                      : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50 border-stone-700/50'
+                  }`}
                 >
                   <Icon name="Handshake" size={20} />
                   <span>Предложить ничью</span>
                 </button>
                 <button
                   onClick={handleSurrender}
-                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100"
+                  className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 ${
+                    theme === 'light'
+                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                      : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50'
+                  }`}
                 >
                   <Icon name="Flag" size={20} />
                   <span>Сдаться</span>
@@ -138,14 +181,22 @@ export const GameControls = ({
                     setShowSettingsMenu(false);
                     setShowNotifications(true);
                   }}
-                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
+                  className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 border-t ${
+                    theme === 'light'
+                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
+                      : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50 border-stone-700/50'
+                  }`}
                 >
                   <Icon name="Bell" size={20} />
                   <span>Уведомления</span>
                 </button>
                 <button
                   onClick={handleNewGame}
-                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
+                  className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 border-t ${
+                    theme === 'light'
+                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
+                      : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50 border-stone-700/50'
+                  }`}
                 >
                   <Icon name="Plus" size={20} />
                   <span>Новая партия</span>

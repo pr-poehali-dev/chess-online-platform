@@ -10,6 +10,7 @@ interface PlayerInfoProps {
   avatar?: string;
   inactivityTimer?: number;
   capturedPieces?: {type: string; color: string}[];
+  theme?: 'light' | 'dark';
 }
 
 const pieceSymbols: Record<string, Record<string, string>> = {
@@ -42,7 +43,8 @@ export const PlayerInfo = ({
   rating,
   avatar,
   inactivityTimer,
-  capturedPieces = []
+  capturedPieces = [],
+  theme = 'dark'
 }: PlayerInfoProps) => {
   const pieceOrder = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king'];
   
@@ -59,7 +61,11 @@ export const PlayerInfo = ({
     .filter(type => groupedPieces[type])
     .map(type => groupedPieces[type]);
   return (
-    <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px] md:max-w-[560px] min-h-[76px] md:min-h-[88px]">
+    <div className={`backdrop-blur-sm rounded-lg p-3 md:p-4 border w-full max-w-[400px] md:max-w-[560px] min-h-[76px] md:min-h-[88px] ${
+      theme === 'light' 
+        ? 'bg-white/80 border-slate-300' 
+        : 'bg-stone-800/50 border-stone-700/30'
+    }`}>
       <div className="flex items-center justify-between h-full">
         <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-shrink">
           {avatar ? (
@@ -72,15 +78,21 @@ export const PlayerInfo = ({
             <div className="text-3xl md:text-4xl flex-shrink-0">{icon}</div>
           )}
           <div className="min-w-0 flex-shrink">
-            <div className="text-xs md:text-sm font-medium text-stone-200 truncate">
+            <div className={`text-xs md:text-sm font-medium truncate ${
+              theme === 'light' ? 'text-slate-800' : 'text-stone-200'
+            }`}>
               {playerName}{difficulty && ` (${difficulty})`}
             </div>
             <div className="flex items-center gap-2">
-              <div className="text-xs text-stone-400 whitespace-nowrap">
+              <div className={`text-xs whitespace-nowrap ${
+                theme === 'light' ? 'text-slate-600' : 'text-stone-400'
+              }`}>
                 {playerColor === 'white' ? 'Белые' : 'Черные'}
               </div>
               {rating && (
-                <div className="text-xs font-semibold text-blue-400 whitespace-nowrap">
+                <div className={`text-xs font-semibold whitespace-nowrap ${
+                  theme === 'light' ? 'text-blue-600' : 'text-blue-400'
+                }`}>
                   {rating}
                 </div>
               )}

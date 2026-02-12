@@ -11,6 +11,7 @@ interface MoveHistoryProps {
   onPreviousMove: () => void;
   onNextMove: () => void;
   historyRef: React.RefObject<HTMLDivElement>;
+  theme?: 'light' | 'dark';
 }
 
 export const MoveHistory = ({
@@ -22,24 +23,35 @@ export const MoveHistory = ({
   onMouseUpOrLeave,
   onPreviousMove,
   onNextMove,
-  historyRef
+  historyRef,
+  theme = 'dark'
 }: MoveHistoryProps) => {
   return (
     <div className="w-full max-w-[400px] md:max-w-[560px] flex items-center gap-2">
       <button
         onClick={onPreviousMove}
         disabled={currentMoveIndex === 0}
-        className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 flex-shrink-0"
+        className={`p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
+          theme === 'light'
+            ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
+            : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
+        }`}
         title="Предыдущий ход"
       >
         <Icon name="ChevronLeft" size={20} />
       </button>
       
       <div className="relative flex-1 min-w-0">
-        <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
+        <div className={`absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r z-10 pointer-events-none ${
+          theme === 'light' ? 'from-slate-200 to-transparent' : 'from-stone-900 to-transparent'
+        }`}></div>
         <div 
           ref={historyRef} 
-          className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-1.5"
+          className={`overflow-x-auto hide-scrollbar backdrop-blur-sm rounded-lg border p-1.5 ${
+            theme === 'light' 
+              ? 'bg-white/80 border-slate-300' 
+              : 'bg-stone-800/50 border-stone-700/30'
+          }`}
           onMouseDown={onMouseDown}
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUpOrLeave}
@@ -50,10 +62,12 @@ export const MoveHistory = ({
               <div 
                 key={index} 
                 className={`whitespace-nowrap flex-shrink-0 transition-all ${
-                  index === currentMoveIndex ? 'text-white font-semibold text-xs' : 'text-stone-300 text-[10px]'
+                  index === currentMoveIndex 
+                    ? (theme === 'light' ? 'text-slate-900 font-semibold text-xs' : 'text-white font-semibold text-xs')
+                    : (theme === 'light' ? 'text-slate-600 text-[10px]' : 'text-stone-300 text-[10px]')
                 }`}
               >
-                <span className="text-stone-500 mr-0.5">{Math.floor(index / 2) + 1}.</span>
+                <span className={theme === 'light' ? 'text-slate-400 mr-0.5' : 'text-stone-500 mr-0.5'}>{Math.floor(index / 2) + 1}.</span>
                 {move}
               </div>
             ))}
@@ -64,7 +78,11 @@ export const MoveHistory = ({
       <button
         onClick={onNextMove}
         disabled={currentMoveIndex === moveHistory.length - 1}
-        className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 flex-shrink-0"
+        className={`p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
+          theme === 'light'
+            ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
+            : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
+        }`}
         title="Следующий ход"
       >
         <Icon name="ChevronRight" size={20} />
