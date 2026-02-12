@@ -44,6 +44,14 @@ export const PlayerInfo = ({
   inactivityTimer,
   capturedPieces = []
 }: PlayerInfoProps) => {
+  const groupedPieces = capturedPieces.reduce((acc, piece) => {
+    const key = `${piece.color}-${piece.type}`;
+    if (!acc[key]) {
+      acc[key] = [];
+    }
+    acc[key].push(piece);
+    return acc;
+  }, {} as Record<string, {type: string; color: string}[]>);
   return (
     <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px] md:max-w-[560px]">
       <div className="flex items-center justify-between">
@@ -74,13 +82,21 @@ export const PlayerInfo = ({
           </div>
         </div>
         {capturedPieces.length > 0 && (
-          <div className="flex flex-wrap gap-1 justify-center mx-2">
-            {capturedPieces.map((piece, index) => (
-              <span key={index} className={`text-base md:text-lg ${
-                piece.color === 'white' ? 'text-stone-200' : 'text-stone-500'
-              }`}>
-                {pieceSymbols[piece.color][piece.type]}
-              </span>
+          <div className="flex flex-wrap gap-2 justify-center mx-2">
+            {Object.values(groupedPieces).map((group, groupIndex) => (
+              <div key={groupIndex} className="relative flex" style={{ height: '2em' }}>
+                {group.map((piece, index) => (
+                  <span 
+                    key={index} 
+                    className={`text-2xl md:text-3xl absolute ${
+                      piece.color === 'white' ? 'text-stone-200' : 'text-stone-500'
+                    }`}
+                    style={{ left: `${index * 0.5}em`, zIndex: index }}
+                  >
+                    {pieceSymbols[piece.color][piece.type]}
+                  </span>
+                ))}
+              </div>
             ))}
           </div>
         )}
