@@ -52,17 +52,24 @@ export const PlayerInfo = ({
             </div>
           </div>
         </div>
-        <div className="flex items-center gap-2">
-          <div className={`text-xl md:text-2xl font-bold ${
-            time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer ? 'text-green-400' : 'text-stone-400'
-          }`}>
-            {formatTime(time)}
+        <div className="flex flex-col items-end gap-1">
+          <div className="flex items-center gap-2">
+            <div className={`text-xl md:text-2xl font-bold ${
+              time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer ? 'text-green-400' : 'text-stone-400'
+            }`}>
+              {formatTime(time)}
+            </div>
+            {inactivityTimer !== undefined && inactivityTimer <= 20 && (
+              <div className={`text-sm md:text-base font-semibold ${
+                inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
+              }`}>
+                ({inactivityTimer}с)
+              </div>
+            )}
           </div>
           {inactivityTimer !== undefined && inactivityTimer <= 20 && (
-            <div className={`text-sm md:text-base font-semibold ${
-              inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
-            }`}>
-              ({inactivityTimer}с)
+            <div className="text-[10px] md:text-xs text-stone-400 text-right">
+              Бездействие игрока. До поражения.
             </div>
           )}
         </div>
