@@ -45,24 +45,18 @@ export const MoveHistory = ({
           onMouseUp={onMouseUpOrLeave}
           onMouseLeave={onMouseUpOrLeave}
         >
-          <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
-            {moveHistory.length === 0 ? (
-              <div className="text-[10px] text-stone-500 whitespace-nowrap">
-                Ходы появятся здесь
+          <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} min-h-[20px]`}>
+            {moveHistory.map((move, index) => (
+              <div 
+                key={index} 
+                className={`whitespace-nowrap flex-shrink-0 transition-all ${
+                  index === currentMoveIndex ? 'text-white font-semibold text-[12px]' : 'text-stone-300 text-[10px]'
+                }`}
+              >
+                <span className="text-stone-500 mr-0.5">{Math.floor(index / 2) + 1}.</span>
+                {move}
               </div>
-            ) : (
-              moveHistory.map((move, index) => (
-                <div 
-                  key={index} 
-                  className={`whitespace-nowrap flex-shrink-0 transition-all ${
-                    index === currentMoveIndex ? 'text-white font-semibold text-[12px]' : 'text-stone-300 text-[10px]'
-                  }`}
-                >
-                  <span className="text-stone-500 mr-0.5">{Math.floor(index / 2) + 1}.</span>
-                  {move}
-                </div>
-              ))
-            )}
+            ))}
           </div>
         </div>
       </div>
