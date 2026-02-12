@@ -11,6 +11,8 @@ interface GameHeaderProps {
   setShowNotifications: (value: boolean) => void;
   showPossibleMoves?: boolean;
   setShowPossibleMoves?: (value: boolean) => void;
+  theme?: 'light' | 'dark';
+  setTheme?: (value: 'light' | 'dark') => void;
 }
 
 export const GameHeader = ({
@@ -46,7 +48,9 @@ export const GameControls = ({
   handleNewGame,
   setShowNotifications,
   showPossibleMoves,
-  setShowPossibleMoves
+  setShowPossibleMoves,
+  theme,
+  setTheme
 }: GameHeaderProps) => {
   return (
     <div className="flex gap-3">
@@ -83,11 +87,29 @@ export const GameControls = ({
               <div className="absolute right-0 mt-2 w-56 bg-stone-800 rounded-lg shadow-xl border border-stone-700/50 overflow-hidden z-50 animate-scale-in">
                 <button
                   onClick={() => {
+                    if (setTheme) {
+                      const newTheme = theme === 'dark' ? 'light' : 'dark';
+                      setTheme(newTheme);
+                      localStorage.setItem('chessTheme', newTheme);
+                    }
+                  }}
+                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center justify-between text-stone-300 hover:text-stone-100"
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon name={theme === 'dark' ? 'Moon' : 'Sun'} size={20} />
+                    <span>{theme === 'dark' ? 'Темная тема' : 'Светлая тема'}</span>
+                  </div>
+                  <div className={`w-10 h-5 rounded-full transition-colors ${theme === 'light' ? 'bg-amber-500' : 'bg-stone-600'} relative`}>
+                    <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${theme === 'light' ? 'translate-x-5' : 'translate-x-0.5'}`} />
+                  </div>
+                </button>
+                <button
+                  onClick={() => {
                     if (setShowPossibleMoves) {
                       setShowPossibleMoves(!showPossibleMoves);
                     }
                   }}
-                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center justify-between text-stone-300 hover:text-stone-100"
+                  className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center justify-between text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
                 >
                   <div className="flex items-center gap-3">
                     <Icon name="Eye" size={20} />

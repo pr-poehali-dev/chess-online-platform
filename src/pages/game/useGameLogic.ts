@@ -45,6 +45,9 @@ export const useGameLogic = (
   const [showPossibleMoves, setShowPossibleMoves] = useState<boolean>(
     savedState?.showPossibleMoves !== undefined ? savedState.showPossibleMoves : true
   );
+  const [theme, setTheme] = useState<'light' | 'dark'>(
+    savedState?.theme || (localStorage.getItem('chessTheme') as 'light' | 'dark') || 'dark'
+  );
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
@@ -156,13 +159,14 @@ export const useGameLogic = (
         capturedByBlack,
         castlingRights,
         enPassantTarget,
-        showPossibleMoves
+        showPossibleMoves,
+        theme
       };
       localStorage.setItem('activeGame', JSON.stringify(gameState));
     } else {
       localStorage.removeItem('activeGame');
     }
-  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget]);
+  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget, showPossibleMoves, theme]);
 
   const makeMove = (from: Position, to: Position) => {
     const newBoard = board.map(row => [...row]);
@@ -381,6 +385,8 @@ export const useGameLogic = (
     kingInCheckPosition,
     showPossibleMoves,
     setShowPossibleMoves,
+    theme,
+    setTheme,
     historyRef,
     handleSquareClick,
     isSquareSelected,

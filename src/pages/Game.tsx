@@ -46,6 +46,8 @@ const Game = () => {
     kingInCheckPosition,
     showPossibleMoves,
     setShowPossibleMoves,
+    theme,
+    setTheme,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -88,7 +90,11 @@ const Game = () => {
   } = useGameHandlers(gameStatus, setGameStatus);
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
+    <div className={`min-h-screen flex flex-col transition-colors ${
+      theme === 'light' 
+        ? 'bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300' 
+        : 'bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950'
+    }`}>
       <GameHeader
         showSettingsMenu={showSettingsMenu}
         setShowSettingsMenu={setShowSettingsMenu}
@@ -100,6 +106,8 @@ const Game = () => {
         setShowNotifications={setShowNotifications}
         showPossibleMoves={showPossibleMoves}
         setShowPossibleMoves={setShowPossibleMoves}
+        theme={theme}
+        setTheme={setTheme}
       />
 
       <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 overflow-y-auto">
@@ -116,6 +124,8 @@ const Game = () => {
               setShowNotifications={setShowNotifications}
               showPossibleMoves={showPossibleMoves}
               setShowPossibleMoves={setShowPossibleMoves}
+              theme={theme}
+              setTheme={setTheme}
             />
           </div>
 
