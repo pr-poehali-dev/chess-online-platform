@@ -127,7 +127,7 @@ const Game = () => {
           />
 
           {gameStatus !== 'playing' && (
-            <div className="bg-blue-600/90 backdrop-blur-sm rounded-lg p-4 text-center border border-blue-500/50 w-full max-w-[400px] space-y-4">
+            <div className="bg-blue-600/90 backdrop-blur-sm rounded-lg p-4 text-center border border-blue-500/50 w-full max-w-[400px] md:max-w-[560px] space-y-4">
               <div className="text-lg font-bold text-white">
                 {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли!'}
                 {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы победили!'}

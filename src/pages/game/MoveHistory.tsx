@@ -25,7 +25,7 @@ export const MoveHistory = ({
   historyRef
 }: MoveHistoryProps) => {
   return (
-    <div className="w-full max-w-[400px] flex items-center gap-2">
+    <div className="w-full max-w-[400px] md:max-w-[560px] flex items-center gap-2">
       <button
         onClick={onPreviousMove}
         disabled={currentMoveIndex === 0}
