@@ -31,7 +31,9 @@ export const PlayerInfo = ({
             </div>
           </div>
         </div>
-        <div className={`text-xl md:text-2xl font-bold ${isCurrentPlayer ? 'text-green-400' : 'text-stone-400'}`}>
+        <div className={`text-xl md:text-2xl font-bold ${
+          time <= 60 ? 'text-red-500 animate-pulse' : isCurrentPlayer ? 'text-green-400' : 'text-stone-400'
+        }`}>
           {formatTime(time)}
         </div>
       </div>
