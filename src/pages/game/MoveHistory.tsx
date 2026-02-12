@@ -32,7 +32,7 @@ export const MoveHistory = ({
     }
   }, [moveHistory.length, historyRef]);
   return (
-    <div className="w-full md:w-auto flex items-center gap-2">
+    <div className="w-full md:w-auto flex items-center gap-2" style={{ maxWidth: '100%' }}>
       <button
         onClick={onPreviousMove}
         disabled={currentMoveIndex === 0}
@@ -46,7 +46,7 @@ export const MoveHistory = ({
         <Icon name="ChevronLeft" size={20} />
       </button>
       
-      <div className="relative flex-1 min-w-0">
+      <div className="relative flex-1 min-w-0 max-w-full overflow-hidden">
         <div className={`absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r z-10 pointer-events-none ${
           theme === 'light' ? 'from-slate-200 to-transparent' : 'from-stone-900 to-transparent'
         }`}></div>
