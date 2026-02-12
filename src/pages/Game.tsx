@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { Board, Position, initialBoard, getInitialTime, getDifficultyLabel, formatTime } from './game/gameTypes';
@@ -19,6 +19,7 @@ const Game = () => {
   const [blackTime, setBlackTime] = useState(getInitialTime(timeControl));
   const [gameStatus, setGameStatus] = useState<'playing' | 'checkmate' | 'stalemate' | 'draw'>('playing');
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const historyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
@@ -63,6 +64,12 @@ const Game = () => {
 
     const moveNotation = `${String.fromCharCode(97 + from.col)}${8 - from.row}-${String.fromCharCode(97 + to.col)}${8 - to.row}`;
     setMoveHistory(prev => [...prev, moveNotation]);
+    
+    setTimeout(() => {
+      if (historyRef.current) {
+        historyRef.current.scrollLeft = historyRef.current.scrollWidth;
+      }
+    }, 10);
 
     setBoard(newBoard);
     setSelectedSquare(null);
@@ -197,23 +204,26 @@ const Game = () => {
               </div>
             )}
 
-          <div className="w-full max-w-[400px] overflow-x-auto hide-scrollbar">
-            <div className="flex gap-2 px-1 select-none cursor-grab active:cursor-grabbing">
-              {moveHistory.length === 0 ? (
-                <div className="text-xs text-stone-500 px-3 py-2 whitespace-nowrap">
-                  Ходы появятся здесь
-                </div>
-              ) : (
-                moveHistory.map((move, index) => (
-                  <div 
-                    key={index} 
-                    className="text-xs text-stone-300 px-3 py-2 bg-stone-800/50 rounded whitespace-nowrap flex-shrink-0 border border-stone-700/30"
-                  >
-                    <span className="text-stone-500 mr-1">{Math.floor(index / 2) + 1}.</span>
-                    {move}
+          <div className="w-full max-w-[400px] relative">
+            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
+            <div ref={historyRef} className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-3">
+              <div className="flex gap-3 select-none cursor-grab active:cursor-grabbing">
+                {moveHistory.length === 0 ? (
+                  <div className="text-xs text-stone-500 whitespace-nowrap">
+                    Ходы появятся здесь
                   </div>
-                ))
-              )}
+                ) : (
+                  moveHistory.map((move, index) => (
+                    <div 
+                      key={index} 
+                      className="text-xs text-stone-300 whitespace-nowrap flex-shrink-0"
+                    >
+                      <span className="text-stone-500 mr-1">{Math.floor(index / 2) + 1}.</span>
+                      {move}
+                    </div>
+                  ))
+                )}
+              </div>
             </div>
           </div>
         </div>
