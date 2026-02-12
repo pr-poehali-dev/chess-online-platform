@@ -141,7 +141,10 @@ export const RankingCard = ({
             : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
         }`}
       >
-        <div className="relative flex-shrink-0">
+        <div className={`flex items-center justify-center w-7 h-7 rounded-full font-bold text-sm ${colors.bg} text-white flex-shrink-0`}>
+          {player.rank}
+        </div>
+        <div className="flex-shrink-0">
           {player.avatar ? (
             <img src={player.avatar} alt={player.name} className="w-9 h-9 rounded-full object-cover" />
           ) : (
@@ -149,9 +152,6 @@ export const RankingCard = ({
               {getInitials(player.name)}
             </div>
           )}
-          <div className={`absolute -bottom-1 -right-1 w-5 h-5 rounded-full flex items-center justify-center text-white font-bold text-xs ${colors.bg} ring-2 ring-white dark:ring-slate-900`}>
-            {player.rank}
-          </div>
         </div>
         <div className="flex-1">
           <div className={`font-semibold text-sm ${
