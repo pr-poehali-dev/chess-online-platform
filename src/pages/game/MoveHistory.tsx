@@ -1,4 +1,4 @@
-import { useRef } from 'react';
+import { useRef, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
 
 interface MoveHistoryProps {
@@ -26,6 +26,11 @@ export const MoveHistory = ({
   historyRef,
   theme = 'dark'
 }: MoveHistoryProps) => {
+  useEffect(() => {
+    if (historyRef.current) {
+      historyRef.current.scrollLeft = historyRef.current.scrollWidth;
+    }
+  }, [moveHistory.length, historyRef]);
   return (
     <div className="w-full md:w-auto flex items-center gap-2">
       <button
@@ -42,7 +47,7 @@ export const MoveHistory = ({
       </button>
       
       <div className="relative flex-1 min-w-0">
-        <div className={`absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r z-10 pointer-events-none ${
+        <div className={`absolute right-0 top-0 bottom-0 w-8 bg-gradient-to-l z-10 pointer-events-none ${
           theme === 'light' ? 'from-slate-200 to-transparent' : 'from-stone-900 to-transparent'
         }`}></div>
         <div 
@@ -57,20 +62,23 @@ export const MoveHistory = ({
           onMouseUp={onMouseUpOrLeave}
           onMouseLeave={onMouseUpOrLeave}
         >
-          <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} min-h-[20px]`}>
-            {moveHistory.map((move, index) => (
-              <div 
-                key={index} 
-                className={`whitespace-nowrap flex-shrink-0 transition-all ${
-                  index === currentMoveIndex 
-                    ? (theme === 'light' ? 'text-slate-900 font-semibold text-xs' : 'text-white font-semibold text-xs')
-                    : (theme === 'light' ? 'text-slate-600 text-[10px]' : 'text-stone-300 text-[10px]')
-                }`}
-              >
-                <span className={theme === 'light' ? 'text-slate-400 mr-0.5' : 'text-stone-500 mr-0.5'}>{Math.floor(index / 2) + 1}.</span>
-                {move}
-              </div>
-            ))}
+          <div className={`flex flex-row-reverse gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} min-h-[20px] justify-end`}>
+            {[...moveHistory].reverse().map((move, reverseIndex) => {
+              const index = moveHistory.length - 1 - reverseIndex;
+              return (
+                <div 
+                  key={index} 
+                  className={`whitespace-nowrap flex-shrink-0 transition-all ${
+                    index === currentMoveIndex 
+                      ? (theme === 'light' ? 'text-slate-900 font-semibold text-xs' : 'text-white font-semibold text-xs')
+                      : (theme === 'light' ? 'text-slate-600 text-[10px]' : 'text-stone-300 text-[10px]')
+                  }`}
+                >
+                  <span className={theme === 'light' ? 'text-slate-400 mr-0.5' : 'text-stone-500 mr-0.5'}>{Math.floor(index / 2) + 1}.</span>
+                  {move}
+                </div>
+              );
+            })}
           </div>
         </div>
       </div>
