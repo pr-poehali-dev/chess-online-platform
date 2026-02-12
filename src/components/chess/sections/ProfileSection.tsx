@@ -43,7 +43,7 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
   const cities = Object.keys(cityRegions).sort();
 
   const handleAvatarClick = () => {
-    if (isEditing && fileInputRef.current) {
+    if (fileInputRef.current) {
       fileInputRef.current.click();
     }
   };
@@ -53,7 +53,15 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
     if (file) {
       const reader = new FileReader();
       reader.onloadend = () => {
-        setEditData({ ...editData, avatar: reader.result as string });
+        const newAvatar = reader.result as string;
+        setEditData({ ...editData, avatar: newAvatar });
+        setUserData({ ...userData, avatar: newAvatar });
+        const savedUser = localStorage.getItem('chessUser');
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          user.avatar = newAvatar;
+          localStorage.setItem('chessUser', JSON.stringify(user));
+        }
       };
       reader.readAsDataURL(file);
     }
