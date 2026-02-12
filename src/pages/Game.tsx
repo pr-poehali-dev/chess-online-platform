@@ -303,7 +303,7 @@ const Game = () => {
                       <div 
                         key={index} 
                         className={`whitespace-nowrap flex-shrink-0 transition-all ${
-                          index === currentMoveIndex ? 'text-white font-semibold text-[12px]' : 'text-stone-300 text-[10px]'
+                          index === moveHistory.length - 1 ? 'text-white font-semibold text-[12px]' : 'text-stone-300 text-[10px]'
                         }`}
                       >
                         <span className="text-stone-500 mr-0.5">{Math.floor(index / 2) + 1}.</span>
