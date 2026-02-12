@@ -176,6 +176,14 @@ const Game = () => {
 
       <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4">
         <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center">
+            <h1 className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 tracking-wide" style={{
+              fontFamily: 'Montserrat, sans-serif',
+              textShadow: '0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)',
+              letterSpacing: '0.05em'
+            }}>
+              ЛигаШахмат
+            </h1>
+
             <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 md:gap-3">
