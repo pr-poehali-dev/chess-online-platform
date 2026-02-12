@@ -9,21 +9,34 @@ interface HomeSectionProps {
   isAuthenticated: boolean;
   setShowGameSettings: (value: boolean) => void;
   setShowAuthModal: (value: boolean) => void;
-  recentGames: Array<{
-    opponent: string;
-    result: string;
-    rating: number;
-    moves: number;
-    time: string;
-  }>;
 }
 
 export const HomeSection = ({ 
   isAuthenticated, 
   setShowGameSettings, 
-  setShowAuthModal, 
-  recentGames 
+  setShowAuthModal
 }: HomeSectionProps) => {
+  const topRussia = [
+    { rank: 1, name: 'Александр Петров', rating: 2456, city: 'Москва' },
+    { rank: 2, name: 'Мария Смирнова', rating: 2398, city: 'Санкт-Петербург' },
+    { rank: 3, name: 'Дмитрий Иванов', rating: 2356, city: 'Казань' },
+    { rank: 4, name: 'Елена Козлова', rating: 2287, city: 'Екатеринбург' },
+  ];
+
+  const topRegion = [
+    { rank: 1, name: 'Игорь Соколов', rating: 2123, city: 'Москва' },
+    { rank: 2, name: 'Анна Волкова', rating: 2089, city: 'Подольск' },
+    { rank: 3, name: 'Сергей Новиков', rating: 2045, city: 'Люберцы' },
+    { rank: 4, name: 'Ольга Морозова', rating: 1998, city: 'Химки' },
+  ];
+
+  const topCity = [
+    { rank: 1, name: 'Павел Лебедев', rating: 1923, city: 'Москва' },
+    { rank: 2, name: 'Наталья Орлова', rating: 1889, city: 'Москва' },
+    { rank: 3, name: 'Артём Федоров', rating: 1856, city: 'Москва' },
+    { rank: 4, name: 'Вы', rating: 1842, city: 'Москва', highlight: true },
+  ];
+
   return (
     <div className="space-y-8 animate-fade-in">
       <div className="text-center pt-2 pb-12">
@@ -51,43 +64,107 @@ export const HomeSection = ({
         </p>
       </div>
 
-      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.3s' }}>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-            <Icon name="History" className="text-blue-600 dark:text-blue-400" size={24} />
-            Последние партии
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {recentGames.map((game, index) => (
-              <div 
-                key={index} 
-                className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all cursor-pointer border border-slate-200 dark:border-white/5"
-              >
-                <div className="flex items-center gap-4">
-                  <Avatar>
-                    <AvatarFallback className="bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-white">
-                      {game.opponent.split(' ').map(n => n[0]).join('')}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <div className="font-semibold text-gray-900 dark:text-white">{game.opponent}</div>
-                    <div className="text-sm text-gray-600 dark:text-gray-400">Рейтинг: {game.rating}</div>
+      <div className="grid md:grid-cols-3 gap-6">
+        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in">
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <Icon name="Globe" className="text-blue-600 dark:text-blue-400" size={20} />
+              Топ-4 России
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topRussia.map((player) => (
+                <div 
+                  key={player.rank}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5"
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-blue-600 dark:bg-blue-500 text-white font-bold text-sm">
+                    {player.rank}
                   </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900 dark:text-white text-sm">{player.name}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
+                  </div>
+                  <div className="text-sm font-bold text-blue-600 dark:text-blue-400">{player.rating}</div>
                 </div>
-                <div className="flex items-center gap-6">
-                  <div className="text-sm text-gray-600 dark:text-gray-400">{game.moves} ходов</div>
-                  <Badge variant={game.result === 'win' ? 'default' : 'destructive'} className={game.result === 'win' ? 'bg-green-600' : ''}>
-                    {game.result === 'win' ? 'Победа' : 'Поражение'}
-                  </Badge>
-                  <div className="text-sm text-gray-500 dark:text-gray-500">{game.time}</div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.1s' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <Icon name="Map" className="text-purple-600 dark:text-purple-400" size={20} />
+              Топ-4 региона
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topRegion.map((player) => (
+                <div 
+                  key={player.rank}
+                  className="flex items-center gap-3 p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5"
+                >
+                  <div className="flex items-center justify-center w-8 h-8 rounded-full bg-purple-600 dark:bg-purple-500 text-white font-bold text-sm">
+                    {player.rank}
+                  </div>
+                  <div className="flex-1">
+                    <div className="font-semibold text-gray-900 dark:text-white text-sm">{player.name}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
+                  </div>
+                  <div className="text-sm font-bold text-purple-600 dark:text-purple-400">{player.rating}</div>
                 </div>
-              </div>
-            ))}
-          </div>
-        </CardContent>
-      </Card>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.2s' }}>
+          <CardHeader>
+            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+              <Icon name="Home" className="text-orange-600 dark:text-orange-400" size={20} />
+              Топ-4 города
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="space-y-3">
+              {topCity.map((player) => (
+                <div 
+                  key={player.rank}
+                  className={`flex items-center gap-3 p-3 rounded-lg border ${
+                    player.highlight 
+                      ? 'bg-orange-50 dark:bg-orange-900/20 border-orange-300 dark:border-orange-500/30' 
+                      : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
+                  }`}
+                >
+                  <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${
+                    player.highlight 
+                      ? 'bg-orange-600 dark:bg-orange-500 text-white' 
+                      : 'bg-orange-600 dark:bg-orange-500 text-white'
+                  }`}>
+                    {player.rank}
+                  </div>
+                  <div className="flex-1">
+                    <div className={`font-semibold text-sm ${
+                      player.highlight 
+                        ? 'text-orange-900 dark:text-orange-300' 
+                        : 'text-gray-900 dark:text-white'
+                    }`}>{player.name}</div>
+                    <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
+                  </div>
+                  <div className={`text-sm font-bold ${
+                    player.highlight 
+                      ? 'text-orange-600 dark:text-orange-400' 
+                      : 'text-orange-600 dark:text-orange-400'
+                  }`}>{player.rating}</div>
+                </div>
+              ))}
+            </div>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 };
