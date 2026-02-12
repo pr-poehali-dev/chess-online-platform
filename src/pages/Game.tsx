@@ -275,7 +275,15 @@ const Game = () => {
 
   const handleNewGame = () => {
     setShowSettingsMenu(false);
-    if (confirm('Начать новую партию? Текущая партия будет завершена.')) {
+    
+    if (gameStatus === 'playing') {
+      if (confirm('Чтобы начать новую партию, необходимо завершить текущую. Сдаться и начать новую игру?')) {
+        setGameStatus('checkmate');
+        setTimeout(() => {
+          window.location.reload();
+        }, 1500);
+      }
+    } else {
       window.location.reload();
     }
   };
