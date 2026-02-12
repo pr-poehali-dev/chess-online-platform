@@ -22,6 +22,11 @@ export const GameSettingsModal = ({
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard' | 'master' | null>(null);
   const [userCity, setUserCity] = useState<string>('');
   const [userRegion, setUserRegion] = useState<string>('');
+  const [lastGameSettings, setLastGameSettings] = useState<{
+    opponent: 'city' | 'region' | 'country' | 'friend' | 'computer';
+    time: 'blitz' | 'rapid' | 'classic';
+    difficulty?: 'easy' | 'medium' | 'hard' | 'master';
+  } | null>(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('chessUser');
@@ -31,6 +36,11 @@ export const GameSettingsModal = ({
         setUserCity(userData.city);
         setUserRegion(cityRegions[userData.city] || '');
       }
+    }
+    
+    const savedSettings = localStorage.getItem('lastGameSettings');
+    if (savedSettings) {
+      setLastGameSettings(JSON.parse(savedSettings));
     }
   }, [showGameSettings]);
 
@@ -81,6 +91,13 @@ export const GameSettingsModal = ({
 
   const handleStartGame = () => {
     if (selectedOpponent === 'computer' && selectedDifficulty && selectedTime) {
+      const settings = {
+        opponent: selectedOpponent,
+        time: selectedTime,
+        difficulty: selectedDifficulty
+      };
+      localStorage.setItem('lastGameSettings', JSON.stringify(settings));
+      
       onStartGame(selectedDifficulty, selectedTime);
       setShowGameSettings(false);
       setStep(1);
@@ -88,7 +105,13 @@ export const GameSettingsModal = ({
       setSelectedTime(null);
       setSelectedFriend(null);
       setSelectedDifficulty(null);
-    } else {
+    } else if (selectedOpponent && selectedTime) {
+      const settings = {
+        opponent: selectedOpponent,
+        time: selectedTime
+      };
+      localStorage.setItem('lastGameSettings', JSON.stringify(settings));
+      
       const isRated = selectedOpponent !== 'friend' && selectedOpponent !== 'computer';
       setShowGameSettings(false);
       alert(`Поиск соперника...\nТип: ${selectedOpponent}\nВремя: ${selectedTime}\nРейтинговая: ${isRated ? 'Да' : 'Нет'}`);
@@ -97,6 +120,49 @@ export const GameSettingsModal = ({
       setSelectedTime(null);
       setSelectedFriend(null);
       setSelectedDifficulty(null);
+    }
+  };
+
+  const handleQuickStart = () => {
+    if (!lastGameSettings) return;
+    
+    if (lastGameSettings.opponent === 'computer' && lastGameSettings.difficulty) {
+      onStartGame(lastGameSettings.difficulty, lastGameSettings.time);
+      setShowGameSettings(false);
+    } else {
+      const isRated = lastGameSettings.opponent !== 'friend' && lastGameSettings.opponent !== 'computer';
+      setShowGameSettings(false);
+      alert(`Поиск соперника...\nТип: ${lastGameSettings.opponent}\nВремя: ${lastGameSettings.time}\nРейтинговая: ${isRated ? 'Да' : 'Нет'}`);
+    }
+  };
+
+  const getOpponentLabel = (type: string) => {
+    switch(type) {
+      case 'city': return 'Город';
+      case 'region': return 'Регион';
+      case 'country': return 'Страна';
+      case 'friend': return 'Друг';
+      case 'computer': return 'Компьютер';
+      default: return type;
+    }
+  };
+
+  const getTimeLabel = (time: string) => {
+    switch(time) {
+      case 'blitz': return 'Блиц 3+2';
+      case 'rapid': return 'Рапид 10+5';
+      case 'classic': return 'Классика 15+10';
+      default: return time;
+    }
+  };
+
+  const getDifficultyLabel = (difficulty?: string) => {
+    switch(difficulty) {
+      case 'easy': return 'Легкий';
+      case 'medium': return 'Средний';
+      case 'hard': return 'Сложный';
+      case 'master': return 'Мастер';
+      default: return '';
     }
   };
 
@@ -147,6 +213,25 @@ export const GameSettingsModal = ({
         <CardContent className="space-y-6">
           {step === 1 && (
             <div className="space-y-3">
+              {lastGameSettings && (
+                <Button 
+                  className="w-full h-20 flex items-center justify-between bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 border-2 border-green-600 dark:border-green-500 shadow-lg"
+                  onClick={handleQuickStart}
+                >
+                  <div className="flex items-center gap-3">
+                    <Icon name="Zap" size={28} className="text-white" />
+                    <div className="text-left">
+                      <div className="text-base font-bold text-white">Быстрый старт</div>
+                      <div className="text-xs text-green-100">
+                        {getOpponentLabel(lastGameSettings.opponent)} • {getTimeLabel(lastGameSettings.time)}
+                        {lastGameSettings.difficulty && ` • ${getDifficultyLabel(lastGameSettings.difficulty)}`}
+                      </div>
+                    </div>
+                  </div>
+                  <Icon name="Play" size={24} className="text-white" />
+                </Button>
+              )}
+              
               <Button 
                 className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
                 onClick={() => handleOpponentSelect('city')}
