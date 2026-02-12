@@ -51,74 +51,7 @@ export const HomeSection = ({
         </p>
       </div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.3s' }}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-              <Icon name="Zap" className="text-orange-500" size={24} />
-              Быстрая игра
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <div className="grid grid-cols-3 gap-3">
-              <Button className="h-20 flex flex-col gap-1 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10">
-                <Icon name="Zap" size={20} className="text-slate-700 dark:text-white" />
-                <span className="text-xs text-slate-900 dark:text-white">Блиц</span>
-                <span className="text-xs text-slate-500 dark:text-gray-400">3+2</span>
-              </Button>
-              <Button className="h-20 flex flex-col gap-1 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10">
-                <Icon name="Clock" size={20} className="text-slate-700 dark:text-white" />
-                <span className="text-xs text-slate-900 dark:text-white">Рапид</span>
-                <span className="text-xs text-slate-500 dark:text-gray-400">10+5</span>
-              </Button>
-              <Button className="h-20 flex flex-col gap-1 bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10">
-                <Icon name="Timer" size={20} className="text-slate-700 dark:text-white" />
-                <span className="text-xs text-slate-900 dark:text-white">Классика</span>
-                <span className="text-xs text-slate-500 dark:text-gray-400">15+10</span>
-              </Button>
-            </div>
-            <p className="text-sm text-gray-600 dark:text-gray-400">Выберите формат и начните играть прямо сейчас</p>
-          </CardContent>
-        </Card>
-
-        <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.4s' }}>
-          <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-              <Icon name="Users" className="text-purple-500" size={24} />
-              Онлайн матчи
-            </CardTitle>
-          </CardHeader>
-          <CardContent className="space-y-4">
-            <p className="text-sm text-gray-600 dark:text-gray-400">
-              Играйте с реальными соперниками со всего мира в реальном времени
-            </p>
-            <div className="grid grid-cols-2 gap-3">
-              <div className="text-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5">
-                <div className="text-2xl font-bold text-blue-600 dark:text-blue-400">1,247</div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Онлайн игроков</div>
-              </div>
-              <div className="text-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/5">
-                <div className="text-2xl font-bold text-green-600 dark:text-green-400">324</div>
-                <div className="text-xs text-gray-600 dark:text-gray-400 mt-1">Активные партии</div>
-              </div>
-            </div>
-            <Button 
-              className="w-full gradient-secondary border-0 text-white"
-              onClick={() => {
-                if (isAuthenticated) {
-                  setShowGameSettings(true);
-                } else {
-                  setShowAuthModal(true);
-                }
-              }}
-            >
-              Начать игру
-            </Button>
-          </CardContent>
-        </Card>
-      </div>
-
-      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.5s' }}>
+      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.3s' }}>
         <CardHeader>
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Icon name="History" className="text-blue-600 dark:text-blue-400" size={24} />
