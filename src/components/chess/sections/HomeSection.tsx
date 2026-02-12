@@ -34,10 +34,10 @@ export const HomeSection = ({
   }, []);
 
   const fullRussiaRanking = [
-    { rank: 1, name: 'Александр Петров', rating: 2456, city: 'Москва' },
-    { rank: 2, name: 'Мария Смирнова', rating: 2398, city: 'Санкт-Петербург' },
-    { rank: 3, name: 'Дмитрий Иванов', rating: 2356, city: 'Казань' },
-    { rank: 4, name: 'Елена Козлова', rating: 2287, city: 'Екатеринбург' },
+    { rank: 1, name: 'Александр Петров', rating: 2456, city: 'Москва', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alexander' },
+    { rank: 2, name: 'Мария Смирнова', rating: 2398, city: 'Санкт-Петербург', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Maria' },
+    { rank: 3, name: 'Дмитрий Иванов', rating: 2356, city: 'Казань', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Dmitry' },
+    { rank: 4, name: 'Елена Козлова', rating: 2287, city: 'Екатеринбург', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Elena' },
     { rank: 5, name: 'Виктор Федоров', rating: 2245, city: 'Новосибирск' },
     { rank: 6, name: 'Анастасия Белова', rating: 2198, city: 'Нижний Новгород' },
     { rank: 7, name: 'Максим Орлов', rating: 2156, city: 'Казань' },
@@ -47,10 +47,10 @@ export const HomeSection = ({
   ];
 
   const fullRegionRanking = [
-    { rank: 1, name: 'Игорь Соколов', rating: 2123, city: userCity },
-    { rank: 2, name: 'Анна Волкова', rating: 2089, city: userCity === 'Москва' ? 'Подольск' : userCity },
-    { rank: 3, name: 'Сергей Новиков', rating: 2045, city: userCity === 'Москва' ? 'Люберцы' : userCity },
-    { rank: 4, name: 'Ольга Морозова', rating: 1998, city: userCity === 'Москва' ? 'Химки' : userCity },
+    { rank: 1, name: 'Игорь Соколов', rating: 2123, city: userCity, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Igor' },
+    { rank: 2, name: 'Анна Волкова', rating: 2089, city: userCity === 'Москва' ? 'Подольск' : userCity, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Anna' },
+    { rank: 3, name: 'Сергей Новиков', rating: 2045, city: userCity === 'Москва' ? 'Люберцы' : userCity, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Sergey' },
+    { rank: 4, name: 'Ольга Морозова', rating: 1998, city: userCity === 'Москва' ? 'Химки' : userCity, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Olga' },
     { rank: 5, name: 'Андрей Кузнецов', rating: 1965, city: userCity },
     { rank: 6, name: 'Татьяна Лебедева', rating: 1934, city: userCity },
     { rank: 7, name: 'Владимир Васильев', rating: 1912, city: userCity === 'Москва' ? 'Балашиха' : userCity },
@@ -59,11 +59,14 @@ export const HomeSection = ({
     { rank: 10, name: 'Наталья Григорьева', rating: 1845, city: userCity },
   ];
 
+  const savedUser = localStorage.getItem('chessUser');
+  const userAvatar = savedUser ? JSON.parse(savedUser).avatar : '';
+
   const fullCityRanking = [
-    { rank: 1, name: 'Павел Лебедев', rating: 1923, city: userCity },
-    { rank: 2, name: 'Наталья Орлова', rating: 1889, city: userCity },
-    { rank: 3, name: 'Артём Федоров', rating: 1856, city: userCity },
-    { rank: 4, name: 'Вы', rating: 1842, city: userCity, highlight: true },
+    { rank: 1, name: 'Павел Лебедев', rating: 1923, city: userCity, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Pavel' },
+    { rank: 2, name: 'Наталья Орлова', rating: 1889, city: userCity, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Natalia' },
+    { rank: 3, name: 'Артём Федоров', rating: 1856, city: userCity, avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Artem' },
+    { rank: 4, name: 'Вы', rating: 1842, city: userCity, highlight: true, avatar: userAvatar },
     { rank: 5, name: 'Игорь Петров', rating: 1823, city: userCity },
     { rank: 6, name: 'Марина Сидорова', rating: 1798, city: userCity },
     { rank: 7, name: 'Дмитрий Козлов', rating: 1776, city: userCity },
