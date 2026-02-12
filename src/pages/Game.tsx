@@ -20,6 +20,9 @@ const Game = () => {
   const [gameStatus, setGameStatus] = useState<'playing' | 'checkmate' | 'stalemate' | 'draw'>('playing');
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
   const historyRef = useRef<HTMLDivElement>(null);
+  const [isDragging, setIsDragging] = useState(false);
+  const [startX, setStartX] = useState(0);
+  const [scrollLeft, setScrollLeft] = useState(0);
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
@@ -136,6 +139,25 @@ const Game = () => {
     return possibleMoves.some(m => m.row === row && m.col === col);
   };
 
+  const handleMouseDown = (e: React.MouseEvent) => {
+    if (!historyRef.current) return;
+    setIsDragging(true);
+    setStartX(e.pageX - historyRef.current.offsetLeft);
+    setScrollLeft(historyRef.current.scrollLeft);
+  };
+
+  const handleMouseMove = (e: React.MouseEvent) => {
+    if (!isDragging || !historyRef.current) return;
+    e.preventDefault();
+    const x = e.pageX - historyRef.current.offsetLeft;
+    const walk = (x - startX) * 2;
+    historyRef.current.scrollLeft = scrollLeft - walk;
+  };
+
+  const handleMouseUpOrLeave = () => {
+    setIsDragging(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
       <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-between">
@@ -206,8 +228,15 @@ const Game = () => {
 
           <div className="w-full max-w-[400px] relative">
             <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
-            <div ref={historyRef} className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-3">
-              <div className="flex gap-3 select-none cursor-grab active:cursor-grabbing">
+            <div 
+              ref={historyRef} 
+              className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-3"
+              onMouseDown={handleMouseDown}
+              onMouseMove={handleMouseMove}
+              onMouseUp={handleMouseUpOrLeave}
+              onMouseLeave={handleMouseUpOrLeave}
+            >
+              <div className={`flex gap-3 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
                 {moveHistory.length === 0 ? (
                   <div className="text-xs text-stone-500 whitespace-nowrap">
                     Ходы появятся здесь
