@@ -8,12 +8,14 @@ interface HomeSectionProps {
   isAuthenticated: boolean;
   setShowGameSettings: (value: boolean) => void;
   setShowAuthModal: (value: boolean) => void;
+  setShowOfflineGameModal: (value: boolean) => void;
 }
 
 export const HomeSection = ({ 
   isAuthenticated, 
   setShowGameSettings, 
-  setShowAuthModal
+  setShowAuthModal,
+  setShowOfflineGameModal
 }: HomeSectionProps) => {
   const [userCity, setUserCity] = useState<string>('Москва');
   const [userRegion, setUserRegion] = useState<string>('Москва');
@@ -103,7 +105,7 @@ export const HomeSection = ({
             className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
             onClick={() => {
               if (isAuthenticated) {
-                setShowGameSettings(true);
+                setShowOfflineGameModal(true);
               } else {
                 setShowAuthModal(true);
               }

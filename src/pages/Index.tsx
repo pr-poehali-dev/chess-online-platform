@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/chess/Navbar';
 import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection, NotificationsSection, HistorySection, ChatSection } from '@/components/chess/Sections';
-import { AuthModal, GameSettingsModal } from '@/components/chess/Modals';
+import { AuthModal, GameSettingsModal, OfflineGameModal } from '@/components/chess/Modals';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -17,6 +17,7 @@ const Index = () => {
   });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGameSettings, setShowGameSettings] = useState(false);
+  const [showOfflineGameModal, setShowOfflineGameModal] = useState(false);
   const [chatParams, setChatParams] = useState<{ name: string; rating: number; id: string } | null>(null);
 
   useEffect(() => {
@@ -92,6 +93,7 @@ const Index = () => {
             isAuthenticated={isAuthenticated}
             setShowGameSettings={setShowGameSettings}
             setShowAuthModal={setShowAuthModal}
+            setShowOfflineGameModal={setShowOfflineGameModal}
           />
         )}
 
@@ -153,6 +155,15 @@ const Index = () => {
         }}
         onStartOnlineGame={(opponentType, timeControl) => {
           navigate(`/online-game?opponent=${opponentType}&time=${timeControl}`);
+        }}
+      />
+
+      <OfflineGameModal
+        showModal={showOfflineGameModal}
+        setShowModal={setShowOfflineGameModal}
+        onRegister={(data) => {
+          console.log('Регистрация на офлайн игру:', data);
+          alert(`Вы зарегистрированы на игру\nДень: ${data.day}\nВремя: ${data.time}${data.district ? `\nРайон: ${data.district}` : ''}`);
         }}
       />
 
