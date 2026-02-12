@@ -17,6 +17,7 @@ export const GameSettingsModal = ({
   const [selectedOpponent, setSelectedOpponent] = useState<'city' | 'region' | 'country' | 'friend' | 'computer' | null>(null);
   const [selectedTime, setSelectedTime] = useState<'blitz' | 'rapid' | 'classic' | null>(null);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
+  const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard' | 'master' | null>(null);
   const [userCity, setUserCity] = useState<string>('');
   const [userRegion, setUserRegion] = useState<string>('');
 
@@ -47,6 +48,9 @@ export const GameSettingsModal = ({
       if (step === 2 && selectedOpponent === 'friend') {
         setSelectedFriend(null);
       }
+      if (step === 2 && selectedOpponent === 'computer') {
+        setSelectedDifficulty(null);
+      }
     }
   };
 
@@ -64,6 +68,11 @@ export const GameSettingsModal = ({
     setStep(3);
   };
 
+  const handleDifficultySelect = (difficulty: 'easy' | 'medium' | 'hard' | 'master') => {
+    setSelectedDifficulty(difficulty);
+    setStep(3);
+  };
+
   const handleTimeSelect = (time: 'blitz' | 'rapid' | 'classic') => {
     setSelectedTime(time);
   };
@@ -76,10 +85,14 @@ export const GameSettingsModal = ({
     setSelectedOpponent(null);
     setSelectedTime(null);
     setSelectedFriend(null);
+    setSelectedDifficulty(null);
   };
 
   const getStepCount = () => {
-    return selectedOpponent === 'friend' ? 3 : 2;
+    if (selectedOpponent === 'friend' || selectedOpponent === 'computer') {
+      return 3;
+    }
+    return 2;
   };
 
   return (
@@ -100,7 +113,8 @@ export const GameSettingsModal = ({
             <CardTitle className="flex-1 text-center text-gray-900 dark:text-white">
               {step === 1 && 'Выбор противника'}
               {step === 2 && selectedOpponent === 'friend' && 'Выбор друга'}
-              {step === 2 && selectedOpponent !== 'friend' && 'Контроль времени'}
+              {step === 2 && selectedOpponent === 'computer' && 'Уровень сложности'}
+              {step === 2 && selectedOpponent !== 'friend' && selectedOpponent !== 'computer' && 'Контроль времени'}
               {step === 3 && 'Контроль времени'}
             </CardTitle>
             {step > 1 && <div className="w-10" />}
@@ -221,7 +235,70 @@ export const GameSettingsModal = ({
             </div>
           )}
 
-          {((step === 2 && selectedOpponent !== 'friend') || step === 3) && (
+          {step === 2 && selectedOpponent === 'computer' && (
+            <div className="space-y-3">
+              <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                Выберите уровень сложности
+              </div>
+              <Button
+                className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
+                onClick={() => handleDifficultySelect('easy')}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🟢</div>
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-slate-900 dark:text-white">Легкий</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">Рейтинг: 800-1000 • Для начинающих</div>
+                  </div>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-slate-400" />
+              </Button>
+
+              <Button
+                className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
+                onClick={() => handleDifficultySelect('medium')}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🟡</div>
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-slate-900 dark:text-white">Средний</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">Рейтинг: 1200-1500 • Любители</div>
+                  </div>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-slate-400" />
+              </Button>
+
+              <Button
+                className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
+                onClick={() => handleDifficultySelect('hard')}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🟠</div>
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-slate-900 dark:text-white">Сложный</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">Рейтинг: 1700-2000 • Опытные игроки</div>
+                  </div>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-slate-400" />
+              </Button>
+
+              <Button
+                className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
+                onClick={() => handleDifficultySelect('master')}
+              >
+                <div className="flex items-center gap-3">
+                  <div className="text-2xl">🔴</div>
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-slate-900 dark:text-white">Мастер</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">Рейтинг: 2200+ • Для профессионалов</div>
+                  </div>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-slate-400" />
+              </Button>
+            </div>
+          )}
+
+          {((step === 2 && selectedOpponent !== 'friend' && selectedOpponent !== 'computer') || step === 3) && (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <Button 
