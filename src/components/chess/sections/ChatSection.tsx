@@ -39,7 +39,14 @@ export const ChatSection = ({
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
   const [messageText, setMessageText] = useState('');
+  const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+
+  const emojis = [
+    '😊', '😂', '❤️', '👍', '👏', '🔥', '💯', '🎉', 
+    '😎', '🤔', '😅', '🙌', '👌', '✨', '⚡', '💪',
+    '🎯', '🏆', '🎲', '♟️', '👑', '⭐', '💎', '🚀'
+  ];
 
   useEffect(() => {
     const savedChats = localStorage.getItem('chessChats');
@@ -274,6 +281,11 @@ export const ChatSection = ({
     }
   };
 
+  const handleEmojiSelect = (emoji: string) => {
+    setMessageText(messageText + emoji);
+    setShowEmojiPicker(false);
+  };
+
   if (selectedChat) {
     return (
       <div className="space-y-6 animate-fade-in">
@@ -345,22 +357,47 @@ export const ChatSection = ({
                 <div ref={messagesEndRef} />
               </div>
 
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  onKeyPress={handleKeyPress}
-                  placeholder="Написать сообщение..."
-                  className="flex-1 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-                <Button
-                  onClick={handleSendMessage}
-                  disabled={!messageText.trim()}
-                  className="bg-blue-600 hover:bg-blue-700 text-white border-0"
-                >
-                  <Icon name="Send" size={18} />
-                </Button>
+              <div className="space-y-2">
+                {showEmojiPicker && (
+                  <div className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-white/10 shadow-lg animate-scale-in">
+                    <div className="grid grid-cols-8 gap-2">
+                      {emojis.map((emoji, index) => (
+                        <button
+                          key={index}
+                          onClick={() => handleEmojiSelect(emoji)}
+                          className="text-2xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded p-1 transition-colors"
+                        >
+                          {emoji}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+                
+                <div className="flex gap-2">
+                  <Button
+                    onClick={() => setShowEmojiPicker(!showEmojiPicker)}
+                    variant="outline"
+                    className="border-slate-200 dark:border-white/20"
+                  >
+                    <Icon name="Smile" size={18} />
+                  </Button>
+                  <input
+                    type="text"
+                    value={messageText}
+                    onChange={(e) => setMessageText(e.target.value)}
+                    onKeyPress={handleKeyPress}
+                    placeholder="Написать сообщение..."
+                    className="flex-1 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  />
+                  <Button
+                    onClick={handleSendMessage}
+                    disabled={!messageText.trim()}
+                    className="bg-blue-600 hover:bg-blue-700 text-white border-0"
+                  >
+                    <Icon name="Send" size={18} />
+                  </Button>
+                </div>
               </div>
             </div>
           </CardContent>
