@@ -105,7 +105,8 @@ export const HomeSection = ({
 
       <div className="grid md:grid-cols-3 gap-6">
         <RankingCard
-          title="Топ-4 России"
+          title="Лучшие в России"
+          subtitle="Лидеры страны"
           icon="Globe"
           iconColor="blue"
           topPlayers={topRussia}
@@ -116,7 +117,7 @@ export const HomeSection = ({
         />
 
         <RankingCard
-          title="Топ-4 региона"
+          title="Первые в регионе"
           subtitle={userRegion}
           icon="Map"
           iconColor="purple"
@@ -128,7 +129,7 @@ export const HomeSection = ({
         />
 
         <RankingCard
-          title="Топ-4 города"
+          title="Победители в городе"
           subtitle={userCity}
           icon="Home"
           iconColor="orange"
