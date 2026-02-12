@@ -7,17 +7,13 @@ import { cityRegions } from '@/components/chess/data/cities';
 interface GameSettingsModalProps {
   showGameSettings: boolean;
   setShowGameSettings: (value: boolean) => void;
-  setShowGame: (value: boolean) => void;
-  setGameDifficulty: (value: 'easy' | 'medium' | 'hard' | 'master' | null) => void;
-  setGameTimeControl: (value: 'blitz' | 'rapid' | 'classic' | null) => void;
+  onStartGame: (difficulty: 'easy' | 'medium' | 'hard' | 'master', timeControl: 'blitz' | 'rapid' | 'classic') => void;
 }
 
 export const GameSettingsModal = ({ 
   showGameSettings, 
   setShowGameSettings,
-  setShowGame,
-  setGameDifficulty,
-  setGameTimeControl
+  onStartGame
 }: GameSettingsModalProps) => {
   const [step, setStep] = useState(1);
   const [selectedOpponent, setSelectedOpponent] = useState<'city' | 'region' | 'country' | 'friend' | 'computer' | null>(null);
@@ -85,9 +81,7 @@ export const GameSettingsModal = ({
 
   const handleStartGame = () => {
     if (selectedOpponent === 'computer' && selectedDifficulty && selectedTime) {
-      setGameDifficulty(selectedDifficulty);
-      setGameTimeControl(selectedTime);
-      setShowGame(true);
+      onStartGame(selectedDifficulty, selectedTime);
       setShowGameSettings(false);
       setStep(1);
       setSelectedOpponent(null);
