@@ -287,26 +287,26 @@ const Game = () => {
               <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
               <div 
                 ref={historyRef} 
-                className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-3"
+                className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-1.5"
                 onMouseDown={handleMouseDown}
                 onMouseMove={handleMouseMove}
                 onMouseUp={handleMouseUpOrLeave}
                 onMouseLeave={handleMouseUpOrLeave}
               >
-                <div className={`flex gap-3 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
+                <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
                   {moveHistory.length === 0 ? (
-                    <div className="text-xs text-stone-500 whitespace-nowrap">
+                    <div className="text-[10px] text-stone-500 whitespace-nowrap">
                       Ходы появятся здесь
                     </div>
                   ) : (
                     moveHistory.map((move, index) => (
                       <div 
                         key={index} 
-                        className={`text-xs whitespace-nowrap flex-shrink-0 transition-colors ${
+                        className={`text-[10px] whitespace-nowrap flex-shrink-0 transition-colors ${
                           index === currentMoveIndex ? 'text-yellow-400 font-semibold' : 'text-stone-300'
                         }`}
                       >
-                        <span className="text-stone-500 mr-1">{Math.floor(index / 2) + 1}.</span>
+                        <span className="text-stone-500 mr-0.5">{Math.floor(index / 2) + 1}.</span>
                         {move}
                       </div>
                     ))
