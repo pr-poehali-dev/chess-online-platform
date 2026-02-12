@@ -9,7 +9,10 @@ const Index = () => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark' || savedTheme === null;
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    const savedUser = localStorage.getItem('chessUser');
+    return !!savedUser;
+  });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGameSettings, setShowGameSettings] = useState(false);
 
