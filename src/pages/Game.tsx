@@ -23,6 +23,7 @@ const Game = () => {
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
+  const [showExitDialog, setShowExitDialog] = useState(false);
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
@@ -158,6 +159,19 @@ const Game = () => {
     setIsDragging(false);
   };
 
+  const handleExitClick = () => {
+    setShowExitDialog(true);
+  };
+
+  const handleSurrender = () => {
+    setGameStatus('checkmate');
+    setShowExitDialog(false);
+  };
+
+  const handleContinue = () => {
+    setShowExitDialog(false);
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
       <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
@@ -173,7 +187,7 @@ const Game = () => {
       <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4">
         <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center">
             <button
-              onClick={() => navigate('/')}
+              onClick={handleExitClick}
               className="flex items-center gap-2 text-stone-400 hover:text-stone-200 transition-colors text-sm"
             >
               <Icon name="LogOut" size={18} />
@@ -261,6 +275,34 @@ const Game = () => {
           </div>
         </div>
       </main>
+
+      {showExitDialog && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-stone-900 rounded-xl border border-stone-700 p-6 md:p-8 max-w-md w-full shadow-2xl">
+            <div className="text-center mb-6">
+              <div className="text-4xl mb-4">⚠️</div>
+              <h2 className="text-2xl font-bold text-stone-100 mb-2">Выход из игры</h2>
+              <p className="text-stone-400">
+                Вы уверены, что хотите сдаться и выйти из игры? Это будет засчитано как поражение.
+              </p>
+            </div>
+            <div className="flex flex-col sm:flex-row gap-3">
+              <button
+                onClick={handleContinue}
+                className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-stone-100 rounded-lg font-medium transition-colors"
+              >
+                Продолжить игру
+              </button>
+              <button
+                onClick={handleSurrender}
+                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
+              >
+                Сдаться
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
