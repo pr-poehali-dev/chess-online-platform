@@ -1,7 +1,11 @@
 import { useState, useRef } from 'react';
 import { useNavigate } from 'react-router-dom';
 
-export const useGameHandlers = (gameStatus: 'playing' | 'checkmate' | 'stalemate' | 'draw', setGameStatus: (status: 'playing' | 'checkmate' | 'stalemate' | 'draw') => void) => {
+export const useGameHandlers = (
+  gameStatus: 'playing' | 'checkmate' | 'stalemate' | 'draw', 
+  setGameStatus: (status: 'playing' | 'checkmate' | 'stalemate' | 'draw') => void,
+  moveCount: number = 0
+) => {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -12,6 +16,8 @@ export const useGameHandlers = (gameStatus: 'playing' | 'checkmate' | 'stalemate
   const [showDrawOffer, setShowDrawOffer] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showRematchOffer, setShowRematchOffer] = useState(false);
+  const [showOpponentLeft, setShowOpponentLeft] = useState(false);
+  const [opponentLeftReason, setOpponentLeftReason] = useState<'early' | 'surrender' | 'exit'>('exit');
   const [drawOffersCount, setDrawOffersCount] = useState(0);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
@@ -40,22 +46,14 @@ export const useGameHandlers = (gameStatus: 'playing' | 'checkmate' | 'stalemate
     if (gameStatus !== 'playing') {
       navigate('/');
     } else {
-      const savedState = localStorage.getItem('activeGame');
-      let moveCount = 0;
-      
-      if (savedState) {
-        try {
-          const gameState = JSON.parse(savedState);
-          moveCount = gameState.moveHistory?.length || 0;
-        } catch (error) {
-          // Ignore parsing errors
-        }
-      }
-      
       if (moveCount <= 2) {
         if (confirm('Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.')) {
-          localStorage.removeItem('activeGame');
-          navigate('/');
+          setOpponentLeftReason('early');
+          setShowOpponentLeft(true);
+          setTimeout(() => {
+            localStorage.removeItem('activeGame');
+            navigate('/');
+          }, 3000);
         }
       } else {
         setShowExitDialog(true);
@@ -66,28 +64,24 @@ export const useGameHandlers = (gameStatus: 'playing' | 'checkmate' | 'stalemate
   const handleSurrender = () => {
     setShowSettingsMenu(false);
     
-    const savedState = localStorage.getItem('activeGame');
-    let moveCount = 0;
-    
-    if (savedState) {
-      try {
-        const gameState = JSON.parse(savedState);
-        moveCount = gameState.moveHistory?.length || 0;
-      } catch (error) {
-        // Ignore parsing errors
-      }
-    }
-    
     const message = moveCount <= 2 
       ? 'Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.'
       : 'Вы действительно хотите сдаться? Партия будет засчитана как поражение.';
     
     if (confirm(message)) {
       if (moveCount <= 2) {
-        localStorage.removeItem('activeGame');
-        navigate('/');
+        setOpponentLeftReason('early');
+        setShowOpponentLeft(true);
+        setTimeout(() => {
+          localStorage.removeItem('activeGame');
+          navigate('/');
+        }, 3000);
       } else {
-        setGameStatus('checkmate');
+        setOpponentLeftReason('surrender');
+        setShowOpponentLeft(true);
+        setTimeout(() => {
+          setGameStatus('checkmate');
+        }, 2000);
       }
       setShowExitDialog(false);
     }
@@ -194,6 +188,9 @@ export const useGameHandlers = (gameStatus: 'playing' | 'checkmate' | 'stalemate
     setShowNotifications,
     showRematchOffer,
     setShowRematchOffer,
+    showOpponentLeft,
+    setShowOpponentLeft,
+    opponentLeftReason,
     chatMessage,
     setChatMessage,
     chatMessages,

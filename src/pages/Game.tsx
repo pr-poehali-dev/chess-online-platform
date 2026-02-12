@@ -9,6 +9,7 @@ import { GameChatModal } from './game/GameChatModal';
 import { DrawOfferModal } from './game/DrawOfferModal';
 import { NotificationsModal } from './game/NotificationsModal';
 import { RematchModal } from './game/RematchModal';
+import { OpponentLeftModal } from './game/OpponentLeftModal';
 import { GameHeader, GameControls } from './game/GameHeader';
 import { useGameLogic } from './game/useGameLogic';
 import { useGameHandlers } from './game/useGameHandlers';
@@ -68,6 +69,9 @@ const Game = () => {
     setShowNotifications,
     showRematchOffer,
     setShowRematchOffer,
+    showOpponentLeft,
+    setShowOpponentLeft,
+    opponentLeftReason,
     chatMessage,
     setChatMessage,
     chatMessages,
@@ -87,7 +91,7 @@ const Game = () => {
     handleNewGame,
     handleAcceptRematch,
     handleDeclineRematch
-  } = useGameHandlers(gameStatus, setGameStatus);
+  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length);
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors ${
@@ -222,6 +226,13 @@ const Game = () => {
         showModal={showRematchOffer}
         onAccept={handleAcceptRematch}
         onDecline={handleDeclineRematch}
+      />
+
+      <OpponentLeftModal
+        showModal={showOpponentLeft}
+        onClose={() => setShowOpponentLeft(false)}
+        isEarlyExit={opponentLeftReason === 'early'}
+        isSurrender={opponentLeftReason === 'surrender'}
       />
     </div>
   );
