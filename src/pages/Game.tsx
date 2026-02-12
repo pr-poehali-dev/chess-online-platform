@@ -234,6 +234,17 @@ const Game = () => {
     }
   };
 
+  const handleBlockOpponent = () => {
+    if (confirm('Вы действительно хотите заблокировать соперника? Вы больше не сможете получать от него сообщения.')) {
+      const blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
+      blockedUsers.push('computer-opponent');
+      localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
+      
+      setShowChat(false);
+      alert('Соперник заблокирован');
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
       <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
@@ -417,12 +428,21 @@ const Game = () => {
                   <div className="text-sm text-stone-400">Соперник</div>
                 </div>
               </div>
-              <button
-                onClick={() => setShowChat(false)}
-                className="p-2 hover:bg-stone-800 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
-              >
-                <Icon name="X" size={24} />
-              </button>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={handleBlockOpponent}
+                  className="p-2 hover:bg-red-900/50 rounded-lg transition-colors text-red-400 hover:text-red-300 border border-red-500/30"
+                  title="Заблокировать соперника"
+                >
+                  <Icon name="Ban" size={20} />
+                </button>
+                <button
+                  onClick={() => setShowChat(false)}
+                  className="p-2 hover:bg-stone-800 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                >
+                  <Icon name="X" size={24} />
+                </button>
+              </div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-4 space-y-3">
