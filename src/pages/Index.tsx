@@ -154,7 +154,7 @@ const Index = () => {
       <main className="container mx-auto px-4 py-8">
         {activeSection === 'home' && (
           <div className="space-y-8 animate-fade-in">
-            <div className="text-center py-12">
+            <div className="text-center pt-2 pb-12">
               <div className="flex justify-center mb-8 animate-slide-up">
                 <Button 
                   size="lg" 
