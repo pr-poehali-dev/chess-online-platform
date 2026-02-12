@@ -58,6 +58,12 @@ export const useGameLogic = (
   useEffect(() => {
     if (gameStatus !== 'playing') return;
 
+    const updateInterval = currentPlayer === 'white' && whiteTime <= 10 
+      ? 100 
+      : currentPlayer === 'black' && blackTime <= 10 
+      ? 100 
+      : 1000;
+
     const timer = setInterval(() => {
       if (currentPlayer === 'white') {
         setWhiteTime(prev => {
@@ -65,7 +71,8 @@ export const useGameLogic = (
             setGameStatus('checkmate');
             return 0;
           }
-          return prev - 1;
+          const decrement = prev <= 10 ? 0.1 : 1;
+          return Math.max(0, prev - decrement);
         });
       } else {
         setBlackTime(prev => {
@@ -73,13 +80,14 @@ export const useGameLogic = (
             setGameStatus('checkmate');
             return 0;
           }
-          return prev - 1;
+          const decrement = prev <= 10 ? 0.1 : 1;
+          return Math.max(0, prev - decrement);
         });
       }
-    }, 1000);
+    }, updateInterval);
 
     return () => clearInterval(timer);
-  }, [currentPlayer, gameStatus]);
+  }, [currentPlayer, gameStatus, whiteTime, blackTime]);
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
