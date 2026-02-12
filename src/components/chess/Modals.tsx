@@ -45,12 +45,9 @@ export const AuthModal = ({
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowAuthModal(false)}>
       <Card className="w-full max-w-md mx-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in" onClick={(e) => e.stopPropagation()}>
         <CardHeader>
-          <CardTitle className="text-center text-gray-900 dark:text-white">Добро пожаловать в ЛигаШахмат!</CardTitle>
+          <CardTitle className="text-center text-gray-900 dark:text-white">Регистрация</CardTitle>
         </CardHeader>
         <CardContent className="space-y-4">
-          <p className="text-center text-gray-600 dark:text-gray-400">
-            Для игры онлайн необходимо зарегистрироваться или войти в аккаунт
-          </p>
           <div className="space-y-3">
             <div>
               <input
