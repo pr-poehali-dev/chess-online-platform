@@ -17,11 +17,19 @@ const Game = () => {
   const [searchParams] = useSearchParams();
   const difficulty = (searchParams.get('difficulty') || 'medium') as 'easy' | 'medium' | 'hard' | 'master';
   const timeControl = (searchParams.get('time') || 'blitz') as 'blitz' | 'rapid' | 'classic';
+  const opponentType = searchParams.get('opponent');
 
   const savedUser = localStorage.getItem('chessUser');
   const userData = savedUser ? JSON.parse(savedUser) : null;
   const userAvatar = userData?.avatar || '';
   const userRating = 1842;
+
+  const isPlayingWithBot = !opponentType || opponentType === 'random';
+  
+  const botAvatar = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
+  const opponentAvatar = isPlayingWithBot ? botAvatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Opponent';
+  const opponentName = isPlayingWithBot ? 'Бот' : 'Игорь Соколов';
+  const opponentRating = isPlayingWithBot ? undefined : 2123;
 
   const {
     displayBoard,
@@ -89,13 +97,15 @@ const Game = () => {
       <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 overflow-y-auto">
         <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center min-h-0">
           <PlayerInfo
-            playerName="Компьютер"
+            playerName={opponentName}
             playerColor="black"
             icon="♚"
             time={blackTime}
             isCurrentPlayer={currentPlayer === 'black'}
             formatTime={formatTime}
-            difficulty={getDifficultyLabel(difficulty)}
+            difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
+            rating={opponentRating}
+            avatar={opponentAvatar}
           />
 
           <GameBoard
@@ -161,7 +171,7 @@ const Game = () => {
 
       {showChat && (
         <GameChatModal
-          opponentName={`Компьютер (${getDifficultyLabel(difficulty)})`}
+          opponentName={isPlayingWithBot ? `${opponentName} (${getDifficultyLabel(difficulty)})` : opponentName}
           opponentIcon="♚"
           opponentInfo="Соперник"
           chatMessages={chatMessages}
