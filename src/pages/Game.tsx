@@ -175,7 +175,11 @@ const Game = () => {
   };
 
   const handleExitClick = () => {
-    setShowExitDialog(true);
+    if (gameStatus !== 'playing') {
+      navigate('/');
+    } else {
+      setShowExitDialog(true);
+    }
   };
 
   const handleSurrender = () => {
