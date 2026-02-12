@@ -238,50 +238,155 @@ export const ChessGame = ({ difficulty, timeControl, onClose }: ChessGameProps) 
     return moves;
   };
 
-  const getBestMove = (moves: { from: Position; to: Position }[], isDifficult: boolean): { from: Position; to: Position } => {
+  const evaluatePosition = (testBoard: Board, color: 'white' | 'black'): number => {
     const pieceValues: Record<string, number> = {
-      pawn: 1, knight: 3, bishop: 3, rook: 5, queen: 9, king: 0
+      pawn: 100, knight: 320, bishop: 330, rook: 500, queen: 900, king: 20000
     };
 
-    const positionBonus = [
-      [0, 0, 0, 0, 0, 0, 0, 0],
-      [5, 5, 5, 5, 5, 5, 5, 5],
-      [1, 2, 3, 4, 4, 3, 2, 1],
-      [0.5, 1, 2, 3, 3, 2, 1, 0.5],
-      [0, 0.5, 1, 2, 2, 1, 0.5, 0],
-      [0, 0, 0, 1, 1, 0, 0, 0],
-      [0, 0, 0, -1, -1, 0, 0, 0],
-      [0, 0, 0, 0, 0, 0, 0, 0]
+    const pawnTable = [
+      [0,  0,  0,  0,  0,  0,  0,  0],
+      [50, 50, 50, 50, 50, 50, 50, 50],
+      [10, 10, 20, 30, 30, 20, 10, 10],
+      [5,  5, 10, 25, 25, 10,  5,  5],
+      [0,  0,  0, 20, 20,  0,  0,  0],
+      [5, -5,-10,  0,  0,-10, -5,  5],
+      [5, 10, 10,-20,-20, 10, 10,  5],
+      [0,  0,  0,  0,  0,  0,  0,  0]
     ];
 
+    const knightTable = [
+      [-50,-40,-30,-30,-30,-30,-40,-50],
+      [-40,-20,  0,  0,  0,  0,-20,-40],
+      [-30,  0, 10, 15, 15, 10,  0,-30],
+      [-30,  5, 15, 20, 20, 15,  5,-30],
+      [-30,  0, 15, 20, 20, 15,  0,-30],
+      [-30,  5, 10, 15, 15, 10,  5,-30],
+      [-40,-20,  0,  5,  5,  0,-20,-40],
+      [-50,-40,-30,-30,-30,-30,-40,-50]
+    ];
+
+    const bishopTable = [
+      [-20,-10,-10,-10,-10,-10,-10,-20],
+      [-10,  0,  0,  0,  0,  0,  0,-10],
+      [-10,  0,  5, 10, 10,  5,  0,-10],
+      [-10,  5,  5, 10, 10,  5,  5,-10],
+      [-10,  0, 10, 10, 10, 10,  0,-10],
+      [-10, 10, 10, 10, 10, 10, 10,-10],
+      [-10,  5,  0,  0,  0,  0,  5,-10],
+      [-20,-10,-10,-10,-10,-10,-10,-20]
+    ];
+
+    const rookTable = [
+      [0,  0,  0,  0,  0,  0,  0,  0],
+      [5, 10, 10, 10, 10, 10, 10,  5],
+      [-5,  0,  0,  0,  0,  0,  0, -5],
+      [-5,  0,  0,  0,  0,  0,  0, -5],
+      [-5,  0,  0,  0,  0,  0,  0, -5],
+      [-5,  0,  0,  0,  0,  0,  0, -5],
+      [-5,  0,  0,  0,  0,  0,  0, -5],
+      [0,  0,  0,  5,  5,  0,  0,  0]
+    ];
+
+    const queenTable = [
+      [-20,-10,-10, -5, -5,-10,-10,-20],
+      [-10,  0,  0,  0,  0,  0,  0,-10],
+      [-10,  0,  5,  5,  5,  5,  0,-10],
+      [-5,  0,  5,  5,  5,  5,  0, -5],
+      [0,  0,  5,  5,  5,  5,  0, -5],
+      [-10,  5,  5,  5,  5,  5,  0,-10],
+      [-10,  0,  5,  0,  0,  0,  0,-10],
+      [-20,-10,-10, -5, -5,-10,-10,-20]
+    ];
+
+    const kingTable = [
+      [-30,-40,-40,-50,-50,-40,-40,-30],
+      [-30,-40,-40,-50,-50,-40,-40,-30],
+      [-30,-40,-40,-50,-50,-40,-40,-30],
+      [-30,-40,-40,-50,-50,-40,-40,-30],
+      [-20,-30,-30,-40,-40,-30,-30,-20],
+      [-10,-20,-20,-20,-20,-20,-20,-10],
+      [20, 20,  0,  0,  0,  0, 20, 20],
+      [20, 30, 10,  0,  0, 10, 30, 20]
+    ];
+
+    let score = 0;
+
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = testBoard[row][col];
+        if (!piece) continue;
+
+        const pieceScore = pieceValues[piece.type];
+        let positionScore = 0;
+
+        const adjustedRow = piece.color === 'white' ? 7 - row : row;
+
+        switch (piece.type) {
+          case 'pawn':
+            positionScore = pawnTable[adjustedRow][col];
+            break;
+          case 'knight':
+            positionScore = knightTable[adjustedRow][col];
+            break;
+          case 'bishop':
+            positionScore = bishopTable[adjustedRow][col];
+            break;
+          case 'rook':
+            positionScore = rookTable[adjustedRow][col];
+            break;
+          case 'queen':
+            positionScore = queenTable[adjustedRow][col];
+            break;
+          case 'king':
+            positionScore = kingTable[adjustedRow][col];
+            break;
+        }
+
+        if (piece.color === color) {
+          score += pieceScore + positionScore;
+        } else {
+          score -= pieceScore + positionScore;
+        }
+      }
+    }
+
+    return score;
+  };
+
+  const getBestMove = (moves: { from: Position; to: Position }[], isDifficult: boolean): { from: Position; to: Position } => {
     let bestMove = moves[0];
     let bestScore = -Infinity;
 
     moves.forEach(move => {
-      const targetPiece = board[move.to.row][move.to.col];
-      const movingPiece = board[move.from.row][move.from.col];
-      let score = 0;
+      const testBoard = board.map(row => [...row]);
+      const piece = testBoard[move.from.row][move.from.col];
       
-      if (targetPiece) {
-        score += pieceValues[targetPiece.type] * 10;
-      }
+      if (!piece) return;
 
-      if (movingPiece) {
-        score += positionBonus[move.to.row][move.to.col];
-        
-        if (movingPiece.type === 'pawn' && move.to.row <= 1) {
-          score += 8;
-        }
-        
-        if (move.to.row >= 2 && move.to.row <= 5 && move.to.col >= 2 && move.to.col <= 5) {
-          score += 1;
-        }
-      }
+      testBoard[move.to.row][move.to.col] = piece;
+      testBoard[move.from.row][move.from.col] = null;
+
+      let score = evaluatePosition(testBoard, 'black');
 
       if (isDifficult) {
-        score += Math.random() * 0.1;
+        const opponentMoves = getAllPossibleMovesForBoard(testBoard, 'white');
+        if (opponentMoves.length > 0) {
+          let worstResponse = Infinity;
+          opponentMoves.slice(0, 5).forEach(oppMove => {
+            const testBoard2 = testBoard.map(row => [...row]);
+            const oppPiece = testBoard2[oppMove.from.row][oppMove.from.col];
+            if (oppPiece) {
+              testBoard2[oppMove.to.row][oppMove.to.col] = oppPiece;
+              testBoard2[oppMove.from.row][oppMove.from.col] = null;
+              const oppScore = evaluatePosition(testBoard2, 'black');
+              worstResponse = Math.min(worstResponse, oppScore);
+            }
+          });
+          score = worstResponse;
+        }
+        score += Math.random() * 5;
       } else {
-        score += Math.random() * 2;
+        score += Math.random() * 50;
       }
 
       if (score > bestScore) {
@@ -291,6 +396,81 @@ export const ChessGame = ({ difficulty, timeControl, onClose }: ChessGameProps) 
     });
 
     return bestMove;
+  };
+
+  const getAllPossibleMovesForBoard = (testBoard: Board, color: 'white' | 'black'): { from: Position; to: Position }[] => {
+    const moves: { from: Position; to: Position }[] = [];
+    
+    for (let row = 0; row < 8; row++) {
+      for (let col = 0; col < 8; col++) {
+        const piece = testBoard[row][col];
+        if (piece && piece.color === color) {
+          for (let toRow = 0; toRow < 8; toRow++) {
+            for (let toCol = 0; toCol < 8; toCol++) {
+              if (isValidMoveForBoard(testBoard, { row, col }, { row: toRow, col: toCol }, piece)) {
+                moves.push({ from: { row, col }, to: { row: toRow, col: toCol } });
+              }
+            }
+          }
+        }
+      }
+    }
+    return moves;
+  };
+
+  const isValidMoveForBoard = (testBoard: Board, from: Position, to: Position, piece: Piece): boolean => {
+    const dx = to.col - from.col;
+    const dy = to.row - from.row;
+    const targetPiece = testBoard[to.row][to.col];
+
+    if (targetPiece && targetPiece.color === piece.color) return false;
+
+    switch (piece.type) {
+      case 'pawn': {
+        const direction = piece.color === 'white' ? -1 : 1;
+        const startRow = piece.color === 'white' ? 6 : 1;
+        
+        if (dx === 0 && !targetPiece) {
+          if (dy === direction) return true;
+          if (from.row === startRow && dy === direction * 2) {
+            const middleRow = from.row + direction;
+            if (!testBoard[middleRow][from.col]) return true;
+          }
+        }
+        
+        if (Math.abs(dx) === 1 && dy === direction && targetPiece) return true;
+        return false;
+      }
+      case 'knight':
+        return (Math.abs(dx) === 2 && Math.abs(dy) === 1) || (Math.abs(dx) === 1 && Math.abs(dy) === 2);
+      case 'bishop':
+        if (Math.abs(dx) !== Math.abs(dy)) return false;
+        return !isPathBlockedForBoard(testBoard, from, to);
+      case 'rook':
+        if (dx !== 0 && dy !== 0) return false;
+        return !isPathBlockedForBoard(testBoard, from, to);
+      case 'queen':
+        if (dx !== 0 && dy !== 0 && Math.abs(dx) !== Math.abs(dy)) return false;
+        return !isPathBlockedForBoard(testBoard, from, to);
+      case 'king':
+        return Math.abs(dx) <= 1 && Math.abs(dy) <= 1;
+      default:
+        return false;
+    }
+  };
+
+  const isPathBlockedForBoard = (testBoard: Board, from: Position, to: Position): boolean => {
+    const dx = Math.sign(to.col - from.col);
+    const dy = Math.sign(to.row - from.row);
+    let x = from.col + dx;
+    let y = from.row + dy;
+
+    while (x !== to.col || y !== to.row) {
+      if (testBoard[y][x]) return true;
+      x += dx;
+      y += dy;
+    }
+    return false;
   };
 
   const handleSquareClick = (row: number, col: number) => {
@@ -348,28 +528,67 @@ export const ChessGame = ({ difficulty, timeControl, onClose }: ChessGameProps) 
                 </div>
               </div>
 
-              <div className="inline-block border-4 border-slate-800 dark:border-slate-600">
+              <div className="inline-block rounded-sm overflow-hidden shadow-2xl relative" style={{ 
+                boxShadow: '0 0 0 4px #3e2723, 0 0 0 6px #5d4037, 0 20px 40px rgba(0,0,0,0.4)'
+              }}>
                 <div className="grid grid-cols-8 gap-0" style={{ width: '480px', height: '480px' }}>
                   {board.map((row, rowIndex) => (
                     row.map((piece, colIndex) => {
                       const isLight = (rowIndex + colIndex) % 2 === 0;
                       const isSelected = isSquareSelected(rowIndex, colIndex);
                       const isPossible = isSquarePossibleMove(rowIndex, colIndex);
+                      const fileLabel = String.fromCharCode(97 + colIndex);
+                      const rankLabel = (8 - rowIndex).toString();
                       
                       return (
                         <div
                           key={`${rowIndex}-${colIndex}`}
                           onClick={() => handleSquareClick(rowIndex, colIndex)}
                           className={`
-                            flex items-center justify-center text-4xl cursor-pointer select-none
-                            ${isLight ? 'bg-amber-100 dark:bg-amber-200' : 'bg-amber-700 dark:bg-amber-800'}
-                            ${isSelected ? 'ring-4 ring-inset ring-blue-500' : ''}
-                            ${isPossible ? 'ring-4 ring-inset ring-green-500' : ''}
-                            hover:opacity-80 transition-opacity
+                            relative flex items-center justify-center cursor-pointer select-none
+                            ${isSelected ? 'ring-4 ring-inset ring-yellow-400 z-10' : ''}
+                            ${isPossible ? 'ring-4 ring-inset ring-green-400 z-10' : ''}
+                            hover:brightness-110 transition-all
                           `}
-                          style={{ width: '60px', height: '60px' }}
+                          style={{ 
+                            width: '60px', 
+                            height: '60px',
+                            background: isLight 
+                              ? 'linear-gradient(135deg, #f0d9b5 0%, #e8d1ad 100%)'
+                              : 'linear-gradient(135deg, #b58863 0%, #a0745f 100%)',
+                            boxShadow: isLight 
+                              ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
+                              : 'inset 0 1px 2px rgba(255,255,255,0.1), inset 0 -1px 2px rgba(0,0,0,0.1)'
+                          }}
                         >
-                          {piece && pieceSymbols[piece.color][piece.type]}
+                          {colIndex === 0 && (
+                            <span 
+                              className="absolute top-0.5 left-1 text-xs font-semibold pointer-events-none"
+                              style={{ color: isLight ? '#b58863' : '#f0d9b5' }}
+                            >
+                              {rankLabel}
+                            </span>
+                          )}
+                          {rowIndex === 7 && (
+                            <span 
+                              className="absolute bottom-0.5 right-1 text-xs font-semibold pointer-events-none"
+                              style={{ color: isLight ? '#b58863' : '#f0d9b5' }}
+                            >
+                              {fileLabel}
+                            </span>
+                          )}
+                          {piece && (
+                            <div 
+                              className="text-5xl font-bold"
+                              style={{
+                                filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.3))',
+                                color: piece.color === 'white' ? '#ffffff' : '#2c2c2c',
+                                WebkitTextStroke: piece.color === 'white' ? '1px #e0e0e0' : '1px #000000'
+                              }}
+                            >
+                              {pieceSymbols[piece.color][piece.type]}
+                            </div>
+                          )}
                         </div>
                       );
                     })
