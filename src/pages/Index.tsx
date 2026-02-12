@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/chess/Navbar';
-import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection } from '@/components/chess/Sections';
+import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection, NotificationsSection } from '@/components/chess/Sections';
 import { AuthModal, GameSettingsModal } from '@/components/chess/Modals';
 
 const Index = () => {
@@ -108,6 +108,10 @@ const Index = () => {
 
         {activeSection === 'friends' && (
           <FriendsSection />
+        )}
+
+        {activeSection === 'notifications' && (
+          <NotificationsSection />
         )}
       </main>
 
