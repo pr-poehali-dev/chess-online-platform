@@ -70,11 +70,11 @@ export const GameControls = ({
   setShowRematchOffer
 }: GameHeaderProps) => {
   return (
-    <div className="w-full md:w-auto h-[60px] md:h-[64px]">
-      <div className="flex items-center gap-2 md:gap-3 h-full">
+    <div className="w-full md:w-auto h-[52px] md:h-[56px]">
+      <div className="flex items-center gap-1.5 md:gap-2 h-full">
         <button
           onClick={handleExitClick}
-          className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center flex-shrink-0 ${
+          className={`p-3 md:p-2.5 border rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 ${
             theme === 'light'
               ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
               : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
@@ -82,19 +82,19 @@ export const GameControls = ({
           title="Выход из игры"
         >
           <div className="rotate-180">
-            <Icon name="LogOut" size={24} />
+            <Icon name="LogOut" size={20} />
           </div>
         </button>
         <button
           onClick={() => setShowChat(true)}
-          className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center flex-shrink-0 ${
+          className={`p-3 md:p-2.5 border rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 ${
             theme === 'light'
               ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
               : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
           }`}
           title="Чат"
         >
-          <Icon name="MessageCircle" size={24} />
+          <Icon name="MessageCircle" size={20} />
         </button>
         <div className="relative flex-shrink-0">
           <button
@@ -106,7 +106,7 @@ export const GameControls = ({
             }`}
             title="Опции"
           >
-            <Icon name="Settings" size={24} />
+            <Icon name="Settings" size={20} />
           </button>
           {showSettingsMenu && (
             <>
