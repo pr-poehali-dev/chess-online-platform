@@ -68,7 +68,9 @@ export const PlayerInfo = ({
             )}
           </div>
           {inactivityTimer !== undefined && inactivityTimer <= 20 && (
-            <div className="text-[10px] md:text-xs text-stone-400 text-right">
+            <div className={`text-[10px] md:text-xs text-right ${
+              inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
+            }`}>
               Бездействие игрока. До поражения.
             </div>
           )}
