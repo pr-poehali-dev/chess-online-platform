@@ -13,6 +13,9 @@ interface GameHeaderProps {
   setShowPossibleMoves?: (value: boolean) => void;
   theme?: 'light' | 'dark';
   setTheme?: (value: 'light' | 'dark') => void;
+  gameStatus?: 'playing' | 'checkmate' | 'stalemate' | 'draw';
+  currentPlayer?: 'white' | 'black';
+  setShowRematchOffer?: (value: boolean) => void;
 }
 
 export const GameHeader = ({
@@ -61,10 +64,14 @@ export const GameControls = ({
   showPossibleMoves,
   setShowPossibleMoves,
   theme,
-  setTheme
+  setTheme,
+  gameStatus,
+  currentPlayer,
+  setShowRematchOffer
 }: GameHeaderProps) => {
   return (
-    <div className="flex gap-3">
+    <div className="flex flex-col gap-3">
+      <div className="flex gap-3">
         <button
           onClick={handleExitClick}
           className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
@@ -206,5 +213,33 @@ export const GameControls = ({
           )}
         </div>
       </div>
+      {gameStatus !== 'playing' && (
+        <div className={`backdrop-blur-sm rounded-lg p-3 border flex items-center justify-between ${
+          theme === 'light'
+            ? 'bg-blue-500/90 border-blue-400'
+            : 'bg-blue-600/90 border-blue-500/50'
+        }`}>
+          <div className="text-base md:text-lg font-bold text-white">
+            {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли!'}
+            {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы победили!'}
+            {gameStatus === 'stalemate' && 'Ничья - пат'}
+            {gameStatus === 'draw' && 'Ничья'}
+          </div>
+          <button
+            onClick={() => {
+              if (setShowRematchOffer) {
+                setTimeout(() => {
+                  setShowRematchOffer(true);
+                }, 500);
+              }
+            }}
+            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2"
+          >
+            <Icon name="RotateCcw" size={18} />
+            Реванш
+          </button>
+        </div>
+      )}
+    </div>
   );
 };

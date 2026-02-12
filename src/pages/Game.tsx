@@ -126,6 +126,9 @@ const Game = () => {
               setShowPossibleMoves={setShowPossibleMoves}
               theme={theme}
               setTheme={setTheme}
+              gameStatus={gameStatus}
+              currentPlayer={currentPlayer}
+              setShowRematchOffer={setShowRematchOffer}
             />
           </div>
 
@@ -164,32 +167,6 @@ const Game = () => {
             capturedPieces={capturedByWhite}
             theme={theme}
           />
-
-          {gameStatus !== 'playing' && (
-            <div className={`backdrop-blur-sm rounded-lg p-4 text-center border w-full max-w-[400px] md:max-w-[560px] space-y-4 ${
-              theme === 'light'
-                ? 'bg-blue-500/90 border-blue-400'
-                : 'bg-blue-600/90 border-blue-500/50'
-            }`}>
-              <div className="text-lg font-bold text-white">
-                {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли!'}
-                {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы победили!'}
-                {gameStatus === 'stalemate' && 'Ничья - пат'}
-                {gameStatus === 'draw' && 'Ничья'}
-              </div>
-              <button
-                onClick={() => {
-                  setTimeout(() => {
-                    setShowRematchOffer(true);
-                  }, 1000);
-                }}
-                className="px-6 py-3 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2 mx-auto"
-              >
-                <Icon name="RotateCcw" size={20} />
-                Предложить реванш
-              </button>
-            </div>
-          )}
 
           <MoveHistory
             moveHistory={moveHistory}
