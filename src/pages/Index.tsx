@@ -116,10 +116,10 @@ const Index = () => {
                 onClick={() => setIsDarkMode(!isDarkMode)}
                 className="border-white/20 hover:bg-white/10"
               >
-                {isDarkMode ? (
-                  <Icon name="Sun" size={20} className="text-yellow-400" />
-                ) : (
+                {!isDarkMode ? (
                   <Icon name="Moon" size={20} className="text-slate-700" />
+                ) : (
+                  <Icon name="Sun" size={20} className="text-yellow-400" />
                 )}
               </Button>
               <Avatar className="ring-2 ring-blue-400/50">
