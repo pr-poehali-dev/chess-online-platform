@@ -88,8 +88,13 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
 
   const handleCitySelect = (city: string) => {
     setEditData({ ...editData, city });
-    setCitySearch('');
+    setCitySearch(city);
     setShowCityDropdown(false);
+  };
+
+  const handleEditStart = () => {
+    setIsEditing(true);
+    setCitySearch(editData.city);
   };
 
   const getInitials = (name: string) => {
@@ -111,7 +116,7 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
             <CardTitle className="text-2xl text-gray-900 dark:text-white">Профиль пользователя</CardTitle>
             {!isEditing ? (
               <Button
-                onClick={() => setIsEditing(true)}
+                onClick={handleEditStart}
                 variant="outline"
                 className="border-blue-400/50 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
               >
@@ -219,9 +224,10 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
                     <>
                       <input
                         type="text"
-                        value={citySearch || editData.city}
+                        value={citySearch}
                         onChange={(e) => {
                           setCitySearch(e.target.value);
+                          setEditData({ ...editData, city: e.target.value });
                           setShowCityDropdown(true);
                         }}
                         onFocus={() => setShowCityDropdown(true)}
