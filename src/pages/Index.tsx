@@ -80,7 +80,7 @@ const Index = () => {
             <div className="flex items-center gap-3">
               <div className="text-3xl">♟️</div>
               <h1 className="text-2xl font-bold text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 dark:bg-clip-text dark:text-transparent">
-                ChessMaster
+                ЛигаШахмат
               </h1>
             </div>
             <div className="hidden md:flex items-center gap-6">
@@ -472,7 +472,7 @@ const Index = () => {
 
       <footer className="border-t border-slate-200 dark:border-white/10 mt-16 py-8">
         <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-          <p>© 2026 ChessMaster. Все права защищены.</p>
+          <p>© 2026 ЛигаШахмат. Все права защищены.</p>
           <div className="flex justify-center gap-6 mt-4">
             <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">О нас</a>
             <a href="#" className="hover:text-gray-900 dark:hover:text-white transition-colors">Правила</a>
