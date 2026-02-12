@@ -60,11 +60,16 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                 )}
                 {piece && (
                   <div 
-                    className="text-3xl md:text-5xl lg:text-6xl font-bold"
+                    className="text-3xl md:text-5xl lg:text-6xl"
                     style={{
-                      filter: 'drop-shadow(0 1px 2px rgba(0,0,0,0.3))',
-                      color: piece.color === 'white' ? '#ffffff' : '#2c2c2c',
-                      WebkitTextStroke: piece.color === 'white' ? '0.5px #e0e0e0' : '0.5px #000000'
+                      filter: piece.color === 'white' 
+                        ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.4))' 
+                        : 'drop-shadow(0 2px 3px rgba(0,0,0,0.8)) drop-shadow(0 0 1px rgba(255,255,255,0.2))',
+                      color: piece.color === 'white' ? '#f5f5f5' : '#1a1a1a',
+                      WebkitTextStroke: piece.color === 'white' ? '1px #d0d0d0' : '1px #000000',
+                      textShadow: piece.color === 'white' 
+                        ? '0 1px 0 #ffffff, 0 -1px 0 #c0c0c0' 
+                        : '0 1px 0 #000000, 0 -1px 0 #333333'
                     }}
                   >
                     {pieceSymbols[piece.color][piece.type]}
