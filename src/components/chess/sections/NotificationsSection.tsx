@@ -7,6 +7,7 @@ import Icon from '@/components/ui/icon';
 interface NotificationSettings {
   soundEnabled: boolean;
   popupEnabled: boolean;
+  messageSound: boolean;
   friendRequests: boolean;
   gameInvites: boolean;
   tournamentReminders: boolean;
@@ -26,6 +27,7 @@ export const NotificationsSection = () => {
   const [settings, setSettings] = useState<NotificationSettings>({
     soundEnabled: true,
     popupEnabled: true,
+    messageSound: true,
     friendRequests: true,
     gameInvites: true,
     tournamentReminders: true,
@@ -295,6 +297,13 @@ export const NotificationsSection = () => {
                   description="Показывать информационные окна с уведомлениями"
                   checked={settings.popupEnabled}
                   onChange={() => handleSettingChange('popupEnabled')}
+                />
+                <SettingToggle
+                  icon="MessageCircle"
+                  title="Звук сообщений в чате"
+                  description="Воспроизводить звук при получении сообщений"
+                  checked={settings.messageSound}
+                  onChange={() => handleSettingChange('messageSound')}
                 />
               </div>
             </div>

@@ -23,7 +23,11 @@ interface Game {
   finalPosition?: string;
 }
 
-export const HistorySection = () => {
+interface HistorySectionProps {
+  onOpenChat?: (opponentName: string, opponentRating: number, gameId: string) => void;
+}
+
+export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
   const [games, setGames] = useState<Game[]>([]);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
@@ -255,14 +259,26 @@ export const HistorySection = () => {
                 <Icon name="ChevronLeft" className="text-blue-600 dark:text-blue-400" size={24} />
                 Просмотр партии
               </CardTitle>
-              <Button
-                onClick={() => setSelectedGame(null)}
-                variant="outline"
-                className="border-slate-200 dark:border-white/20"
-              >
-                <Icon name="X" size={18} className="mr-2" />
-                Закрыть
-              </Button>
+              <div className="flex gap-2">
+                {onOpenChat && (
+                  <Button
+                    onClick={() => onOpenChat(selectedGame.opponent, selectedGame.opponentRating, selectedGame.id)}
+                    variant="outline"
+                    className="border-blue-400/50 text-blue-600 dark:text-blue-400"
+                  >
+                    <Icon name="MessageCircle" size={18} className="mr-2" />
+                    Написать
+                  </Button>
+                )}
+                <Button
+                  onClick={() => setSelectedGame(null)}
+                  variant="outline"
+                  className="border-slate-200 dark:border-white/20"
+                >
+                  <Icon name="X" size={18} className="mr-2" />
+                  Закрыть
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -424,6 +440,20 @@ export const HistorySection = () => {
                       {game.opponentRating}
                     </Badge>
                   </div>
+
+                  {onOpenChat && (
+                    <Button
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        onOpenChat(game.opponent, game.opponentRating, game.id);
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="border-blue-400/50 text-blue-600 dark:text-blue-400"
+                    >
+                      <Icon name="MessageCircle" size={16} />
+                    </Button>
+                  )}
 
                   <Icon name="ChevronRight" size={20} className="text-gray-400" />
                 </div>

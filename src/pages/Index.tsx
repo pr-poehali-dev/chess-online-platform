@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/chess/Navbar';
-import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection, NotificationsSection, HistorySection } from '@/components/chess/Sections';
+import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection, NotificationsSection, HistorySection, ChatSection } from '@/components/chess/Sections';
 import { AuthModal, GameSettingsModal } from '@/components/chess/Modals';
 
 const Index = () => {
@@ -17,6 +17,7 @@ const Index = () => {
   });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGameSettings, setShowGameSettings] = useState(false);
+  const [chatParams, setChatParams] = useState<{ name: string; rating: number; id: string } | null>(null);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -107,7 +108,12 @@ const Index = () => {
         )}
 
         {activeSection === 'friends' && (
-          <FriendsSection />
+          <FriendsSection 
+            onOpenChat={(name, rating, id) => {
+              setChatParams({ name, rating, id });
+              setActiveSection('chat');
+            }}
+          />
         )}
 
         {activeSection === 'notifications' && (
@@ -115,7 +121,20 @@ const Index = () => {
         )}
 
         {activeSection === 'history' && (
-          <HistorySection />
+          <HistorySection 
+            onOpenChat={(name, rating, id) => {
+              setChatParams({ name, rating, id });
+              setActiveSection('chat');
+            }}
+          />
+        )}
+
+        {activeSection === 'chat' && (
+          <ChatSection 
+            initialChatId={chatParams?.id}
+            initialParticipantName={chatParams?.name}
+            initialParticipantRating={chatParams?.rating}
+          />
         )}
       </main>
 

@@ -14,7 +14,11 @@ interface Friend {
   status: 'online' | 'offline';
 }
 
-export const FriendsSection = () => {
+interface FriendsSectionProps {
+  onOpenChat?: (friendName: string, friendRating: number, friendId: string) => void;
+}
+
+export const FriendsSection = ({ onOpenChat }: FriendsSectionProps) => {
   const [userId, setUserId] = useState<string>('');
   const [friendCode, setFriendCode] = useState('');
   const [showAddFriend, setShowAddFriend] = useState(false);
@@ -217,6 +221,7 @@ export const FriendsSection = () => {
                       Играть
                     </Button>
                     <Button
+                      onClick={() => onOpenChat?.(friend.name, friend.rating, friend.id)}
                       variant="outline"
                       size="sm"
                       className="border-slate-200 dark:border-white/20"
