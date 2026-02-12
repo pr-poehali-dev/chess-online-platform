@@ -25,8 +25,17 @@ export const MoveHistory = ({
   historyRef
 }: MoveHistoryProps) => {
   return (
-    <div className="w-full max-w-[400px] flex flex-col gap-2">
-      <div className="relative">
+    <div className="w-full max-w-[400px] flex items-center gap-2">
+      <button
+        onClick={onPreviousMove}
+        disabled={currentMoveIndex === 0}
+        className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 flex-shrink-0"
+        title="Предыдущий ход"
+      >
+        <Icon name="ChevronLeft" size={20} />
+      </button>
+      
+      <div className="relative flex-1">
         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
         <div 
           ref={historyRef} 
@@ -57,25 +66,15 @@ export const MoveHistory = ({
           </div>
         </div>
       </div>
-      
-      <div className="flex gap-2 justify-center">
-        <button
-          onClick={onPreviousMove}
-          disabled={currentMoveIndex === 0}
-          className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
-          title="Предыдущий ход"
-        >
-          <Icon name="ChevronLeft" size={20} />
-        </button>
-        <button
-          onClick={onNextMove}
-          disabled={currentMoveIndex === moveHistory.length - 1}
-          className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
-          title="Следующий ход"
-        >
-          <Icon name="ChevronRight" size={20} />
-        </button>
-      </div>
+
+      <button
+        onClick={onNextMove}
+        disabled={currentMoveIndex === moveHistory.length - 1}
+        className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 flex-shrink-0"
+        title="Следующий ход"
+      >
+        <Icon name="ChevronRight" size={20} />
+      </button>
     </div>
   );
 };
