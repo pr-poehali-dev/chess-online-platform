@@ -61,7 +61,7 @@ export const PlayerInfo = ({
     .filter(type => groupedPieces[type])
     .map(type => groupedPieces[type]);
   return (
-    <div className={`backdrop-blur-sm rounded-lg p-3 md:p-4 border w-full min-h-[76px] md:min-h-[88px] ${
+    <div className={`backdrop-blur-sm rounded-lg p-3 md:p-4 border w-full md:w-auto min-h-[76px] md:min-h-[88px] ${
       theme === 'light' 
         ? 'bg-white/80 border-slate-300' 
         : 'bg-stone-800/50 border-stone-700/30'

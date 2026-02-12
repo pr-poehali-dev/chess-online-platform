@@ -27,7 +27,7 @@ export const MoveHistory = ({
   theme = 'dark'
 }: MoveHistoryProps) => {
   return (
-    <div className="w-full flex items-center gap-2">
+    <div className="w-full md:w-auto flex items-center gap-2">
       <button
         onClick={onPreviousMove}
         disabled={currentMoveIndex === 0}
