@@ -473,22 +473,28 @@ export const AuthModal = ({
                   autoFocus
                   className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
-                {showCityDropdown && filteredCities.length > 0 && (
+                {showCityDropdown && (
                   <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg shadow-lg">
-                    {filteredCities.slice(0, 15).map(({ city, region }) => (
-                      <div
-                        key={`${city}-${region}`}
-                        className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
-                        onClick={() => {
-                          setSelectedCity(city);
-                          setCitySearch('');
-                          setShowCityDropdown(false);
-                        }}
-                      >
-                        <div className="text-gray-900 dark:text-white font-medium">{city}</div>
-                        <div className="text-xs text-gray-500 dark:text-gray-400">{region}</div>
+                    {filteredCities.length > 0 ? (
+                      filteredCities.slice(0, citySearch.length > 0 ? 15 : 50).map(({ city, region }) => (
+                        <div
+                          key={`${city}-${region}`}
+                          className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                          onClick={() => {
+                            setSelectedCity(city);
+                            setCitySearch('');
+                            setShowCityDropdown(false);
+                          }}
+                        >
+                          <div className="text-gray-900 dark:text-white font-medium">{city}</div>
+                          <div className="text-xs text-gray-500 dark:text-gray-400">{region}</div>
+                        </div>
+                      ))
+                    ) : (
+                      <div className="px-4 py-3 text-center text-gray-500 dark:text-gray-400">
+                        Город не найден
                       </div>
-                    ))}
+                    )}
                   </div>
                 )}
               </div>
