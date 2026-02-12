@@ -110,84 +110,86 @@ const Game = () => {
         setTheme={setTheme}
       />
 
-      <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 overflow-y-auto md:overflow-hidden">
-        <div className="flex flex-col gap-2 md:gap-3 w-full items-center min-h-0 md:h-full md:justify-center md:max-h-[calc(100vh-80px)]">
-          <div className="w-full md:w-auto md:flex-shrink-0">
-            <GameControls
-              showSettingsMenu={showSettingsMenu}
-              setShowSettingsMenu={setShowSettingsMenu}
-              setShowChat={setShowChat}
-              handleExitClick={handleExitClick}
-              handleOfferDraw={handleOfferDraw}
-              handleSurrender={handleSurrender}
-              handleNewGame={handleNewGame}
-              setShowNotifications={setShowNotifications}
-              showPossibleMoves={showPossibleMoves}
-              setShowPossibleMoves={setShowPossibleMoves}
-              theme={theme}
-              setTheme={setTheme}
-              gameStatus={gameStatus}
-              currentPlayer={currentPlayer}
-              setShowRematchOffer={setShowRematchOffer}
-            />
-          </div>
+      <main className="flex-1 flex items-center justify-center p-2 md:p-4 overflow-y-auto md:overflow-hidden">
+        <div className="w-full h-full flex items-center justify-center">
+          <div className="flex flex-col gap-2 md:gap-3 w-full max-w-[calc(100vw-16px)] md:max-w-none md:h-[min(calc(100vh-120px),90vh)] md:aspect-square md:max-h-[calc(100vh-120px)]">
+            <div className="w-full">
+              <GameControls
+                showSettingsMenu={showSettingsMenu}
+                setShowSettingsMenu={setShowSettingsMenu}
+                setShowChat={setShowChat}
+                handleExitClick={handleExitClick}
+                handleOfferDraw={handleOfferDraw}
+                handleSurrender={handleSurrender}
+                handleNewGame={handleNewGame}
+                setShowNotifications={setShowNotifications}
+                showPossibleMoves={showPossibleMoves}
+                setShowPossibleMoves={setShowPossibleMoves}
+                theme={theme}
+                setTheme={setTheme}
+                gameStatus={gameStatus}
+                currentPlayer={currentPlayer}
+                setShowRematchOffer={setShowRematchOffer}
+              />
+            </div>
 
-          <div className="w-full md:w-auto md:flex-shrink-0">
-            <PlayerInfo
-              playerName={opponentName}
-              playerColor="black"
-              icon="♚"
-              time={blackTime}
-              isCurrentPlayer={currentPlayer === 'black'}
-              formatTime={formatTime}
-              difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
-              rating={opponentRating}
-              avatar={opponentAvatar}
-              capturedPieces={capturedByBlack}
-              theme={theme}
-            />
-          </div>
+            <div className="w-full">
+              <PlayerInfo
+                playerName={opponentName}
+                playerColor="black"
+                icon="♚"
+                time={blackTime}
+                isCurrentPlayer={currentPlayer === 'black'}
+                formatTime={formatTime}
+                difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
+                rating={opponentRating}
+                avatar={opponentAvatar}
+                capturedPieces={capturedByBlack}
+                theme={theme}
+              />
+            </div>
 
-          <div className="w-full md:flex-1 md:flex md:items-center md:justify-center md:min-h-0">
-            <GameBoard
-              board={displayBoard}
-              onSquareClick={handleSquareClick}
-              isSquareSelected={isSquareSelected}
-              isSquarePossibleMove={isSquarePossibleMove}
-              kingInCheckPosition={kingInCheckPosition}
-              showPossibleMoves={showPossibleMoves}
-            />
-          </div>
+            <div className="w-full flex-1 flex items-center justify-center min-h-0">
+              <GameBoard
+                board={displayBoard}
+                onSquareClick={handleSquareClick}
+                isSquareSelected={isSquareSelected}
+                isSquarePossibleMove={isSquarePossibleMove}
+                kingInCheckPosition={kingInCheckPosition}
+                showPossibleMoves={showPossibleMoves}
+              />
+            </div>
 
-          <div className="w-full md:w-auto md:flex-shrink-0">
-            <PlayerInfo
-              playerName="Вы"
-              playerColor="white"
-              icon="♔"
-              time={whiteTime}
-              isCurrentPlayer={currentPlayer === 'white'}
-              formatTime={formatTime}
-              rating={userRating}
-              avatar={userAvatar}
-              inactivityTimer={currentPlayer === 'white' ? inactivityTimer : undefined}
-              capturedPieces={capturedByWhite}
-              theme={theme}
-            />
-          </div>
+            <div className="w-full">
+              <PlayerInfo
+                playerName="Вы"
+                playerColor="white"
+                icon="♔"
+                time={whiteTime}
+                isCurrentPlayer={currentPlayer === 'white'}
+                formatTime={formatTime}
+                rating={userRating}
+                avatar={userAvatar}
+                inactivityTimer={currentPlayer === 'white' ? inactivityTimer : undefined}
+                capturedPieces={capturedByWhite}
+                theme={theme}
+              />
+            </div>
 
-          <div className="w-full md:w-auto md:flex-shrink-0">
-            <MoveHistory
-              moveHistory={moveHistory}
-              currentMoveIndex={currentMoveIndex}
-              isDragging={isDragging}
-              onMouseDown={(e) => handleMouseDown(e, historyRef)}
-              onMouseMove={(e) => handleMouseMove(e, historyRef)}
-              onMouseUpOrLeave={handleMouseUpOrLeave}
-              onPreviousMove={handlePreviousMove}
-              onNextMove={handleNextMove}
-              historyRef={historyRef}
-              theme={theme}
-            />
+            <div className="w-full">
+              <MoveHistory
+                moveHistory={moveHistory}
+                currentMoveIndex={currentMoveIndex}
+                isDragging={isDragging}
+                onMouseDown={(e) => handleMouseDown(e, historyRef)}
+                onMouseMove={(e) => handleMouseMove(e, historyRef)}
+                onMouseUpOrLeave={handleMouseUpOrLeave}
+                onPreviousMove={handlePreviousMove}
+                onNextMove={handleNextMove}
+                historyRef={historyRef}
+                theme={theme}
+              />
+            </div>
           </div>
         </div>
       </main>
