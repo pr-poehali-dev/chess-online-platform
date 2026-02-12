@@ -19,6 +19,9 @@ const Game = () => {
   const [blackTime, setBlackTime] = useState(getInitialTime(timeControl));
   const [gameStatus, setGameStatus] = useState<'playing' | 'checkmate' | 'stalemate' | 'draw'>('playing');
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
+  const [boardHistory, setBoardHistory] = useState<Board[]>([initialBoard]);
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+  const [displayBoard, setDisplayBoard] = useState<Board>(initialBoard);
   const historyRef = useRef<HTMLDivElement>(null);
   const [isDragging, setIsDragging] = useState(false);
   const [startX, setStartX] = useState(0);
@@ -53,9 +56,15 @@ const Game = () => {
 
   useEffect(() => {
     if (currentPlayer === 'black' && gameStatus === 'playing') {
+      setCurrentMoveIndex(boardHistory.length - 1);
+      setDisplayBoard(board);
       setTimeout(() => makeComputerMove(), 500);
     }
   }, [currentPlayer, gameStatus]);
+
+  useEffect(() => {
+    setDisplayBoard(boardHistory[currentMoveIndex] || initialBoard);
+  }, [currentMoveIndex]);
 
   const makeMove = (from: Position, to: Position) => {
     const newBoard = board.map(row => [...row]);
@@ -68,6 +77,7 @@ const Game = () => {
 
     const moveNotation = `${String.fromCharCode(97 + from.col)}${8 - from.row}-${String.fromCharCode(97 + to.col)}${8 - to.row}`;
     setMoveHistory(prev => [...prev, moveNotation]);
+    setBoardHistory(prev => [...prev, newBoard]);
     
     setTimeout(() => {
       if (historyRef.current) {
@@ -76,6 +86,8 @@ const Game = () => {
     }, 10);
 
     setBoard(newBoard);
+    setDisplayBoard(newBoard);
+    setCurrentMoveIndex(boardHistory.length);
     setSelectedSquare(null);
     setPossibleMoves([]);
     setCurrentPlayer(currentPlayer === 'white' ? 'black' : 'white');
@@ -172,6 +184,18 @@ const Game = () => {
     setShowExitDialog(false);
   };
 
+  const handlePreviousMove = () => {
+    if (currentMoveIndex > 0) {
+      setCurrentMoveIndex(currentMoveIndex - 1);
+    }
+  };
+
+  const handleNextMove = () => {
+    if (currentMoveIndex < boardHistory.length - 1) {
+      setCurrentMoveIndex(currentMoveIndex + 1);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
       <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
@@ -226,7 +250,7 @@ const Game = () => {
             </div>
 
             <GameBoard
-              board={board}
+              board={displayBoard}
               onSquareClick={handleSquareClick}
               isSquareSelected={isSquareSelected}
               isSquarePossibleMove={isSquarePossibleMove}
@@ -258,33 +282,56 @@ const Game = () => {
               </div>
             )}
 
-          <div className="w-full max-w-[400px] relative">
-            <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
-            <div 
-              ref={historyRef} 
-              className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-3"
-              onMouseDown={handleMouseDown}
-              onMouseMove={handleMouseMove}
-              onMouseUp={handleMouseUpOrLeave}
-              onMouseLeave={handleMouseUpOrLeave}
-            >
-              <div className={`flex gap-3 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
-                {moveHistory.length === 0 ? (
-                  <div className="text-xs text-stone-500 whitespace-nowrap">
-                    Ходы появятся здесь
-                  </div>
-                ) : (
-                  moveHistory.map((move, index) => (
-                    <div 
-                      key={index} 
-                      className="text-xs text-stone-300 whitespace-nowrap flex-shrink-0"
-                    >
-                      <span className="text-stone-500 mr-1">{Math.floor(index / 2) + 1}.</span>
-                      {move}
+          <div className="w-full max-w-[400px] flex flex-col gap-2">
+            <div className="relative">
+              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
+              <div 
+                ref={historyRef} 
+                className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-3"
+                onMouseDown={handleMouseDown}
+                onMouseMove={handleMouseMove}
+                onMouseUp={handleMouseUpOrLeave}
+                onMouseLeave={handleMouseUpOrLeave}
+              >
+                <div className={`flex gap-3 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
+                  {moveHistory.length === 0 ? (
+                    <div className="text-xs text-stone-500 whitespace-nowrap">
+                      Ходы появятся здесь
                     </div>
-                  ))
-                )}
+                  ) : (
+                    moveHistory.map((move, index) => (
+                      <div 
+                        key={index} 
+                        className={`text-xs whitespace-nowrap flex-shrink-0 transition-colors ${
+                          index === currentMoveIndex ? 'text-yellow-400 font-semibold' : 'text-stone-300'
+                        }`}
+                      >
+                        <span className="text-stone-500 mr-1">{Math.floor(index / 2) + 1}.</span>
+                        {move}
+                      </div>
+                    ))
+                  )}
+                </div>
               </div>
+            </div>
+            
+            <div className="flex gap-2 justify-center">
+              <button
+                onClick={handlePreviousMove}
+                disabled={currentMoveIndex === 0}
+                className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                title="Предыдущий ход"
+              >
+                <Icon name="ChevronLeft" size={20} />
+              </button>
+              <button
+                onClick={handleNextMove}
+                disabled={currentMoveIndex === boardHistory.length - 1}
+                className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                title="Следующий ход"
+              >
+                <Icon name="ChevronRight" size={20} />
+              </button>
             </div>
           </div>
         </div>
