@@ -302,8 +302,8 @@ const Game = () => {
                     moveHistory.map((move, index) => (
                       <div 
                         key={index} 
-                        className={`text-[10px] whitespace-nowrap flex-shrink-0 transition-colors ${
-                          index === currentMoveIndex ? 'text-yellow-400 font-semibold' : 'text-stone-300'
+                        className={`whitespace-nowrap flex-shrink-0 transition-all ${
+                          index === currentMoveIndex ? 'text-white font-semibold text-[12px]' : 'text-stone-300 text-[10px]'
                         }`}
                       >
                         <span className="text-stone-500 mr-0.5">{Math.floor(index / 2) + 1}.</span>
