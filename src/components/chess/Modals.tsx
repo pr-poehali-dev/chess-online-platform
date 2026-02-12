@@ -1,6 +1,22 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+
+const russianCities = [
+  'Москва', 'Санкт-Петербург', 'Новосибирск', 'Екатеринбург', 'Казань', 'Нижний Новгород',
+  'Челябинск', 'Самара', 'Омск', 'Ростов-на-Дону', 'Уфа', 'Красноярск', 'Воронеж',
+  'Пермь', 'Волгоград', 'Краснодар', 'Саратов', 'Тюмень', 'Тольятти', 'Ижевск',
+  'Барнаул', 'Ульяновск', 'Иркутск', 'Хабаровск', 'Ярославль', 'Владивосток',
+  'Махачкала', 'Томск', 'Оренбург', 'Кемерово', 'Новокузнецк', 'Рязань', 'Астрахань',
+  'Набережные Челны', 'Пенза', 'Киров', 'Липецк', 'Чебоксары', 'Калининград',
+  'Тула', 'Курск', 'Сочи', 'Ставрополь', 'Улан-Удэ', 'Тверь', 'Магнитогорск',
+  'Иваново', 'Брянск', 'Белгород', 'Сургут', 'Владимир', 'Нижний Тагил',
+  'Архангельск', 'Чита', 'Калуга', 'Смоленск', 'Волжский', 'Курган', 'Орел',
+  'Череповец', 'Владикавказ', 'Мурманск', 'Вологда', 'Саранск', 'Тамбов',
+  'Якутск', 'Грозный', 'Кострома', 'Комсомольск-на-Амуре', 'Петрозаводск',
+  'Таганрог', 'Нижневартовск', 'Йошкар-Ола', 'Братск', 'Новороссийск'
+];
 
 interface AuthModalProps {
   showAuthModal: boolean;
@@ -15,7 +31,15 @@ export const AuthModal = ({
   setIsAuthenticated, 
   setShowGameSettings 
 }: AuthModalProps) => {
+  const [citySearch, setCitySearch] = useState('');
+  const [showCityDropdown, setShowCityDropdown] = useState(false);
+  const [selectedCity, setSelectedCity] = useState('');
+
   if (!showAuthModal) return null;
+
+  const filteredCities = russianCities.filter(city => 
+    city.toLowerCase().includes(citySearch.toLowerCase())
+  );
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowAuthModal(false)}>
@@ -28,21 +52,52 @@ export const AuthModal = ({
             Для игры онлайн необходимо зарегистрироваться или войти в аккаунт
           </p>
           <div className="space-y-3">
-            <input
-              type="text"
-              placeholder="Имя пользователя"
-              className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            <div>
+              <input
+                type="text"
+                placeholder="Имя"
+                className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              <p className="text-xs text-gray-500 dark:text-gray-400 mt-1 px-1">
+                Пожалуйста, указывайте своё настоящее имя
+              </p>
+            </div>
             <input
               type="email"
-              placeholder="Email"
+              placeholder="Электронная почта"
               className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
             />
-            <input
-              type="password"
-              placeholder="Пароль"
-              className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-            />
+            <div className="relative">
+              <input
+                type="text"
+                placeholder="Город"
+                value={selectedCity || citySearch}
+                onChange={(e) => {
+                  setCitySearch(e.target.value);
+                  setSelectedCity('');
+                  setShowCityDropdown(true);
+                }}
+                onFocus={() => setShowCityDropdown(true)}
+                className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
+              />
+              {showCityDropdown && filteredCities.length > 0 && (
+                <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg shadow-lg">
+                  {filteredCities.slice(0, 10).map((city) => (
+                    <div
+                      key={city}
+                      className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer text-gray-900 dark:text-white"
+                      onClick={() => {
+                        setSelectedCity(city);
+                        setCitySearch('');
+                        setShowCityDropdown(false);
+                      }}
+                    >
+                      {city}
+                    </div>
+                  ))}
+                </div>
+              )}
+            </div>
           </div>
           <div className="flex gap-3">
             <Button 
