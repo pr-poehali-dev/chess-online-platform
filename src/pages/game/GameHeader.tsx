@@ -70,8 +70,8 @@ export const GameControls = ({
   setShowRematchOffer
 }: GameHeaderProps) => {
   return (
-    <div className="flex flex-col gap-3">
-      <div className="flex gap-3">
+    <div className="w-full">
+      <div className="flex items-center gap-2 md:gap-3">
         <button
           onClick={handleExitClick}
           className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
@@ -214,12 +214,12 @@ export const GameControls = ({
         </div>
       </div>
       {gameStatus !== 'playing' && (
-        <div className={`backdrop-blur-sm rounded-lg p-3 border flex items-center justify-between ${
+        <div className={`backdrop-blur-sm rounded-lg p-2 md:p-3 border flex items-center justify-between flex-1 ml-2 md:ml-3 ${
           theme === 'light'
             ? 'bg-blue-500/90 border-blue-400'
             : 'bg-blue-600/90 border-blue-500/50'
         }`}>
-          <div className="text-base md:text-lg font-bold text-white">
+          <div className="text-sm md:text-base font-bold text-white truncate">
             {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли!'}
             {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы победили!'}
             {gameStatus === 'stalemate' && 'Ничья - пат'}
@@ -233,9 +233,9 @@ export const GameControls = ({
                 }, 500);
               }
             }}
-            className="px-4 py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-2"
+            className="px-3 md:px-4 py-1.5 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-1.5 md:gap-2 flex-shrink-0 text-sm md:text-base"
           >
-            <Icon name="RotateCcw" size={18} />
+            <Icon name="RotateCcw" size={16} />
             Реванш
           </button>
         </div>
