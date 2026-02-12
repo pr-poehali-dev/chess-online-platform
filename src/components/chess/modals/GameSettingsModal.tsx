@@ -8,12 +8,14 @@ interface GameSettingsModalProps {
   showGameSettings: boolean;
   setShowGameSettings: (value: boolean) => void;
   onStartGame: (difficulty: 'easy' | 'medium' | 'hard' | 'master', timeControl: 'blitz' | 'rapid' | 'classic') => void;
+  onStartOnlineGame?: (opponentType: 'city' | 'region' | 'country', timeControl: 'blitz' | 'rapid' | 'classic') => void;
 }
 
 export const GameSettingsModal = ({ 
   showGameSettings, 
   setShowGameSettings,
-  onStartGame
+  onStartGame,
+  onStartOnlineGame
 }: GameSettingsModalProps) => {
   const [step, setStep] = useState(1);
   const [selectedOpponent, setSelectedOpponent] = useState<'city' | 'region' | 'country' | 'friend' | 'computer' | null>(null);
@@ -112,9 +114,14 @@ export const GameSettingsModal = ({
       };
       localStorage.setItem('lastGameSettings', JSON.stringify(settings));
       
-      const isRated = selectedOpponent !== 'friend' && selectedOpponent !== 'computer';
+      if ((selectedOpponent === 'city' || selectedOpponent === 'region' || selectedOpponent === 'country') && onStartOnlineGame) {
+        onStartOnlineGame(selectedOpponent, selectedTime);
+      } else {
+        const isRated = selectedOpponent !== 'friend' && selectedOpponent !== 'computer';
+        alert(`Поиск соперника...\nТип: ${selectedOpponent}\nВремя: ${selectedTime}\nРейтинговая: ${isRated ? 'Да' : 'Нет'}`);
+      }
+      
       setShowGameSettings(false);
-      alert(`Поиск соперника...\nТип: ${selectedOpponent}\nВремя: ${selectedTime}\nРейтинговая: ${isRated ? 'Да' : 'Нет'}`);
       setStep(1);
       setSelectedOpponent(null);
       setSelectedTime(null);
@@ -128,6 +135,9 @@ export const GameSettingsModal = ({
     
     if (lastGameSettings.opponent === 'computer' && lastGameSettings.difficulty) {
       onStartGame(lastGameSettings.difficulty, lastGameSettings.time);
+      setShowGameSettings(false);
+    } else if ((lastGameSettings.opponent === 'city' || lastGameSettings.opponent === 'region' || lastGameSettings.opponent === 'country') && onStartOnlineGame) {
+      onStartOnlineGame(lastGameSettings.opponent, lastGameSettings.time);
       setShowGameSettings(false);
     } else {
       const isRated = lastGameSettings.opponent !== 'friend' && lastGameSettings.opponent !== 'computer';

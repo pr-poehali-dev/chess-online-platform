@@ -151,6 +151,9 @@ const Index = () => {
         onStartGame={(difficulty, timeControl) => {
           navigate(`/game?difficulty=${difficulty}&time=${timeControl}`);
         }}
+        onStartOnlineGame={(opponentType, timeControl) => {
+          navigate(`/online-game?opponent=${opponentType}&time=${timeControl}`);
+        }}
       />
 
       <footer className="border-t border-slate-200 dark:border-white/10 mt-16 py-8">
