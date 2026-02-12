@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
-import { popularCities, allCities } from '@/components/chess/data/cities';
+import { popularCities, allCities, cityRegions } from '@/components/chess/data/cities';
 
 interface NameStepProps {
   userName: string;
@@ -126,7 +126,7 @@ export const CityStep = ({
               filteredCities.slice(0, 20).map((city) => (
                 <div
                   key={city}
-                  className="px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                  className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
                   onClick={() => {
                     setSelectedCity(city);
                     setCitySearch('');
@@ -134,6 +134,7 @@ export const CityStep = ({
                   }}
                 >
                   <div className="text-gray-900 dark:text-white font-medium">{city}</div>
+                  <div className="text-xs text-gray-500 dark:text-gray-400">{cityRegions[city]}</div>
                 </div>
               ))
             ) : (
