@@ -18,7 +18,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
       backgroundSize: 'cover',
       backgroundPosition: 'center'
     }}>
-      <div className="grid grid-cols-8 w-full h-full" style={{ gap: 0 }}>
+      <div className="w-full h-full" style={{ display: 'grid', gridTemplateColumns: 'repeat(8, 1fr)', gridTemplateRows: 'repeat(8, 1fr)' }}>
         {board.map((row, rowIndex) => (
           row.map((piece, colIndex) => {
             const isLight = (rowIndex + colIndex) % 2 === 0;
@@ -34,7 +34,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => onSquareClick(rowIndex, colIndex)}
                 className={`
-                  relative flex items-center justify-center cursor-pointer select-none aspect-square
+                  relative flex items-center justify-center cursor-pointer select-none
                   ${isSelected ? 'ring-2 md:ring-4 ring-inset ring-yellow-400 z-10' : ''}
                   ${isKingInCheck ? 'ring-4 md:ring-[6px] ring-inset ring-red-500 z-20 animate-pulse' : ''}
                   hover:brightness-110 transition-all
@@ -43,8 +43,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                   backgroundColor: isLight ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.3)',
                   boxShadow: isLight 
                     ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
-                    : 'inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.1)',
-                  margin: '-0.5px'
+                    : 'inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.1)'
                 }}
               >
                 {colIndex === 0 && (
