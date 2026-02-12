@@ -80,49 +80,50 @@ export const RankingCard = ({
 
     return (
       <div className="flex gap-4 mb-4">
-        <div className="flex-1 p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30">
-          <div className="flex items-center gap-3">
-            <div className="relative">
-              {first.avatar ? (
-                <img src={first.avatar} alt={first.name} className="w-20 h-20 rounded-full object-cover ring-4 ring-yellow-400" />
-              ) : (
-                <div className={`w-20 h-20 rounded-full flex items-center justify-center font-bold text-xl text-white ${colors.bg} ring-4 ring-yellow-400`}>
-                  {getInitials(first.name)}
-                </div>
-              )}
-              <div className="absolute -top-1 -right-1 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
-                1
+        <div className="flex-1">
+          <div className="text-center mb-2">
+            <div className="text-2xl font-bold text-yellow-400">1 место</div>
+          </div>
+          <div className="p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30">
+            <div className="flex items-center gap-3">
+              <div className="relative">
+                {first.avatar ? (
+                  <img src={first.avatar} alt={first.name} className="w-20 h-20 rounded-full object-cover ring-4 ring-yellow-400" />
+                ) : (
+                  <div className={`w-20 h-20 rounded-full flex items-center justify-center font-bold text-xl text-white ${colors.bg} ring-4 ring-yellow-400`}>
+                    {getInitials(first.name)}
+                  </div>
+                )}
               </div>
-            </div>
-            <div className="flex-1">
-              <div className="font-bold text-lg text-gray-900 dark:text-white">{first.name}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">{first.city}</div>
-              <div className={`text-lg font-bold ${colors.text} mt-1`}>{first.rating}</div>
+              <div className="flex-1">
+                <div className="font-bold text-lg text-gray-900 dark:text-white">{first.name}</div>
+                <div className="text-sm text-gray-600 dark:text-gray-400">{first.city}</div>
+                <div className={`text-lg font-bold ${colors.text} mt-1`}>{first.rating}</div>
+              </div>
             </div>
           </div>
         </div>
 
         <div className="flex flex-col gap-2">
           {rest.map((player) => (
-            <div 
-              key={player.rank}
-              className="flex items-center gap-2 p-2 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5"
-            >
-              <div className="relative">
-                {player.avatar ? (
-                  <img src={player.avatar} alt={player.name} className="w-12 h-12 rounded-full object-cover" />
-                ) : (
-                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm text-white ${colors.bg}`}>
-                    {getInitials(player.name)}
-                  </div>
-                )}
-                <div className={`absolute -top-1 -right-1 w-5 h-5 ${colors.bg} rounded-full flex items-center justify-center text-white font-bold text-xs`}>
-                  {player.rank}
-                </div>
+            <div key={player.rank} className="flex-1">
+              <div className="text-center mb-1">
+                <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">{player.rank} место</div>
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{player.name}</div>
-                <div className={`text-sm font-bold ${colors.text}`}>{player.rating}</div>
+              <div className="flex items-center gap-2 p-2 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5">
+                <div className="relative">
+                  {player.avatar ? (
+                    <img src={player.avatar} alt={player.name} className="w-12 h-12 rounded-full object-cover" />
+                  ) : (
+                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm text-white ${colors.bg}`}>
+                      {getInitials(player.name)}
+                    </div>
+                  )}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{player.name}</div>
+                  <div className={`text-sm font-bold ${colors.text}`}>{player.rating}</div>
+                </div>
               </div>
             </div>
           ))}
