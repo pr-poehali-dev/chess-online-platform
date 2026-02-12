@@ -40,6 +40,7 @@ const Game = () => {
     setGameStatus,
     moveHistory,
     currentMoveIndex,
+    inactivityTimer,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -124,6 +125,7 @@ const Game = () => {
             formatTime={formatTime}
             rating={userRating}
             avatar={userAvatar}
+            inactivityTimer={currentPlayer === 'white' ? inactivityTimer : undefined}
           />
 
           {gameStatus !== 'playing' && (

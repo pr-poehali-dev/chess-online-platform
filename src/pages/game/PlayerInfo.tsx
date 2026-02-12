@@ -8,6 +8,7 @@ interface PlayerInfoProps {
   difficulty?: string;
   rating?: number;
   avatar?: string;
+  inactivityTimer?: number;
 }
 
 export const PlayerInfo = ({
@@ -19,7 +20,8 @@ export const PlayerInfo = ({
   formatTime,
   difficulty,
   rating,
-  avatar
+  avatar,
+  inactivityTimer
 }: PlayerInfoProps) => {
   return (
     <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px] md:max-w-[560px]">
@@ -50,10 +52,19 @@ export const PlayerInfo = ({
             </div>
           </div>
         </div>
-        <div className={`text-xl md:text-2xl font-bold ${
-          time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer ? 'text-green-400' : 'text-stone-400'
-        }`}>
-          {formatTime(time)}
+        <div className="flex items-center gap-2">
+          <div className={`text-xl md:text-2xl font-bold ${
+            time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer ? 'text-green-400' : 'text-stone-400'
+          }`}>
+            {formatTime(time)}
+          </div>
+          {inactivityTimer !== undefined && inactivityTimer <= 20 && (
+            <div className={`text-sm md:text-base font-semibold ${
+              inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
+            }`}>
+              ({inactivityTimer}с)
+            </div>
+          )}
         </div>
       </div>
     </div>

@@ -19,6 +19,26 @@ export const useGameLogic = (
   const [displayBoard, setDisplayBoard] = useState<Board>(initialBoard);
   const [inactivityTimer, setInactivityTimer] = useState(40);
   const historyRef = useRef<HTMLDivElement>(null);
+  const hasPlayedWarning = useRef(false);
+
+  const playWarningSound = () => {
+    const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+    const audioContext = new AudioContextClass();
+    const oscillator = audioContext.createOscillator();
+    const gainNode = audioContext.createGain();
+    
+    oscillator.connect(gainNode);
+    gainNode.connect(audioContext.destination);
+    
+    oscillator.frequency.value = 800;
+    oscillator.type = 'sine';
+    
+    gainNode.gain.setValueAtTime(0.3, audioContext.currentTime);
+    gainNode.gain.exponentialRampToValueAtTime(0.01, audioContext.currentTime + 0.5);
+    
+    oscillator.start(audioContext.currentTime);
+    oscillator.stop(audioContext.currentTime + 0.5);
+  };
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
@@ -50,9 +70,15 @@ export const useGameLogic = (
     if (gameStatus !== 'playing') return;
 
     setInactivityTimer(40);
+    hasPlayedWarning.current = false;
 
     const inactivityInterval = setInterval(() => {
       setInactivityTimer(prev => {
+        if (prev === 20 && !hasPlayedWarning.current && currentPlayer === 'white') {
+          playWarningSound();
+          hasPlayedWarning.current = true;
+        }
+        
         if (prev <= 1) {
           setGameStatus('checkmate');
           return 0;
@@ -190,6 +216,7 @@ export const useGameLogic = (
     moveHistory,
     boardHistory,
     currentMoveIndex,
+    inactivityTimer,
     historyRef,
     handleSquareClick,
     isSquareSelected,
