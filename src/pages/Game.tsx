@@ -9,7 +9,7 @@ import { GameChatModal } from './game/GameChatModal';
 import { DrawOfferModal } from './game/DrawOfferModal';
 import { NotificationsModal } from './game/NotificationsModal';
 import { RematchModal } from './game/RematchModal';
-import { GameHeader } from './game/GameHeader';
+import { GameHeader, GameControls } from './game/GameHeader';
 import { useGameLogic } from './game/useGameLogic';
 import { useGameHandlers } from './game/useGameHandlers';
 
@@ -97,6 +97,19 @@ const Game = () => {
 
       <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 overflow-y-auto">
         <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center min-h-0">
+          <div className="w-full max-w-[400px] md:max-w-[560px]">
+            <GameControls
+              showSettingsMenu={showSettingsMenu}
+              setShowSettingsMenu={setShowSettingsMenu}
+              setShowChat={setShowChat}
+              handleExitClick={handleExitClick}
+              handleOfferDraw={handleOfferDraw}
+              handleSurrender={handleSurrender}
+              handleNewGame={handleNewGame}
+              setShowNotifications={setShowNotifications}
+            />
+          </div>
+
           <PlayerInfo
             playerName={opponentName}
             playerColor="black"

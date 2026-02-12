@@ -22,18 +22,30 @@ export const GameHeader = ({
   setShowNotifications
 }: GameHeaderProps) => {
   return (
-    <>
-      <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
-        <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 tracking-wide" style={{
-          fontFamily: 'Montserrat, sans-serif',
-          textShadow: '0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)',
-          letterSpacing: '0.05em'
-        }}>
-          ЛигаШахмат
-        </h1>
-      </header>
+    <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
+      <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 tracking-wide" style={{
+        fontFamily: 'Montserrat, sans-serif',
+        textShadow: '0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)',
+        letterSpacing: '0.05em'
+      }}>
+        ЛигаШахмат
+      </h1>
+    </header>
+  );
+};
 
-      <div className="flex gap-3">
+export const GameControls = ({
+  showSettingsMenu,
+  setShowSettingsMenu,
+  setShowChat,
+  handleExitClick,
+  handleOfferDraw,
+  handleSurrender,
+  handleNewGame,
+  setShowNotifications
+}: GameHeaderProps) => {
+  return (
+    <div className="flex gap-3">
         <button
           onClick={handleExitClick}
           className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
@@ -99,6 +111,5 @@ export const GameHeader = ({
           )}
         </div>
       </div>
-    </>
   );
 };
