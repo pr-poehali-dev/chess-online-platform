@@ -155,16 +155,10 @@ const Index = () => {
         {activeSection === 'home' && (
           <div className="space-y-8 animate-fade-in">
             <div className="text-center py-12">
-              <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up">
-                Играйте в шахматы онлайн
-              </h2>
-              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 animate-slide-up" style={{ animationDelay: '0.1s' }}>
-                Соревнуйтесь с игроками со всего мира или бросьте вызов компьютеру
-              </p>
-              <div className="flex flex-wrap gap-4 justify-center animate-slide-up" style={{ animationDelay: '0.2s' }}>
+              <div className="flex justify-center mb-8 animate-slide-up">
                 <Button 
                   size="lg" 
-                  className="gradient-primary border-0 text-white hover:opacity-90 transition-all hover:scale-105"
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
                   onClick={() => {
                     if (isAuthenticated) {
                       setShowGameSettings(true);
@@ -173,10 +167,16 @@ const Index = () => {
                     }
                   }}
                 >
-                  <Icon name="Play" className="mr-2" size={20} />
+                  <Icon name="Play" className="mr-2" size={24} />
                   Играть онлайн
                 </Button>
               </div>
+              <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up" style={{ animationDelay: '0.1s' }}>
+                Играйте в шахматы онлайн
+              </h2>
+              <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+                Соревнуйтесь с игроками со всего мира или бросьте вызов компьютеру
+              </p>
             </div>
 
             <div className="grid md:grid-cols-2 gap-6">
