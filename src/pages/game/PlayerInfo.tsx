@@ -59,65 +59,63 @@ export const PlayerInfo = ({
     .filter(type => groupedPieces[type])
     .map(type => groupedPieces[type]);
   return (
-    <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px] md:max-w-[560px]">
-      <div className="flex items-center justify-between">
-        <div className="flex items-center gap-2 md:gap-3">
+    <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px] md:max-w-[560px] min-h-[76px] md:min-h-[88px]">
+      <div className="flex items-center justify-between h-full">
+        <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-shrink">
           {avatar ? (
             <img 
               src={avatar} 
               alt={playerName}
-              className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-stone-600"
+              className="w-10 h-10 md:w-12 md:h-12 rounded-full object-cover border-2 border-stone-600 flex-shrink-0"
             />
           ) : (
-            <div className="text-3xl md:text-4xl">{icon}</div>
+            <div className="text-3xl md:text-4xl flex-shrink-0">{icon}</div>
           )}
-          <div className="flex-1">
-            <div className="text-xs md:text-sm font-medium text-stone-200">
+          <div className="min-w-0 flex-shrink">
+            <div className="text-xs md:text-sm font-medium text-stone-200 truncate">
               {playerName}{difficulty && ` (${difficulty})`}
             </div>
             <div className="flex items-center gap-2">
-              <div className="text-xs text-stone-400">
+              <div className="text-xs text-stone-400 whitespace-nowrap">
                 {playerColor === 'white' ? 'Белые' : 'Черные'}
               </div>
               {rating && (
-                <div className="text-xs font-semibold text-blue-400">
+                <div className="text-xs font-semibold text-blue-400 whitespace-nowrap">
                   {rating}
                 </div>
               )}
             </div>
           </div>
         </div>
-        {capturedPieces.length > 0 && (
-          <div className="flex items-center gap-0.5 mx-2">
-            {sortedGroups.map((group, groupIndex) => (
-              <div key={groupIndex} className="relative flex items-center" style={{ height: '1.5em' }}>
-                {group.map((piece, index) => (
-                  <span 
-                    key={index} 
-                    className={`text-xl md:text-2xl ${
-                      piece.color === 'white' ? 'text-stone-200' : 'text-stone-500'
-                    }`}
-                    style={{ 
-                      marginLeft: index > 0 ? '-0.4em' : '0',
-                      zIndex: index 
-                    }}
-                  >
-                    {pieceSymbols[piece.color][piece.type]}
-                  </span>
-                ))}
-              </div>
-            ))}
-          </div>
-        )}
-        <div className="flex flex-col items-end gap-1">
+        <div className="flex items-center gap-0.5 mx-2 overflow-hidden flex-shrink min-w-0" style={{ maxWidth: '30%' }}>
+          {capturedPieces.length > 0 && sortedGroups.map((group, groupIndex) => (
+            <div key={groupIndex} className="relative flex items-center flex-shrink-0" style={{ height: '1.5em' }}>
+              {group.map((piece, index) => (
+                <span 
+                  key={index} 
+                  className={`text-xl md:text-2xl ${
+                    piece.color === 'white' ? 'text-stone-200' : 'text-stone-500'
+                  }`}
+                  style={{ 
+                    marginLeft: index > 0 ? '-0.4em' : '0',
+                    zIndex: index 
+                  }}
+                >
+                  {pieceSymbols[piece.color][piece.type]}
+                </span>
+              ))}
+            </div>
+          ))}
+        </div>
+        <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <div className="flex items-center gap-2">
-            <div className={`text-xl md:text-2xl font-bold ${
+            <div className={`text-xl md:text-2xl font-bold whitespace-nowrap ${
               time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer ? 'text-green-400' : 'text-stone-400'
             }`}>
               {formatTime(time)}
             </div>
             {inactivityTimer !== undefined && inactivityTimer <= 20 && (
-              <div className={`text-sm md:text-base font-semibold ${
+              <div className={`text-sm md:text-base font-semibold whitespace-nowrap ${
                 inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
               }`}>
                 ({inactivityTimer}с)
@@ -125,7 +123,7 @@ export const PlayerInfo = ({
             )}
           </div>
           {inactivityTimer !== undefined && inactivityTimer <= 20 && (
-            <div className={`text-[10px] md:text-xs text-right ${
+            <div className={`text-[10px] md:text-xs text-right whitespace-nowrap ${
               inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
             }`}>
               Бездействие игрока. До поражения.
