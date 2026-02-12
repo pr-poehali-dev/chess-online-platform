@@ -14,7 +14,7 @@ export const GameSettingsModal = ({
   setShowGameSettings 
 }: GameSettingsModalProps) => {
   const [step, setStep] = useState(1);
-  const [selectedOpponent, setSelectedOpponent] = useState<'city' | 'region' | 'country' | 'friend' | null>(null);
+  const [selectedOpponent, setSelectedOpponent] = useState<'city' | 'region' | 'country' | 'friend' | 'computer' | null>(null);
   const [selectedTime, setSelectedTime] = useState<'blitz' | 'rapid' | 'classic' | null>(null);
   const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
   const [userCity, setUserCity] = useState<string>('');
@@ -50,7 +50,7 @@ export const GameSettingsModal = ({
     }
   };
 
-  const handleOpponentSelect = (type: 'city' | 'region' | 'country' | 'friend') => {
+  const handleOpponentSelect = (type: 'city' | 'region' | 'country' | 'friend' | 'computer') => {
     setSelectedOpponent(type);
     if (type === 'friend') {
       setStep(2);
@@ -69,7 +69,7 @@ export const GameSettingsModal = ({
   };
 
   const handleStartGame = () => {
-    const isRated = selectedOpponent !== 'friend';
+    const isRated = selectedOpponent !== 'friend' && selectedOpponent !== 'computer';
     setShowGameSettings(false);
     alert(`Поиск соперника...\nТип: ${selectedOpponent}\nВремя: ${selectedTime}\nРейтинговая: ${isRated ? 'Да' : 'Нет'}`);
     setStep(1);
@@ -178,6 +178,20 @@ export const GameSettingsModal = ({
                 </div>
                 <Icon name="ChevronRight" size={20} className="text-slate-400" />
               </Button>
+
+              <Button 
+                className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
+                onClick={() => handleOpponentSelect('computer')}
+              >
+                <div className="flex items-center gap-3">
+                  <Icon name="Bot" size={24} className="text-slate-700 dark:text-white" />
+                  <div className="text-left">
+                    <div className="text-sm font-medium text-slate-900 dark:text-white">Играть с компьютером</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">Тренировочная игра</div>
+                  </div>
+                </div>
+                <Icon name="ChevronRight" size={20} className="text-slate-400" />
+              </Button>
             </div>
           )}
 
@@ -255,10 +269,10 @@ export const GameSettingsModal = ({
                   <div className="flex items-center gap-2">
                     <Icon name="Trophy" size={20} className="text-blue-600 dark:text-blue-400" />
                     <span className="text-sm text-slate-900 dark:text-white">
-                      {selectedOpponent === 'friend' ? 'Нерейтинговая игра' : 'Рейтинговая игра'}
+                      {selectedOpponent === 'friend' || selectedOpponent === 'computer' ? 'Нерейтинговая игра' : 'Рейтинговая игра'}
                     </span>
                   </div>
-                  {selectedOpponent === 'friend' && (
+                  {(selectedOpponent === 'friend' || selectedOpponent === 'computer') && (
                     <span className="text-xs text-slate-500 dark:text-gray-400">Рейтинг не изменится</span>
                   )}
                 </div>
