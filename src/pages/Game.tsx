@@ -44,6 +44,11 @@ const Game = () => {
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  const savedUser = localStorage.getItem('chessUser');
+  const userData = savedUser ? JSON.parse(savedUser) : null;
+  const userAvatar = userData?.avatar || '';
+  const userRating = 1842;
+
   useEffect(() => {
     if (gameStatus !== 'playing') return;
 
@@ -412,6 +417,8 @@ const Game = () => {
               time={whiteTime}
               isCurrentPlayer={currentPlayer === 'white'}
               formatTime={formatTime}
+              rating={userRating}
+              avatar={userAvatar}
             />
 
             {gameStatus !== 'playing' && (
