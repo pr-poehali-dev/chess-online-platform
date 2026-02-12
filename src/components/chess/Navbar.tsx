@@ -114,6 +114,7 @@ const Navbar = ({
                     </button>
                     <button
                       onClick={() => {
+                        setActiveSection('history');
                         setShowMenu(false);
                       }}
                       className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
