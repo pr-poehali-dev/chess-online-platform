@@ -145,9 +145,8 @@ const Game = () => {
         <div className="w-16"></div>
       </header>
 
-      <main className="flex-1 flex items-center justify-center p-2 md:p-4">
-        <div className="flex flex-col lg:flex-row gap-3 md:gap-6 items-center lg:items-start w-full max-w-[1200px]">
-          <div className="flex flex-col gap-3 md:gap-6 w-full lg:w-auto items-center">
+      <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4">
+        <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center">
             <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px]">
               <div className="flex items-center justify-between">
                 <div className="flex items-center gap-2 md:gap-3">
@@ -188,7 +187,7 @@ const Game = () => {
             </div>
 
             {gameStatus !== 'playing' && (
-              <div className="bg-blue-600/90 backdrop-blur-sm rounded-lg p-4 text-center border border-blue-500/50">
+              <div className="bg-blue-600/90 backdrop-blur-sm rounded-lg p-4 text-center border border-blue-500/50 w-full max-w-[400px]">
                 <div className="text-lg font-bold text-white">
                   {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли!'}
                   {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы победили!'}
@@ -197,27 +196,27 @@ const Game = () => {
                 </div>
               </div>
             )}
-          </div>
 
-          <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 w-full lg:w-72 max-w-[400px] lg:max-w-none h-[300px] lg:h-[700px] flex flex-col">
-            <div className="px-3 md:px-4 py-2 md:py-3 border-b border-stone-700/30">
-              <h3 className="text-xs md:text-sm font-semibold text-stone-200">История ходов</h3>
-            </div>
-            <div className="flex-1 overflow-y-auto p-2 md:p-3 space-y-1">
+          <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 w-full max-w-[400px] p-3">
+            <div className="text-xs text-stone-400 mb-2">История ходов:</div>
+            <div className="flex gap-2 overflow-x-auto pb-2">
               {moveHistory.length === 0 ? (
-                <div className="text-sm text-stone-500 text-center py-8">
+                <div className="text-xs text-stone-500 text-center w-full py-2">
                   Ходы будут отображаться здесь
                 </div>
               ) : (
-                moveHistory.map((move, index) => (
-                  <div 
-                    key={index} 
-                    className="text-sm text-stone-200 px-3 py-1.5 bg-stone-700/30 rounded hover:bg-stone-700/50 transition-colors"
-                  >
-                    <span className="text-stone-400 mr-2">{Math.floor(index / 2) + 1}.</span>
-                    {move}
-                  </div>
-                ))
+                moveHistory.slice(-3).map((move, index) => {
+                  const actualIndex = moveHistory.length - 3 + index;
+                  return (
+                    <div 
+                      key={actualIndex} 
+                      className="text-xs text-stone-200 px-3 py-2 bg-stone-700/30 rounded whitespace-nowrap flex-shrink-0"
+                    >
+                      <span className="text-stone-400 mr-1">{Math.floor(actualIndex / 2) + 1}.</span>
+                      {move}
+                    </div>
+                  );
+                })
               )}
             </div>
           </div>
