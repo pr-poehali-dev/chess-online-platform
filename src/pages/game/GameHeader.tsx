@@ -55,7 +55,9 @@ export const GameControls = ({
           className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
           title="Выход из игры"
         >
-          <Icon name="LogOut" size={24} />
+          <div className="rotate-180">
+            <Icon name="LogOut" size={24} />
+          </div>
         </button>
         <button
           onClick={() => setShowChat(true)}
