@@ -86,7 +86,35 @@ const Index = () => {
                 ЛигаШахмат
               </h1>
             </div>
-            <div className="hidden md:flex items-center gap-6">
+            <div className="flex items-center gap-6">
+              <div className="hidden md:flex items-center gap-6">
+                <button 
+                  onClick={() => setActiveSection('home')}
+                  className={`transition-all ${activeSection === 'home' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                >
+                  Главная
+                </button>
+                <button 
+                  onClick={() => setActiveSection('profile')}
+                  className={`transition-all ${activeSection === 'profile' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                >
+                  Профиль
+                </button>
+                <button 
+                  onClick={() => setActiveSection('leaderboard')}
+                  className={`transition-all ${activeSection === 'leaderboard' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                >
+                  Рейтинг
+                </button>
+                <button 
+                  onClick={() => setActiveSection('tournaments')}
+                  className={`transition-all ${activeSection === 'tournaments' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
+                >
+                  Турниры
+                </button>
+              </div>
+            </div>
+            <div className="flex items-center gap-3">
               <Button
                 onClick={() => {
                   if (isAuthenticated) {
@@ -100,32 +128,6 @@ const Index = () => {
                 <Icon name="Play" className="mr-2" size={18} />
                 Играть онлайн
               </Button>
-              <button 
-                onClick={() => setActiveSection('home')}
-                className={`transition-all ${activeSection === 'home' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-              >
-                Главная
-              </button>
-              <button 
-                onClick={() => setActiveSection('profile')}
-                className={`transition-all ${activeSection === 'profile' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-              >
-                Профиль
-              </button>
-              <button 
-                onClick={() => setActiveSection('leaderboard')}
-                className={`transition-all ${activeSection === 'leaderboard' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-              >
-                Рейтинг
-              </button>
-              <button 
-                onClick={() => setActiveSection('tournaments')}
-                className={`transition-all ${activeSection === 'tournaments' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-              >
-                Турниры
-              </button>
-            </div>
-            <div className="flex items-center gap-3">
               <Button
                 variant="outline"
                 size="icon"
