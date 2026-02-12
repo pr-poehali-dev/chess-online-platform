@@ -39,6 +39,7 @@ const Game = () => {
   const [showDrawOffer, setShowDrawOffer] = useState(false);
   const [showNotifications, setShowNotifications] = useState(false);
   const [showRematchOffer, setShowRematchOffer] = useState(false);
+  const [drawOffersCount, setDrawOffersCount] = useState(0);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -261,6 +262,13 @@ const Game = () => {
 
   const handleOfferDraw = () => {
     setShowSettingsMenu(false);
+    
+    if (drawOffersCount >= 2) {
+      alert('Вы уже предлагали ничью 2 раза. Больше нельзя предлагать ничью в этой партии.');
+      return;
+    }
+    
+    setDrawOffersCount(drawOffersCount + 1);
     setTimeout(() => {
       setShowDrawOffer(true);
     }, 500);
