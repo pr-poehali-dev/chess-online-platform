@@ -31,7 +31,7 @@ export const useGameLogic = (
   const [boardHistory, setBoardHistory] = useState<Board[]>(savedState?.boardHistory || [initialBoard]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(savedState?.currentMoveIndex || 0);
   const [displayBoard, setDisplayBoard] = useState<Board>(savedState?.board || initialBoard);
-  const [inactivityTimer, setInactivityTimer] = useState(40);
+  const [inactivityTimer, setInactivityTimer] = useState(60);
   const [capturedByWhite, setCapturedByWhite] = useState<{type: string; color: string}[]>(savedState?.capturedByWhite || []);
   const [capturedByBlack, setCapturedByBlack] = useState<{type: string; color: string}[]>(savedState?.capturedByBlack || []);
   const [castlingRights, setCastlingRights] = useState<CastlingRights>(savedState?.castlingRights || {
@@ -105,7 +105,7 @@ export const useGameLogic = (
   useEffect(() => {
     if (gameStatus !== 'playing') return;
 
-    setInactivityTimer(40);
+    setInactivityTimer(60);
     hasPlayedWarning.current = false;
 
     const inactivityInterval = setInterval(() => {
