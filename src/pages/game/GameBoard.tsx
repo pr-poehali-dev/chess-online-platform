@@ -18,7 +18,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
       backgroundSize: 'cover',
       backgroundPosition: 'center'
     }}>
-      <div className="grid grid-cols-8 gap-0 w-full h-full">
+      <div className="grid grid-cols-8 w-full h-full" style={{ gap: 0 }}>
         {board.map((row, rowIndex) => (
           row.map((piece, colIndex) => {
             const isLight = (rowIndex + colIndex) % 2 === 0;
@@ -43,7 +43,8 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                   backgroundColor: isLight ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.3)',
                   boxShadow: isLight 
                     ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
-                    : 'inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.1)'
+                    : 'inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.1)',
+                  margin: '-0.5px'
                 }}
               >
                 {colIndex === 0 && (
