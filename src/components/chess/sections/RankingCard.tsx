@@ -65,29 +65,49 @@ export const RankingCard = ({
 
   const colors = colorClasses[iconColor];
 
-  const renderPlayer = (player: Player) => (
-    <div 
-      key={player.rank}
-      className={`flex items-center gap-3 p-3 rounded-lg border ${
-        player.highlight 
-          ? colors.highlight
-          : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
-      }`}
-    >
-      <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${colors.bg} text-white`}>
-        {player.rank}
-      </div>
-      <div className="flex-1">
-        <div className={`font-semibold text-sm ${
+  const getInitials = (name: string) => {
+    const parts = name.split(' ');
+    if (parts.length >= 2) {
+      return parts[0][0] + parts[1][0];
+    }
+    return name.substring(0, 2).toUpperCase();
+  };
+
+  const renderPlayer = (player: Player, isTop4: boolean = false) => {
+    const isFirst = player.rank === 1;
+    const avatarSize = isFirst ? 'w-16 h-16' : 'w-10 h-10';
+    const nameSize = isFirst ? 'text-base' : 'text-sm';
+    
+    return (
+      <div 
+        key={player.rank}
+        className={`flex items-center gap-3 p-3 rounded-lg border ${
           player.highlight 
-            ? colors.highlightText
-            : 'text-gray-900 dark:text-white'
-        }`}>{player.name}</div>
-        <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
+            ? colors.highlight
+            : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
+        }`}
+      >
+        {isTop4 ? (
+          <div className={`flex items-center justify-center ${avatarSize} rounded-full font-bold text-white ${colors.bg} flex-shrink-0`}>
+            {getInitials(player.name)}
+          </div>
+        ) : (
+          <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${colors.bg} text-white`}>
+            {player.rank}
+          </div>
+        )}
+        <div className="flex-1">
+          <div className={`font-semibold ${nameSize} ${
+            player.highlight 
+              ? colors.highlightText
+              : 'text-gray-900 dark:text-white'
+          }`}>{player.name}</div>
+          <div className="text-xs text-gray-600 dark:text-gray-400">{player.city}</div>
+        </div>
+        <div className={`text-sm font-bold ${colors.text}`}>{player.rating}</div>
       </div>
-      <div className={`text-sm font-bold ${colors.text}`}>{player.rating}</div>
-    </div>
-  );
+    );
+  };
 
   return (
     <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay }}>
@@ -111,11 +131,11 @@ export const RankingCard = ({
       </CardHeader>
       <CardContent>
         <div className="space-y-3">
-          {topPlayers.map(renderPlayer)}
+          {topPlayers.map((player) => renderPlayer(player, true))}
           
           {showModal && (
             <div className="animate-slide-down">
-              {fullRanking.slice(4).map(renderPlayer)}
+              {fullRanking.slice(4).map((player) => renderPlayer(player, false))}
             </div>
           )}
         </div>
