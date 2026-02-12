@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 
 interface NavbarProps {
@@ -28,6 +29,41 @@ const Navbar = ({
   stats 
 }: NavbarProps) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [hasActiveGame, setHasActiveGame] = useState(false);
+  const navigate = useNavigate();
+  const location = useLocation();
+
+  useEffect(() => {
+    const checkActiveGame = () => {
+      const saved = localStorage.getItem('activeGame');
+      if (saved) {
+        try {
+          const gameState = JSON.parse(saved);
+          setHasActiveGame(gameState.gameStatus === 'playing');
+        } catch {
+          setHasActiveGame(false);
+        }
+      } else {
+        setHasActiveGame(false);
+      }
+    };
+
+    checkActiveGame();
+    const interval = setInterval(checkActiveGame, 1000);
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleReturnToGame = () => {
+    const saved = localStorage.getItem('activeGame');
+    if (saved) {
+      try {
+        const gameState = JSON.parse(saved);
+        navigate(`/game?difficulty=${gameState.difficulty}&time=${gameState.timeControl}`);
+      } catch {
+        navigate('/game');
+      }
+    }
+  };
 
   return (
     <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in">
@@ -56,6 +92,16 @@ const Navbar = ({
           )}
 
           <div className="flex items-center gap-3">
+            {hasActiveGame && location.pathname !== '/game' && (
+              <button
+                onClick={handleReturnToGame}
+                className="p-2 rounded-lg bg-green-600 hover:bg-green-700 transition-colors animate-pulse"
+                title="Вернуться к игре"
+              >
+                <Icon name="Gamepad2" size={22} className="text-white" />
+              </button>
+            )}
+
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"

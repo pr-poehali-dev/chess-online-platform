@@ -6,20 +6,35 @@ export const useGameLogic = (
   difficulty: 'easy' | 'medium' | 'hard' | 'master',
   timeControl: 'blitz' | 'rapid' | 'classic'
 ) => {
-  const [board, setBoard] = useState<Board>(initialBoard);
+  const loadGameState = () => {
+    const saved = localStorage.getItem('activeGame');
+    if (saved) {
+      try {
+        return JSON.parse(saved);
+      } catch {
+        return null;
+      }
+    }
+    return null;
+  };
+
+  const savedState = loadGameState();
+  
+  const [board, setBoard] = useState<Board>(savedState?.board || initialBoard);
   const [selectedSquare, setSelectedSquare] = useState<Position | null>(null);
-  const [currentPlayer, setCurrentPlayer] = useState<'white' | 'black'>('white');
+  const [currentPlayer, setCurrentPlayer] = useState<'white' | 'black'>(savedState?.currentPlayer || 'white');
   const [possibleMoves, setPossibleMoves] = useState<Position[]>([]);
-  const [whiteTime, setWhiteTime] = useState(getInitialTime(timeControl));
-  const [blackTime, setBlackTime] = useState(getInitialTime(timeControl));
-  const [gameStatus, setGameStatus] = useState<'playing' | 'checkmate' | 'stalemate' | 'draw'>('playing');
-  const [moveHistory, setMoveHistory] = useState<string[]>([]);
-  const [boardHistory, setBoardHistory] = useState<Board[]>([initialBoard]);
-  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
-  const [displayBoard, setDisplayBoard] = useState<Board>(initialBoard);
+  const [whiteTime, setWhiteTime] = useState(savedState?.whiteTime || getInitialTime(timeControl));
+  const [blackTime, setBlackTime] = useState(savedState?.blackTime || getInitialTime(timeControl));
+  const [gameStatus, setGameStatus] = useState<'playing' | 'checkmate' | 'stalemate' | 'draw'>(savedState?.gameStatus || 'playing');
+  const [moveHistory, setMoveHistory] = useState<string[]>(savedState?.moveHistory || []);
+  const [boardHistory, setBoardHistory] = useState<Board[]>(savedState?.boardHistory || [initialBoard]);
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(savedState?.currentMoveIndex || 0);
+  const [displayBoard, setDisplayBoard] = useState<Board>(savedState?.board || initialBoard);
   const [inactivityTimer, setInactivityTimer] = useState(40);
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
+  const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
 
   const playWarningSound = () => {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -101,6 +116,27 @@ export const useGameLogic = (
   useEffect(() => {
     setDisplayBoard(boardHistory[currentMoveIndex] || initialBoard);
   }, [currentMoveIndex]);
+
+  useEffect(() => {
+    if (gameStatus === 'playing') {
+      const gameState = {
+        board,
+        currentPlayer,
+        whiteTime,
+        blackTime,
+        gameStatus,
+        moveHistory,
+        boardHistory,
+        currentMoveIndex,
+        gameStartTime: gameStartTime.current,
+        difficulty,
+        timeControl
+      };
+      localStorage.setItem('activeGame', JSON.stringify(gameState));
+    } else {
+      localStorage.removeItem('activeGame');
+    }
+  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl]);
 
   const makeMove = (from: Position, to: Position) => {
     const newBoard = board.map(row => [...row]);
