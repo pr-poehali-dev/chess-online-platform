@@ -173,4 +173,13 @@
   .dark .gradient-secondary {
     background: linear-gradient(135deg, #8b5cf6 0%, #f97316 100%);
   }
+
+  .hide-scrollbar {
+    -ms-overflow-style: none;
+    scrollbar-width: none;
+  }
+
+  .hide-scrollbar::-webkit-scrollbar {
+    display: none;
+  }
 }
