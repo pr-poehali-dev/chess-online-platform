@@ -292,8 +292,8 @@ const Game = () => {
         </h1>
       </header>
 
-      <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4">
-        <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center">
+      <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4 overflow-y-auto">
+        <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center min-h-0">
             <div className="flex gap-3">
               <button
                 onClick={handleExitClick}
