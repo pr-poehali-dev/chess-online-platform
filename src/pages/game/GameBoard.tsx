@@ -11,7 +11,10 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
   return (
     <div className="inline-block rounded-sm overflow-hidden shadow-2xl relative w-full max-w-[400px] md:max-w-[560px]" style={{ 
       boxShadow: '0 0 0 3px #3e2723, 0 0 0 5px #5d4037, 0 15px 30px rgba(0,0,0,0.4)',
-      aspectRatio: '1/1'
+      aspectRatio: '1/1',
+      backgroundImage: 'url(https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/79c4520d-63b3-4e07-8bba-0b7b41c53435.jpg)',
+      backgroundSize: 'cover',
+      backgroundPosition: 'center'
     }}>
       <div className="grid grid-cols-8 gap-0 w-full h-full">
         {board.map((row, rowIndex) => (
@@ -33,12 +36,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                   hover:brightness-110 transition-all
                 `}
                 style={{ 
-                  backgroundImage: 'url(https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/79c4520d-63b3-4e07-8bba-0b7b41c53435.jpg)',
-                  backgroundSize: '800%',
-                  backgroundPosition: isLight 
-                    ? `${colIndex * 12.5}% ${rowIndex * 12.5}%`
-                    : `${colIndex * 12.5}% ${rowIndex * 12.5}%`,
-                  filter: isLight ? 'brightness(1.15)' : 'brightness(0.85)',
+                  backgroundColor: isLight ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.3)',
                   boxShadow: isLight 
                     ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
                     : 'inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.1)'
