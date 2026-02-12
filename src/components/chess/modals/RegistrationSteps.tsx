@@ -3,44 +3,6 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { popularCities, allCities, cityRegions } from '@/components/chess/data/cities';
 
-interface CodeStepProps {
-  verificationCode: string;
-  setVerificationCode: (value: string) => void;
-  handleNextStep: () => void;
-}
-
-export const CodeStep = ({ verificationCode, setVerificationCode, handleNextStep }: CodeStepProps) => {
-  return (
-    <div className="space-y-4">
-      <div>
-        <input
-          type="text"
-          name="code"
-          placeholder="Введите код из письма"
-          value={verificationCode}
-          onChange={(e) => setVerificationCode(e.target.value.replace(/\D/g, '').slice(0, 6))}
-          onKeyPress={(e) => e.key === 'Enter' && handleNextStep()}
-          autoComplete="one-time-code"
-          autoFocus
-          maxLength={6}
-          className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-center text-2xl tracking-widest"
-        />
-        <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 px-1">
-          Проверьте почту и введите 6-значный код
-        </p>
-      </div>
-      <Button
-        className="w-full gradient-primary border-0 text-white h-12"
-        onClick={handleNextStep}
-        disabled={verificationCode.length !== 6}
-      >
-        Завершить регистрацию
-        <Icon name="Check" className="ml-2" size={20} />
-      </Button>
-    </div>
-  );
-};
-
 interface NameStepProps {
   userName: string;
   setUserName: (value: string) => void;
@@ -100,7 +62,7 @@ export const EmailStep = ({ userEmail, setUserEmail, handleNextStep }: EmailStep
           className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
         />
         <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 px-1">
-          Мы отправим одноразовый код для входа
+          Мы отправим одноразовый пароль для входа
         </p>
       </div>
       <Button
@@ -108,8 +70,8 @@ export const EmailStep = ({ userEmail, setUserEmail, handleNextStep }: EmailStep
         onClick={handleNextStep}
         disabled={!userEmail.trim() || !userEmail.includes('@')}
       >
-        Отправить код
-        <Icon name="Send" className="ml-2" size={20} />
+        Продолжить
+        <Icon name="ChevronRight" className="ml-2" size={20} />
       </Button>
     </div>
   );
@@ -192,8 +154,8 @@ export const CityStep = ({
         onClick={handleNextStep}
         disabled={!selectedCity}
       >
-        Продолжить
-        <Icon name="ChevronRight" className="ml-2" size={20} />
+        Завершить регистрацию
+        <Icon name="Check" className="ml-2" size={20} />
       </Button>
     </div>
   );

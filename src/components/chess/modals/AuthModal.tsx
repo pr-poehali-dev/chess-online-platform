@@ -2,7 +2,7 @@ import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
-import { NameStep, EmailStep, CityStep, CodeStep } from './RegistrationSteps';
+import { NameStep, EmailStep, CityStep } from './RegistrationSteps';
 
 interface AuthModalProps {
   showAuthModal: boolean;
@@ -23,7 +23,6 @@ export const AuthModal = ({
   const [citySearch, setCitySearch] = useState('');
   const [showCityDropdown, setShowCityDropdown] = useState(false);
   const [selectedCity, setSelectedCity] = useState('');
-  const [verificationCode, setVerificationCode] = useState('');
 
   useEffect(() => {
     const savedUser = localStorage.getItem('chessUser');
@@ -40,12 +39,10 @@ export const AuthModal = ({
   const handleNextStep = () => {
     if (registrationStep === 1 && userName.trim()) {
       setRegistrationStep(2);
-    } else if (registrationStep === 2 && selectedCity) {
+    } else if (registrationStep === 2 && userEmail.trim()) {
       setRegistrationStep(3);
-    } else if (registrationStep === 3 && userEmail.trim()) {
-      setRegistrationStep(4);
-    } else if (registrationStep === 4 && verificationCode.length === 6) {
-      const userData = { name: userName, email: userEmail, city: selectedCity, verified: true };
+    } else if (registrationStep === 3 && selectedCity) {
+      const userData = { name: userName, email: userEmail, city: selectedCity };
       localStorage.setItem('chessUser', JSON.stringify(userData));
       setIsAuthenticated(true);
       setShowAuthModal(false);
@@ -55,7 +52,6 @@ export const AuthModal = ({
       setUserEmail('');
       setSelectedCity('');
       setCitySearch('');
-      setVerificationCode('');
     }
   };
 
@@ -82,24 +78,20 @@ export const AuthModal = ({
             )}
             <CardTitle className="flex-1 text-center text-gray-900 dark:text-white">
               {registrationStep === 1 && 'Как вас зовут?'}
-              {registrationStep === 2 && 'Ваш город'}
-              {registrationStep === 3 && 'Электронная почта'}
-              {registrationStep === 4 && 'Код подтверждения'}
+              {registrationStep === 2 && 'Электронная почта'}
+              {registrationStep === 3 && 'Ваш город'}
             </CardTitle>
             {registrationStep > 1 && <div className="w-10" />}
           </div>
           <div className="flex justify-center gap-2 mt-4">
-            <div className={`h-1.5 w-10 rounded-full transition-colors ${
+            <div className={`h-1.5 w-12 rounded-full transition-colors ${
               registrationStep >= 1 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
             }`} />
-            <div className={`h-1.5 w-10 rounded-full transition-colors ${
+            <div className={`h-1.5 w-12 rounded-full transition-colors ${
               registrationStep >= 2 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
             }`} />
-            <div className={`h-1.5 w-10 rounded-full transition-colors ${
+            <div className={`h-1.5 w-12 rounded-full transition-colors ${
               registrationStep >= 3 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
-            }`} />
-            <div className={`h-1.5 w-10 rounded-full transition-colors ${
-              registrationStep >= 4 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
             }`} />
           </div>
         </CardHeader>
@@ -113,18 +105,6 @@ export const AuthModal = ({
           )}
 
           {registrationStep === 2 && (
-            <CityStep
-              citySearch={citySearch}
-              setCitySearch={setCitySearch}
-              selectedCity={selectedCity}
-              setSelectedCity={setSelectedCity}
-              showCityDropdown={showCityDropdown}
-              setShowCityDropdown={setShowCityDropdown}
-              handleNextStep={handleNextStep}
-            />
-          )}
-
-          {registrationStep === 3 && (
             <EmailStep
               userEmail={userEmail}
               setUserEmail={setUserEmail}
@@ -132,10 +112,14 @@ export const AuthModal = ({
             />
           )}
 
-          {registrationStep === 4 && (
-            <CodeStep
-              verificationCode={verificationCode}
-              setVerificationCode={setVerificationCode}
+          {registrationStep === 3 && (
+            <CityStep
+              citySearch={citySearch}
+              setCitySearch={setCitySearch}
+              selectedCity={selectedCity}
+              setSelectedCity={setSelectedCity}
+              showCityDropdown={showCityDropdown}
+              setShowCityDropdown={setShowCityDropdown}
               handleNextStep={handleNextStep}
             />
           )}
