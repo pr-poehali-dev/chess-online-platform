@@ -1,5 +1,4 @@
-import { Button } from '@/components/ui/button';
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
+import { useState } from 'react';
 import Icon from '@/components/ui/icon';
 
 interface NavbarProps {
@@ -28,75 +27,72 @@ const Navbar = ({
   setShowAuthModal,
   stats 
 }: NavbarProps) => {
+  const [showMenu, setShowMenu] = useState(false);
+
   return (
     <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in">
       <div className="container mx-auto px-4 py-4">
         <div className="flex items-center justify-between">
           <div className="flex items-center gap-3">
-            <div className="text-3xl">♟️</div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:to-purple-500 dark:bg-clip-text dark:text-transparent">
-              ЛигаШахмат
+            <img 
+              src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/70fa1147-826f-4c89-8da6-773ff084ce53.jpg" 
+              alt="Logo" 
+              className="w-10 h-10 object-contain"
+            />
+            <h1 className="text-2xl font-bold tracking-wide text-slate-900 dark:text-white" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              Лига Шахмат
             </h1>
           </div>
-          <div className="hidden md:flex items-center gap-6">
-            <Button
-              onClick={() => {
-                if (isAuthenticated) {
-                  setShowGameSettings(true);
-                } else {
-                  setShowAuthModal(true);
-                }
-              }}
-              className="gradient-primary border-0 text-white hover:opacity-90"
-            >
-              <Icon name="Play" className="mr-2" size={18} />
-              Играть онлайн
-            </Button>
-            <button 
-              onClick={() => setActiveSection('home')}
-              className={`transition-all ${activeSection === 'home' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              Главная
-            </button>
-            <button 
-              onClick={() => setActiveSection('profile')}
-              className={`transition-all ${activeSection === 'profile' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              Профиль
-            </button>
-            <button 
-              onClick={() => setActiveSection('leaderboard')}
-              className={`transition-all ${activeSection === 'leaderboard' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              Рейтинг
-            </button>
-            <button 
-              onClick={() => setActiveSection('tournaments')}
-              className={`transition-all ${activeSection === 'tournaments' ? 'text-blue-600 dark:text-blue-400' : 'text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white'}`}
-            >
-              Турниры
-            </button>
-          </div>
+
           <div className="flex items-center gap-3">
-            <Button
-              variant="outline"
-              size="icon"
+            <button
               onClick={() => setIsDarkMode(!isDarkMode)}
-              className="border-slate-300 dark:border-white/20 hover:bg-slate-100 dark:hover:bg-white/10"
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
             >
               {isDarkMode ? (
-                <Icon name="Moon" size={20} className="text-blue-400" />
+                <Icon name="Moon" size={22} className="text-blue-400" />
               ) : (
-                <Icon name="Sun" size={20} className="text-yellow-500" />
+                <Icon name="Sun" size={22} className="text-yellow-500" />
               )}
-            </Button>
-            <Avatar className="ring-2 ring-blue-400/50">
-              <AvatarImage src="" />
-              <AvatarFallback className="bg-gradient-primary text-white">ВЫ</AvatarFallback>
-            </Avatar>
-            <div className="hidden md:block">
-              <div className="font-semibold text-gray-900 dark:text-white">Ваш профиль</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Рейтинг: {stats.rating}</div>
+            </button>
+
+            <div className="relative">
+              <button
+                onClick={() => setShowMenu(!showMenu)}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-300"
+              >
+                <Icon name="Menu" size={24} />
+              </button>
+
+              {showMenu && (
+                <>
+                  <div 
+                    className="fixed inset-0 z-40" 
+                    onClick={() => setShowMenu(false)}
+                  />
+                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-scale-in">
+                    <button
+                      onClick={() => {
+                        setActiveSection('profile');
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300"
+                    >
+                      <Icon name="User" size={20} />
+                      <span>Профиль</span>
+                    </button>
+                    <button
+                      onClick={() => {
+                        setShowMenu(false);
+                      }}
+                      className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
+                    >
+                      <Icon name="History" size={20} />
+                      <span>История</span>
+                    </button>
+                  </div>
+                </>
+              )}
             </div>
           </div>
         </div>
