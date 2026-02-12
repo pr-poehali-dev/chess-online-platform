@@ -40,14 +40,55 @@ export const useGameHandlers = (gameStatus: 'playing' | 'checkmate' | 'stalemate
     if (gameStatus !== 'playing') {
       navigate('/');
     } else {
-      setShowExitDialog(true);
+      const savedState = localStorage.getItem('activeGame');
+      let moveCount = 0;
+      
+      if (savedState) {
+        try {
+          const gameState = JSON.parse(savedState);
+          moveCount = gameState.moveHistory?.length || 0;
+        } catch (error) {
+          // Ignore parsing errors
+        }
+      }
+      
+      if (moveCount <= 2) {
+        if (confirm('Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.')) {
+          localStorage.removeItem('activeGame');
+          navigate('/');
+        }
+      } else {
+        setShowExitDialog(true);
+      }
     }
   };
 
   const handleSurrender = () => {
     setShowSettingsMenu(false);
-    if (confirm('Вы действительно хотите сдаться? Партия будет засчитана как поражение.')) {
-      setGameStatus('checkmate');
+    
+    const savedState = localStorage.getItem('activeGame');
+    let moveCount = 0;
+    
+    if (savedState) {
+      try {
+        const gameState = JSON.parse(savedState);
+        moveCount = gameState.moveHistory?.length || 0;
+      } catch (error) {
+        // Ignore parsing errors
+      }
+    }
+    
+    const message = moveCount <= 2 
+      ? 'Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.'
+      : 'Вы действительно хотите сдаться? Партия будет засчитана как поражение.';
+    
+    if (confirm(message)) {
+      if (moveCount <= 2) {
+        localStorage.removeItem('activeGame');
+        navigate('/');
+      } else {
+        setGameStatus('checkmate');
+      }
       setShowExitDialog(false);
     }
   };
