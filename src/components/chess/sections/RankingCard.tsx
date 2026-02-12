@@ -8,6 +8,7 @@ interface Player {
   rating: number;
   city: string;
   highlight?: boolean;
+  avatar?: string;
 }
 
 interface RankingCardProps {
@@ -73,11 +74,64 @@ export const RankingCard = ({
     return name.substring(0, 2).toUpperCase();
   };
 
-  const renderPlayer = (player: Player, isTop4: boolean = false) => {
-    const isFirst = player.rank === 1;
-    const avatarSize = isFirst ? 'w-16 h-16' : 'w-10 h-10';
-    const nameSize = isFirst ? 'text-base' : 'text-sm';
-    
+  const renderTop4 = () => {
+    const first = topPlayers[0];
+    const rest = topPlayers.slice(1, 4);
+
+    return (
+      <div className="flex gap-4 mb-4">
+        <div className="flex-1 p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30">
+          <div className="flex items-center gap-3">
+            <div className="relative">
+              {first.avatar ? (
+                <img src={first.avatar} alt={first.name} className="w-20 h-20 rounded-full object-cover ring-4 ring-yellow-400" />
+              ) : (
+                <div className={`w-20 h-20 rounded-full flex items-center justify-center font-bold text-xl text-white ${colors.bg} ring-4 ring-yellow-400`}>
+                  {getInitials(first.name)}
+                </div>
+              )}
+              <div className="absolute -top-1 -right-1 w-8 h-8 bg-yellow-400 rounded-full flex items-center justify-center text-white font-bold text-sm">
+                1
+              </div>
+            </div>
+            <div className="flex-1">
+              <div className="font-bold text-lg text-gray-900 dark:text-white">{first.name}</div>
+              <div className="text-sm text-gray-600 dark:text-gray-400">{first.city}</div>
+              <div className={`text-lg font-bold ${colors.text} mt-1`}>{first.rating}</div>
+            </div>
+          </div>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          {rest.map((player) => (
+            <div 
+              key={player.rank}
+              className="flex items-center gap-2 p-2 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5"
+            >
+              <div className="relative">
+                {player.avatar ? (
+                  <img src={player.avatar} alt={player.name} className="w-12 h-12 rounded-full object-cover" />
+                ) : (
+                  <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm text-white ${colors.bg}`}>
+                    {getInitials(player.name)}
+                  </div>
+                )}
+                <div className={`absolute -top-1 -right-1 w-5 h-5 ${colors.bg} rounded-full flex items-center justify-center text-white font-bold text-xs`}>
+                  {player.rank}
+                </div>
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{player.name}</div>
+                <div className={`text-sm font-bold ${colors.text}`}>{player.rating}</div>
+              </div>
+            </div>
+          ))}
+        </div>
+      </div>
+    );
+  };
+
+  const renderPlayer = (player: Player) => {
     return (
       <div 
         key={player.rank}
@@ -87,17 +141,11 @@ export const RankingCard = ({
             : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
         }`}
       >
-        {isTop4 ? (
-          <div className={`flex items-center justify-center ${avatarSize} rounded-full font-bold text-white ${colors.bg} flex-shrink-0`}>
-            {getInitials(player.name)}
-          </div>
-        ) : (
-          <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${colors.bg} text-white`}>
-            {player.rank}
-          </div>
-        )}
+        <div className={`flex items-center justify-center w-8 h-8 rounded-full font-bold text-sm ${colors.bg} text-white`}>
+          {player.rank}
+        </div>
         <div className="flex-1">
-          <div className={`font-semibold ${nameSize} ${
+          <div className={`font-semibold text-sm ${
             player.highlight 
               ? colors.highlightText
               : 'text-gray-900 dark:text-white'
@@ -130,15 +178,13 @@ export const RankingCard = ({
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <div className="space-y-3">
-          {topPlayers.map((player) => renderPlayer(player, true))}
-          
-          {showModal && (
-            <div className="animate-slide-down">
-              {fullRanking.slice(4).map((player) => renderPlayer(player, false))}
-            </div>
-          )}
-        </div>
+        {renderTop4()}
+        
+        {showModal && (
+          <div className="space-y-3 animate-slide-down">
+            {fullRanking.slice(4).map((player) => renderPlayer(player))}
+          </div>
+        )}
         
         <Button 
           variant="outline" 
