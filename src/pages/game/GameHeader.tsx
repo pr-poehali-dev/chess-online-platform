@@ -70,7 +70,7 @@ export const GameControls = ({
   setShowRematchOffer
 }: GameHeaderProps) => {
   return (
-    <div className="w-full">
+    <div className="w-full flex flex-col gap-3">
       <div className="flex items-center gap-2 md:gap-3">
         <button
           onClick={handleExitClick}
@@ -214,15 +214,15 @@ export const GameControls = ({
         </div>
       </div>
       {gameStatus !== 'playing' && (
-        <div className={`backdrop-blur-sm rounded-lg p-2 md:p-3 border flex items-center justify-between flex-1 ml-2 md:ml-3 ${
+        <div className={`backdrop-blur-sm rounded-lg p-3 md:p-4 border flex items-center justify-between w-full ${
           theme === 'light'
-            ? 'bg-blue-500/90 border-blue-400'
-            : 'bg-blue-600/90 border-blue-500/50'
+            ? 'bg-blue-500/90 border-blue-600'
+            : 'bg-blue-600/90 border-blue-700'
         }`}>
-          <div className="text-sm md:text-base font-bold text-white truncate">
-            {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли!'}
-            {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы победили!'}
-            {gameStatus === 'stalemate' && 'Ничья - пат'}
+          <div className="text-base md:text-lg font-bold text-white truncate">
+            {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли'}
+            {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы выиграли'}
+            {gameStatus === 'stalemate' && 'Пат'}
             {gameStatus === 'draw' && 'Ничья'}
           </div>
           <button
@@ -233,10 +233,10 @@ export const GameControls = ({
                 }, 500);
               }
             }}
-            className="px-3 md:px-4 py-1.5 md:py-2 bg-green-600 hover:bg-green-700 text-white rounded-lg font-semibold transition-all flex items-center gap-1.5 md:gap-2 flex-shrink-0 text-sm md:text-base"
+            className="p-2.5 md:p-3 rounded-lg transition-colors flex items-center gap-2 flex-shrink-0 ml-3 bg-green-600 hover:bg-green-700 text-white"
           >
-            <Icon name="RotateCcw" size={16} />
-            Реванш
+            <Icon name="RotateCcw" size={20} />
+            <span className="font-semibold">Реванш</span>
           </button>
         </div>
       )}
