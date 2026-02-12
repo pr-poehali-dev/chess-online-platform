@@ -98,11 +98,15 @@ export const CityStep = ({
 }: CityStepProps) => {
   const [showAll] = useState(false);
   
-  const search = citySearch.toLowerCase().trim();
+  const normalizeText = (text: string) => {
+    return text.toLowerCase().replace(/ё/g, 'е');
+  };
+  
+  const search = normalizeText(citySearch.trim());
   
   const filteredCities = search === '' 
     ? popularCities.slice(0, 20)
-    : allCities.filter(city => city.toLowerCase().includes(search));
+    : allCities.filter(city => normalizeText(city).includes(search));
 
   return (
     <div className="space-y-4">
