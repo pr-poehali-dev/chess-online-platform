@@ -32,6 +32,7 @@ const Game = () => {
   const [scrollLeft, setScrollLeft] = useState(0);
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [showChat, setShowChat] = useState(false);
+  const [showSettingsMenu, setShowSettingsMenu] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -249,6 +250,20 @@ const Game = () => {
     }
   };
 
+  const handleOfferDraw = () => {
+    setShowSettingsMenu(false);
+    if (confirm('Предложить ничью сопернику?')) {
+      setGameStatus('draw');
+    }
+  };
+
+  const handleNewGame = () => {
+    setShowSettingsMenu(false);
+    if (confirm('Начать новую партию? Текущая партия будет завершена.')) {
+      window.location.reload();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
       <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
@@ -278,12 +293,56 @@ const Game = () => {
               >
                 <Icon name="MessageCircle" size={24} />
               </button>
-              <button
-                className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
-                title="Опции"
-              >
-                <Icon name="Settings" size={24} />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={() => setShowSettingsMenu(!showSettingsMenu)}
+                  className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
+                  title="Опции"
+                >
+                  <Icon name="Settings" size={24} />
+                </button>
+                {showSettingsMenu && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setShowSettingsMenu(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-56 bg-stone-800 rounded-lg shadow-xl border border-stone-700/50 overflow-hidden z-50 animate-scale-in">
+                      <button
+                        onClick={handleOfferDraw}
+                        className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100"
+                      >
+                        <Icon name="Handshake" size={20} />
+                        <span>Предложить ничью</span>
+                      </button>
+                      <button
+                        onClick={handleSurrender}
+                        className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
+                      >
+                        <Icon name="Flag" size={20} />
+                        <span>Сдаться</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setShowSettingsMenu(false);
+                          navigate('/?section=notifications');
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
+                      >
+                        <Icon name="Bell" size={20} />
+                        <span>Уведомления</span>
+                      </button>
+                      <button
+                        onClick={handleNewGame}
+                        className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
+                      >
+                        <Icon name="Plus" size={20} />
+                        <span>Новая партия</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
             </div>
 
             <PlayerInfo
