@@ -159,10 +159,18 @@
   }
 
   .gradient-primary {
+    background: linear-gradient(135deg, #1e293b 0%, #475569 100%);
+  }
+
+  .dark .gradient-primary {
     background: linear-gradient(135deg, #0ea5e9 0%, #8b5cf6 100%);
   }
 
   .gradient-secondary {
+    background: linear-gradient(135deg, #334155 0%, #64748b 100%);
+  }
+
+  .dark .gradient-secondary {
     background: linear-gradient(135deg, #8b5cf6 0%, #f97316 100%);
   }
 }
