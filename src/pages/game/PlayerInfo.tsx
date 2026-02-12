@@ -12,13 +12,23 @@ interface PlayerInfoProps {
   capturedPieces?: {type: string; color: string}[];
 }
 
-const pieceSymbols: Record<string, string> = {
-  'pawn': '♟',
-  'knight': '♞',
-  'bishop': '♝',
-  'rook': '♜',
-  'queen': '♛',
-  'king': '♚'
+const pieceSymbols: Record<string, Record<string, string>> = {
+  'white': {
+    'pawn': '♙',
+    'knight': '♘',
+    'bishop': '♗',
+    'rook': '♖',
+    'queen': '♕',
+    'king': '♔'
+  },
+  'black': {
+    'pawn': '♟',
+    'knight': '♞',
+    'bishop': '♝',
+    'rook': '♜',
+    'queen': '♛',
+    'king': '♚'
+  }
 };
 
 export const PlayerInfo = ({
@@ -39,8 +49,10 @@ export const PlayerInfo = ({
       {capturedPieces.length > 0 && (
         <div className="flex flex-wrap gap-1 mb-2">
           {capturedPieces.map((piece, index) => (
-            <span key={index} className="text-lg md:text-xl text-stone-400">
-              {pieceSymbols[piece.type]}
+            <span key={index} className={`text-lg md:text-xl ${
+              piece.color === 'white' ? 'text-stone-200' : 'text-stone-500'
+            }`}>
+              {pieceSymbols[piece.color][piece.type]}
             </span>
           ))}
         </div>

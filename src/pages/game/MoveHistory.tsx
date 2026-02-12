@@ -35,7 +35,7 @@ export const MoveHistory = ({
         <Icon name="ChevronLeft" size={20} />
       </button>
       
-      <div className="relative flex-1">
+      <div className="relative flex-1 min-w-0">
         <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
         <div 
           ref={historyRef} 
@@ -50,7 +50,7 @@ export const MoveHistory = ({
               <div 
                 key={index} 
                 className={`whitespace-nowrap flex-shrink-0 transition-all ${
-                  index === currentMoveIndex ? 'text-white font-semibold text-[12px]' : 'text-stone-300 text-[10px]'
+                  index === currentMoveIndex ? 'text-white font-semibold text-xs' : 'text-stone-300 text-[10px]'
                 }`}
               >
                 <span className="text-stone-500 mr-0.5">{Math.floor(index / 2) + 1}.</span>
