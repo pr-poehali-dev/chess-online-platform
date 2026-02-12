@@ -40,6 +40,8 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                   hover:brightness-110 transition-all
                 `}
                 style={{ 
+                  gridColumn: colIndex + 1,
+                  gridRow: rowIndex + 1,
                   backgroundColor: isLight ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.3)',
                   boxShadow: isLight 
                     ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
