@@ -414,23 +414,15 @@ export const HistorySection = () => {
 
                   <div className="flex-1">
                     <div className="font-semibold text-gray-900 dark:text-white">
-                      vs {game.opponent}
-                    </div>
-                    <div className="flex items-center gap-3 mt-1">
-                      <span className="text-sm text-gray-600 dark:text-gray-400">{game.openingName}</span>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">•</span>
-                      <span className="text-sm text-gray-600 dark:text-gray-400">{game.timeControl}</span>
+                      {game.opponent}
                     </div>
                   </div>
 
-                  <div className="flex flex-col items-end gap-1">
+                  <div className="flex-shrink-0">
                     <Badge variant="outline" className="border-blue-400/50 text-blue-400">
                       <Icon name="TrendingUp" className="mr-1" size={12} />
                       {game.opponentRating}
                     </Badge>
-                    <div className="text-xs text-gray-500 dark:text-gray-500">
-                      {formatDate(game.date)}
-                    </div>
                   </div>
 
                   <Icon name="ChevronRight" size={20} className="text-gray-400" />
