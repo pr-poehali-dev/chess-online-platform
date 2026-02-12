@@ -70,8 +70,8 @@ export const GameControls = ({
   setShowRematchOffer
 }: GameHeaderProps) => {
   return (
-    <div className="w-full">
-      <div className="flex items-center gap-2 md:gap-3">
+    <div className="w-full h-[60px] md:h-[64px]">
+      <div className="flex items-center gap-2 md:gap-3 h-full">
         <button
           onClick={handleExitClick}
           className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center flex-shrink-0 ${
