@@ -63,8 +63,8 @@ export const PlayerInfo = ({
   return (
     <div className={`backdrop-blur-sm rounded-lg p-3 md:p-4 border w-full md:w-auto min-h-[76px] md:min-h-[88px] ${
       theme === 'light' 
-        ? 'bg-white/80 border-slate-300' 
-        : 'bg-stone-800/50 border-stone-700/30'
+        ? (playerColor === 'black' ? 'bg-stone-700/80 border-stone-600' : 'bg-white/80 border-slate-300')
+        : (playerColor === 'black' ? 'bg-stone-900/80 border-stone-700' : 'bg-stone-800/50 border-stone-700/30')
     }`}>
       <div className="flex items-center justify-between h-full">
         <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-shrink">
