@@ -160,29 +160,25 @@ const Game = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
-      <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-between">
-        <button
-          onClick={() => navigate('/')}
-          className="flex items-center gap-2 text-stone-300 hover:text-white transition-colors"
-        >
-          <Icon name="ArrowLeft" size={20} />
-          <span className="text-sm font-medium">Назад</span>
-        </button>
-        <div className="text-stone-200 text-sm font-medium">
-          Игра с компьютером • {getDifficultyLabel(difficulty)}
-        </div>
-        <div className="w-16"></div>
+      <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
+        <h1 className="text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 tracking-wide" style={{
+          fontFamily: 'Montserrat, sans-serif',
+          textShadow: '0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)',
+          letterSpacing: '0.05em'
+        }}>
+          ЛигаШахмат
+        </h1>
       </header>
 
       <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4">
         <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center">
-            <h1 className="text-3xl md:text-5xl font-bold text-transparent bg-clip-text bg-gradient-to-r from-amber-200 via-yellow-400 to-amber-200 tracking-wide" style={{
-              fontFamily: 'Montserrat, sans-serif',
-              textShadow: '0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)',
-              letterSpacing: '0.05em'
-            }}>
-              ЛигаШахмат
-            </h1>
+            <button
+              onClick={() => navigate('/')}
+              className="flex items-center gap-2 text-stone-400 hover:text-stone-200 transition-colors text-sm"
+            >
+              <Icon name="LogOut" size={18} />
+              <span className="font-medium">Выход из игры</span>
+            </button>
 
             <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px]">
               <div className="flex items-center justify-between">
