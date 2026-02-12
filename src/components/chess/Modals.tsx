@@ -334,10 +334,12 @@ export const AuthModal = ({
 
   if (!showAuthModal) return null;
 
-  const filteredCities = russianCities.filter(({ city, region }) => 
-    city.toLowerCase().includes(citySearch.toLowerCase()) ||
-    region.toLowerCase().includes(citySearch.toLowerCase())
-  );
+  const filteredCities = citySearch.trim() === '' 
+    ? russianCities 
+    : russianCities.filter(({ city, region }) => 
+        city.toLowerCase().includes(citySearch.toLowerCase()) ||
+        region.toLowerCase().includes(citySearch.toLowerCase())
+      );
 
   const handleNextStep = () => {
     if (registrationStep === 1 && userName.trim()) {
