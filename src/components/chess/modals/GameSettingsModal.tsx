@@ -1,7 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import { cityRegions } from '@/components/chess/data/cities';
 
 interface GameSettingsModalProps {
   showGameSettings: boolean;
@@ -15,18 +16,52 @@ export const GameSettingsModal = ({
   const [step, setStep] = useState(1);
   const [selectedOpponent, setSelectedOpponent] = useState<'city' | 'region' | 'country' | 'friend' | null>(null);
   const [selectedTime, setSelectedTime] = useState<'blitz' | 'rapid' | 'classic' | null>(null);
+  const [selectedFriend, setSelectedFriend] = useState<string | null>(null);
+  const [userCity, setUserCity] = useState<string>('');
+  const [userRegion, setUserRegion] = useState<string>('');
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('chessUser');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      if (userData.city) {
+        setUserCity(userData.city);
+        setUserRegion(cityRegions[userData.city] || '');
+      }
+    }
+  }, [showGameSettings]);
+
+  const friends = [
+    { id: '1', name: 'Иван Петров', rating: 1756, avatar: '👤', city: 'Москва' },
+    { id: '2', name: 'Мария Сидорова', rating: 1834, avatar: '👤', city: 'Санкт-Петербург' },
+    { id: '3', name: 'Алексей Козлов', rating: 1678, avatar: '👤', city: 'Казань' },
+    { id: '4', name: 'Ольга Новикова', rating: 1923, avatar: '👤', city: 'Екатеринбург' },
+    { id: '5', name: 'Дмитрий Волков', rating: 1789, avatar: '👤', city: 'Новосибирск' },
+  ];
 
   if (!showGameSettings) return null;
 
   const handleBack = () => {
     if (step > 1) {
       setStep(step - 1);
+      if (step === 2 && selectedOpponent === 'friend') {
+        setSelectedFriend(null);
+      }
     }
   };
 
   const handleOpponentSelect = (type: 'city' | 'region' | 'country' | 'friend') => {
     setSelectedOpponent(type);
-    setStep(2);
+    if (type === 'friend') {
+      setStep(2);
+    } else {
+      setStep(2);
+    }
+  };
+
+  const handleFriendSelect = (friendId: string) => {
+    setSelectedFriend(friendId);
+    setStep(3);
   };
 
   const handleTimeSelect = (time: 'blitz' | 'rapid' | 'classic') => {
@@ -40,6 +75,11 @@ export const GameSettingsModal = ({
     setStep(1);
     setSelectedOpponent(null);
     setSelectedTime(null);
+    setSelectedFriend(null);
+  };
+
+  const getStepCount = () => {
+    return selectedOpponent === 'friend' ? 3 : 2;
   };
 
   return (
@@ -59,17 +99,21 @@ export const GameSettingsModal = ({
             )}
             <CardTitle className="flex-1 text-center text-gray-900 dark:text-white">
               {step === 1 && 'Выбор противника'}
-              {step === 2 && 'Контроль времени'}
+              {step === 2 && selectedOpponent === 'friend' && 'Выбор друга'}
+              {step === 2 && selectedOpponent !== 'friend' && 'Контроль времени'}
+              {step === 3 && 'Контроль времени'}
             </CardTitle>
             {step > 1 && <div className="w-10" />}
           </div>
           <div className="flex justify-center gap-2 mt-4">
-            <div className={`h-1.5 w-12 rounded-full transition-colors ${
-              step >= 1 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
-            }`} />
-            <div className={`h-1.5 w-12 rounded-full transition-colors ${
-              step >= 2 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
-            }`} />
+            {Array.from({ length: getStepCount() }).map((_, i) => (
+              <div 
+                key={i}
+                className={`h-1.5 w-10 rounded-full transition-colors ${
+                  step >= i + 1 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
+                }`} 
+              />
+            ))}
           </div>
         </CardHeader>
         <CardContent className="space-y-6">
@@ -83,7 +127,9 @@ export const GameSettingsModal = ({
                   <Icon name="Home" size={24} className="text-slate-700 dark:text-white" />
                   <div className="text-left">
                     <div className="text-sm font-medium text-slate-900 dark:text-white">Играть с городом</div>
-                    <div className="text-xs text-slate-500 dark:text-gray-400">Соперники из вашего города</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">
+                      {userCity ? `Соперники из ${userCity}` : 'Соперники из вашего города'}
+                    </div>
                   </div>
                 </div>
                 <Icon name="ChevronRight" size={20} className="text-slate-400" />
@@ -97,7 +143,9 @@ export const GameSettingsModal = ({
                   <Icon name="Map" size={24} className="text-slate-700 dark:text-white" />
                   <div className="text-left">
                     <div className="text-sm font-medium text-slate-900 dark:text-white">Играть с регионом</div>
-                    <div className="text-xs text-slate-500 dark:text-gray-400">Соперники из вашего региона</div>
+                    <div className="text-xs text-slate-500 dark:text-gray-400">
+                      {userRegion ? `Соперники из ${userRegion}` : 'Соперники из вашего региона'}
+                    </div>
                   </div>
                 </div>
                 <Icon name="ChevronRight" size={20} className="text-slate-400" />
@@ -133,7 +181,33 @@ export const GameSettingsModal = ({
             </div>
           )}
 
-          {step === 2 && (
+          {step === 2 && selectedOpponent === 'friend' && (
+            <div className="space-y-3">
+              <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+                Выберите друга для игры
+              </div>
+              {friends.map((friend) => (
+                <Button
+                  key={friend.id}
+                  className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
+                  onClick={() => handleFriendSelect(friend.id)}
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="text-2xl">{friend.avatar}</div>
+                    <div className="text-left">
+                      <div className="text-sm font-medium text-slate-900 dark:text-white">{friend.name}</div>
+                      <div className="text-xs text-slate-500 dark:text-gray-400">
+                        {friend.city} • Рейтинг: {friend.rating}
+                      </div>
+                    </div>
+                  </div>
+                  <Icon name="ChevronRight" size={20} className="text-slate-400" />
+                </Button>
+              ))}
+            </div>
+          )}
+
+          {((step === 2 && selectedOpponent !== 'friend') || step === 3) && (
             <div className="space-y-4">
               <div className="grid grid-cols-3 gap-3">
                 <Button 
