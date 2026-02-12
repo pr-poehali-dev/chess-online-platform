@@ -32,7 +32,7 @@ export const MoveHistory = ({
     }
   }, [moveHistory.length, historyRef]);
   return (
-    <div className="w-full md:w-auto flex items-center gap-2" style={{ maxWidth: '100%' }}>
+    <div className="w-full flex items-center gap-2">
       <button
         onClick={onPreviousMove}
         disabled={currentMoveIndex === 0}

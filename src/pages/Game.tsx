@@ -116,7 +116,7 @@ const Game = () => {
 
       <main className="flex-1 flex items-center justify-center p-2 md:p-3 overflow-y-auto md:overflow-hidden">
         <div className="w-full h-full flex items-center justify-center">
-          <div className="flex flex-col gap-1.5 md:gap-2 w-full max-w-[calc(100vw-16px)] md:max-w-none md:w-auto">
+          <div className="flex flex-col gap-1.5 md:gap-2 w-full max-w-[calc(100vw-16px)]" style={{ maxWidth: 'min(calc(100vw - 16px), min(calc(100vh - 310px), 700px))' }}>
             <GameControls
               showSettingsMenu={showSettingsMenu}
               setShowSettingsMenu={setShowSettingsMenu}
