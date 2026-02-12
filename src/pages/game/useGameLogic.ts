@@ -17,6 +17,7 @@ export const useGameLogic = (
   const [boardHistory, setBoardHistory] = useState<Board[]>([initialBoard]);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
   const [displayBoard, setDisplayBoard] = useState<Board>(initialBoard);
+  const [inactivityTimer, setInactivityTimer] = useState(40);
   const historyRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
@@ -43,6 +44,24 @@ export const useGameLogic = (
     }, 1000);
 
     return () => clearInterval(timer);
+  }, [currentPlayer, gameStatus]);
+
+  useEffect(() => {
+    if (gameStatus !== 'playing') return;
+
+    setInactivityTimer(40);
+
+    const inactivityInterval = setInterval(() => {
+      setInactivityTimer(prev => {
+        if (prev <= 1) {
+          setGameStatus('checkmate');
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(inactivityInterval);
   }, [currentPlayer, gameStatus]);
 
   useEffect(() => {
