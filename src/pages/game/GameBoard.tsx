@@ -18,9 +18,11 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
       backgroundSize: 'cover',
       backgroundPosition: 'center'
     }}>
-      <div className="grid grid-cols-8 grid-rows-8 w-full h-full">
+      <table className="w-full h-full border-collapse" style={{ borderSpacing: 0 }}>
+        <tbody>
         {board.map((row, rowIndex) => (
-          row.map((piece, colIndex) => {
+          <tr key={`row-${rowIndex}`}>
+          {row.map((piece, colIndex) => {
             const isLight = (rowIndex + colIndex) % 2 === 0;
             const isSelected = isSquareSelected(rowIndex, colIndex);
             const isPossible = showPossibleMoves && isSquarePossibleMove(rowIndex, colIndex);
@@ -30,24 +32,26 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
             const rankLabel = (8 - rowIndex).toString();
             
             return (
-              <div
+              <td
                 key={`${rowIndex}-${colIndex}`}
                 onClick={() => onSquareClick(rowIndex, colIndex)}
                 className={`
-                  relative flex items-center justify-center cursor-pointer select-none
+                  relative cursor-pointer select-none p-0 m-0
                   ${isSelected ? 'ring-2 md:ring-4 ring-inset ring-yellow-400 z-10' : ''}
                   ${isKingInCheck ? 'ring-4 md:ring-[6px] ring-inset ring-red-500 z-20 animate-pulse' : ''}
                   hover:brightness-110 transition-all
                 `}
                 style={{ 
-                  gridColumn: colIndex + 1,
-                  gridRow: rowIndex + 1,
+                  width: '12.5%',
+                  height: 0,
+                  paddingBottom: '12.5%',
                   backgroundColor: isLight ? 'rgba(255, 255, 255, 0.15)' : 'rgba(0, 0, 0, 0.3)',
                   boxShadow: isLight 
                     ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
                     : 'inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.1)'
                 }}
               >
+                <div className="absolute inset-0 flex items-center justify-center">
                 {colIndex === 0 && (
                   <span 
                     className="absolute top-0.5 md:top-1 left-1 md:left-1.5 text-[8px] md:text-xs font-semibold pointer-events-none"
@@ -92,11 +96,14 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                     {pieceSymbols[piece.color][piece.type]}
                   </div>
                 )}
-              </div>
+                </div>
+              </td>
             );
-          })
+          })}
+          </tr>
         ))}
-      </div>
+        </tbody>
+      </table>
     </div>
   );
 };
