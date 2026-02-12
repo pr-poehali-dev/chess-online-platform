@@ -32,6 +32,8 @@ export const useGameLogic = (
   const [currentMoveIndex, setCurrentMoveIndex] = useState(savedState?.currentMoveIndex || 0);
   const [displayBoard, setDisplayBoard] = useState<Board>(savedState?.board || initialBoard);
   const [inactivityTimer, setInactivityTimer] = useState(40);
+  const [capturedByWhite, setCapturedByWhite] = useState<{type: string; color: string}[]>(savedState?.capturedByWhite || []);
+  const [capturedByBlack, setCapturedByBlack] = useState<{type: string; color: string}[]>(savedState?.capturedByBlack || []);
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
@@ -138,19 +140,30 @@ export const useGameLogic = (
         currentMoveIndex,
         gameStartTime: gameStartTime.current,
         difficulty,
-        timeControl
+        timeControl,
+        capturedByWhite,
+        capturedByBlack
       };
       localStorage.setItem('activeGame', JSON.stringify(gameState));
     } else {
       localStorage.removeItem('activeGame');
     }
-  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl]);
+  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack]);
 
   const makeMove = (from: Position, to: Position) => {
     const newBoard = board.map(row => [...row]);
     const piece = newBoard[from.row][from.col];
     
     if (!piece) return;
+
+    const capturedPiece = newBoard[to.row][to.col];
+    if (capturedPiece) {
+      if (piece.color === 'white') {
+        setCapturedByWhite(prev => [...prev, {type: capturedPiece.type, color: capturedPiece.color}]);
+      } else {
+        setCapturedByBlack(prev => [...prev, {type: capturedPiece.type, color: capturedPiece.color}]);
+      }
+    }
 
     newBoard[to.row][to.col] = piece;
     newBoard[from.row][from.col] = null;
@@ -261,6 +274,8 @@ export const useGameLogic = (
     boardHistory,
     currentMoveIndex,
     inactivityTimer,
+    capturedByWhite,
+    capturedByBlack,
     historyRef,
     handleSquareClick,
     isSquareSelected,

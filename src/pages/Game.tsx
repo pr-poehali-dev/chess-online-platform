@@ -41,6 +41,8 @@ const Game = () => {
     moveHistory,
     currentMoveIndex,
     inactivityTimer,
+    capturedByWhite,
+    capturedByBlack,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -120,6 +122,7 @@ const Game = () => {
             difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
             rating={opponentRating}
             avatar={opponentAvatar}
+            capturedPieces={capturedByBlack}
           />
 
           <GameBoard
@@ -139,6 +142,7 @@ const Game = () => {
             rating={userRating}
             avatar={userAvatar}
             inactivityTimer={currentPlayer === 'white' ? inactivityTimer : undefined}
+            capturedPieces={capturedByWhite}
           />
 
           {gameStatus !== 'playing' && (

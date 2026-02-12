@@ -9,7 +9,17 @@ interface PlayerInfoProps {
   rating?: number;
   avatar?: string;
   inactivityTimer?: number;
+  capturedPieces?: {type: string; color: string}[];
 }
+
+const pieceSymbols: Record<string, string> = {
+  'pawn': '♟',
+  'knight': '♞',
+  'bishop': '♝',
+  'rook': '♜',
+  'queen': '♛',
+  'king': '♚'
+};
 
 export const PlayerInfo = ({
   playerName,
@@ -21,10 +31,20 @@ export const PlayerInfo = ({
   difficulty,
   rating,
   avatar,
-  inactivityTimer
+  inactivityTimer,
+  capturedPieces = []
 }: PlayerInfoProps) => {
   return (
     <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px] md:max-w-[560px]">
+      {capturedPieces.length > 0 && (
+        <div className="flex flex-wrap gap-1 mb-2">
+          {capturedPieces.map((piece, index) => (
+            <span key={index} className="text-lg md:text-xl text-stone-400">
+              {pieceSymbols[piece.type]}
+            </span>
+          ))}
+        </div>
+      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 md:gap-3">
           {avatar ? (
