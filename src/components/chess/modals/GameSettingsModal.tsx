@@ -3,16 +3,21 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { cityRegions } from '@/components/chess/data/cities';
-import { ChessGame } from '@/components/chess/ChessGame';
 
 interface GameSettingsModalProps {
   showGameSettings: boolean;
   setShowGameSettings: (value: boolean) => void;
+  setShowGame: (value: boolean) => void;
+  setGameDifficulty: (value: 'easy' | 'medium' | 'hard' | 'master' | null) => void;
+  setGameTimeControl: (value: 'blitz' | 'rapid' | 'classic' | null) => void;
 }
 
 export const GameSettingsModal = ({ 
   showGameSettings, 
-  setShowGameSettings 
+  setShowGameSettings,
+  setShowGame,
+  setGameDifficulty,
+  setGameTimeControl
 }: GameSettingsModalProps) => {
   const [step, setStep] = useState(1);
   const [selectedOpponent, setSelectedOpponent] = useState<'city' | 'region' | 'country' | 'friend' | 'computer' | null>(null);
@@ -21,7 +26,6 @@ export const GameSettingsModal = ({
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard' | 'master' | null>(null);
   const [userCity, setUserCity] = useState<string>('');
   const [userRegion, setUserRegion] = useState<string>('');
-  const [showGame, setShowGame] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('chessUser');
@@ -81,8 +85,15 @@ export const GameSettingsModal = ({
 
   const handleStartGame = () => {
     if (selectedOpponent === 'computer' && selectedDifficulty && selectedTime) {
+      setGameDifficulty(selectedDifficulty);
+      setGameTimeControl(selectedTime);
       setShowGame(true);
       setShowGameSettings(false);
+      setStep(1);
+      setSelectedOpponent(null);
+      setSelectedTime(null);
+      setSelectedFriend(null);
+      setSelectedDifficulty(null);
     } else {
       const isRated = selectedOpponent !== 'friend' && selectedOpponent !== 'computer';
       setShowGameSettings(false);
@@ -95,14 +106,7 @@ export const GameSettingsModal = ({
     }
   };
 
-  const handleCloseGame = () => {
-    setShowGame(false);
-    setStep(1);
-    setSelectedOpponent(null);
-    setSelectedTime(null);
-    setSelectedFriend(null);
-    setSelectedDifficulty(null);
-  };
+
 
   const getStepCount = () => {
     if (selectedOpponent === 'friend' || selectedOpponent === 'computer') {
@@ -390,14 +394,6 @@ export const GameSettingsModal = ({
           )}
         </CardContent>
       </Card>
-
-      {showGame && selectedDifficulty && selectedTime && (
-        <ChessGame
-          difficulty={selectedDifficulty}
-          timeControl={selectedTime}
-          onClose={handleCloseGame}
-        />
-      )}
     </div>
   );
 };

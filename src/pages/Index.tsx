@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import Navbar from '@/components/chess/Navbar';
 import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection } from '@/components/chess/Sections';
 import { AuthModal, GameSettingsModal } from '@/components/chess/Modals';
+import { ChessGame } from '@/components/chess/ChessGame';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
@@ -15,6 +16,9 @@ const Index = () => {
   });
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGameSettings, setShowGameSettings] = useState(false);
+  const [showGame, setShowGame] = useState(false);
+  const [gameDifficulty, setGameDifficulty] = useState<'easy' | 'medium' | 'hard' | 'master' | null>(null);
+  const [gameTimeControl, setGameTimeControl] = useState<'blitz' | 'rapid' | 'classic' | null>(null);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -120,7 +124,22 @@ const Index = () => {
       <GameSettingsModal
         showGameSettings={showGameSettings}
         setShowGameSettings={setShowGameSettings}
+        setShowGame={setShowGame}
+        setGameDifficulty={setGameDifficulty}
+        setGameTimeControl={setGameTimeControl}
       />
+
+      {showGame && gameDifficulty && gameTimeControl && (
+        <ChessGame
+          difficulty={gameDifficulty}
+          timeControl={gameTimeControl}
+          onClose={() => {
+            setShowGame(false);
+            setGameDifficulty(null);
+            setGameTimeControl(null);
+          }}
+        />
+      )}
 
       <footer className="border-t border-slate-200 dark:border-white/10 mt-16 py-8">
         <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
