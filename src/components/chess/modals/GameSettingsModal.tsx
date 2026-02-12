@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { cityRegions } from '@/components/chess/data/cities';
+import { ChessGame } from '@/components/chess/ChessGame';
 
 interface GameSettingsModalProps {
   showGameSettings: boolean;
@@ -20,6 +21,7 @@ export const GameSettingsModal = ({
   const [selectedDifficulty, setSelectedDifficulty] = useState<'easy' | 'medium' | 'hard' | 'master' | null>(null);
   const [userCity, setUserCity] = useState<string>('');
   const [userRegion, setUserRegion] = useState<string>('');
+  const [showGame, setShowGame] = useState(false);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('chessUser');
@@ -78,9 +80,23 @@ export const GameSettingsModal = ({
   };
 
   const handleStartGame = () => {
-    const isRated = selectedOpponent !== 'friend' && selectedOpponent !== 'computer';
-    setShowGameSettings(false);
-    alert(`Поиск соперника...\nТип: ${selectedOpponent}\nВремя: ${selectedTime}\nРейтинговая: ${isRated ? 'Да' : 'Нет'}`);
+    if (selectedOpponent === 'computer' && selectedDifficulty && selectedTime) {
+      setShowGame(true);
+      setShowGameSettings(false);
+    } else {
+      const isRated = selectedOpponent !== 'friend' && selectedOpponent !== 'computer';
+      setShowGameSettings(false);
+      alert(`Поиск соперника...\nТип: ${selectedOpponent}\nВремя: ${selectedTime}\nРейтинговая: ${isRated ? 'Да' : 'Нет'}`);
+      setStep(1);
+      setSelectedOpponent(null);
+      setSelectedTime(null);
+      setSelectedFriend(null);
+      setSelectedDifficulty(null);
+    }
+  };
+
+  const handleCloseGame = () => {
+    setShowGame(false);
     setStep(1);
     setSelectedOpponent(null);
     setSelectedTime(null);
@@ -374,6 +390,14 @@ export const GameSettingsModal = ({
           )}
         </CardContent>
       </Card>
+
+      {showGame && selectedDifficulty && selectedTime && (
+        <ChessGame
+          difficulty={selectedDifficulty}
+          timeControl={selectedTime}
+          onClose={handleCloseGame}
+        />
+      )}
     </div>
   );
 };
