@@ -90,50 +90,45 @@ export const RankingCard = ({
   );
 
   return (
-    <div className="relative">
-      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay }}>
-        <CardHeader>
-          <CardTitle className={subtitle ? "flex flex-col gap-1 text-gray-900 dark:text-white" : "flex items-center gap-2 text-gray-900 dark:text-white"}>
-            {subtitle ? (
-              <>
-                <div className="flex items-center gap-2">
-                  <Icon name={icon} className={colors.icon} size={20} />
-                  {title}
-                </div>
-                <div className="text-sm font-normal text-gray-600 dark:text-gray-400">{subtitle}</div>
-              </>
-            ) : (
-              <>
+    <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay }}>
+      <CardHeader>
+        <CardTitle className={subtitle ? "flex flex-col gap-1 text-gray-900 dark:text-white" : "flex items-center gap-2 text-gray-900 dark:text-white"}>
+          {subtitle ? (
+            <>
+              <div className="flex items-center gap-2">
                 <Icon name={icon} className={colors.icon} size={20} />
                 {title}
-              </>
-            )}
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="space-y-3">
-            {topPlayers.map(renderPlayer)}
-          </div>
-          <Button 
-            variant="outline" 
-            className={`w-full mt-4 ${colors.text} ${colors.border} ${colors.hover}`}
-            onClick={() => setShowModal(!showModal)}
-          >
-            Показать больше
-            <Icon name={showModal ? "ChevronUp" : "ChevronDown"} size={16} className="ml-2" />
-          </Button>
-        </CardContent>
-
-        {showModal && (
-          <div className="absolute top-full left-0 right-0 mt-2 z-50 animate-slide-down">
-            <div className="bg-white dark:bg-slate-900/50 rounded-lg border border-slate-200 dark:border-white/10 p-4">
-              <div className="space-y-3">
-                {fullRanking.slice(4).map(renderPlayer)}
               </div>
+              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">{subtitle}</div>
+            </>
+          ) : (
+            <>
+              <Icon name={icon} className={colors.icon} size={20} />
+              {title}
+            </>
+          )}
+        </CardTitle>
+      </CardHeader>
+      <CardContent>
+        <div className="space-y-3">
+          {topPlayers.map(renderPlayer)}
+          
+          {showModal && (
+            <div className="animate-slide-down">
+              {fullRanking.slice(4).map(renderPlayer)}
             </div>
-          </div>
-        )}
-      </Card>
-    </div>
+          )}
+        </div>
+        
+        <Button 
+          variant="outline" 
+          className={`w-full mt-4 ${colors.text} ${colors.border} ${colors.hover}`}
+          onClick={() => setShowModal(!showModal)}
+        >
+          {showModal ? 'Скрыть список' : 'Показать больше'}
+          <Icon name={showModal ? "ChevronUp" : "ChevronDown"} size={16} className="ml-2" />
+        </Button>
+      </CardContent>
+    </Card>
   );
 };
