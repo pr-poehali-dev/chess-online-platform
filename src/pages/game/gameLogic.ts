@@ -452,35 +452,50 @@ export const getBestMove = (board: Board, moves: { from: Position; to: Position 
   let bestScore = -Infinity;
 
   moves.forEach(move => {
-    const testBoard = board.map(row => [...row]);
-    const piece = testBoard[move.from.row][move.from.col];
-    
-    if (!piece) return;
-
-    testBoard[move.to.row][move.to.col] = piece;
-    testBoard[move.from.row][move.from.col] = null;
-
+    const testBoard = simulateMove(board, move.from, move.to);
     let score = evaluatePosition(testBoard, 'black');
 
+    // Приоритет мата: если ход дает мат - выбираем его
+    if (isCheckmate(testBoard, 'white')) {
+      score = 1000000;
+    }
+    // Бонус за шах (создает давление)
+    else if (isInCheck(testBoard, 'white')) {
+      score += 5000;
+    }
+    // Штраф, если мы оставляем короля под шахом
+    else if (isInCheck(testBoard, 'black')) {
+      score -= 10000;
+    }
+
+    // Бонус за ограничение подвижности противника
+    const opponentMoves = getAllLegalMoves(testBoard, 'white');
+    score -= opponentMoves.length * 10;
+
     if (isDifficult) {
-      const opponentMoves = getAllPossibleMovesForBoard(testBoard, 'white');
+      // На высоком уровне просчитываем ответы противника
       if (opponentMoves.length > 0) {
         let worstResponse = Infinity;
-        opponentMoves.slice(0, 5).forEach(oppMove => {
-          const testBoard2 = testBoard.map(row => [...row]);
-          const oppPiece = testBoard2[oppMove.from.row][oppMove.from.col];
-          if (oppPiece) {
-            testBoard2[oppMove.to.row][oppMove.to.col] = oppPiece;
-            testBoard2[oppMove.from.row][oppMove.from.col] = null;
-            const oppScore = evaluatePosition(testBoard2, 'black');
-            worstResponse = Math.min(worstResponse, oppScore);
+        opponentMoves.slice(0, 8).forEach(oppMove => {
+          const testBoard2 = simulateMove(testBoard, oppMove.from, oppMove.to);
+          let oppScore = evaluatePosition(testBoard2, 'black');
+          
+          // Избегаем ходов, где противник может дать нам мат
+          if (isCheckmate(testBoard2, 'black')) {
+            oppScore = -1000000;
           }
+          // Защита от шаха
+          else if (isInCheck(testBoard2, 'black')) {
+            oppScore -= 5000;
+          }
+          
+          worstResponse = Math.min(worstResponse, oppScore);
         });
         score = worstResponse;
       }
-      score += Math.random() * 5;
+      score += Math.random() * 3; // Минимальная случайность для разнообразия
     } else {
-      score += Math.random() * 50;
+      score += Math.random() * 30; // Больше случайности на легких уровнях
     }
 
     if (score > bestScore) {
