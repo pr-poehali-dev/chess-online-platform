@@ -70,11 +70,11 @@ export const GameControls = ({
   setShowRematchOffer
 }: GameHeaderProps) => {
   return (
-    <div className="w-full flex flex-col gap-3">
+    <div className="w-full">
       <div className="flex items-center gap-2 md:gap-3">
         <button
           onClick={handleExitClick}
-          className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
+          className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center flex-shrink-0 ${
             theme === 'light'
               ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
               : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
@@ -87,7 +87,7 @@ export const GameControls = ({
         </button>
         <button
           onClick={() => setShowChat(true)}
-          className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
+          className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center flex-shrink-0 ${
             theme === 'light'
               ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
               : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
@@ -96,7 +96,7 @@ export const GameControls = ({
         >
           <Icon name="MessageCircle" size={24} />
         </button>
-        <div className="relative">
+        <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
             className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
@@ -212,34 +212,34 @@ export const GameControls = ({
             </>
           )}
         </div>
-      </div>
-      {gameStatus !== 'playing' && (
-        <div className={`backdrop-blur-sm rounded-lg p-3 md:p-4 border flex items-center justify-between w-full ${
-          theme === 'light'
-            ? 'bg-blue-500/90 border-blue-600'
-            : 'bg-blue-600/90 border-blue-700'
-        }`}>
-          <div className="text-base md:text-lg font-bold text-white truncate">
-            {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли'}
-            {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы выиграли'}
-            {gameStatus === 'stalemate' && 'Пат'}
-            {gameStatus === 'draw' && 'Ничья'}
+        {gameStatus !== 'playing' && (
+          <div className={`backdrop-blur-sm rounded-lg p-2 md:p-3 border flex items-center justify-between flex-1 min-w-0 ml-1 md:ml-2 ${
+            theme === 'light'
+              ? 'bg-blue-500/90 border-blue-600'
+              : 'bg-blue-600/90 border-blue-700'
+          }`}>
+            <div className="text-xs md:text-sm font-bold text-white truncate">
+              {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли'}
+              {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы выиграли'}
+              {gameStatus === 'stalemate' && 'Пат'}
+              {gameStatus === 'draw' && 'Ничья'}
+            </div>
+            <button
+              onClick={() => {
+                if (setShowRematchOffer) {
+                  setTimeout(() => {
+                    setShowRematchOffer(true);
+                  }, 500);
+                }
+              }}
+              className="p-2 rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 ml-2 bg-green-600 hover:bg-green-700 text-white"
+            >
+              <Icon name="RotateCcw" size={18} />
+              <span className="font-semibold text-xs md:text-sm">Реванш</span>
+            </button>
           </div>
-          <button
-            onClick={() => {
-              if (setShowRematchOffer) {
-                setTimeout(() => {
-                  setShowRematchOffer(true);
-                }, 500);
-              }
-            }}
-            className="p-2.5 md:p-3 rounded-lg transition-colors flex items-center gap-2 flex-shrink-0 ml-3 bg-green-600 hover:bg-green-700 text-white"
-          >
-            <Icon name="RotateCcw" size={20} />
-            <span className="font-semibold">Реванш</span>
-          </button>
-        </div>
-      )}
+        )}
+      </div>
     </div>
   );
 };
