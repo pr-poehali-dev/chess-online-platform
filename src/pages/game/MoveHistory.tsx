@@ -28,7 +28,7 @@ export const MoveHistory = ({
 }: MoveHistoryProps) => {
   useEffect(() => {
     if (historyRef.current) {
-      historyRef.current.scrollLeft = historyRef.current.scrollWidth;
+      historyRef.current.scrollLeft = 0;
     }
   }, [moveHistory.length, historyRef]);
   return (
@@ -61,8 +61,9 @@ export const MoveHistory = ({
           onMouseMove={onMouseMove}
           onMouseUp={onMouseUpOrLeave}
           onMouseLeave={onMouseUpOrLeave}
+          style={{ direction: 'rtl' }}
         >
-          <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} min-h-[20px]`}>
+          <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} min-h-[20px]`} style={{ direction: 'ltr' }}>
             {moveHistory.map((move, index) => (
               <div 
                 key={index} 
