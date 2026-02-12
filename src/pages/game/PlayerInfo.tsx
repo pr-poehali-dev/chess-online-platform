@@ -46,17 +46,6 @@ export const PlayerInfo = ({
 }: PlayerInfoProps) => {
   return (
     <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px] md:max-w-[560px]">
-      {capturedPieces.length > 0 && (
-        <div className="flex flex-wrap gap-1 mb-2">
-          {capturedPieces.map((piece, index) => (
-            <span key={index} className={`text-lg md:text-xl ${
-              piece.color === 'white' ? 'text-stone-200' : 'text-stone-500'
-            }`}>
-              {pieceSymbols[piece.color][piece.type]}
-            </span>
-          ))}
-        </div>
-      )}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-2 md:gap-3">
           {avatar ? (
@@ -68,7 +57,7 @@ export const PlayerInfo = ({
           ) : (
             <div className="text-3xl md:text-4xl">{icon}</div>
           )}
-          <div>
+          <div className="flex-1">
             <div className="text-xs md:text-sm font-medium text-stone-200">
               {playerName}{difficulty && ` (${difficulty})`}
             </div>
@@ -84,6 +73,17 @@ export const PlayerInfo = ({
             </div>
           </div>
         </div>
+        {capturedPieces.length > 0 && (
+          <div className="flex flex-wrap gap-1 justify-center mx-2">
+            {capturedPieces.map((piece, index) => (
+              <span key={index} className={`text-base md:text-lg ${
+                piece.color === 'white' ? 'text-stone-200' : 'text-stone-500'
+              }`}>
+                {pieceSymbols[piece.color][piece.type]}
+              </span>
+            ))}
+          </div>
+        )}
         <div className="flex flex-col items-end gap-1">
           <div className="flex items-center gap-2">
             <div className={`text-xl md:text-2xl font-bold ${
