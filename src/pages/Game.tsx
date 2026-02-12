@@ -4,6 +4,10 @@ import Icon from '@/components/ui/icon';
 import { Board, Position, initialBoard, getInitialTime, getDifficultyLabel, formatTime } from './game/gameTypes';
 import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove } from './game/gameLogic';
 import { GameBoard } from './game/GameBoard';
+import { PlayerInfo } from './game/PlayerInfo';
+import { MoveHistory } from './game/MoveHistory';
+import { ExitDialog } from './game/ExitDialog';
+import { GameChatModal } from './game/GameChatModal';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -282,22 +286,15 @@ const Game = () => {
               </button>
             </div>
 
-            <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <div className="text-3xl md:text-4xl">♚</div>
-                  <div>
-                    <div className="text-xs md:text-sm font-medium text-stone-200">
-                      Компьютер ({getDifficultyLabel(difficulty)})
-                    </div>
-                    <div className="text-xs text-stone-400">Черные</div>
-                  </div>
-                </div>
-                <div className={`text-xl md:text-2xl font-bold ${currentPlayer === 'black' ? 'text-green-400' : 'text-stone-400'}`}>
-                  {formatTime(blackTime)}
-                </div>
-              </div>
-            </div>
+            <PlayerInfo
+              playerName="Компьютер"
+              playerColor="black"
+              icon="♚"
+              time={blackTime}
+              isCurrentPlayer={currentPlayer === 'black'}
+              formatTime={formatTime}
+              difficulty={getDifficultyLabel(difficulty)}
+            />
 
             <GameBoard
               board={displayBoard}
@@ -306,20 +303,14 @@ const Game = () => {
               isSquarePossibleMove={isSquarePossibleMove}
             />
 
-            <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px]">
-              <div className="flex items-center justify-between">
-                <div className="flex items-center gap-2 md:gap-3">
-                  <div className="text-3xl md:text-4xl">♔</div>
-                  <div>
-                    <div className="text-xs md:text-sm font-medium text-stone-200">Вы</div>
-                    <div className="text-xs text-stone-400">Белые</div>
-                  </div>
-                </div>
-                <div className={`text-xl md:text-2xl font-bold ${currentPlayer === 'white' ? 'text-green-400' : 'text-stone-400'}`}>
-                  {formatTime(whiteTime)}
-                </div>
-              </div>
-            </div>
+            <PlayerInfo
+              playerName="Вы"
+              playerColor="white"
+              icon="♔"
+              time={whiteTime}
+              isCurrentPlayer={currentPlayer === 'white'}
+              formatTime={formatTime}
+            />
 
             {gameStatus !== 'playing' && (
               <div className="bg-blue-600/90 backdrop-blur-sm rounded-lg p-4 text-center border border-blue-500/50 w-full max-w-[400px]">
@@ -332,177 +323,41 @@ const Game = () => {
               </div>
             )}
 
-          <div className="w-full max-w-[400px] flex flex-col gap-2">
-            <div className="relative">
-              <div className="absolute left-0 top-0 bottom-0 w-8 bg-gradient-to-r from-stone-900 to-transparent z-10 pointer-events-none"></div>
-              <div 
-                ref={historyRef} 
-                className="overflow-x-auto hide-scrollbar bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 p-1.5"
-                onMouseDown={handleMouseDown}
-                onMouseMove={handleMouseMove}
-                onMouseUp={handleMouseUpOrLeave}
-                onMouseLeave={handleMouseUpOrLeave}
-              >
-                <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'}`}>
-                  {moveHistory.length === 0 ? (
-                    <div className="text-[10px] text-stone-500 whitespace-nowrap">
-                      Ходы появятся здесь
-                    </div>
-                  ) : (
-                    moveHistory.map((move, index) => (
-                      <div 
-                        key={index} 
-                        className={`whitespace-nowrap flex-shrink-0 transition-all ${
-                          index === currentMoveIndex ? 'text-white font-semibold text-[12px]' : 'text-stone-300 text-[10px]'
-                        }`}
-                      >
-                        <span className="text-stone-500 mr-0.5">{Math.floor(index / 2) + 1}.</span>
-                        {move}
-                      </div>
-                    ))
-                  )}
-                </div>
-              </div>
-            </div>
-            
-            <div className="flex gap-2 justify-center">
-              <button
-                onClick={handlePreviousMove}
-                disabled={currentMoveIndex === 0}
-                className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
-                title="Предыдущий ход"
-              >
-                <Icon name="ChevronLeft" size={20} />
-              </button>
-              <button
-                onClick={handleNextMove}
-                disabled={currentMoveIndex === boardHistory.length - 1}
-                className="p-2 bg-stone-800/50 hover:bg-stone-700/50 disabled:opacity-30 disabled:cursor-not-allowed border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
-                title="Следующий ход"
-              >
-                <Icon name="ChevronRight" size={20} />
-              </button>
-            </div>
-          </div>
+          <MoveHistory
+            moveHistory={moveHistory}
+            currentMoveIndex={currentMoveIndex}
+            isDragging={isDragging}
+            onMouseDown={handleMouseDown}
+            onMouseMove={handleMouseMove}
+            onMouseUpOrLeave={handleMouseUpOrLeave}
+            onPreviousMove={handlePreviousMove}
+            onNextMove={handleNextMove}
+            historyRef={historyRef}
+          />
         </div>
       </main>
 
       {showExitDialog && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-stone-900 rounded-xl border border-stone-700 p-6 md:p-8 max-w-md w-full shadow-2xl">
-            <div className="text-center mb-6">
-              <div className="text-4xl mb-4">⚠️</div>
-              <h2 className="text-2xl font-bold text-stone-100 mb-2">Выход из игры</h2>
-              <p className="text-stone-400">
-                Вы уверены, что хотите сдаться и выйти из игры? Это будет засчитано как поражение.
-              </p>
-            </div>
-            <div className="flex flex-col sm:flex-row gap-3">
-              <button
-                onClick={handleContinue}
-                className="flex-1 px-6 py-3 bg-stone-700 hover:bg-stone-600 text-stone-100 rounded-lg font-medium transition-colors"
-              >
-                Продолжить игру
-              </button>
-              <button
-                onClick={handleSurrender}
-                className="flex-1 px-6 py-3 bg-red-600 hover:bg-red-700 text-white rounded-lg font-medium transition-colors"
-              >
-                Сдаться
-              </button>
-            </div>
-          </div>
-        </div>
+        <ExitDialog
+          onContinue={handleContinue}
+          onSurrender={handleSurrender}
+        />
       )}
 
       {showChat && (
-        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-          <div className="bg-stone-900 rounded-xl border border-stone-700 w-full max-w-2xl h-[80vh] shadow-2xl flex flex-col">
-            <div className="flex items-center justify-between p-4 border-b border-stone-700">
-              <div className="flex items-center gap-3">
-                <div className="text-3xl">♚</div>
-                <div>
-                  <h2 className="text-xl font-bold text-stone-100">
-                    Компьютер ({getDifficultyLabel(difficulty)})
-                  </h2>
-                  <div className="text-sm text-stone-400">Соперник</div>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <button
-                  onClick={handleBlockOpponent}
-                  className="p-2 hover:bg-red-900/50 rounded-lg transition-colors text-red-400 hover:text-red-300 border border-red-500/30"
-                  title="Заблокировать соперника"
-                >
-                  <Icon name="Ban" size={20} />
-                </button>
-                <button
-                  onClick={() => setShowChat(false)}
-                  className="p-2 hover:bg-stone-800 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
-                >
-                  <Icon name="X" size={24} />
-                </button>
-              </div>
-            </div>
-
-            <div className="flex-1 overflow-y-auto p-4 space-y-3">
-              {chatMessages.length === 0 ? (
-                <div className="text-center py-12 text-stone-400">
-                  <Icon name="MessageCircle" size={48} className="mx-auto mb-4 opacity-50" />
-                  <p>Чат с соперником</p>
-                  <p className="text-sm mt-2">Игра продолжается в фоновом режиме</p>
-                </div>
-              ) : (
-                <>
-                  {chatMessages.map((message) => (
-                    <div
-                      key={message.id}
-                      className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
-                    >
-                      <div
-                        className={`max-w-[70%] rounded-lg p-3 ${
-                          message.isOwn
-                            ? 'bg-amber-600 text-white'
-                            : 'bg-stone-800 text-stone-100 border border-stone-700'
-                        }`}
-                      >
-                        <div className="text-sm break-words">{message.text}</div>
-                        <div
-                          className={`text-xs mt-1 ${
-                            message.isOwn ? 'text-amber-100' : 'text-stone-500'
-                          }`}
-                        >
-                          {message.time}
-                        </div>
-                      </div>
-                    </div>
-                  ))}
-                  <div ref={chatEndRef} />
-                </>
-              )}
-            </div>
-
-            <div className="p-4 border-t border-stone-700">
-              <div className="flex gap-2">
-                <input
-                  type="text"
-                  value={chatMessage}
-                  onChange={(e) => setChatMessage(e.target.value)}
-                  onKeyPress={handleChatKeyPress}
-                  placeholder="Написать сообщение..."
-                  className="flex-1 px-4 py-3 rounded-lg bg-stone-800 border border-stone-700 text-stone-100 placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
-                />
-                <button 
-                  onClick={handleSendMessage}
-                  disabled={!chatMessage.trim()}
-                  className="px-6 py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-stone-700 disabled:text-stone-500 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
-                >
-                  <Icon name="Send" size={20} />
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <GameChatModal
+          opponentName={`Компьютер (${getDifficultyLabel(difficulty)})`}
+          opponentIcon="♚"
+          opponentInfo="Соперник"
+          chatMessages={chatMessages}
+          chatMessage={chatMessage}
+          onChatMessageChange={setChatMessage}
+          onSendMessage={handleSendMessage}
+          onChatKeyPress={handleChatKeyPress}
+          onBlock={handleBlockOpponent}
+          onClose={() => setShowChat(false)}
+          chatEndRef={chatEndRef}
+        />
       )}
     </div>
   );
