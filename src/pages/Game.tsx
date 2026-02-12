@@ -27,6 +27,10 @@ const Game = () => {
   const [startX, setStartX] = useState(0);
   const [scrollLeft, setScrollLeft] = useState(0);
   const [showExitDialog, setShowExitDialog] = useState(false);
+  const [showChat, setShowChat] = useState(false);
+  const [chatMessage, setChatMessage] = useState('');
+  const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
+  const chatEndRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
@@ -203,6 +207,33 @@ const Game = () => {
     }
   };
 
+  const handleSendMessage = () => {
+    if (!chatMessage.trim()) return;
+
+    const newMessage = {
+      id: Date.now().toString(),
+      text: chatMessage,
+      isOwn: true,
+      time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+    };
+
+    setChatMessages([...chatMessages, newMessage]);
+    setChatMessage('');
+
+    setTimeout(() => {
+      if (chatEndRef.current) {
+        chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }
+    }, 100);
+  };
+
+  const handleChatKeyPress = (e: React.KeyboardEvent) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSendMessage();
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col">
       <header className="bg-stone-900/80 backdrop-blur-sm border-b border-stone-700/50 px-4 py-3 flex items-center justify-center">
@@ -220,22 +251,23 @@ const Game = () => {
             <div className="flex gap-3">
               <button
                 onClick={handleExitClick}
-                className="p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
                 title="Выход из игры"
               >
-                <Icon name="LogOut" size={20} />
+                <Icon name="LogOut" size={24} />
               </button>
               <button
-                className="p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                onClick={() => setShowChat(true)}
+                className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
                 title="Чат"
               >
-                <Icon name="MessageCircle" size={20} />
+                <Icon name="MessageCircle" size={24} />
               </button>
               <button
-                className="p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                className="p-4 md:p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100 min-w-[48px] min-h-[48px] flex items-center justify-center"
                 title="Опции"
               >
-                <Icon name="Settings" size={20} />
+                <Icon name="Settings" size={24} />
               </button>
             </div>
 
@@ -367,6 +399,87 @@ const Game = () => {
               >
                 Сдаться
               </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {showChat && (
+        <div className="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+          <div className="bg-stone-900 rounded-xl border border-stone-700 w-full max-w-2xl h-[80vh] shadow-2xl flex flex-col">
+            <div className="flex items-center justify-between p-4 border-b border-stone-700">
+              <div className="flex items-center gap-3">
+                <div className="text-3xl">♚</div>
+                <div>
+                  <h2 className="text-xl font-bold text-stone-100">
+                    Компьютер ({getDifficultyLabel(difficulty)})
+                  </h2>
+                  <div className="text-sm text-stone-400">Соперник</div>
+                </div>
+              </div>
+              <button
+                onClick={() => setShowChat(false)}
+                className="p-2 hover:bg-stone-800 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+              >
+                <Icon name="X" size={24} />
+              </button>
+            </div>
+
+            <div className="flex-1 overflow-y-auto p-4 space-y-3">
+              {chatMessages.length === 0 ? (
+                <div className="text-center py-12 text-stone-400">
+                  <Icon name="MessageCircle" size={48} className="mx-auto mb-4 opacity-50" />
+                  <p>Чат с соперником</p>
+                  <p className="text-sm mt-2">Игра продолжается в фоновом режиме</p>
+                </div>
+              ) : (
+                <>
+                  {chatMessages.map((message) => (
+                    <div
+                      key={message.id}
+                      className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}
+                    >
+                      <div
+                        className={`max-w-[70%] rounded-lg p-3 ${
+                          message.isOwn
+                            ? 'bg-amber-600 text-white'
+                            : 'bg-stone-800 text-stone-100 border border-stone-700'
+                        }`}
+                      >
+                        <div className="text-sm break-words">{message.text}</div>
+                        <div
+                          className={`text-xs mt-1 ${
+                            message.isOwn ? 'text-amber-100' : 'text-stone-500'
+                          }`}
+                        >
+                          {message.time}
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                  <div ref={chatEndRef} />
+                </>
+              )}
+            </div>
+
+            <div className="p-4 border-t border-stone-700">
+              <div className="flex gap-2">
+                <input
+                  type="text"
+                  value={chatMessage}
+                  onChange={(e) => setChatMessage(e.target.value)}
+                  onKeyPress={handleChatKeyPress}
+                  placeholder="Написать сообщение..."
+                  className="flex-1 px-4 py-3 rounded-lg bg-stone-800 border border-stone-700 text-stone-100 placeholder-stone-500 focus:outline-none focus:ring-2 focus:ring-amber-400"
+                />
+                <button 
+                  onClick={handleSendMessage}
+                  disabled={!chatMessage.trim()}
+                  className="px-6 py-3 bg-amber-600 hover:bg-amber-700 disabled:bg-stone-700 disabled:text-stone-500 text-white rounded-lg font-medium transition-colors flex items-center gap-2"
+                >
+                  <Icon name="Send" size={20} />
+                </button>
+              </div>
             </div>
           </div>
         </div>
