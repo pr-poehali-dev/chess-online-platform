@@ -199,24 +199,21 @@ const Game = () => {
 
           <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg border border-stone-700/30 w-full max-w-[400px] p-3">
             <div className="text-xs text-stone-400 mb-2">История ходов:</div>
-            <div className="flex gap-2 overflow-x-auto pb-2">
+            <div className="flex gap-2 overflow-x-auto pb-2 scrollbar-thin scrollbar-thumb-stone-600 scrollbar-track-stone-800">
               {moveHistory.length === 0 ? (
                 <div className="text-xs text-stone-500 text-center w-full py-2">
                   Ходы будут отображаться здесь
                 </div>
               ) : (
-                moveHistory.slice(-3).map((move, index) => {
-                  const actualIndex = moveHistory.length - 3 + index;
-                  return (
-                    <div 
-                      key={actualIndex} 
-                      className="text-xs text-stone-200 px-3 py-2 bg-stone-700/30 rounded whitespace-nowrap flex-shrink-0"
-                    >
-                      <span className="text-stone-400 mr-1">{Math.floor(actualIndex / 2) + 1}.</span>
-                      {move}
-                    </div>
-                  );
-                })
+                moveHistory.map((move, index) => (
+                  <div 
+                    key={index} 
+                    className="text-xs text-stone-200 px-3 py-2 bg-stone-700/30 rounded whitespace-nowrap flex-shrink-0"
+                  >
+                    <span className="text-stone-400 mr-1">{Math.floor(index / 2) + 1}.</span>
+                    {move}
+                  </div>
+                ))
               )}
             </div>
           </div>
