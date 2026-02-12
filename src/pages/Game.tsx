@@ -8,6 +8,8 @@ import { PlayerInfo } from './game/PlayerInfo';
 import { MoveHistory } from './game/MoveHistory';
 import { ExitDialog } from './game/ExitDialog';
 import { GameChatModal } from './game/GameChatModal';
+import { DrawOfferModal } from './game/DrawOfferModal';
+import { NotificationsModal } from './game/NotificationsModal';
 
 const Game = () => {
   const navigate = useNavigate();
@@ -33,6 +35,8 @@ const Game = () => {
   const [showExitDialog, setShowExitDialog] = useState(false);
   const [showChat, setShowChat] = useState(false);
   const [showSettingsMenu, setShowSettingsMenu] = useState(false);
+  const [showDrawOffer, setShowDrawOffer] = useState(false);
+  const [showNotifications, setShowNotifications] = useState(false);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -192,8 +196,11 @@ const Game = () => {
   };
 
   const handleSurrender = () => {
-    setGameStatus('checkmate');
-    setShowExitDialog(false);
+    setShowSettingsMenu(false);
+    if (confirm('Вы действительно хотите сдаться? Партия будет засчитана как поражение.')) {
+      setGameStatus('checkmate');
+      setShowExitDialog(false);
+    }
   };
 
   const handleContinue = () => {
@@ -252,9 +259,18 @@ const Game = () => {
 
   const handleOfferDraw = () => {
     setShowSettingsMenu(false);
-    if (confirm('Предложить ничью сопернику?')) {
-      setGameStatus('draw');
-    }
+    setTimeout(() => {
+      setShowDrawOffer(true);
+    }, 500);
+  };
+
+  const handleAcceptDraw = () => {
+    setShowDrawOffer(false);
+    setGameStatus('draw');
+  };
+
+  const handleDeclineDraw = () => {
+    setShowDrawOffer(false);
   };
 
   const handleNewGame = () => {
@@ -325,7 +341,7 @@ const Game = () => {
                       <button
                         onClick={() => {
                           setShowSettingsMenu(false);
-                          navigate('/?section=notifications');
+                          setShowNotifications(true);
                         }}
                         className="w-full px-4 py-3 text-left hover:bg-stone-700/50 transition-colors flex items-center gap-3 text-stone-300 hover:text-stone-100 border-t border-stone-700/50"
                       >
@@ -418,6 +434,17 @@ const Game = () => {
           chatEndRef={chatEndRef}
         />
       )}
+
+      <DrawOfferModal
+        showModal={showDrawOffer}
+        onAccept={handleAcceptDraw}
+        onDecline={handleDeclineDraw}
+      />
+
+      <NotificationsModal
+        showModal={showNotifications}
+        onClose={() => setShowNotifications(false)}
+      />
     </div>
   );
 };
