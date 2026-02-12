@@ -9,8 +9,8 @@ const Index = () => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark' || savedTheme === null;
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(true);
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(true);
   const [showGameSettings, setShowGameSettings] = useState(false);
 
   useEffect(() => {
