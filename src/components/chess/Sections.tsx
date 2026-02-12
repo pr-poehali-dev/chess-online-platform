@@ -9,12 +9,20 @@ interface HomeSectionProps {
   isAuthenticated: boolean;
   setShowGameSettings: (value: boolean) => void;
   setShowAuthModal: (value: boolean) => void;
+  recentGames: Array<{
+    opponent: string;
+    result: string;
+    rating: number;
+    moves: number;
+    time: string;
+  }>;
 }
 
 export const HomeSection = ({ 
   isAuthenticated, 
   setShowGameSettings, 
-  setShowAuthModal
+  setShowAuthModal, 
+  recentGames 
 }: HomeSectionProps) => {
   return (
     <div className="space-y-8 animate-fade-in">
@@ -42,6 +50,44 @@ export const HomeSection = ({
           Соревнуйтесь с игроками со всего мира или бросьте вызов компьютеру
         </p>
       </div>
+
+      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.3s' }}>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
+            <Icon name="History" className="text-blue-600 dark:text-blue-400" size={24} />
+            Последние партии
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <div className="space-y-3">
+            {recentGames.map((game, index) => (
+              <div 
+                key={index} 
+                className="flex items-center justify-between p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50 transition-all cursor-pointer border border-slate-200 dark:border-white/5"
+              >
+                <div className="flex items-center gap-4">
+                  <Avatar>
+                    <AvatarFallback className="bg-slate-300 dark:bg-slate-700 text-slate-700 dark:text-white">
+                      {game.opponent.split(' ').map(n => n[0]).join('')}
+                    </AvatarFallback>
+                  </Avatar>
+                  <div>
+                    <div className="font-semibold text-gray-900 dark:text-white">{game.opponent}</div>
+                    <div className="text-sm text-gray-600 dark:text-gray-400">Рейтинг: {game.rating}</div>
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="text-sm text-gray-600 dark:text-gray-400">{game.moves} ходов</div>
+                  <Badge variant={game.result === 'win' ? 'default' : 'destructive'} className={game.result === 'win' ? 'bg-green-600' : ''}>
+                    {game.result === 'win' ? 'Победа' : 'Поражение'}
+                  </Badge>
+                  <div className="text-sm text-gray-500 dark:text-gray-500">{game.time}</div>
+                </div>
+              </div>
+            ))}
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 };

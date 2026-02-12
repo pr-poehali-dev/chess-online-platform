@@ -68,6 +68,12 @@ const Index = () => {
     },
   ];
 
+  const recentGames = [
+    { opponent: 'Иван Сидоров', result: 'win', rating: 1789, moves: 42, time: '2 часа назад' },
+    { opponent: 'Ольга Новикова', result: 'loss', rating: 1923, moves: 35, time: '5 часов назад' },
+    { opponent: 'Сергей Волков', result: 'win', rating: 1756, moves: 38, time: 'Вчера' },
+  ];
+
   return (
     <div className="min-h-screen bg-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:bg-gradient-to-br transition-colors duration-300">
       <Navbar
@@ -87,6 +93,7 @@ const Index = () => {
             isAuthenticated={isAuthenticated}
             setShowGameSettings={setShowGameSettings}
             setShowAuthModal={setShowAuthModal}
+            recentGames={recentGames}
           />
         )}
 
