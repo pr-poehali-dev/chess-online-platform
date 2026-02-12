@@ -85,7 +85,7 @@ export const RankingCard = ({
             <div className="text-2xl font-bold text-yellow-400">1 место</div>
           </div>
           <div className="p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30">
-            <div className="flex items-center gap-3">
+            <div className="flex flex-col items-center text-center gap-3">
               <div className="relative">
                 {first.avatar ? (
                   <img src={first.avatar} alt={first.name} className="w-20 h-20 rounded-full object-cover ring-4 ring-yellow-400" />
