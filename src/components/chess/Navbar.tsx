@@ -47,15 +47,15 @@ const Navbar = ({
             </h1>
           </button>
 
+          {isAuthenticated && (
+            <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-500/30">
+              <Icon name="TrendingUp" size={18} className="text-blue-600 dark:text-blue-400" />
+              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Мой рейтинг:</span>
+              <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{stats.rating}</span>
+            </div>
+          )}
+
           <div className="flex items-center gap-3">
-            {isAuthenticated && (
-              <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-500/30">
-                <Icon name="TrendingUp" size={18} className="text-blue-600 dark:text-blue-400" />
-                <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Мой рейтинг:</span>
-                <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{stats.rating}</span>
-              </div>
-            )}
-            
             <button
               onClick={() => setIsDarkMode(!isDarkMode)}
               className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
