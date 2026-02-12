@@ -106,7 +106,7 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
     return name.substring(0, 2).toUpperCase();
   };
 
-  const userRegion = cityRegions[userData.city] || userData.city;
+  const userRegion = cityRegions[editData.city] || cityRegions[userData.city] || userData.city;
 
   return (
     <div className="space-y-6 animate-fade-in">
