@@ -88,6 +88,108 @@ export const isPathBlocked = (board: Board, from: Position, to: Position): boole
   return false;
 };
 
+export const findKing = (board: Board, color: 'white' | 'black'): Position | null => {
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = board[row][col];
+      if (piece && piece.type === 'king' && piece.color === color) {
+        return { row, col };
+      }
+    }
+  }
+  return null;
+};
+
+export const isSquareUnderAttack = (board: Board, pos: Position, byColor: 'white' | 'black'): boolean => {
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = board[row][col];
+      if (piece && piece.color === byColor) {
+        if (isValidMove(board, { row, col }, pos, piece)) {
+          return true;
+        }
+      }
+    }
+  }
+  return false;
+};
+
+export const isInCheck = (board: Board, color: 'white' | 'black'): boolean => {
+  const kingPos = findKing(board, color);
+  if (!kingPos) return false;
+  
+  const opponentColor = color === 'white' ? 'black' : 'white';
+  return isSquareUnderAttack(board, kingPos, opponentColor);
+};
+
+export const simulateMove = (board: Board, from: Position, to: Position): Board => {
+  const newBoard = board.map(row => [...row]);
+  const piece = newBoard[from.row][from.col];
+  
+  if (!piece) return newBoard;
+  
+  // Рокировка
+  if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
+    const isKingSide = to.col > from.col;
+    const rookFromCol = isKingSide ? 7 : 0;
+    const rookToCol = isKingSide ? to.col - 1 : to.col + 1;
+    
+    newBoard[from.row][rookToCol] = newBoard[from.row][rookFromCol];
+    newBoard[from.row][rookFromCol] = null;
+  }
+  
+  newBoard[to.row][to.col] = piece;
+  newBoard[from.row][from.col] = null;
+  
+  return newBoard;
+};
+
+export const isMoveLegal = (
+  board: Board,
+  from: Position,
+  to: Position,
+  piece: Piece,
+  castlingRights?: CastlingRights,
+  enPassantTarget?: Position | null
+): boolean => {
+  if (!isValidMove(board, from, to, piece, castlingRights, enPassantTarget)) {
+    return false;
+  }
+  
+  // Проверка рокировки через шах
+  if (piece.type === 'king' && Math.abs(to.col - from.col) === 2) {
+    const opponentColor = piece.color === 'white' ? 'black' : 'white';
+    
+    // Король не может быть под шахом
+    if (isSquareUnderAttack(board, from, opponentColor)) {
+      return false;
+    }
+    
+    // Король не может проходить через битое поле
+    const direction = to.col > from.col ? 1 : -1;
+    const intermediateCol = from.col + direction;
+    if (isSquareUnderAttack(board, { row: from.row, col: intermediateCol }, opponentColor)) {
+      return false;
+    }
+    
+    // Король не может встать на битое поле
+    if (isSquareUnderAttack(board, to, opponentColor)) {
+      return false;
+    }
+  }
+  
+  // Симулируем ход и проверяем, остался ли король под шахом
+  const simulatedBoard = simulateMove(board, from, to);
+  
+  // Взятие на проходе
+  if (piece.type === 'pawn' && enPassantTarget && to.row === enPassantTarget.row && to.col === enPassantTarget.col) {
+    const capturedRow = piece.color === 'white' ? to.row + 1 : to.row - 1;
+    simulatedBoard[capturedRow][to.col] = null;
+  }
+  
+  return !isInCheck(simulatedBoard, piece.color);
+};
+
 export const getPossibleMoves = (
   board: Board, 
   pos: Position, 
@@ -100,7 +202,7 @@ export const getPossibleMoves = (
   const moves: Position[] = [];
   for (let row = 0; row < 8; row++) {
     for (let col = 0; col < 8; col++) {
-      if (isValidMove(board, pos, { row, col }, piece, castlingRights, enPassantTarget)) {
+      if (isMoveLegal(board, pos, { row, col }, piece, castlingRights, enPassantTarget)) {
         moves.push({ row, col });
       }
     }
@@ -241,6 +343,53 @@ export const getAllPossibleMovesForBoard = (testBoard: Board, color: 'white' | '
     }
   }
   return moves;
+};
+
+export const getAllLegalMoves = (
+  board: Board, 
+  color: 'white' | 'black',
+  castlingRights?: CastlingRights,
+  enPassantTarget?: Position | null
+): { from: Position; to: Position }[] => {
+  const moves: { from: Position; to: Position }[] = [];
+  
+  for (let row = 0; row < 8; row++) {
+    for (let col = 0; col < 8; col++) {
+      const piece = board[row][col];
+      if (piece && piece.color === color) {
+        for (let toRow = 0; toRow < 8; toRow++) {
+          for (let toCol = 0; toCol < 8; toCol++) {
+            if (isMoveLegal(board, { row, col }, { row: toRow, col: toCol }, piece, castlingRights, enPassantTarget)) {
+              moves.push({ from: { row, col }, to: { row: toRow, col: toCol } });
+            }
+          }
+        }
+      }
+    }
+  }
+  return moves;
+};
+
+export const isCheckmate = (
+  board: Board, 
+  color: 'white' | 'black',
+  castlingRights?: CastlingRights,
+  enPassantTarget?: Position | null
+): boolean => {
+  if (!isInCheck(board, color)) return false;
+  const legalMoves = getAllLegalMoves(board, color, castlingRights, enPassantTarget);
+  return legalMoves.length === 0;
+};
+
+export const isStalemate = (
+  board: Board, 
+  color: 'white' | 'black',
+  castlingRights?: CastlingRights,
+  enPassantTarget?: Position | null
+): boolean => {
+  if (isInCheck(board, color)) return false;
+  const legalMoves = getAllLegalMoves(board, color, castlingRights, enPassantTarget);
+  return legalMoves.length === 0;
 };
 
 export const isValidMoveForBoard = (testBoard: Board, from: Position, to: Position, piece: Piece): boolean => {

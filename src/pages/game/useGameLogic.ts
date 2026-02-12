@@ -1,6 +1,6 @@
 import { useState, useEffect, useRef } from 'react';
 import { Board, Position, initialBoard, getInitialTime, CastlingRights } from './gameTypes';
-import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove } from './gameLogic';
+import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
 
 export const useGameLogic = (
   difficulty: 'easy' | 'medium' | 'hard' | 'master',
@@ -41,6 +41,7 @@ export const useGameLogic = (
     blackQueenSide: true
   });
   const [enPassantTarget, setEnPassantTarget] = useState<Position | null>(savedState?.enPassantTarget || null);
+  const [kingInCheckPosition, setKingInCheckPosition] = useState<Position | null>(null);
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
@@ -260,13 +261,36 @@ export const useGameLogic = (
     setCurrentMoveIndex(newMoveHistory.length - 1);
     setSelectedSquare(null);
     setPossibleMoves([]);
-    setCurrentPlayer(currentPlayer === 'white' ? 'black' : 'white');
+    
+    const nextPlayer = currentPlayer === 'white' ? 'black' : 'white';
+    setCurrentPlayer(nextPlayer);
+    
+    // Проверка шаха
+    setTimeout(() => {
+      if (isInCheck(newBoard, nextPlayer)) {
+        const kingPos = findKing(newBoard, nextPlayer);
+        setKingInCheckPosition(kingPos);
+      } else {
+        setKingInCheckPosition(null);
+      }
+      
+      // Проверка мата или пата
+      if (isCheckmate(newBoard, nextPlayer, newCastlingRights, newEnPassantTarget)) {
+        setGameStatus('checkmate');
+      } else if (isStalemate(newBoard, nextPlayer, newCastlingRights, newEnPassantTarget)) {
+        setGameStatus('stalemate');
+      }
+    }, 100);
   };
 
   const makeComputerMove = () => {
-    const moves = getAllPossibleMovesForBoard(board, 'black');
+    const moves = getAllLegalMoves(board, 'black', castlingRights, enPassantTarget);
     if (moves.length === 0) {
-      setGameStatus('checkmate');
+      if (isCheckmate(board, 'black', castlingRights, enPassantTarget)) {
+        setGameStatus('checkmate');
+      } else {
+        setGameStatus('stalemate');
+      }
       return;
     }
 
@@ -350,6 +374,7 @@ export const useGameLogic = (
     inactivityTimer,
     capturedByWhite,
     capturedByBlack,
+    kingInCheckPosition,
     historyRef,
     handleSquareClick,
     isSquareSelected,

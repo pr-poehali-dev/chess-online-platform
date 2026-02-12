@@ -5,9 +5,10 @@ interface GameBoardProps {
   onSquareClick: (row: number, col: number) => void;
   isSquareSelected: (row: number, col: number) => boolean;
   isSquarePossibleMove: (row: number, col: number) => boolean;
+  kingInCheckPosition?: Position | null;
 }
 
-export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove }: GameBoardProps) => {
+export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition }: GameBoardProps) => {
   return (
     <div className="inline-block rounded-sm overflow-hidden shadow-2xl relative w-full max-w-[400px] md:max-w-[560px] flex-shrink-0" style={{ 
       boxShadow: '0 0 0 3px #3e2723, 0 0 0 5px #5d4037, 0 15px 30px rgba(0,0,0,0.4)',
@@ -22,6 +23,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
             const isLight = (rowIndex + colIndex) % 2 === 0;
             const isSelected = isSquareSelected(rowIndex, colIndex);
             const isPossible = isSquarePossibleMove(rowIndex, colIndex);
+            const isKingInCheck = kingInCheckPosition?.row === rowIndex && kingInCheckPosition?.col === colIndex;
             const fileLabel = String.fromCharCode(97 + colIndex);
             const rankLabel = (8 - rowIndex).toString();
             
@@ -33,6 +35,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                   relative flex items-center justify-center cursor-pointer select-none aspect-square
                   ${isSelected ? 'ring-2 md:ring-4 ring-inset ring-yellow-400 z-10' : ''}
                   ${isPossible ? 'ring-2 md:ring-4 ring-inset ring-green-400 z-10' : ''}
+                  ${isKingInCheck ? 'ring-4 md:ring-[6px] ring-inset ring-red-500 z-20 animate-pulse' : ''}
                   hover:brightness-110 transition-all
                 `}
                 style={{ 

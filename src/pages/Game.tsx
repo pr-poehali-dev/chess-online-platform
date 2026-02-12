@@ -43,6 +43,7 @@ const Game = () => {
     inactivityTimer,
     capturedByWhite,
     capturedByBlack,
+    kingInCheckPosition,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -130,6 +131,7 @@ const Game = () => {
             onSquareClick={handleSquareClick}
             isSquareSelected={isSquareSelected}
             isSquarePossibleMove={isSquarePossibleMove}
+            kingInCheckPosition={kingInCheckPosition}
           />
 
           <PlayerInfo
