@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
@@ -9,6 +9,15 @@ import Icon from '@/components/ui/icon';
 
 const Index = () => {
   const [activeSection, setActiveSection] = useState('home');
+  const [isDarkMode, setIsDarkMode] = useState(true);
+
+  useEffect(() => {
+    if (isDarkMode) {
+      document.documentElement.classList.add('dark');
+    } else {
+      document.documentElement.classList.remove('dark');
+    }
+  }, [isDarkMode]);
 
   const stats = {
     games: 247,
@@ -59,7 +68,7 @@ const Index = () => {
   ];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+    <div className="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900 dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 bg-white transition-colors duration-300">
       <nav className="border-b border-white/10 glass-effect sticky top-0 z-50 animate-fade-in">
         <div className="container mx-auto px-4 py-4">
           <div className="flex items-center justify-between">
@@ -96,6 +105,18 @@ const Index = () => {
               </button>
             </div>
             <div className="flex items-center gap-3">
+              <Button
+                variant="outline"
+                size="icon"
+                onClick={() => setIsDarkMode(!isDarkMode)}
+                className="border-white/20 hover:bg-white/10"
+              >
+                {isDarkMode ? (
+                  <Icon name="Sun" size={20} className="text-yellow-400" />
+                ) : (
+                  <Icon name="Moon" size={20} className="text-slate-700" />
+                )}
+              </Button>
               <Avatar className="ring-2 ring-blue-400/50">
                 <AvatarImage src="" />
                 <AvatarFallback className="bg-gradient-primary text-white">ВЫ</AvatarFallback>
