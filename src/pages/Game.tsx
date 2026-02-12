@@ -76,8 +76,11 @@ const Game = () => {
     newBoard[from.row][from.col] = null;
 
     const moveNotation = `${String.fromCharCode(97 + from.col)}${8 - from.row}-${String.fromCharCode(97 + to.col)}${8 - to.row}`;
-    setMoveHistory(prev => [...prev, moveNotation]);
-    setBoardHistory(prev => [...prev, newBoard]);
+    const newMoveHistory = [...moveHistory, moveNotation];
+    const newBoardHistory = [...boardHistory, newBoard];
+    
+    setMoveHistory(newMoveHistory);
+    setBoardHistory(newBoardHistory);
     
     setTimeout(() => {
       if (historyRef.current) {
@@ -87,7 +90,7 @@ const Game = () => {
 
     setBoard(newBoard);
     setDisplayBoard(newBoard);
-    setCurrentMoveIndex(boardHistory.length);
+    setCurrentMoveIndex(newMoveHistory.length - 1);
     setSelectedSquare(null);
     setPossibleMoves([]);
     setCurrentPlayer(currentPlayer === 'white' ? 'black' : 'white');
