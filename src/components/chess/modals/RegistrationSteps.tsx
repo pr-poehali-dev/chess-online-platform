@@ -1,6 +1,7 @@
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
-import { russianCities } from '@/components/chess/data/cities';
+import { popularCities, allCities } from '@/components/chess/data/cities';
 
 interface NameStepProps {
   userName: string;
@@ -95,12 +96,13 @@ export const CityStep = ({
   setShowCityDropdown,
   handleNextStep,
 }: CityStepProps) => {
-  const filteredCities = citySearch.trim() === '' 
-    ? russianCities 
-    : russianCities.filter(({ city, region }) => 
-        city.toLowerCase().includes(citySearch.toLowerCase()) ||
-        region.toLowerCase().includes(citySearch.toLowerCase())
-      );
+  const [showAll] = useState(false);
+  
+  const search = citySearch.toLowerCase().trim();
+  
+  const filteredCities = search === '' 
+    ? popularCities.slice(0, 20)
+    : allCities.filter(city => city.toLowerCase().includes(search));
 
   return (
     <div className="space-y-4">
@@ -121,10 +123,10 @@ export const CityStep = ({
         {showCityDropdown && (
           <div className="absolute z-10 w-full mt-1 max-h-60 overflow-y-auto bg-white dark:bg-slate-800 border border-slate-200 dark:border-white/10 rounded-lg shadow-lg">
             {filteredCities.length > 0 ? (
-              filteredCities.slice(0, citySearch.length > 0 ? 15 : 50).map(({ city, region }) => (
+              filteredCities.slice(0, 20).map((city) => (
                 <div
-                  key={`${city}-${region}`}
-                  className="px-4 py-2 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
+                  key={city}
+                  className="px-4 py-3 hover:bg-slate-100 dark:hover:bg-slate-700 cursor-pointer"
                   onClick={() => {
                     setSelectedCity(city);
                     setCitySearch('');
@@ -132,7 +134,6 @@ export const CityStep = ({
                   }}
                 >
                   <div className="text-gray-900 dark:text-white font-medium">{city}</div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400">{region}</div>
                 </div>
               ))
             ) : (
