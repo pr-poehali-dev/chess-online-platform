@@ -1,9 +1,11 @@
+import { useState, useEffect } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import { cityRegions } from '@/components/chess/data/cities';
 
 interface HomeSectionProps {
   isAuthenticated: boolean;
@@ -16,6 +18,21 @@ export const HomeSection = ({
   setShowGameSettings, 
   setShowAuthModal
 }: HomeSectionProps) => {
+  const [userCity, setUserCity] = useState<string>('Москва');
+  const [userRegion, setUserRegion] = useState<string>('Москва');
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('chessUser');
+    if (savedUser) {
+      const userData = JSON.parse(savedUser);
+      if (userData.city) {
+        setUserCity(userData.city);
+        const region = cityRegions[userData.city];
+        setUserRegion(region || userData.city);
+      }
+    }
+  }, []);
+
   const topRussia = [
     { rank: 1, name: 'Александр Петров', rating: 2456, city: 'Москва' },
     { rank: 2, name: 'Мария Смирнова', rating: 2398, city: 'Санкт-Петербург' },
@@ -24,17 +41,17 @@ export const HomeSection = ({
   ];
 
   const topRegion = [
-    { rank: 1, name: 'Игорь Соколов', rating: 2123, city: 'Москва' },
-    { rank: 2, name: 'Анна Волкова', rating: 2089, city: 'Подольск' },
-    { rank: 3, name: 'Сергей Новиков', rating: 2045, city: 'Люберцы' },
-    { rank: 4, name: 'Ольга Морозова', rating: 1998, city: 'Химки' },
+    { rank: 1, name: 'Игорь Соколов', rating: 2123, city: userCity },
+    { rank: 2, name: 'Анна Волкова', rating: 2089, city: userCity === 'Москва' ? 'Подольск' : userCity },
+    { rank: 3, name: 'Сергей Новиков', rating: 2045, city: userCity === 'Москва' ? 'Люберцы' : userCity },
+    { rank: 4, name: 'Ольга Морозова', rating: 1998, city: userCity === 'Москва' ? 'Химки' : userCity },
   ];
 
   const topCity = [
-    { rank: 1, name: 'Павел Лебедев', rating: 1923, city: 'Москва' },
-    { rank: 2, name: 'Наталья Орлова', rating: 1889, city: 'Москва' },
-    { rank: 3, name: 'Артём Федоров', rating: 1856, city: 'Москва' },
-    { rank: 4, name: 'Вы', rating: 1842, city: 'Москва', highlight: true },
+    { rank: 1, name: 'Павел Лебедев', rating: 1923, city: userCity },
+    { rank: 2, name: 'Наталья Орлова', rating: 1889, city: userCity },
+    { rank: 3, name: 'Артём Федоров', rating: 1856, city: userCity },
+    { rank: 4, name: 'Вы', rating: 1842, city: userCity, highlight: true },
   ];
 
   return (
@@ -95,9 +112,12 @@ export const HomeSection = ({
 
         <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.1s' }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-              <Icon name="Map" className="text-purple-600 dark:text-purple-400" size={20} />
-              Топ-4 региона
+            <CardTitle className="flex flex-col gap-1 text-gray-900 dark:text-white">
+              <div className="flex items-center gap-2">
+                <Icon name="Map" className="text-purple-600 dark:text-purple-400" size={20} />
+                Топ-4 региона
+              </div>
+              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">{userRegion}</div>
             </CardTitle>
           </CardHeader>
           <CardContent>
@@ -123,9 +143,12 @@ export const HomeSection = ({
 
         <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay: '0.2s' }}>
           <CardHeader>
-            <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-              <Icon name="Home" className="text-orange-600 dark:text-orange-400" size={20} />
-              Топ-4 города
+            <CardTitle className="flex flex-col gap-1 text-gray-900 dark:text-white">
+              <div className="flex items-center gap-2">
+                <Icon name="Home" className="text-orange-600 dark:text-orange-400" size={20} />
+                Топ-4 города
+              </div>
+              <div className="text-sm font-normal text-gray-600 dark:text-gray-400">{userCity}</div>
             </CardTitle>
           </CardHeader>
           <CardContent>
