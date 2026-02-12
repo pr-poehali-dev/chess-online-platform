@@ -217,10 +217,12 @@ export const AuthModal = ({
               <div>
                 <input
                   type="text"
+                  name="name"
                   placeholder="Введите ваше имя"
                   value={userName}
                   onChange={(e) => setUserName(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleNextStep()}
+                  autoComplete="name"
                   autoFocus
                   className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
@@ -244,10 +246,12 @@ export const AuthModal = ({
               <div>
                 <input
                   type="email"
+                  name="email"
                   placeholder="example@mail.ru"
                   value={userEmail}
                   onChange={(e) => setUserEmail(e.target.value)}
                   onKeyPress={(e) => e.key === 'Enter' && handleNextStep()}
+                  autoComplete="email"
                   autoFocus
                   className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
                 />
