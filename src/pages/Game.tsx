@@ -186,13 +186,27 @@ const Game = () => {
 
       <main className="flex-1 flex flex-col items-center justify-center p-2 md:p-4">
         <div className="flex flex-col gap-3 md:gap-6 w-full max-w-[1200px] items-center">
-            <button
-              onClick={handleExitClick}
-              className="flex items-center gap-2 text-stone-400 hover:text-stone-200 transition-colors text-sm"
-            >
-              <Icon name="LogOut" size={18} />
-              <span className="font-medium">Выход из игры</span>
-            </button>
+            <div className="flex gap-3">
+              <button
+                onClick={handleExitClick}
+                className="p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                title="Выход из игры"
+              >
+                <Icon name="LogOut" size={20} />
+              </button>
+              <button
+                className="p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                title="Чат"
+              >
+                <Icon name="MessageCircle" size={20} />
+              </button>
+              <button
+                className="p-3 bg-stone-800/50 hover:bg-stone-700/50 border border-stone-700/30 rounded-lg transition-colors text-stone-300 hover:text-stone-100"
+                title="Опции"
+              >
+                <Icon name="Settings" size={20} />
+              </button>
+            </div>
 
             <div className="bg-stone-800/50 backdrop-blur-sm rounded-lg p-3 md:p-4 border border-stone-700/30 w-full max-w-[400px]">
               <div className="flex items-center justify-between">
