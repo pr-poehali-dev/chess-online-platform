@@ -126,13 +126,20 @@ def handler(event: dict, context) -> dict:
     cur.execute("SELECT id FROM matchmaking_queue WHERE user_id = '%s'" % user_id.replace("'", "''"))
     already_in = cur.fetchone()
 
-    rating_min = user_rating - 50
-    rating_max = user_rating + 50
+    any_rating = body.get('any_rating', False)
 
-    cur.execute(
-        "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND rating >= %d AND rating <= %d ORDER BY ABS(rating - %d) LIMIT 1"
-        % (user_id.replace("'", "''"), time_control.replace("'", "''"), rating_min, rating_max, user_rating)
-    )
+    if any_rating:
+        cur.execute(
+            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' ORDER BY ABS(rating - %d) LIMIT 1"
+            % (user_id.replace("'", "''"), time_control.replace("'", "''"), user_rating)
+        )
+    else:
+        rating_min = user_rating - 50
+        rating_max = user_rating + 50
+        cur.execute(
+            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND rating >= %d AND rating <= %d ORDER BY ABS(rating - %d) LIMIT 1"
+            % (user_id.replace("'", "''"), time_control.replace("'", "''"), rating_min, rating_max, user_rating)
+        )
     match = cur.fetchone()
 
     if match:

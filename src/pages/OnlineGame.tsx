@@ -6,6 +6,7 @@ import { Button } from '@/components/ui/button';
 
 const MATCHMAKING_URL = 'https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299';
 const POLL_INTERVAL = 2000;
+const WIDEN_RATING_DELAY = 8000;
 const BOT_OFFER_DELAY = 8000;
 
 const OnlineGame = () => {
@@ -15,7 +16,7 @@ const OnlineGame = () => {
   const timeControl = searchParams.get('time') || 'rapid';
   const colorParam = searchParams.get('color') || 'random';
 
-  const [searchStatus, setSearchStatus] = useState<'searching' | 'no_opponents' | 'found' | 'starting'>('searching');
+  const [searchStatus, setSearchStatus] = useState<'searching' | 'no_exact_rating' | 'searching_any' | 'no_opponents' | 'found' | 'starting'>('searching');
   const [opponent, setOpponent] = useState<{
     name: string;
     rating: number;
@@ -118,9 +119,9 @@ const OnlineGame = () => {
     botOfferTimerRef.current = setTimeout(() => {
       if (!abortedRef.current && !matchFoundRef.current) {
         if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-        setSearchStatus('no_opponents');
+        setSearchStatus('no_exact_rating');
       }
-    }, BOT_OFFER_DELAY);
+    }, WIDEN_RATING_DELAY);
 
     return () => {
       cleanup();
@@ -169,6 +170,60 @@ const OnlineGame = () => {
       setTimeout(() => setSearchStatus('starting'), 2000);
     }
   }, [getUserData, opponentType, timeControl]);
+
+  const handleSearchAnyRating = useCallback(() => {
+    setSearchStatus('searching_any');
+    abortedRef.current = false;
+    matchFoundRef.current = false;
+    const user = getUserData();
+    if (!user) return;
+
+    const searchAny = async () => {
+      if (abortedRef.current) return;
+      const res = await fetch(MATCHMAKING_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'search',
+          user_id: user.id,
+          username: user.name || 'Player',
+          avatar: user.avatar || '',
+          rating: user.rating || 1200,
+          opponent_type: opponentType || 'country',
+          time_control: timeControl,
+          any_rating: true
+        })
+      });
+      const data = await res.json();
+      if (abortedRef.current) return;
+      if (data.status === 'matched') {
+        matchFoundRef.current = true;
+        cleanup();
+        setOpponent({
+          name: data.opponent_name,
+          rating: data.opponent_rating,
+          avatar: data.opponent_avatar || '',
+          isBotGame: false
+        });
+        setPlayerColor(data.player_color);
+        setGameId(data.game_id);
+        setSearchStatus('found');
+        setTimeout(() => {
+          if (!abortedRef.current) setSearchStatus('starting');
+        }, 2000);
+      }
+    };
+
+    searchAny();
+    pollRef.current = setInterval(searchAny, POLL_INTERVAL);
+
+    botOfferTimerRef.current = setTimeout(() => {
+      if (!abortedRef.current && !matchFoundRef.current) {
+        if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+        setSearchStatus('no_opponents');
+      }
+    }, BOT_OFFER_DELAY);
+  }, [getUserData, opponentType, timeControl, cleanup]);
 
   const handleContinueSearch = useCallback(() => {
     setSearchStatus('searching');
@@ -307,6 +362,78 @@ const OnlineGame = () => {
             </div>
           )}
 
+          {searchStatus === 'no_exact_rating' && (
+            <div className="text-center space-y-6 animate-fade-in">
+              <div className="flex justify-center">
+                <Icon name="Users" size={64} className="text-amber-400" />
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-bold text-stone-100 mb-2">Нет соперников ±50</h2>
+                <p className="text-stone-400">
+                  Не нашли игрока с близким рейтингом
+                </p>
+                <p className="text-sm text-stone-500 mt-2">
+                  Можем поискать соперника с любым рейтингом
+                </p>
+              </div>
+
+              <div className="flex flex-col gap-3">
+                <Button
+                  onClick={handleSearchAnyRating}
+                  className="bg-amber-500 hover:bg-amber-600 text-stone-900 font-bold"
+                >
+                  <Icon name="Search" size={20} className="mr-2" />
+                  Играть с любым рейтингом
+                </Button>
+                <Button
+                  onClick={handlePlayBot}
+                  variant="outline"
+                  className="border-stone-600 text-stone-300 hover:bg-stone-800"
+                >
+                  <Icon name="Bot" size={20} className="mr-2" />
+                  Сыграть с ботом
+                </Button>
+                <Button
+                  onClick={cancelSearch}
+                  variant="ghost"
+                  className="text-stone-500 hover:text-stone-300"
+                >
+                  Вернуться
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {searchStatus === 'searching_any' && (
+            <div className="text-center space-y-6">
+              <div className="flex justify-center">
+                <div className="relative">
+                  <div className="w-24 h-24 rounded-full border-4 border-amber-500/30 border-t-amber-500 animate-spin"></div>
+                  <div className="absolute inset-0 flex items-center justify-center">
+                    <Icon name="Search" size={32} className="text-amber-400" />
+                  </div>
+                </div>
+              </div>
+
+              <div>
+                <h2 className="text-2xl font-bold text-stone-100 mb-2">Ищем соперника</h2>
+                <p className="text-stone-400">Любой рейтинг</p>
+                <p className="text-sm text-stone-500 mt-2">
+                  Контроль времени: {getTimeLabel(timeControl)}
+                </p>
+              </div>
+
+              <Button
+                onClick={cancelSearch}
+                variant="outline"
+                className="border-stone-600 text-stone-300 hover:bg-stone-800"
+              >
+                Отменить поиск
+              </Button>
+            </div>
+          )}
+
           {searchStatus === 'no_opponents' && (
             <div className="text-center space-y-6 animate-fade-in">
               <div className="flex justify-center">
@@ -316,7 +443,7 @@ const OnlineGame = () => {
               <div>
                 <h2 className="text-2xl font-bold text-stone-100 mb-2">Соперников нет</h2>
                 <p className="text-stone-400">
-                  Сейчас нет игроков с близким рейтингом
+                  Сейчас нет онлайн-игроков
                 </p>
                 <p className="text-sm text-stone-500 mt-2">
                   Вы можете сыграть с нашим ботом или продолжить ожидание
