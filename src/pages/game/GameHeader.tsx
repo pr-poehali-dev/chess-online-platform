@@ -117,14 +117,17 @@ export const GameControls = ({
           {showSettingsMenu && (
             <>
               <div 
-                className="fixed inset-0 z-40" 
+                className={`fixed inset-0 z-40 md:bg-transparent ${
+                  theme === 'light' ? 'bg-black/30' : 'bg-black/50'
+                }`}
                 onClick={() => setShowSettingsMenu(false)}
               />
-              <div className={`absolute right-0 mt-2 w-56 rounded-lg shadow-xl border overflow-hidden z-50 animate-scale-in ${
+              <div className={`fixed md:absolute inset-x-0 bottom-0 md:inset-x-auto md:bottom-auto md:right-0 md:mt-2 md:w-56 md:rounded-lg rounded-t-2xl shadow-xl border overflow-hidden z-50 md:animate-scale-in animate-in slide-in-from-bottom duration-200 max-h-[80vh] overflow-y-auto ${
                 theme === 'light'
                   ? 'bg-white border-slate-300'
                   : 'bg-stone-800 border-stone-700/50'
               }`}>
+                <div className="md:hidden w-10 h-1 rounded-full bg-slate-300 dark:bg-stone-600 mx-auto mt-2 mb-1" />
                 <button
                   onClick={() => {
                     if (setTheme) {
@@ -264,6 +267,7 @@ export const GameControls = ({
                   <Icon name="Plus" size={20} />
                   <span>Новая партия</span>
                 </button>
+                <div className="md:hidden pb-[env(safe-area-inset-bottom,8px)]" />
               </div>
             </>
           )}
