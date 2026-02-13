@@ -1,12 +1,20 @@
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 
+import { useState } from 'react';
+
 interface LastGameSettings {
   opponent: 'city' | 'region' | 'country' | 'friend' | 'computer';
   time: string;
   difficulty?: 'easy' | 'medium' | 'hard' | 'master';
   color?: 'white' | 'black' | 'random';
 }
+
+const RATING_REQUIREMENTS: Record<string, number> = {
+  city: 500,
+  region: 500,
+  country: 1200
+};
 
 interface OpponentSelectStepProps {
   userCity: string;
@@ -29,8 +37,36 @@ const OpponentSelectStep = ({
   getTimeLabel,
   getDifficultyLabel,
 }: OpponentSelectStepProps) => {
+  const [lockedMsg, setLockedMsg] = useState<string | null>(null);
+
+  const savedUser = localStorage.getItem('chessUser');
+  const userRating = savedUser ? (JSON.parse(savedUser).rating || 0) : 0;
+
+  const handleLockedSelect = (type: 'city' | 'region' | 'country' | 'friend' | 'computer') => {
+    const req = RATING_REQUIREMENTS[type];
+    if (req && userRating < req) {
+      setLockedMsg(`Доступно с рейтингом выше ${req}`);
+      setTimeout(() => setLockedMsg(null), 3000);
+      return;
+    }
+    onSelect(type);
+  };
+
+  const isLocked = (type: string) => {
+    const req = RATING_REQUIREMENTS[type];
+    return req ? userRating < req : false;
+  };
+
   return (
     <div className="space-y-3">
+      {lockedMsg && (
+        <div className="animate-fade-in">
+          <div className="flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 px-3 py-2 rounded-lg text-sm">
+            <Icon name="Lock" size={16} />
+            {lockedMsg}
+          </div>
+        </div>
+      )}
       {lastGameSettings && (
         <Button 
           className="w-full h-20 flex items-center justify-between bg-green-500 hover:bg-green-600 dark:bg-green-600 dark:hover:bg-green-700 border-2 border-green-600 dark:border-green-500 shadow-lg"
@@ -51,8 +87,8 @@ const OpponentSelectStep = ({
       )}
       
       <Button 
-        className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
-        onClick={() => onSelect('city')}
+        className={`w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10 ${isLocked('city') ? 'opacity-60' : ''}`}
+        onClick={() => handleLockedSelect('city')}
       >
         <div className="flex items-center gap-3">
           <Icon name="Home" size={24} className="text-slate-700 dark:text-white" />
@@ -63,12 +99,12 @@ const OpponentSelectStep = ({
             </div>
           </div>
         </div>
-        <Icon name="ChevronRight" size={20} className="text-slate-400" />
+        {isLocked('city') ? <Icon name="Lock" size={20} className="text-red-400" /> : <Icon name="ChevronRight" size={20} className="text-slate-400" />}
       </Button>
 
       <Button 
-        className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
-        onClick={() => onSelect('region')}
+        className={`w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10 ${isLocked('region') ? 'opacity-60' : ''}`}
+        onClick={() => handleLockedSelect('region')}
       >
         <div className="flex items-center gap-3">
           <Icon name="Map" size={24} className="text-slate-700 dark:text-white" />
@@ -79,12 +115,12 @@ const OpponentSelectStep = ({
             </div>
           </div>
         </div>
-        <Icon name="ChevronRight" size={20} className="text-slate-400" />
+        {isLocked('region') ? <Icon name="Lock" size={20} className="text-red-400" /> : <Icon name="ChevronRight" size={20} className="text-slate-400" />}
       </Button>
 
       <Button 
-        className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
-        onClick={() => onSelect('country')}
+        className={`w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10 ${isLocked('country') ? 'opacity-60' : ''}`}
+        onClick={() => handleLockedSelect('country')}
       >
         <div className="flex items-center gap-3">
           <Icon name="Globe" size={24} className="text-slate-700 dark:text-white" />
@@ -93,7 +129,7 @@ const OpponentSelectStep = ({
             <div className="text-xs text-slate-500 dark:text-gray-400">Соперники со всей России</div>
           </div>
         </div>
-        <Icon name="ChevronRight" size={20} className="text-slate-400" />
+        {isLocked('country') ? <Icon name="Lock" size={20} className="text-red-400" /> : <Icon name="ChevronRight" size={20} className="text-slate-400" />}
       </Button>
 
       <Button 

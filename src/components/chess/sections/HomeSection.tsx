@@ -30,6 +30,7 @@ export const HomeSection = ({
   const [showCityModal, setShowCityModal] = useState(false);
   const [siteSettings, setSiteSettings] = useState<SiteSettingsData | null>(null);
   const [userRating, setUserRating] = useState(0);
+  const [lockedMessage, setLockedMessage] = useState<string | null>(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('chessUser');
@@ -167,8 +168,13 @@ export const HomeSection = ({
             <div className="w-full relative">
               <Button 
                 size="lg" 
-                className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg ${!isLevelAllowed('level_tournament') ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''}`}
+                className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all shadow-lg ${userRating < 1000 ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
                 onClick={() => {
+                  if (userRating < 1000) {
+                    setLockedMessage('Доступно с рейтингом выше 1000');
+                    setTimeout(() => setLockedMessage(null), 3000);
+                    return;
+                  }
                   if (!isLevelAllowed('level_tournament')) return;
                   if (isAuthenticated) {
                     setShowGameSettings(true);
@@ -179,8 +185,9 @@ export const HomeSection = ({
               >
                 <Icon name="Trophy" className="mr-2" size={24} />
                 Участвовать в турнире
+                {userRating < 1000 && <Icon name="Lock" className="ml-2" size={18} />}
               </Button>
-              {!isLevelAllowed('level_tournament') && (
+              {!isLevelAllowed('level_tournament') && userRating >= 1000 && (
                 <p className="text-xs text-red-400 mt-1 text-center">
                   Нужен рейтинг от {siteSettings?.level_tournament?.value}
                 </p>
@@ -188,6 +195,16 @@ export const HomeSection = ({
             </div>
           )}
         </div>
+
+        {lockedMessage && (
+          <div className="mb-4 animate-fade-in">
+            <div className="inline-flex items-center gap-2 bg-red-500/10 border border-red-500/30 text-red-400 px-4 py-2 rounded-lg text-sm">
+              <Icon name="Lock" size={16} />
+              {lockedMessage}
+            </div>
+          </div>
+        )}
+
         <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up" style={{ animationDelay: '0.1s' }}>
           Играйте в шахматы онлайн
         </h2>
