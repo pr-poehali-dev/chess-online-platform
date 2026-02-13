@@ -64,7 +64,7 @@ def handler(event, context):
     smtp_user = os.environ.get('SMTP_USER', '')
     smtp_password = os.environ.get('SMTP_PASSWORD', '')
     from_email = os.environ.get('SMTP_FROM_EMAIL', smtp_user)
-    print('SMTP config: host={}, port={}, user={}, from={}'.format(smtp_host, smtp_port, smtp_user, from_email))
+    print('SMTP config: host={}, port={}, user={}, from={}, pass_len={}'.format(smtp_host, smtp_port, smtp_user, from_email, len(smtp_password)))
 
     msg = MIMEMultipart('alternative')
     msg['Subject'] = 'Код подтверждения - ЛигаШахмат'
