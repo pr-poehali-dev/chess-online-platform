@@ -92,6 +92,16 @@ const Navbar = ({
           )}
 
           <div className="flex items-center gap-3">
+            {!isAuthenticated && (
+              <button
+                onClick={() => setShowAuthModal(true)}
+                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors text-white text-sm font-medium flex items-center gap-2"
+              >
+                <Icon name="LogIn" size={18} />
+                <span>Войти</span>
+              </button>
+            )}
+
             {hasActiveGame && location.pathname !== '/game' && (
               <button
                 onClick={handleReturnToGame}
