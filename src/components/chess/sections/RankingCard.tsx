@@ -1,6 +1,8 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
 
 interface Player {
   rank: number;
@@ -34,6 +36,8 @@ export const RankingCard = ({
   setShowModal,
   animationDelay
 }: RankingCardProps) => {
+  const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+
   const colorClasses = {
     blue: {
       icon: 'text-blue-600 dark:text-blue-400',
@@ -84,7 +88,10 @@ export const RankingCard = ({
           <div className="text-center mb-2">
             <div className="text-2xl font-bold text-yellow-400">1 место</div>
           </div>
-          <div className="p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30">
+          <div
+            className="p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30 cursor-pointer hover:ring-2 hover:ring-yellow-400 transition-all"
+            onClick={() => setSelectedPlayer(first)}
+          >
             <div className="flex flex-col items-center text-center gap-3">
               <div className="relative">
                 {first.avatar ? (
@@ -110,7 +117,10 @@ export const RankingCard = ({
               <div className="text-center mb-1">
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">{player.rank} место</div>
               </div>
-              <div className="flex items-center gap-2 p-2 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5">
+              <div
+                className="flex items-center gap-2 p-2 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 cursor-pointer hover:border-amber-400 transition-colors"
+                onClick={() => setSelectedPlayer(player)}
+              >
                 <div className="relative">
                   {player.avatar ? (
                     <img src={player.avatar} alt={player.name} className="w-12 h-12 rounded-full object-cover" />
@@ -136,7 +146,8 @@ export const RankingCard = ({
     return (
       <div 
         key={player.rank}
-        className={`flex items-center gap-3 p-3 rounded-lg border ${
+        onClick={() => setSelectedPlayer(player)}
+        className={`flex items-center gap-3 p-3 rounded-lg border cursor-pointer transition-colors hover:border-amber-400 ${
           player.highlight 
             ? colors.highlight
             : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
@@ -205,6 +216,13 @@ export const RankingCard = ({
           <Icon name={showModal ? "ChevronUp" : "ChevronDown"} size={16} className="ml-2" />
         </Button>
       </CardContent>
+      <PlayerProfileModal
+        open={!!selectedPlayer}
+        onClose={() => setSelectedPlayer(null)}
+        playerName={selectedPlayer?.name || ''}
+        playerAvatar={selectedPlayer?.avatar}
+        playerRating={selectedPlayer?.rating}
+      />
     </Card>
   );
 };

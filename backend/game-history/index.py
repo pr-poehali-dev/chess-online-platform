@@ -48,7 +48,7 @@ def handler(event: dict, context) -> dict:
 
     cur.execute(
         """SELECT id, opponent_name, opponent_type, opponent_rating, result, user_color, time_control, difficulty, 
-           moves_count, move_history, rating_before, rating_after, rating_change, duration_seconds, end_reason, created_at
+           moves_count, move_history, rating_before, rating_after, rating_change, duration_seconds, end_reason, created_at, move_times
         FROM game_history WHERE user_id = '%s' ORDER BY created_at DESC LIMIT %d OFFSET %d"""
         % (user_id.replace("'", "''"), limit, offset)
     )
@@ -72,7 +72,8 @@ def handler(event: dict, context) -> dict:
             'rating_change': r[12],
             'duration_seconds': r[13],
             'end_reason': r[14],
-            'created_at': r[15].isoformat() if r[15] else None
+            'created_at': r[15].isoformat() if r[15] else None,
+            'move_times': r[16]
         })
 
     cur.close()

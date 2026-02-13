@@ -25,6 +25,7 @@ def handler(event: dict, context) -> dict:
     difficulty = body.get('difficulty')
     moves_count = body.get('moves_count', 0)
     move_history = body.get('move_history', '')
+    move_times = body.get('move_times', '')
     duration_seconds = body.get('duration_seconds')
     end_reason = body.get('end_reason', 'checkmate')
 
@@ -88,6 +89,7 @@ def handler(event: dict, context) -> dict:
     )
 
     move_history_escaped = move_history.replace("'", "''") if move_history else ''
+    move_times_escaped = move_times.replace("'", "''") if move_times else ''
     opponent_name_escaped = opponent_name.replace("'", "''")
     difficulty_val = "'%s'" % difficulty.replace("'", "''") if difficulty else 'NULL'
     opponent_rating_val = str(opponent_rating) if opponent_rating else 'NULL'
@@ -95,8 +97,8 @@ def handler(event: dict, context) -> dict:
 
     cur.execute(
         """INSERT INTO game_history 
-        (user_id, opponent_name, opponent_type, opponent_rating, result, user_color, time_control, difficulty, moves_count, move_history, rating_before, rating_after, rating_change, duration_seconds, end_reason)
-        VALUES ('%s', '%s', '%s', %s, '%s', '%s', '%s', %s, %d, '%s', %d, %d, %d, %s, '%s')
+        (user_id, opponent_name, opponent_type, opponent_rating, result, user_color, time_control, difficulty, moves_count, move_history, move_times, rating_before, rating_after, rating_change, duration_seconds, end_reason)
+        VALUES ('%s', '%s', '%s', %s, '%s', '%s', '%s', %s, %d, '%s', '%s', %d, %d, %d, %s, '%s')
         RETURNING id"""
         % (
             user_id.replace("'", "''"),
@@ -109,6 +111,7 @@ def handler(event: dict, context) -> dict:
             difficulty_val,
             moves_count,
             move_history_escaped,
+            move_times_escaped,
             current_rating,
             new_rating,
             rating_change,

@@ -14,6 +14,7 @@ import { OpponentLeftModal } from './game/OpponentLeftModal';
 import { GameHeader, GameControls } from './game/GameHeader';
 import { useGameLogic } from './game/useGameLogic';
 import { useGameHandlers } from './game/useGameHandlers';
+import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
 
 const Game = () => {
   const [searchParams] = useSearchParams();
@@ -36,9 +37,13 @@ const Game = () => {
   
   const flipped = playerColor === 'black';
 
+  const [showOpponentProfile, setShowOpponentProfile] = useState(false);
+  const [showMyProfile, setShowMyProfile] = useState(false);
+  
   const savedUser = localStorage.getItem('chessUser');
   const userData = savedUser ? JSON.parse(savedUser) : null;
   const userAvatar = userData?.avatar || '';
+  const myUserId = userData ? 'u_' + (userData.email || userData.name || 'anonymous').replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60) : '';
   const isPlayingWithBot = (!opponentType || opponentType === 'random') && !isOnlineReal;
   
   const botAvatar = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
@@ -170,6 +175,7 @@ const Game = () => {
               avatar={opponentAvatar}
               capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
               theme={theme}
+              onClickProfile={() => setShowOpponentProfile(true)}
             />
 
             <GameBoard
@@ -196,6 +202,7 @@ const Game = () => {
               inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
               capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}
               theme={theme}
+              onClickProfile={() => setShowMyProfile(true)}
             />
 
             <MoveHistory
@@ -259,6 +266,23 @@ const Game = () => {
         onClose={() => setShowOpponentLeft(false)}
         isEarlyExit={opponentLeftReason === 'early'}
         isSurrender={opponentLeftReason === 'surrender'}
+      />
+
+      <PlayerProfileModal
+        open={showOpponentProfile}
+        onClose={() => setShowOpponentProfile(false)}
+        playerName={opponentName}
+        playerAvatar={opponentAvatar}
+        playerRating={opponentRating}
+      />
+
+      <PlayerProfileModal
+        open={showMyProfile}
+        onClose={() => setShowMyProfile(false)}
+        userId={myUserId}
+        playerName={userData?.name || 'Вы'}
+        playerAvatar={userAvatar}
+        playerRating={newRating || userRating || undefined}
       />
     </div>
   );

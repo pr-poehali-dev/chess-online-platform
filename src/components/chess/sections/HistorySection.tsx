@@ -16,6 +16,7 @@ interface Game {
   difficulty: string | null;
   moves_count: number;
   move_history: string | null;
+  move_times: string | null;
   rating_before: number;
   rating_after: number;
   rating_change: number;
@@ -148,12 +149,15 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
 
   if (selectedGame) {
     const moves = selectedGame.move_history ? selectedGame.move_history.split(',') : [];
-    const movePairs: { num: number; white: string; black?: string }[] = [];
+    const times = selectedGame.move_times ? selectedGame.move_times.split(',') : [];
+    const movePairs: { num: number; white: string; black?: string; whiteTime?: string; blackTime?: string }[] = [];
     for (let i = 0; i < moves.length; i += 2) {
       movePairs.push({
         num: Math.floor(i / 2) + 1,
         white: moves[i],
-        black: moves[i + 1] || undefined
+        black: moves[i + 1] || undefined,
+        whiteTime: times[i] ? formatDuration(parseInt(times[i])) : undefined,
+        blackTime: times[i + 1] ? formatDuration(parseInt(times[i + 1])) : undefined
       });
     }
 
@@ -227,9 +231,19 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                       >
                         <div className="w-8 text-sm font-bold text-gray-600 dark:text-gray-400">{mp.num}.</div>
                         <div className="flex-1 flex gap-4">
-                          <div className="flex-1 text-sm font-medium text-gray-900 dark:text-white">{mp.white}</div>
+                          <div className="flex-1 flex items-center gap-1.5">
+                            <span className="text-sm font-medium text-gray-900 dark:text-white">{mp.white}</span>
+                            {mp.whiteTime && (
+                              <span className="text-[10px] text-gray-400 bg-gray-100 dark:bg-slate-700 px-1 rounded">{mp.whiteTime}</span>
+                            )}
+                          </div>
                           {mp.black && (
-                            <div className="flex-1 text-sm font-medium text-gray-900 dark:text-white">{mp.black}</div>
+                            <div className="flex-1 flex items-center gap-1.5">
+                              <span className="text-sm font-medium text-gray-900 dark:text-white">{mp.black}</span>
+                              {mp.blackTime && (
+                                <span className="text-[10px] text-gray-400 bg-gray-100 dark:bg-slate-700 px-1 rounded">{mp.blackTime}</span>
+                              )}
+                            </div>
                           )}
                         </div>
                       </div>

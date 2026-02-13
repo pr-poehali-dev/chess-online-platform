@@ -1,19 +1,24 @@
+import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import Icon from '@/components/ui/icon';
+import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
+
+interface LeaderboardPlayer {
+  rank: number;
+  name: string;
+  rating: number;
+  avatar: string;
+  highlight?: boolean;
+}
 
 interface LeaderboardSectionProps {
-  leaderboard: Array<{
-    rank: number;
-    name: string;
-    rating: number;
-    avatar: string;
-    highlight?: boolean;
-  }>;
+  leaderboard: LeaderboardPlayer[];
 }
 
 export const LeaderboardSection = ({ leaderboard }: LeaderboardSectionProps) => {
+  const [selectedPlayer, setSelectedPlayer] = useState<LeaderboardPlayer | null>(null);
   return (
     <div className="animate-fade-in">
       <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
@@ -34,7 +39,8 @@ export const LeaderboardSection = ({ leaderboard }: LeaderboardSectionProps) => 
               {leaderboard.map((player) => (
                 <div 
                   key={player.rank}
-                  className={`flex items-center justify-between p-4 rounded-lg transition-all ${
+                  onClick={() => setSelectedPlayer(player)}
+                  className={`flex items-center justify-between p-4 rounded-lg transition-all cursor-pointer ${
                     player.highlight 
                       ? 'bg-slate-100 dark:bg-blue-500/20 border-2 border-slate-300 dark:border-blue-400/50' 
                       : 'bg-slate-50 dark:bg-slate-800/30 hover:bg-slate-100 dark:hover:bg-slate-800/50 border border-slate-200 dark:border-white/5'
@@ -85,6 +91,12 @@ export const LeaderboardSection = ({ leaderboard }: LeaderboardSectionProps) => 
           </Tabs>
         </CardContent>
       </Card>
+      <PlayerProfileModal
+        open={!!selectedPlayer}
+        onClose={() => setSelectedPlayer(null)}
+        playerName={selectedPlayer?.name || ''}
+        playerRating={selectedPlayer?.rating}
+      />
     </div>
   );
 };

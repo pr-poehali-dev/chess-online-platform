@@ -36,6 +36,7 @@ export const useGameLogic = (
   const [gameStatus, setGameStatus] = useState<'playing' | 'checkmate' | 'stalemate' | 'draw'>(savedState?.gameStatus || 'playing');
   const [moveHistory, setMoveHistory] = useState<string[]>(savedState?.moveHistory || []);
   const [boardHistory, setBoardHistory] = useState<Board[]>(savedState?.boardHistory || [initialBoard]);
+  const [moveTimes, setMoveTimes] = useState<string[]>(savedState?.moveTimes || []);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(savedState?.currentMoveIndex || 0);
   const [displayBoard, setDisplayBoard] = useState<Board>(savedState?.board || initialBoard);
   const [inactivityTimer, setInactivityTimer] = useState(60);
@@ -195,13 +196,14 @@ export const useGameLogic = (
         enPassantTarget,
         showPossibleMoves,
         theme,
-        boardTheme
+        boardTheme,
+        moveTimes
       };
       localStorage.setItem('activeGame', JSON.stringify(gameState));
     } else {
       localStorage.removeItem('activeGame');
     }
-  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget, showPossibleMoves, theme, boardTheme]);
+  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget, showPossibleMoves, theme, boardTheme, moveTimes]);
 
   const onlineMoveCountRef = useRef(0);
   
@@ -401,6 +403,7 @@ export const useGameLogic = (
           difficulty,
           moves_count: moveHistory.length,
           move_history: moveHistory.join(','),
+          move_times: moveTimes.join(','),
           duration_seconds: durationSeconds,
           end_reason: status
         })
@@ -415,7 +418,7 @@ export const useGameLogic = (
     } catch (e) {
       console.error('Failed to submit game result:', e);
     }
-  }, [playerColor, timeControl, difficulty, moveHistory]);
+  }, [playerColor, timeControl, difficulty, moveHistory, moveTimes]);
 
   useEffect(() => {
     if (gameStatus !== 'playing' && !gameFinished.current && moveHistory.length > 2) {
@@ -509,9 +512,12 @@ export const useGameLogic = (
     const moveNotation = `${String.fromCharCode(97 + from.col)}${8 - from.row}-${String.fromCharCode(97 + to.col)}${8 - to.row}`;
     const newMoveHistory = [...moveHistory, moveNotation];
     const newBoardHistory = [...boardHistory, newBoard];
+    const timeAfterMove = currentPlayer === 'white' ? Math.round(whiteTime) : Math.round(blackTime);
+    const newMoveTimes = [...moveTimes, String(timeAfterMove)];
     
     setMoveHistory(newMoveHistory);
     setBoardHistory(newBoardHistory);
+    setMoveTimes(newMoveTimes);
     
     setTimeout(() => {
       if (historyRef.current) {

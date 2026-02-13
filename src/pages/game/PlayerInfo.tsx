@@ -12,6 +12,7 @@ interface PlayerInfoProps {
   capturedPieces?: {type: string; color: string}[];
   ratingChange?: number | null;
   theme?: 'light' | 'dark';
+  onClickProfile?: () => void;
 }
 
 import { pieceImages } from './gameTypes';
@@ -29,7 +30,8 @@ export const PlayerInfo = ({
   inactivityTimer,
   capturedPieces = [],
   ratingChange,
-  theme = 'dark'
+  theme = 'dark',
+  onClickProfile
 }: PlayerInfoProps) => {
   const pieceOrder = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king'];
   
@@ -52,7 +54,10 @@ export const PlayerInfo = ({
         : (playerColor === 'black' ? 'bg-stone-900/80 border-stone-700' : 'bg-stone-800/50 border-stone-700/30')
     }`}>
       <div className="flex items-center justify-between h-full">
-        <div className="flex items-center gap-2 md:gap-3 min-w-0 flex-shrink">
+        <div
+          className={`flex items-center gap-2 md:gap-3 min-w-0 flex-shrink ${onClickProfile ? 'cursor-pointer hover:opacity-80 active:scale-95 transition-all' : ''}`}
+          onClick={onClickProfile}
+        >
           {avatar ? (
             <img 
               src={avatar} 
