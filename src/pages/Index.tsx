@@ -190,10 +190,10 @@ const Index = () => {
         showGameSettings={showGameSettings}
         setShowGameSettings={setShowGameSettings}
         onStartGame={(difficulty, timeControl, color) => {
-          navigate(`/game?difficulty=${difficulty}&time=${timeControl}&color=${color}`);
+          navigate(`/game?difficulty=${difficulty}&time=${encodeURIComponent(timeControl)}&color=${color}`);
         }}
         onStartOnlineGame={(opponentType, timeControl, color) => {
-          navigate(`/online-game?opponent=${opponentType}&time=${timeControl}&color=${color}`);
+          navigate(`/online-game?opponent=${opponentType}&time=${encodeURIComponent(timeControl)}&color=${color}`);
         }}
       />
 

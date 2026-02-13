@@ -4,8 +4,8 @@ import { cityRegions } from '@/components/chess/data/cities';
 
 const MATCHMAKING_URL = 'https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299';
 const POLL_INTERVAL = 2000;
-const STAGE_DURATION = 8000;
-const FINAL_STAGE_DURATION = 10000;
+const STAGE_DURATION = 5000;
+const FINAL_STAGE_DURATION = 5000;
 
 export type SearchStage = 'city' | 'region' | 'rating' | 'any';
 export type SearchStatus = 'searching' | 'no_opponents' | 'found' | 'starting';
@@ -92,28 +92,33 @@ const useMatchmaking = () => {
   const doSearch = useCallback(async (user: { id: string; name?: string; avatar?: string; rating?: number; city?: string; region?: string }, stage: SearchStage) => {
     if (abortedRef.current || matchFoundRef.current) return;
 
-    const res = await fetch(MATCHMAKING_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        action: 'search',
-        user_id: user.id,
-        username: user.name || 'Player',
-        avatar: user.avatar || '',
-        rating: user.rating || 1200,
-        opponent_type: opponentType || 'country',
-        time_control: timeControl,
-        city: user.city || '',
-        region: user.region || '',
-        search_stage: stage
-      })
-    });
-    const data = await res.json();
+    try {
+      const res = await fetch(MATCHMAKING_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'search',
+          user_id: user.id,
+          username: user.name || 'Player',
+          avatar: user.avatar || '',
+          rating: user.rating || 1200,
+          opponent_type: opponentType || 'country',
+          time_control: timeControl,
+          city: user.city || '',
+          region: user.region || '',
+          search_stage: stage
+        })
+      });
+      if (!res.ok) return;
+      const data = await res.json();
 
-    if (abortedRef.current || matchFoundRef.current) return;
+      if (abortedRef.current || matchFoundRef.current) return;
 
-    if (data.status === 'matched') {
-      handleMatchFound(data);
+      if (data.status === 'matched') {
+        handleMatchFound(data);
+      }
+    } catch {
+      // Network error, will retry on next poll
     }
   }, [opponentType, timeControl, handleMatchFound]);
 
@@ -148,7 +153,10 @@ const useMatchmaking = () => {
 
   useEffect(() => {
     const user = getUserData();
-    if (!user) { navigate('/'); return; }
+    if (!user) {
+      setTimeout(() => navigate('/'), 0);
+      return;
+    }
 
     abortedRef.current = false;
     matchFoundRef.current = false;
@@ -232,9 +240,9 @@ const useMatchmaking = () => {
             clearInterval(timer);
             const isBotGame = opponent?.isBotGame;
             if (isBotGame) {
-              navigate(`/game?difficulty=medium&time=${timeControl}&color=${playerColor}&online_game_id=${gameId}&bot_game=true&opponent_name=${encodeURIComponent(opponent?.name || '')}`);
+              navigate(`/game?difficulty=medium&time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&bot_game=true&opponent_name=${encodeURIComponent(opponent?.name || '')}`);
             } else {
-              navigate(`/game?time=${timeControl}&color=${playerColor}&online_game_id=${gameId}&online=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}`);
+              navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&online=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}`);
             }
             return 0;
           }

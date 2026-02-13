@@ -166,7 +166,7 @@ def handler(event: dict, context) -> dict:
         if match:
             matched_stage = 'region'
 
-    if not match and search_stage in ('city', 'region', 'rating'):
+    if not match and search_stage in ('city', 'region', 'rating', 'any'):
         rating_min = user_rating - 50
         rating_max = user_rating + 50
         cur.execute(
