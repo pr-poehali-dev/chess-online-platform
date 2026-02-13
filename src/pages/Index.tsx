@@ -123,7 +123,7 @@ const Index = () => {
           />
         )}
 
-        {activeSection === 'profile' && (
+        {activeSection === 'profile' && isAuthenticated && (
           <ProfileSection stats={stats} onLogout={() => {
             localStorage.removeItem('chessUser');
             setIsAuthenticated(false);
@@ -139,7 +139,7 @@ const Index = () => {
           <TournamentsSection upcomingTournaments={upcomingTournaments} />
         )}
 
-        {activeSection === 'friends' && (
+        {activeSection === 'friends' && isAuthenticated && (
           <FriendsSection 
             onOpenChat={(name, rating, id) => {
               setChatParams({ name, rating, id });
@@ -148,11 +148,11 @@ const Index = () => {
           />
         )}
 
-        {activeSection === 'notifications' && (
+        {activeSection === 'notifications' && isAuthenticated && (
           <NotificationsSection />
         )}
 
-        {activeSection === 'history' && (
+        {activeSection === 'history' && isAuthenticated && (
           <HistorySection 
             onOpenChat={(name, rating, id) => {
               setChatParams({ name, rating, id });
@@ -161,11 +161,20 @@ const Index = () => {
           />
         )}
 
-        {activeSection === 'chat' && (
+        {activeSection === 'chat' && isAuthenticated && (
           <ChatSection 
             initialChatId={chatParams?.id}
             initialParticipantName={chatParams?.name}
             initialParticipantRating={chatParams?.rating}
+          />
+        )}
+
+        {!isAuthenticated && ['profile', 'friends', 'notifications', 'history', 'chat'].includes(activeSection) && (
+          <HomeSection
+            isAuthenticated={isAuthenticated}
+            setShowGameSettings={setShowGameSettings}
+            setShowAuthModal={setShowAuthModal}
+            setShowOfflineGameModal={setShowOfflineGameModal}
           />
         )}
       </main>
