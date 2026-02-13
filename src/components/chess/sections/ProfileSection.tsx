@@ -13,9 +13,10 @@ interface ProfileSectionProps {
     rating: number;
     tournaments: number;
   };
+  onLogout?: () => void;
 }
 
-export const ProfileSection = ({ stats }: ProfileSectionProps) => {
+export const ProfileSection = ({ stats, onLogout }: ProfileSectionProps) => {
   const [isEditing, setIsEditing] = useState(false);
   const [userData, setUserData] = useState({
     name: '',
@@ -347,6 +348,21 @@ export const ProfileSection = ({ stats }: ProfileSectionProps) => {
           </div>
         </CardContent>
       </Card>
+
+      {onLogout && (
+        <Button
+          onClick={() => {
+            if (confirm('Вы уверены, что хотите выйти из аккаунта?')) {
+              onLogout();
+            }
+          }}
+          variant="outline"
+          className="w-full border-red-300 dark:border-red-700/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 h-12"
+        >
+          <Icon name="LogOut" size={18} className="mr-2" />
+          Выйти из аккаунта
+        </Button>
+      )}
     </div>
   );
 };

@@ -124,7 +124,11 @@ const Index = () => {
         )}
 
         {activeSection === 'profile' && (
-          <ProfileSection stats={stats} />
+          <ProfileSection stats={stats} onLogout={() => {
+            localStorage.removeItem('chessUser');
+            setIsAuthenticated(false);
+            setActiveSection('home');
+          }} />
         )}
 
         {activeSection === 'leaderboard' && (
