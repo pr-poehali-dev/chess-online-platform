@@ -7,9 +7,10 @@ interface GameBoardProps {
   isSquarePossibleMove: (row: number, col: number) => boolean;
   kingInCheckPosition?: Position | null;
   showPossibleMoves?: boolean;
+  flipped?: boolean;
 }
 
-export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition, showPossibleMoves = true }: GameBoardProps) => {
+export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition, showPossibleMoves = true, flipped = false }: GameBoardProps) => {
   return (
     <div className="inline-block rounded-sm overflow-hidden shadow-2xl relative w-full md:w-auto md:h-[min(calc(100vh-310px),700px)]" style={{ 
       boxShadow: '0 0 0 3px #3e2723, 0 0 0 5px #5d4037, 0 15px 30px rgba(0,0,0,0.4)',
@@ -20,9 +21,13 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
     }}>
       <table className="w-full h-full border-collapse" style={{ borderSpacing: 0 }}>
         <tbody>
-        {board.map((row, rowIndex) => (
+        {Array.from({ length: 8 }).map((_, viewRow) => {
+          const rowIndex = flipped ? 7 - viewRow : viewRow;
+          return (
           <tr key={`row-${rowIndex}`}>
-          {row.map((piece, colIndex) => {
+          {Array.from({ length: 8 }).map((_, viewCol) => {
+            const colIndex = flipped ? 7 - viewCol : viewCol;
+            const piece = board[rowIndex]?.[colIndex] || null;
             const isLight = (rowIndex + colIndex) % 2 === 0;
             const isSelected = isSquareSelected(rowIndex, colIndex);
             const isPossible = showPossibleMoves && isSquarePossibleMove(rowIndex, colIndex);
@@ -52,7 +57,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                 }}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
-                {colIndex === 0 && (
+                {viewCol === 0 && (
                   <span 
                     className="absolute top-0.5 md:top-1 left-1 md:left-1.5 text-[8px] md:text-xs font-semibold pointer-events-none"
                     style={{ color: isLight ? '#b58863' : '#f0d9b5' }}
@@ -60,7 +65,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                     {rankLabel}
                   </span>
                 )}
-                {rowIndex === 7 && (
+                {viewRow === 7 && (
                   <span 
                     className="absolute bottom-0.5 md:bottom-1 right-1 md:right-1.5 text-[8px] md:text-xs font-semibold pointer-events-none"
                     style={{ color: isLight ? '#b58863' : '#f0d9b5' }}
@@ -101,7 +106,8 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
             );
           })}
           </tr>
-        ))}
+          );
+        })}
         </tbody>
       </table>
     </div>

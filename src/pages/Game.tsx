@@ -1,3 +1,4 @@
+import { useState } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { getDifficultyLabel, formatTime } from './game/gameTypes';
@@ -19,6 +20,15 @@ const Game = () => {
   const difficulty = (searchParams.get('difficulty') || 'medium') as 'easy' | 'medium' | 'hard' | 'master';
   const timeControl = searchParams.get('time') || '10+0';
   const opponentType = searchParams.get('opponent');
+  const colorParam = searchParams.get('color') || 'random';
+  
+  const [playerColor] = useState<'white' | 'black'>(() => {
+    if (colorParam === 'white') return 'white';
+    if (colorParam === 'black') return 'black';
+    return Math.random() < 0.5 ? 'white' : 'black';
+  });
+  
+  const flipped = playerColor === 'black';
 
   const savedUser = localStorage.getItem('chessUser');
   const userData = savedUser ? JSON.parse(savedUser) : null;
@@ -55,7 +65,7 @@ const Game = () => {
     isSquarePossibleMove,
     handlePreviousMove,
     handleNextMove
-  } = useGameLogic(difficulty, timeControl);
+  } = useGameLogic(difficulty, timeControl, playerColor);
 
   const {
     isDragging,
@@ -137,15 +147,15 @@ const Game = () => {
 
             <PlayerInfo
               playerName={opponentName}
-              playerColor="black"
-              icon="♚"
-              time={blackTime}
-              isCurrentPlayer={currentPlayer === 'black'}
+              playerColor={playerColor === 'white' ? 'black' : 'white'}
+              icon={playerColor === 'white' ? '♚' : '♔'}
+              time={playerColor === 'white' ? blackTime : whiteTime}
+              isCurrentPlayer={currentPlayer !== playerColor}
               formatTime={formatTime}
               difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
               rating={opponentRating}
               avatar={opponentAvatar}
-              capturedPieces={capturedByBlack}
+              capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
               theme={theme}
             />
 
@@ -156,19 +166,20 @@ const Game = () => {
               isSquarePossibleMove={isSquarePossibleMove}
               kingInCheckPosition={kingInCheckPosition}
               showPossibleMoves={showPossibleMoves}
+              flipped={flipped}
             />
 
             <PlayerInfo
               playerName="Вы"
-              playerColor="white"
-              icon="♔"
-              time={whiteTime}
-              isCurrentPlayer={currentPlayer === 'white'}
+              playerColor={playerColor}
+              icon={playerColor === 'white' ? '♔' : '♚'}
+              time={playerColor === 'white' ? whiteTime : blackTime}
+              isCurrentPlayer={currentPlayer === playerColor}
               formatTime={formatTime}
               rating={userRating}
               avatar={userAvatar}
-              inactivityTimer={currentPlayer === 'white' ? inactivityTimer : undefined}
-              capturedPieces={capturedByWhite}
+              inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
+              capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}
               theme={theme}
             />
 

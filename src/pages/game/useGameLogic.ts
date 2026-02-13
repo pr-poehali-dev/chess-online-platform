@@ -4,8 +4,10 @@ import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove, isCheckmate
 
 export const useGameLogic = (
   difficulty: 'easy' | 'medium' | 'hard' | 'master',
-  timeControl: string
+  timeControl: string,
+  playerColor: 'white' | 'black' = 'white'
 ) => {
+  const botColor = playerColor === 'white' ? 'black' : 'white';
   const loadGameState = () => {
     const saved = localStorage.getItem('activeGame');
     if (saved) {
@@ -113,7 +115,7 @@ export const useGameLogic = (
 
     const inactivityInterval = setInterval(() => {
       setInactivityTimer(prev => {
-        if (prev === 20 && !hasPlayedWarning.current && currentPlayer === 'white') {
+        if (prev === 20 && !hasPlayedWarning.current && currentPlayer === playerColor) {
           playWarningSound();
           hasPlayedWarning.current = true;
         }
@@ -130,7 +132,7 @@ export const useGameLogic = (
   }, [currentPlayer, gameStatus]);
 
   useEffect(() => {
-    if (currentPlayer === 'black' && gameStatus === 'playing') {
+    if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
       setDisplayBoard(board);
       setTimeout(() => makeComputerMove(), 500);
@@ -299,9 +301,9 @@ export const useGameLogic = (
   };
 
   const makeComputerMove = () => {
-    const moves = getAllLegalMoves(board, 'black', castlingRights, enPassantTarget);
+    const moves = getAllLegalMoves(board, botColor, castlingRights, enPassantTarget);
     if (moves.length === 0) {
-      if (isCheckmate(board, 'black', castlingRights, enPassantTarget)) {
+      if (isCheckmate(board, botColor, castlingRights, enPassantTarget)) {
         setGameStatus('checkmate');
       } else {
         setGameStatus('stalemate');
@@ -331,7 +333,7 @@ export const useGameLogic = (
   };
 
   const handleSquareClick = (row: number, col: number) => {
-    if (currentPlayer !== 'white' || gameStatus !== 'playing') return;
+    if (currentPlayer !== playerColor || gameStatus !== 'playing') return;
 
     const piece = board[row][col];
 
@@ -340,14 +342,14 @@ export const useGameLogic = (
       
       if (isValidTarget) {
         makeMove(selectedSquare, { row, col });
-      } else if (piece && piece.color === 'white') {
+      } else if (piece && piece.color === playerColor) {
         setSelectedSquare({ row, col });
         setPossibleMoves(getPossibleMoves(board, { row, col }, castlingRights, enPassantTarget));
       } else {
         setSelectedSquare(null);
         setPossibleMoves([]);
       }
-    } else if (piece && piece.color === 'white') {
+    } else if (piece && piece.color === playerColor) {
       setSelectedSquare({ row, col });
       setPossibleMoves(getPossibleMoves(board, { row, col }, castlingRights, enPassantTarget));
     }
