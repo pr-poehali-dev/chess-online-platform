@@ -88,6 +88,9 @@ const Admin = () => {
       { key: 'level_play_online', label: 'Онлайн' },
       { key: 'level_play_offline', label: 'Офлайн' },
       { key: 'level_tournament', label: 'Турнир' },
+      { key: 'level_online_city', label: 'Город' },
+      { key: 'level_online_region', label: 'Регион' },
+      { key: 'level_online_country', label: 'Россия' },
     ];
     return items.map(i => {
       const val = siteSettings[i.key]?.value || '0';

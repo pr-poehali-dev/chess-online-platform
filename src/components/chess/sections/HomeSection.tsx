@@ -118,9 +118,14 @@ export const HomeSection = ({
             <div className="w-full relative">
               <Button 
                 size="lg" 
-                className={`w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg ${!isLevelAllowed('level_play_online') ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''}`}
+                className={`w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_play_online') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
                 onClick={() => {
-                  if (!isLevelAllowed('level_play_online')) return;
+                  if (!isLevelAllowed('level_play_online')) {
+                    const minR = siteSettings?.level_play_online?.value || '0';
+                    setLockedMessage(`Доступно с рейтингом выше ${minR}`);
+                    setTimeout(() => setLockedMessage(null), 3000);
+                    return;
+                  }
                   if (isAuthenticated) {
                     setShowGameSettings(true);
                   } else {
@@ -130,12 +135,8 @@ export const HomeSection = ({
               >
                 <Icon name="Play" className="mr-2" size={24} />
                 Играть онлайн
+                {!isLevelAllowed('level_play_online') && <Icon name="Lock" className="ml-2" size={18} />}
               </Button>
-              {!isLevelAllowed('level_play_online') && (
-                <p className="text-xs text-red-400 mt-1 text-center">
-                  Нужен рейтинг от {siteSettings?.level_play_online?.value}
-                </p>
-              )}
             </div>
           )}
           
@@ -143,9 +144,14 @@ export const HomeSection = ({
             <div className="w-full relative">
               <Button 
                 size="lg" 
-                className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg ${!isLevelAllowed('level_play_offline') ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''}`}
+                className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_play_offline') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
                 onClick={() => {
-                  if (!isLevelAllowed('level_play_offline')) return;
+                  if (!isLevelAllowed('level_play_offline')) {
+                    const minR = siteSettings?.level_play_offline?.value || '0';
+                    setLockedMessage(`Доступно с рейтингом выше ${minR}`);
+                    setTimeout(() => setLockedMessage(null), 3000);
+                    return;
+                  }
                   if (isAuthenticated) {
                     setShowOfflineGameModal(true);
                   } else {
@@ -155,12 +161,8 @@ export const HomeSection = ({
               >
                 <Icon name="Gamepad2" className="mr-2" size={24} />
                 Играть офлайн
+                {!isLevelAllowed('level_play_offline') && <Icon name="Lock" className="ml-2" size={18} />}
               </Button>
-              {!isLevelAllowed('level_play_offline') && (
-                <p className="text-xs text-red-400 mt-1 text-center">
-                  Нужен рейтинг от {siteSettings?.level_play_offline?.value}
-                </p>
-              )}
             </div>
           )}
           
@@ -168,14 +170,14 @@ export const HomeSection = ({
             <div className="w-full relative">
               <Button 
                 size="lg" 
-                className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all shadow-lg ${userRating < 1000 ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
+                className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_tournament') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
                 onClick={() => {
-                  if (userRating < 1000) {
-                    setLockedMessage('Доступно с рейтингом выше 1000');
+                  if (!isLevelAllowed('level_tournament')) {
+                    const minR = siteSettings?.level_tournament?.value || '1000';
+                    setLockedMessage(`Доступно с рейтингом выше ${minR}`);
                     setTimeout(() => setLockedMessage(null), 3000);
                     return;
                   }
-                  if (!isLevelAllowed('level_tournament')) return;
                   if (isAuthenticated) {
                     setShowGameSettings(true);
                   } else {
@@ -185,13 +187,8 @@ export const HomeSection = ({
               >
                 <Icon name="Trophy" className="mr-2" size={24} />
                 Участвовать в турнире
-                {userRating < 1000 && <Icon name="Lock" className="ml-2" size={18} />}
+                {!isLevelAllowed('level_tournament') && <Icon name="Lock" className="ml-2" size={18} />}
               </Button>
-              {!isLevelAllowed('level_tournament') && userRating >= 1000 && (
-                <p className="text-xs text-red-400 mt-1 text-center">
-                  Нужен рейтинг от {siteSettings?.level_tournament?.value}
-                </p>
-              )}
             </div>
           )}
         </div>

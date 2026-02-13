@@ -1,7 +1,9 @@
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
+
+const SITE_SETTINGS_URL = 'https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286';
 
 interface LastGameSettings {
   opponent: 'city' | 'region' | 'country' | 'friend' | 'computer';
@@ -10,7 +12,7 @@ interface LastGameSettings {
   color?: 'white' | 'black' | 'random';
 }
 
-const RATING_REQUIREMENTS: Record<string, number> = {
+const DEFAULT_REQUIREMENTS: Record<string, number> = {
   city: 500,
   region: 500,
   country: 1200
@@ -38,12 +40,26 @@ const OpponentSelectStep = ({
   getDifficultyLabel,
 }: OpponentSelectStepProps) => {
   const [lockedMsg, setLockedMsg] = useState<string | null>(null);
+  const [ratingReqs, setRatingReqs] = useState<Record<string, number>>(DEFAULT_REQUIREMENTS);
 
   const savedUser = localStorage.getItem('chessUser');
   const userRating = savedUser ? (JSON.parse(savedUser).rating || 0) : 0;
 
+  useEffect(() => {
+    fetch(SITE_SETTINGS_URL)
+      .then(r => r.json())
+      .then(data => {
+        const reqs: Record<string, number> = {};
+        if (data.level_online_city?.value) reqs.city = parseInt(data.level_online_city.value) || 0;
+        if (data.level_online_region?.value) reqs.region = parseInt(data.level_online_region.value) || 0;
+        if (data.level_online_country?.value) reqs.country = parseInt(data.level_online_country.value) || 0;
+        setRatingReqs(reqs);
+      })
+      .catch(() => {});
+  }, []);
+
   const handleLockedSelect = (type: 'city' | 'region' | 'country' | 'friend' | 'computer') => {
-    const req = RATING_REQUIREMENTS[type];
+    const req = ratingReqs[type];
     if (req && userRating < req) {
       setLockedMsg(`Доступно с рейтингом выше ${req}`);
       setTimeout(() => setLockedMsg(null), 3000);
@@ -53,7 +69,7 @@ const OpponentSelectStep = ({
   };
 
   const isLocked = (type: string) => {
-    const req = RATING_REQUIREMENTS[type];
+    const req = ratingReqs[type];
     return req ? userRating < req : false;
   };
 

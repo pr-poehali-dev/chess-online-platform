@@ -26,6 +26,9 @@ const levels = [
   { key: 'level_play_online', label: 'Играть онлайн', icon: 'Play', color: 'text-green-400' },
   { key: 'level_play_offline', label: 'Играть офлайн', icon: 'Gamepad2', color: 'text-blue-400' },
   { key: 'level_tournament', label: 'Участвовать в турнире', icon: 'Trophy', color: 'text-purple-400' },
+  { key: 'level_online_city', label: 'Онлайн: город', icon: 'Home', color: 'text-orange-400' },
+  { key: 'level_online_region', label: 'Онлайн: регион', icon: 'Map', color: 'text-cyan-400' },
+  { key: 'level_online_country', label: 'Онлайн: вся Россия', icon: 'Globe', color: 'text-red-400' },
 ];
 
 export const LevelAccessModal = ({ settings, onSave, onClose }: Props) => {
