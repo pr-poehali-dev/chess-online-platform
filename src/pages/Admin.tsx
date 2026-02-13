@@ -73,7 +73,7 @@ const AdminLogin = ({ onSuccess }: { onSuccess: (email: string) => void }) => {
       const verifyRes = await fetch(VERIFY_OTP_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode.trim(), mode: 'login' })
+        body: JSON.stringify({ email: email.trim().toLowerCase(), code: otpCode.trim(), mode: 'admin' })
       });
       const verifyData = await verifyRes.json();
       if (!verifyRes.ok) {

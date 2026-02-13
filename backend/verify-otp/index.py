@@ -75,6 +75,16 @@ def handler(event, context):
     )
     existing = cur.fetchone()
 
+    if mode == 'admin':
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {
+            'statusCode': 200,
+            'headers': headers,
+            'body': json.dumps({'success': True, 'verified': True})
+        }
+
     if mode == 'login':
         if not existing:
             conn.commit()
