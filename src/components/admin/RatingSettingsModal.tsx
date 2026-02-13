@@ -2,6 +2,17 @@ import { useState } from 'react';
 import Icon from '@/components/ui/icon';
 import type { RatingSettings } from '@/pages/Admin';
 
+const noSpinnerStyle = `
+  .no-spinner::-webkit-outer-spin-button,
+  .no-spinner::-webkit-inner-spin-button {
+    -webkit-appearance: none;
+    margin: 0;
+  }
+  .no-spinner {
+    -moz-appearance: textfield;
+  }
+`;
+
 interface Props {
   settings: RatingSettings;
   onSave: (updated: Record<string, { value: string }>) => Promise<void>;
@@ -43,6 +54,7 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
+      <style>{noSpinnerStyle}</style>
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
       <div className="relative w-full max-w-lg bg-slate-800 rounded-2xl border border-slate-700/50 shadow-2xl max-h-[90vh] flex flex-col">
         <div className="flex items-center justify-between p-5 border-b border-slate-700/50">
@@ -69,7 +81,7 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
                   type="number"
                   value={f.value}
                   onChange={(e) => f.onChange(e.target.value)}
-                  className="w-full bg-slate-800/80 border border-slate-600/50 rounded-lg px-3 py-2 text-white text-lg font-bold focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30"
+                  className="w-full bg-slate-800/80 border border-slate-600/50 rounded-lg px-3 py-2 text-white text-lg font-bold focus:outline-none focus:border-amber-500/50 focus:ring-1 focus:ring-amber-500/30 no-spinner"
                 />
               </div>
             ))}
