@@ -42,8 +42,14 @@ def handler(event: dict, context) -> dict:
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'applied': True, 'affected': 0, 'decay': 0})}
 
     cur.execute(
-        "UPDATE users SET rating = GREATEST(rating - %d, %d), updated_at = NOW() WHERE rating > %d RETURNING id"
-        % (decay, min_rating, min_rating)
+        """UPDATE users SET rating = GREATEST(rating - %d, %d), updated_at = NOW()
+        WHERE rating > %d
+          AND id NOT IN (
+            SELECT DISTINCT user_id FROM game_history
+            WHERE created_at >= '%s 00:00:00' AND created_at < '%s 00:00:00' + INTERVAL '1 day'
+          )
+        RETURNING id"""
+        % (decay, min_rating, min_rating, today_msk, today_msk)
     )
     affected = len(cur.fetchall())
 
