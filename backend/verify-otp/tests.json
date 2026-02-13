@@ -25,6 +25,15 @@
       "bodyMatcher": "partial"
     },
     {
+      "name": "POST login mode with wrong code",
+      "method": "POST",
+      "path": "/",
+      "body": {"email": "test@test.com", "code": "000000", "mode": "login"},
+      "expectedStatus": 400,
+      "expectedBody": {"error": "string"},
+      "bodyMatcher": "partial"
+    },
+    {
       "name": "GET not allowed",
       "method": "GET",
       "path": "/",

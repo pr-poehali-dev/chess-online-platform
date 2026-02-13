@@ -30,6 +30,7 @@ def handler(event, context):
     code = body.get('code', '').strip()
     name = body.get('name', '').strip()
     city = body.get('city', '').strip()
+    mode = body.get('mode', 'register')
 
     if not email or not code:
         return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'Email and code required'})}
@@ -74,7 +75,26 @@ def handler(event, context):
     )
     existing = cur.fetchone()
 
-    if existing:
+    if mode == 'login':
+        if not existing:
+            conn.commit()
+            cur.close()
+            conn.close()
+            return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'User not found', 'message': 'Аккаунт с этим email не найден. Пожалуйста, зарегистрируйтесь.'})}
+
+        conn.commit()
+        user_data = {
+            'id': existing[0],
+            'username': existing[1],
+            'rating': existing[2],
+            'city': existing[3],
+            'games_played': existing[4],
+            'wins': existing[5],
+            'losses': existing[6],
+            'draws': existing[7],
+            'is_new': False
+        }
+    elif existing:
         if name:
             cur.execute(
                 "UPDATE {schema}.users SET username = '{name}', updated_at = now() WHERE id = '{uid}'".format(
