@@ -24,7 +24,6 @@ export const FriendsSection = ({ onOpenChat }: FriendsSectionProps) => {
   const [userId, setUserId] = useState<string>('');
   const [friendCode, setFriendCode] = useState('');
   const [showAddFriend, setShowAddFriend] = useState(false);
-  const [showQR, setShowQR] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
   const [friends, setFriends] = useState<Friend[]>([]);
   const [copied, setCopied] = useState(false);
@@ -157,59 +156,43 @@ export const FriendsSection = ({ onOpenChat }: FriendsSectionProps) => {
     return name.substring(0, 2).toUpperCase();
   };
 
-  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=200x200&data=${encodeURIComponent(`${SITE_URL}?invite=${userId}`)}`;
+  const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${SITE_URL}?invite=${userId}`)}`;
 
   return (
     <div className="space-y-4 animate-fade-in max-w-2xl mx-auto">
       <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 overflow-hidden">
         <CardContent className="p-4 md:p-6 space-y-5">
           <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-500/20">
-            <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1.5 flex items-center gap-1.5">
-              <Icon name="Fingerprint" size={14} />
-              Ваш уникальный ID
-            </div>
-            <div className="flex items-center gap-2 flex-wrap">
-              <code className="text-lg md:text-xl font-mono font-bold text-slate-900 dark:text-white bg-white/70 dark:bg-slate-800/70 px-3 py-1.5 rounded-lg tracking-wider">
-                {userId}
-              </code>
-              <Button
-                onClick={copyInviteLink}
-                variant="outline"
-                size="sm"
-                className={`border-blue-300 dark:border-blue-500/40 transition-all ${
-                  copied
-                    ? 'bg-green-50 dark:bg-green-900/20 text-green-600 dark:text-green-400 border-green-300 dark:border-green-500/40'
-                    : 'text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20'
-                }`}
-              >
-                <Icon name={copied ? 'Check' : 'Link'} size={14} className="mr-1.5" />
-                {copied ? 'Скопировано!' : 'Копировать ссылку'}
-              </Button>
-            </div>
-            <p className="text-[11px] text-blue-500/70 dark:text-blue-400/50 mt-2">
-              Отправьте ссылку другу — он перейдёт на сайт и сможет вас добавить
-            </p>
-
-            <div className="flex gap-2 mt-3">
-              <Button
-                onClick={() => setShowQR(!showQR)}
-                variant="ghost"
-                size="sm"
-                className="text-blue-600 dark:text-blue-400 hover:bg-blue-100/50 dark:hover:bg-blue-900/30"
-              >
-                <Icon name="QrCode" size={16} className="mr-1.5" />
-                {showQR ? 'Скрыть QR' : 'Мой QR-код'}
-              </Button>
-            </div>
-
-            {showQR && (
-              <div className="mt-3 flex justify-center animate-scale-in">
-                <div className="bg-white p-3 rounded-xl shadow-lg">
-                  <img src={qrCodeUrl} alt="QR Code" className="w-44 h-44 rounded" />
-                  <p className="text-center text-[11px] text-gray-500 mt-2">Друг сканирует — попадает на сайт</p>
+            <div className="flex items-start gap-4">
+              <div className="flex-1 min-w-0">
+                <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1.5 flex items-center gap-1.5">
+                  <Icon name="Fingerprint" size={14} />
+                  Ваш уникальный ID
                 </div>
+                <button
+                  onClick={copyInviteLink}
+                  className="group flex items-center gap-2 cursor-pointer"
+                  title="Нажмите, чтобы скопировать ссылку"
+                >
+                  <code className="text-lg md:text-xl font-mono font-bold text-slate-900 dark:text-white bg-white/70 dark:bg-slate-800/70 px-3 py-1.5 rounded-lg tracking-wider group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-active:scale-95 transition-all">
+                    {userId}
+                  </code>
+                  <span className={`text-xs transition-all ${copied ? 'text-green-500' : 'text-blue-400 opacity-0 group-hover:opacity-100'}`}>
+                    {copied ? (
+                      <span className="flex items-center gap-1"><Icon name="Check" size={14} /> Скопировано!</span>
+                    ) : (
+                      <Icon name="Copy" size={14} />
+                    )}
+                  </span>
+                </button>
+                <p className="text-[11px] text-blue-500/70 dark:text-blue-400/50 mt-1.5">
+                  Нажмите на ID — скопируется ссылка-приглашение
+                </p>
               </div>
-            )}
+              <div className="flex-shrink-0 bg-white rounded-lg p-1.5 shadow-sm">
+                <img src={qrCodeUrl} alt="QR Code" className="w-24 h-24 rounded" />
+              </div>
+            </div>
           </div>
 
           <div>
