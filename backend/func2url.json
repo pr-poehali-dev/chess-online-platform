@@ -1,4 +1,5 @@
 {
+  "site-settings": "https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286",
   "matchmaking": "https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299",
   "online-move": "https://functions.poehali.dev/58a413af-81c4-47bd-b3ce-4552a349ae19",
   "apply-daily-decay": "https://functions.poehali.dev/06f73421-41be-448f-a352-17e488dc15ef",

@@ -4,6 +4,12 @@ import Icon from '@/components/ui/icon';
 import { cityRegions } from '@/components/chess/data/cities';
 import { RankingCard } from './RankingCard';
 
+const SITE_SETTINGS_URL = 'https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286';
+
+interface SiteSettingsData {
+  [key: string]: { value: string; description: string };
+}
+
 interface HomeSectionProps {
   isAuthenticated: boolean;
   setShowGameSettings: (value: boolean) => void;
@@ -22,6 +28,8 @@ export const HomeSection = ({
   const [showRussiaModal, setShowRussiaModal] = useState(false);
   const [showRegionModal, setShowRegionModal] = useState(false);
   const [showCityModal, setShowCityModal] = useState(false);
+  const [siteSettings, setSiteSettings] = useState<SiteSettingsData | null>(null);
+  const [userRating, setUserRating] = useState(0);
 
   useEffect(() => {
     const savedUser = localStorage.getItem('chessUser');
@@ -32,8 +40,28 @@ export const HomeSection = ({
         const region = cityRegions[userData.city];
         setUserRegion(region || userData.city);
       }
+      if (userData.rating) setUserRating(userData.rating);
     }
   }, []);
+
+  useEffect(() => {
+    fetch(SITE_SETTINGS_URL)
+      .then(r => r.json())
+      .then(data => setSiteSettings(data))
+      .catch(() => {});
+  }, []);
+
+  const isButtonVisible = (btnKey: string) => {
+    if (!siteSettings) return true;
+    return siteSettings[btnKey]?.value !== 'false';
+  };
+
+  const isLevelAllowed = (levelKey: string) => {
+    if (!siteSettings) return true;
+    const minRating = parseInt(siteSettings[levelKey]?.value || '0');
+    if (minRating === 0) return true;
+    return userRating >= minRating;
+  };
 
   const fullRussiaRanking = [
     { rank: 1, name: 'Александр Петров', rating: 2456, city: 'Москва', avatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=Alexander' },
@@ -85,50 +113,80 @@ export const HomeSection = ({
     <div className="space-y-8 animate-fade-in">
       <div className="text-center pt-2 pb-12">
         <div className="flex flex-col items-center gap-4 mb-8 animate-slide-up max-w-md mx-auto">
-          <Button 
-            size="lg" 
-            className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
-            onClick={() => {
-              if (isAuthenticated) {
-                setShowGameSettings(true);
-              } else {
-                setShowAuthModal(true);
-              }
-            }}
-          >
-            <Icon name="Play" className="mr-2" size={24} />
-            Играть онлайн
-          </Button>
+          {isButtonVisible('btn_play_online') && (
+            <div className="w-full relative">
+              <Button 
+                size="lg" 
+                className={`w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg ${!isLevelAllowed('level_play_online') ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''}`}
+                onClick={() => {
+                  if (!isLevelAllowed('level_play_online')) return;
+                  if (isAuthenticated) {
+                    setShowGameSettings(true);
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
+              >
+                <Icon name="Play" className="mr-2" size={24} />
+                Играть онлайн
+              </Button>
+              {!isLevelAllowed('level_play_online') && (
+                <p className="text-xs text-red-400 mt-1 text-center">
+                  Нужен рейтинг от {siteSettings?.level_play_online?.value}
+                </p>
+              )}
+            </div>
+          )}
           
-          <Button 
-            size="lg" 
-            className="w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
-            onClick={() => {
-              if (isAuthenticated) {
-                setShowOfflineGameModal(true);
-              } else {
-                setShowAuthModal(true);
-              }
-            }}
-          >
-            <Icon name="Gamepad2" className="mr-2" size={24} />
-            Играть офлайн
-          </Button>
+          {isButtonVisible('btn_play_offline') && (
+            <div className="w-full relative">
+              <Button 
+                size="lg" 
+                className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg ${!isLevelAllowed('level_play_offline') ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''}`}
+                onClick={() => {
+                  if (!isLevelAllowed('level_play_offline')) return;
+                  if (isAuthenticated) {
+                    setShowOfflineGameModal(true);
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
+              >
+                <Icon name="Gamepad2" className="mr-2" size={24} />
+                Играть офлайн
+              </Button>
+              {!isLevelAllowed('level_play_offline') && (
+                <p className="text-xs text-red-400 mt-1 text-center">
+                  Нужен рейтинг от {siteSettings?.level_play_offline?.value}
+                </p>
+              )}
+            </div>
+          )}
           
-          <Button 
-            size="lg" 
-            className="w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg"
-            onClick={() => {
-              if (isAuthenticated) {
-                setShowGameSettings(true);
-              } else {
-                setShowAuthModal(true);
-              }
-            }}
-          >
-            <Icon name="Trophy" className="mr-2" size={24} />
-            Участвовать в турнире
-          </Button>
+          {isButtonVisible('btn_tournament') && (
+            <div className="w-full relative">
+              <Button 
+                size="lg" 
+                className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all hover:scale-105 shadow-lg ${!isLevelAllowed('level_tournament') ? 'opacity-50 cursor-not-allowed hover:scale-100' : ''}`}
+                onClick={() => {
+                  if (!isLevelAllowed('level_tournament')) return;
+                  if (isAuthenticated) {
+                    setShowGameSettings(true);
+                  } else {
+                    setShowAuthModal(true);
+                  }
+                }}
+              >
+                <Icon name="Trophy" className="mr-2" size={24} />
+                Участвовать в турнире
+              </Button>
+              {!isLevelAllowed('level_tournament') && (
+                <p className="text-xs text-red-400 mt-1 text-center">
+                  Нужен рейтинг от {siteSettings?.level_tournament?.value}
+                </p>
+              )}
+            </div>
+          )}
         </div>
         <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up" style={{ animationDelay: '0.1s' }}>
           Играйте в шахматы онлайн

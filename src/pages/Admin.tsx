@@ -2,8 +2,11 @@ import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { RatingSettingsModal } from '@/components/admin/RatingSettingsModal';
+import { ButtonVisibilityModal } from '@/components/admin/ButtonVisibilityModal';
+import { LevelAccessModal } from '@/components/admin/LevelAccessModal';
 
 const API_URL = 'https://functions.poehali.dev/f55f4280-d8ac-4ef1-a044-74594813ca03';
+const SITE_SETTINGS_URL = 'https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286';
 
 export interface RatingSettings {
   win_points: { value: string; description: string };
@@ -15,17 +18,29 @@ export interface RatingSettings {
   rating_principles: { value: string; description: string };
 }
 
+export interface SiteSettings {
+  [key: string]: { value: string; description: string };
+}
+
 const Admin = () => {
   const navigate = useNavigate();
   const [showRatingModal, setShowRatingModal] = useState(false);
+  const [showButtonsModal, setShowButtonsModal] = useState(false);
+  const [showLevelsModal, setShowLevelsModal] = useState(false);
   const [settings, setSettings] = useState<RatingSettings | null>(null);
+  const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(false);
 
   const fetchSettings = async () => {
     setLoading(true);
-    const res = await fetch(API_URL);
-    const data = await res.json();
-    setSettings(data);
+    const [ratingRes, siteRes] = await Promise.all([
+      fetch(API_URL),
+      fetch(SITE_SETTINGS_URL)
+    ]);
+    const ratingData = await ratingRes.json();
+    const siteData = await siteRes.json();
+    setSettings(ratingData);
+    setSiteSettings(siteData);
     setLoading(false);
   };
 
@@ -33,7 +48,7 @@ const Admin = () => {
     fetchSettings();
   }, []);
 
-  const handleSave = async (updated: Record<string, { value: string }>) => {
+  const handleRatingSave = async (updated: Record<string, { value: string }>) => {
     await fetch(API_URL, {
       method: 'PUT',
       headers: { 'Content-Type': 'application/json' },
@@ -41,6 +56,43 @@ const Admin = () => {
     });
     await fetchSettings();
     setShowRatingModal(false);
+  };
+
+  const handleSiteSave = async (updated: Record<string, { value: string }>) => {
+    await fetch(SITE_SETTINGS_URL, {
+      method: 'PUT',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(updated)
+    });
+    await fetchSettings();
+    setShowButtonsModal(false);
+    setShowLevelsModal(false);
+  };
+
+  const getButtonsDescription = () => {
+    if (!siteSettings) return 'Загрузка...';
+    const items = [
+      { key: 'btn_play_online', label: 'Онлайн' },
+      { key: 'btn_play_offline', label: 'Офлайн' },
+      { key: 'btn_tournament', label: 'Турнир' },
+    ];
+    return items.map(i => {
+      const on = siteSettings[i.key]?.value === 'true';
+      return `${i.label}: ${on ? 'вкл' : 'выкл'}`;
+    }).join(' | ');
+  };
+
+  const getLevelsDescription = () => {
+    if (!siteSettings) return 'Загрузка...';
+    const items = [
+      { key: 'level_play_online', label: 'Онлайн' },
+      { key: 'level_play_offline', label: 'Офлайн' },
+      { key: 'level_tournament', label: 'Турнир' },
+    ];
+    return items.map(i => {
+      const val = siteSettings[i.key]?.value || '0';
+      return `${i.label}: ${val === '0' ? 'все' : `от ${val}`}`;
+    }).join(' | ');
   };
 
   const adminItems = [
@@ -52,6 +104,20 @@ const Admin = () => {
         ? `Победа: +${settings.win_points.value} | Поражение: -${settings.loss_points.value} | Ничья: +${settings.draw_points.value} | Начальный: ${settings.initial_rating.value} | Мин: ${settings.min_rating.value}`
         : 'Загрузка...',
       onClick: () => setShowRatingModal(true)
+    },
+    {
+      id: 'levels',
+      icon: 'ShieldCheck',
+      title: 'Доступы по уровням',
+      description: getLevelsDescription(),
+      onClick: () => setShowLevelsModal(true)
+    },
+    {
+      id: 'buttons',
+      icon: 'ToggleRight',
+      title: 'Видимость кнопок на сайте',
+      description: getButtonsDescription(),
+      onClick: () => setShowButtonsModal(true)
     }
   ];
 
@@ -101,8 +167,24 @@ const Admin = () => {
       {showRatingModal && settings && (
         <RatingSettingsModal
           settings={settings}
-          onSave={handleSave}
+          onSave={handleRatingSave}
           onClose={() => setShowRatingModal(false)}
+        />
+      )}
+
+      {showButtonsModal && siteSettings && (
+        <ButtonVisibilityModal
+          settings={siteSettings}
+          onSave={handleSiteSave}
+          onClose={() => setShowButtonsModal(false)}
+        />
+      )}
+
+      {showLevelsModal && siteSettings && (
+        <LevelAccessModal
+          settings={siteSettings}
+          onSave={handleSiteSave}
+          onClose={() => setShowLevelsModal(false)}
         />
       )}
     </div>
