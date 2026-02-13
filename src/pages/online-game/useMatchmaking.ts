@@ -6,7 +6,7 @@ const POLL_INTERVAL = 2000;
 const WIDEN_RATING_DELAY = 8000;
 const BOT_OFFER_DELAY = 8000;
 
-export type SearchStatus = 'searching' | 'no_exact_rating' | 'searching_any' | 'no_opponents' | 'found' | 'starting';
+export type SearchStatus = 'searching' | 'searching_any' | 'no_opponents' | 'found' | 'starting';
 
 export interface OpponentData {
   name: string;
@@ -120,7 +120,8 @@ const useMatchmaking = () => {
     botOfferTimerRef.current = setTimeout(() => {
       if (!abortedRef.current && !matchFoundRef.current) {
         if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-        setSearchStatus('no_exact_rating');
+        setSearchStatus('searching_any');
+        startAnyRatingSearch(user);
       }
     }, WIDEN_RATING_DELAY);
 
@@ -172,12 +173,9 @@ const useMatchmaking = () => {
     }
   }, [getUserData, opponentType, timeControl]);
 
-  const handleSearchAnyRating = useCallback(() => {
-    setSearchStatus('searching_any');
+  const startAnyRatingSearch = useCallback((user: { id: string; name?: string; avatar?: string; rating?: number }) => {
     abortedRef.current = false;
     matchFoundRef.current = false;
-    const user = getUserData();
-    if (!user) return;
 
     const searchAny = async () => {
       if (abortedRef.current) return;
@@ -224,7 +222,7 @@ const useMatchmaking = () => {
         setSearchStatus('no_opponents');
       }
     }, BOT_OFFER_DELAY);
-  }, [getUserData, opponentType, timeControl, cleanup]);
+  }, [opponentType, timeControl, cleanup]);
 
   const handleContinueSearch = useCallback(() => {
     setSearchStatus('searching');
@@ -311,7 +309,6 @@ const useMatchmaking = () => {
     timeControl,
     cancelSearch,
     handlePlayBot,
-    handleSearchAnyRating,
     handleContinueSearch
   };
 };

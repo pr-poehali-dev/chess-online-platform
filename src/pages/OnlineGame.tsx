@@ -38,7 +38,6 @@ const OnlineGame = () => {
     timeControl,
     cancelSearch,
     handlePlayBot,
-    handleSearchAnyRating,
     handleContinueSearch
   } = useMatchmaking();
 
@@ -58,10 +57,8 @@ const OnlineGame = () => {
             />
           )}
 
-          {(searchStatus === 'no_exact_rating' || searchStatus === 'no_opponents') && (
+          {searchStatus === 'no_opponents' && (
             <NoMatchScreen
-              isNoExactRating={searchStatus === 'no_exact_rating'}
-              onSearchAnyRating={handleSearchAnyRating}
               onPlayBot={handlePlayBot}
               onContinueSearch={handleContinueSearch}
               onCancel={cancelSearch}
