@@ -50,12 +50,8 @@ export const useGameHandlers = (
     } else {
       if (moveCount <= 2) {
         if (confirm('Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.')) {
-          setOpponentLeftReason('early');
-          setShowOpponentLeft(true);
-          setTimeout(() => {
-            localStorage.removeItem('activeGame');
-            navigate('/');
-          }, 3000);
+          localStorage.removeItem('activeGame');
+          navigate('/');
         }
       } else {
         setShowExitDialog(true);
@@ -72,18 +68,10 @@ export const useGameHandlers = (
     
     if (confirm(message)) {
       if (moveCount <= 2) {
-        setOpponentLeftReason('early');
-        setShowOpponentLeft(true);
-        setTimeout(() => {
-          localStorage.removeItem('activeGame');
-          navigate('/');
-        }, 3000);
+        localStorage.removeItem('activeGame');
+        navigate('/');
       } else {
-        setOpponentLeftReason('surrender');
-        setShowOpponentLeft(true);
-        setTimeout(() => {
-          setGameStatus('checkmate');
-        }, 2000);
+        setGameStatus('checkmate');
       }
       setShowExitDialog(false);
     }
