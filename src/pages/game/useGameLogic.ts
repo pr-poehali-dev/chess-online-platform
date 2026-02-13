@@ -2,6 +2,7 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRights, BoardTheme } from './gameTypes';
 import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
 const FINISH_GAME_URL = 'https://functions.poehali.dev/24acb5e2-473c-4c15-a295-944e14d8aa96';
+const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-050d3d0c3ba2';
 
 export const useGameLogic = (
   difficulty: 'easy' | 'medium' | 'hard' | 'master',
@@ -56,10 +57,30 @@ export const useGameLogic = (
   );
   const [ratingChange, setRatingChange] = useState<number | null>(null);
   const [newRating, setNewRating] = useState<number | null>(null);
+  const [userRating, setUserRating] = useState<number | null>(() => {
+    const saved = localStorage.getItem('chessUser');
+    return saved ? JSON.parse(saved).rating || null : null;
+  });
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
   const gameFinished = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
+
+  useEffect(() => {
+    const saved = localStorage.getItem('chessUser');
+    if (!saved) return;
+    const userData = JSON.parse(saved);
+    const rawId = userData.email || userData.name || 'anonymous';
+    const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+    fetch(`${GAME_HISTORY_URL}?user_id=${encodeURIComponent(userId)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.user?.rating) {
+          setUserRating(data.user.rating);
+        }
+      })
+      .catch(() => {});
+  }, []);
 
   const playWarningSound = () => {
     const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
@@ -466,6 +487,7 @@ export const useGameLogic = (
     setBoardTheme,
     ratingChange,
     newRating,
+    userRating,
     historyRef,
     handleSquareClick,
     isSquareSelected,

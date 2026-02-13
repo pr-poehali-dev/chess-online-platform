@@ -33,8 +33,6 @@ const Game = () => {
   const savedUser = localStorage.getItem('chessUser');
   const userData = savedUser ? JSON.parse(savedUser) : null;
   const userAvatar = userData?.avatar || '';
-  const userRatingStored = userData?.rating || null;
-
   const isPlayingWithBot = !opponentType || opponentType === 'random';
   
   const botAvatar = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
@@ -63,6 +61,7 @@ const Game = () => {
     setBoardTheme,
     ratingChange,
     newRating,
+    userRating,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -185,7 +184,7 @@ const Game = () => {
               time={playerColor === 'white' ? whiteTime : blackTime}
               isCurrentPlayer={currentPlayer === playerColor}
               formatTime={formatTime}
-              rating={newRating || userRatingStored || undefined}
+              rating={newRating || userRating || undefined}
               ratingChange={ratingChange}
               avatar={userAvatar}
               inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
