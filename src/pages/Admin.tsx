@@ -11,6 +11,7 @@ export interface RatingSettings {
   draw_points: { value: string; description: string };
   daily_decay: { value: string; description: string };
   initial_rating: { value: string; description: string };
+  min_rating: { value: string; description: string };
   rating_principles: { value: string; description: string };
 }
 
@@ -48,7 +49,7 @@ const Admin = () => {
       icon: 'Trophy',
       title: 'Принципы построения рейтинга',
       description: settings 
-        ? `Победа: +${settings.win_points.value} | Поражение: -${settings.loss_points.value} | Ничья: +${settings.draw_points.value} | Начальный: ${settings.initial_rating.value}`
+        ? `Победа: +${settings.win_points.value} | Поражение: -${settings.loss_points.value} | Ничья: +${settings.draw_points.value} | Начальный: ${settings.initial_rating.value} | Мин: ${settings.min_rating.value}`
         : 'Загрузка...',
       onClick: () => setShowRatingModal(true)
     }

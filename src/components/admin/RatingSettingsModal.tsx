@@ -14,6 +14,7 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
   const [drawPoints, setDrawPoints] = useState(settings.draw_points.value);
   const [dailyDecay, setDailyDecay] = useState(settings.daily_decay.value);
   const [initialRating, setInitialRating] = useState(settings.initial_rating.value);
+  const [minRating, setMinRating] = useState(settings.min_rating.value);
   const [principles, setPrinciples] = useState(settings.rating_principles.value);
   const [saving, setSaving] = useState(false);
 
@@ -25,6 +26,7 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
       draw_points: { value: drawPoints },
       daily_decay: { value: dailyDecay },
       initial_rating: { value: initialRating },
+      min_rating: { value: minRating },
       rating_principles: { value: principles }
     });
     setSaving(false);
@@ -35,7 +37,8 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
     { label: 'Баллы за поражение', value: lossPoints, onChange: setLossPoints, icon: 'Minus', color: 'text-red-400' },
     { label: 'Баллы за ничью', value: drawPoints, onChange: setDrawPoints, icon: 'Equal', color: 'text-yellow-400' },
     { label: 'Ежедневное снижение', value: dailyDecay, onChange: setDailyDecay, icon: 'TrendingDown', color: 'text-orange-400' },
-    { label: 'Начальный рейтинг', value: initialRating, onChange: setInitialRating, icon: 'Star', color: 'text-blue-400' }
+    { label: 'Начальный рейтинг', value: initialRating, onChange: setInitialRating, icon: 'Star', color: 'text-blue-400' },
+    { label: 'Минимальный рейтинг', value: minRating, onChange: setMinRating, icon: 'ShieldAlert', color: 'text-purple-400' }
   ];
 
   return (
