@@ -59,6 +59,8 @@ const Game = () => {
     setShowPossibleMoves,
     theme,
     setTheme,
+    boardTheme,
+    setBoardTheme,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -122,6 +124,8 @@ const Game = () => {
         setShowPossibleMoves={setShowPossibleMoves}
         theme={theme}
         setTheme={setTheme}
+        boardTheme={boardTheme}
+        setBoardTheme={setBoardTheme}
       />
 
       <main className="flex-1 flex items-center justify-center p-2 md:p-3 overflow-y-auto md:overflow-hidden">
@@ -140,6 +144,8 @@ const Game = () => {
               setShowPossibleMoves={setShowPossibleMoves}
               theme={theme}
               setTheme={setTheme}
+              boardTheme={boardTheme}
+              setBoardTheme={setBoardTheme}
               gameStatus={gameStatus}
               currentPlayer={currentPlayer}
               setShowRematchOffer={setShowRematchOffer}
@@ -167,6 +173,7 @@ const Game = () => {
               kingInCheckPosition={kingInCheckPosition}
               showPossibleMoves={showPossibleMoves}
               flipped={flipped}
+              boardTheme={boardTheme}
             />
 
             <PlayerInfo

@@ -1,4 +1,4 @@
-import { Board, Position, pieceImages } from './gameTypes';
+import { Board, Position, pieceImages, pieceSymbols, BoardTheme, boardThemes } from './gameTypes';
 
 interface GameBoardProps {
   board: Board;
@@ -8,16 +8,22 @@ interface GameBoardProps {
   kingInCheckPosition?: Position | null;
   showPossibleMoves?: boolean;
   flipped?: boolean;
+  boardTheme?: BoardTheme;
 }
 
-const LIGHT_SQUARE = '#b8976a';
-const DARK_SQUARE = '#8b6b4a';
+export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition, showPossibleMoves = true, flipped = false, boardTheme = 'wood' }: GameBoardProps) => {
+  const config = boardThemes[boardTheme];
+  const useImages = boardTheme !== 'classic';
 
-export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition, showPossibleMoves = true, flipped = false }: GameBoardProps) => {
   return (
     <div className="inline-block rounded-sm overflow-hidden shadow-2xl relative w-full md:w-auto md:h-[min(calc(100vh-310px),700px)]" style={{ 
-      boxShadow: '0 0 0 3px #5d4037, 0 0 0 5px #3e2723, 0 15px 30px rgba(0,0,0,0.4)',
-      aspectRatio: '1/1'
+      boxShadow: `0 0 0 3px ${config.borderColor}, 0 0 0 5px ${config.borderOuterColor}, 0 15px 30px rgba(0,0,0,0.4)`,
+      aspectRatio: '1/1',
+      ...(config.backgroundImage ? {
+        backgroundImage: `url(${config.backgroundImage})`,
+        backgroundSize: 'cover',
+        backgroundPosition: 'center'
+      } : {})
     }}>
       <table className="w-full h-full border-collapse" style={{ borderSpacing: 0 }}>
         <tbody>
@@ -50,14 +56,19 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                   width: '12.5%',
                   height: 0,
                   paddingBottom: '12.5%',
-                  backgroundColor: isLight ? LIGHT_SQUARE : DARK_SQUARE
+                  backgroundColor: isLight ? config.lightSquare : config.darkSquare,
+                  ...(boardTheme === 'classic' ? {
+                    boxShadow: isLight 
+                      ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
+                      : 'inset 0 1px 2px rgba(0,0,0,0.2), inset 0 -1px 2px rgba(0,0,0,0.1)'
+                  } : {})
                 }}
               >
                 <div className="absolute inset-0 flex items-center justify-center">
                 {viewCol === 0 && (
                   <span 
                     className="absolute top-0.5 md:top-1 left-1 md:left-1.5 text-[8px] md:text-xs font-semibold pointer-events-none"
-                    style={{ color: isLight ? DARK_SQUARE : LIGHT_SQUARE }}
+                    style={{ color: isLight ? config.labelLightColor : config.labelDarkColor }}
                   >
                     {rankLabel}
                   </span>
@@ -65,7 +76,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                 {viewRow === 7 && (
                   <span 
                     className="absolute bottom-0.5 md:bottom-1 right-1 md:right-1.5 text-[8px] md:text-xs font-semibold pointer-events-none"
-                    style={{ color: isLight ? DARK_SQUARE : LIGHT_SQUARE }}
+                    style={{ color: isLight ? config.labelLightColor : config.labelDarkColor }}
                   >
                     {fileLabel}
                   </span>
@@ -81,7 +92,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                     )}
                   </div>
                 )}
-                {piece && (
+                {piece && useImages && (
                   <img
                     src={pieceImages[piece.color][piece.type]}
                     alt={`${piece.color} ${piece.type}`}
@@ -91,6 +102,23 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                     }}
                     draggable={false}
                   />
+                )}
+                {piece && !useImages && (
+                  <div 
+                    className="text-3xl md:text-5xl lg:text-6xl relative z-20"
+                    style={{
+                      filter: piece.color === 'white' 
+                        ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.4))' 
+                        : 'drop-shadow(0 2px 3px rgba(0,0,0,0.8)) drop-shadow(0 0 1px rgba(255,255,255,0.2))',
+                      color: piece.color === 'white' ? '#f5f5f5' : '#1a1a1a',
+                      WebkitTextStroke: piece.color === 'white' ? '1px #d0d0d0' : '1px #000000',
+                      textShadow: piece.color === 'white' 
+                        ? '0 1px 0 #ffffff, 0 -1px 0 #c0c0c0' 
+                        : '0 1px 0 #000000, 0 -1px 0 #333333'
+                    }}
+                  >
+                    {pieceSymbols[piece.color][piece.type]}
+                  </div>
                 )}
                 </div>
               </td>

@@ -1,4 +1,5 @@
 import Icon from '@/components/ui/icon';
+import { BoardTheme, boardThemes } from './gameTypes';
 
 interface GameHeaderProps {
   showSettingsMenu: boolean;
@@ -13,6 +14,8 @@ interface GameHeaderProps {
   setShowPossibleMoves?: (value: boolean) => void;
   theme?: 'light' | 'dark';
   setTheme?: (value: 'light' | 'dark') => void;
+  boardTheme?: BoardTheme;
+  setBoardTheme?: (value: BoardTheme) => void;
   gameStatus?: 'playing' | 'checkmate' | 'stalemate' | 'draw';
   currentPlayer?: 'white' | 'black';
   setShowRematchOffer?: (value: boolean) => void;
@@ -65,10 +68,13 @@ export const GameControls = ({
   setShowPossibleMoves,
   theme,
   setTheme,
+  boardTheme,
+  setBoardTheme,
   gameStatus,
   currentPlayer,
   setShowRematchOffer
 }: GameHeaderProps) => {
+  const themeKeys: BoardTheme[] = ['classic', 'flat', 'wood'];
   return (
     <div className="w-full md:w-auto h-[52px] md:h-[56px]">
       <div className="flex items-center gap-1.5 md:gap-2 h-full">
@@ -161,6 +167,56 @@ export const GameControls = ({
                     <div className={`absolute top-0.5 w-4 h-4 rounded-full bg-white transition-transform ${showPossibleMoves ? 'translate-x-5' : 'translate-x-0.5'}`} />
                   </div>
                 </button>
+                <div className={`px-4 py-3 border-t ${
+                  theme === 'light' ? 'border-slate-200' : 'border-stone-700/50'
+                }`}>
+                  <div className={`flex items-center gap-3 mb-2 ${
+                    theme === 'light' ? 'text-slate-700' : 'text-stone-300'
+                  }`}>
+                    <Icon name="LayoutGrid" size={20} />
+                    <span>Доска</span>
+                  </div>
+                  <div className="flex gap-1.5">
+                    {themeKeys.map((key) => {
+                      const cfg = boardThemes[key];
+                      const isActive = boardTheme === key;
+                      return (
+                        <button
+                          key={key}
+                          onClick={() => {
+                            if (setBoardTheme) {
+                              setBoardTheme(key);
+                              localStorage.setItem('chessBoardTheme', key);
+                            }
+                          }}
+                          className={`flex-1 rounded-md overflow-hidden border-2 transition-all ${
+                            isActive ? 'border-amber-400 scale-105' : (theme === 'light' ? 'border-slate-300' : 'border-stone-600')
+                          }`}
+                          title={cfg.name}
+                        >
+                          <div className="grid grid-cols-4 aspect-square">
+                            {Array.from({ length: 16 }).map((_, i) => {
+                              const r = Math.floor(i / 4);
+                              const c = i % 4;
+                              const isL = (r + c) % 2 === 0;
+                              return (
+                                <div
+                                  key={i}
+                                  style={{ backgroundColor: isL ? cfg.lightSquare : cfg.darkSquare }}
+                                />
+                              );
+                            })}
+                          </div>
+                          <div className={`text-[9px] text-center py-0.5 ${
+                            theme === 'light' ? 'text-slate-600 bg-slate-50' : 'text-stone-400 bg-stone-700/50'
+                          }`}>
+                            {cfg.name}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </div>
                 <button
                   onClick={handleOfferDraw}
                   className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 border-t ${

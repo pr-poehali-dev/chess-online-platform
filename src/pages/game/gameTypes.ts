@@ -60,6 +60,50 @@ export const pieceImages: Record<string, Record<string, string>> = {
   }
 };
 
+export type BoardTheme = 'classic' | 'flat' | 'wood';
+
+export interface BoardThemeConfig {
+  name: string;
+  lightSquare: string;
+  darkSquare: string;
+  backgroundImage?: string;
+  borderColor: string;
+  borderOuterColor: string;
+  labelLightColor: string;
+  labelDarkColor: string;
+}
+
+export const boardThemes: Record<BoardTheme, BoardThemeConfig> = {
+  classic: {
+    name: 'Классика',
+    lightSquare: 'rgba(255, 255, 255, 0.15)',
+    darkSquare: 'rgba(0, 0, 0, 0.3)',
+    backgroundImage: 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/79c4520d-63b3-4e07-8bba-0b7b41c53435.jpg',
+    borderColor: '#3e2723',
+    borderOuterColor: '#5d4037',
+    labelLightColor: '#b58863',
+    labelDarkColor: '#f0d9b5'
+  },
+  flat: {
+    name: 'Плоская',
+    lightSquare: '#b8976a',
+    darkSquare: '#8b6b4a',
+    borderColor: '#5d4037',
+    borderOuterColor: '#3e2723',
+    labelLightColor: '#8b6b4a',
+    labelDarkColor: '#b8976a'
+  },
+  wood: {
+    name: 'Дерево',
+    lightSquare: '#c4a882',
+    darkSquare: '#8b7355',
+    borderColor: '#5a4a3a',
+    borderOuterColor: '#3d3228',
+    labelLightColor: '#7a6548',
+    labelDarkColor: '#d4bc9a'
+  }
+};
+
 export function parseTimeControl(control: string): { minutes: number; increment: number } {
   if (control.includes('+')) {
     const [mins, inc] = control.split('+').map(Number);

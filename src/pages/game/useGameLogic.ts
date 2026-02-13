@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRights } from './gameTypes';
+import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRights, BoardTheme } from './gameTypes';
 import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
 
 export const useGameLogic = (
@@ -49,6 +49,9 @@ export const useGameLogic = (
   );
   const [theme, setTheme] = useState<'light' | 'dark'>(
     savedState?.theme || (localStorage.getItem('chessTheme') as 'light' | 'dark') || 'dark'
+  );
+  const [boardTheme, setBoardTheme] = useState<BoardTheme>(
+    savedState?.boardTheme || (localStorage.getItem('chessBoardTheme') as BoardTheme) || 'wood'
   );
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
@@ -162,13 +165,14 @@ export const useGameLogic = (
         castlingRights,
         enPassantTarget,
         showPossibleMoves,
-        theme
+        theme,
+        boardTheme
       };
       localStorage.setItem('activeGame', JSON.stringify(gameState));
     } else {
       localStorage.removeItem('activeGame');
     }
-  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget, showPossibleMoves, theme]);
+  }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget, showPossibleMoves, theme, boardTheme]);
 
   const makeMove = (from: Position, to: Position) => {
     const newBoard = board.map(row => [...row]);
@@ -396,6 +400,8 @@ export const useGameLogic = (
     setShowPossibleMoves,
     theme,
     setTheme,
+    boardTheme,
+    setBoardTheme,
     historyRef,
     handleSquareClick,
     isSquareSelected,
