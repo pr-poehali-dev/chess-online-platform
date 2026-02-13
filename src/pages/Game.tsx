@@ -109,6 +109,9 @@ const Game = () => {
     handleSendMessage,
     handleChatKeyPress,
     handleBlockOpponent,
+    handleUnblockOpponent,
+    isChatBlocked,
+    isChatBlockedByOpponent,
     handleOfferDraw,
     handleAcceptDraw,
     handleDeclineDraw,
@@ -239,8 +242,12 @@ const Game = () => {
           onSendMessage={handleSendMessage}
           onChatKeyPress={handleChatKeyPress}
           onBlock={handleBlockOpponent}
+          onUnblock={handleUnblockOpponent}
+          isBlocked={isChatBlocked}
+          isBlockedByOpponent={isChatBlockedByOpponent}
           onClose={() => setShowChat(false)}
           chatEndRef={chatEndRef}
+          theme={theme}
         />
       )}
 

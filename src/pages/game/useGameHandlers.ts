@@ -21,6 +21,8 @@ export const useGameHandlers = (
   const [drawOffersCount, setDrawOffersCount] = useState(0);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
+  const [isChatBlocked, setIsChatBlocked] = useState(false);
+  const [isChatBlockedByOpponent, setIsChatBlockedByOpponent] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
   const handleMouseDown = (e: React.MouseEvent, historyRef: React.RefObject<HTMLDivElement>) => {
@@ -119,14 +121,11 @@ export const useGameHandlers = (
   };
 
   const handleBlockOpponent = () => {
-    if (confirm('Вы действительно хотите заблокировать соперника? Вы больше не сможете получать от него сообщения.')) {
-      const blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
-      blockedUsers.push('computer-opponent');
-      localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
-      
-      setShowChat(false);
-      alert('Соперник заблокирован');
-    }
+    setIsChatBlocked(true);
+  };
+
+  const handleUnblockOpponent = () => {
+    setIsChatBlocked(false);
   };
 
   const handleOfferDraw = () => {
@@ -204,6 +203,9 @@ export const useGameHandlers = (
     handleSendMessage,
     handleChatKeyPress,
     handleBlockOpponent,
+    handleUnblockOpponent,
+    isChatBlocked,
+    isChatBlockedByOpponent,
     handleOfferDraw,
     handleAcceptDraw,
     handleDeclineDraw,
