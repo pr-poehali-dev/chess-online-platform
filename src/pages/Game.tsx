@@ -21,6 +21,12 @@ const Game = () => {
   const timeControl = searchParams.get('time') || '10+0';
   const opponentType = searchParams.get('opponent');
   const colorParam = searchParams.get('color') || 'random';
+  const onlineGameId = searchParams.get('online_game_id');
+  const isOnlineReal = searchParams.get('online') === 'true';
+  const isBotFromMatchmaking = searchParams.get('bot_game') === 'true';
+  const paramOpponentName = searchParams.get('opponent_name') ? decodeURIComponent(searchParams.get('opponent_name')!) : '';
+  const paramOpponentRating = searchParams.get('opponent_rating') ? Number(searchParams.get('opponent_rating')) : 0;
+  const paramOpponentAvatar = searchParams.get('opponent_avatar') ? decodeURIComponent(searchParams.get('opponent_avatar')!) : '';
   
   const [playerColor] = useState<'white' | 'black'>(() => {
     if (colorParam === 'white') return 'white';
@@ -33,12 +39,12 @@ const Game = () => {
   const savedUser = localStorage.getItem('chessUser');
   const userData = savedUser ? JSON.parse(savedUser) : null;
   const userAvatar = userData?.avatar || '';
-  const isPlayingWithBot = !opponentType || opponentType === 'random';
+  const isPlayingWithBot = (!opponentType || opponentType === 'random') && !isOnlineReal;
   
   const botAvatar = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
-  const opponentAvatar = isPlayingWithBot ? botAvatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Opponent';
-  const opponentName = isPlayingWithBot ? 'Бот' : 'Игорь Соколов';
-  const opponentRating = isPlayingWithBot ? undefined : 2123;
+  const opponentAvatar = isOnlineReal ? (paramOpponentAvatar || '') : (isPlayingWithBot || isBotFromMatchmaking) ? botAvatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Opponent';
+  const opponentName = isOnlineReal ? (paramOpponentName || 'Соперник') : (isPlayingWithBot || isBotFromMatchmaking) ? (paramOpponentName || 'Бот') : 'Соперник';
+  const opponentRating = isOnlineReal ? (paramOpponentRating || undefined) : (isPlayingWithBot ? undefined : paramOpponentRating || undefined);
 
   const {
     displayBoard,
@@ -68,7 +74,7 @@ const Game = () => {
     isSquarePossibleMove,
     handlePreviousMove,
     handleNextMove
-  } = useGameLogic(difficulty, timeControl, playerColor);
+  } = useGameLogic(difficulty, timeControl, playerColor, isOnlineReal ? Number(onlineGameId) : undefined);
 
   const {
     isDragging,
@@ -159,7 +165,7 @@ const Game = () => {
               time={playerColor === 'white' ? blackTime : whiteTime}
               isCurrentPlayer={currentPlayer !== playerColor}
               formatTime={formatTime}
-              difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
+              difficulty={(isPlayingWithBot || isBotFromMatchmaking) ? getDifficultyLabel(difficulty) : undefined}
               rating={opponentRating}
               avatar={opponentAvatar}
               capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
@@ -217,7 +223,7 @@ const Game = () => {
 
       {showChat && (
         <GameChatModal
-          opponentName={isPlayingWithBot ? `${opponentName} (${getDifficultyLabel(difficulty)})` : opponentName}
+          opponentName={(isPlayingWithBot || isBotFromMatchmaking) ? `${opponentName} (${getDifficultyLabel(difficulty)})` : opponentName}
           opponentIcon="♚"
           opponentInfo="Соперник"
           chatMessages={chatMessages}

@@ -1,0 +1,42 @@
+{
+  "tests": [
+    {
+      "name": "OPTIONS preflight",
+      "method": "OPTIONS",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Search for opponent",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "search",
+        "user_id": "test-match-002",
+        "username": "TestMatchPlayer",
+        "rating": 1200,
+        "opponent_type": "country",
+        "time_control": "rapid"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"status": "string"},
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Play with bot",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "play_bot",
+        "user_id": "test-match-002",
+        "username": "TestMatchPlayer",
+        "rating": 1200,
+        "opponent_type": "country",
+        "time_control": "rapid"
+      },
+      "expectedStatus": 200,
+      "expectedBody": {"status": "string"},
+      "bodyMatcher": "partial"
+    }
+  ]
+}

@@ -3,12 +3,15 @@ import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRi
 import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
 const FINISH_GAME_URL = 'https://functions.poehali.dev/24acb5e2-473c-4c15-a295-944e14d8aa96';
 const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-050d3d0c3ba2';
+const ONLINE_MOVE_URL = 'https://functions.poehali.dev/58a413af-81c4-47bd-b3ce-4552a349ae19';
 
 export const useGameLogic = (
   difficulty: 'easy' | 'medium' | 'hard' | 'master',
   timeControl: string,
-  playerColor: 'white' | 'black' = 'white'
+  playerColor: 'white' | 'black' = 'white',
+  onlineGameId?: number
 ) => {
+  const isOnlineGame = !!onlineGameId;
   const botColor = playerColor === 'white' ? 'black' : 'white';
   const loadGameState = () => {
     const saved = localStorage.getItem('activeGame');
@@ -160,6 +163,7 @@ export const useGameLogic = (
   }, [currentPlayer, gameStatus]);
 
   useEffect(() => {
+    if (isOnlineGame) return;
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
       setDisplayBoard(board);
@@ -198,6 +202,168 @@ export const useGameLogic = (
       localStorage.removeItem('activeGame');
     }
   }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget, showPossibleMoves, theme, boardTheme]);
+
+  const onlineMoveCountRef = useRef(0);
+  
+  const sendMoveToServer = useCallback(async (move: string, boardState: string, gameStatusVal: string, winnerId?: string) => {
+    if (!isOnlineGame || !onlineGameId) return;
+    const saved = localStorage.getItem('chessUser');
+    if (!saved) return;
+    const uData = JSON.parse(saved);
+    const rawId = uData.email || uData.name || 'anonymous';
+    const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+    
+    fetch(ONLINE_MOVE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'move',
+        game_id: onlineGameId,
+        user_id: userId,
+        move,
+        board_state: boardState,
+        game_status: gameStatusVal,
+        winner_id: winnerId || ''
+      })
+    }).catch(() => {});
+  }, [isOnlineGame, onlineGameId]);
+
+  const applyMoveFromNotation = useCallback((notation: string) => {
+    const parts = notation.split('-');
+    if (parts.length !== 2) return;
+    const fromCol = parts[0].charCodeAt(0) - 97;
+    const fromRow = 8 - parseInt(parts[0][1]);
+    const toCol = parts[1].charCodeAt(0) - 97;
+    const toRow = 8 - parseInt(parts[1][1]);
+    
+    setBoard(prevBoard => {
+      const newBoard = prevBoard.map(row => [...row]);
+      const piece = newBoard[fromRow][fromCol];
+      if (!piece) return prevBoard;
+
+      const capturedPiece = newBoard[toRow][toCol];
+
+      if (piece.type === 'king' && Math.abs(toCol - fromCol) === 2) {
+        const isKingSide = toCol > fromCol;
+        const rookFromCol = isKingSide ? 7 : 0;
+        const rookToCol = isKingSide ? toCol - 1 : toCol + 1;
+        newBoard[fromRow][rookToCol] = newBoard[fromRow][rookFromCol];
+        newBoard[fromRow][rookFromCol] = null;
+      }
+
+      if (piece.type === 'pawn' && toCol !== fromCol && !capturedPiece) {
+        const capturedRow = piece.color === 'white' ? toRow + 1 : toRow - 1;
+        const enPassantCaptured = newBoard[capturedRow][toCol];
+        if (enPassantCaptured) {
+          if (piece.color === 'white') {
+            setCapturedByWhite(prev => [...prev, {type: enPassantCaptured.type, color: enPassantCaptured.color}]);
+          } else {
+            setCapturedByBlack(prev => [...prev, {type: enPassantCaptured.type, color: enPassantCaptured.color}]);
+          }
+        }
+        newBoard[capturedRow][toCol] = null;
+      }
+
+      if (capturedPiece) {
+        if (piece.color === 'white') {
+          setCapturedByWhite(prev => [...prev, {type: capturedPiece.type, color: capturedPiece.color}]);
+        } else {
+          setCapturedByBlack(prev => [...prev, {type: capturedPiece.type, color: capturedPiece.color}]);
+        }
+      }
+
+      const promotionRow = piece.color === 'white' ? 0 : 7;
+      if (piece.type === 'pawn' && toRow === promotionRow) {
+        newBoard[toRow][toCol] = { type: 'queen', color: piece.color };
+      } else {
+        newBoard[toRow][toCol] = piece;
+      }
+      newBoard[fromRow][fromCol] = null;
+
+      setCastlingRights(prev => {
+        const nr = { ...prev };
+        if (piece.type === 'king') {
+          if (piece.color === 'white') { nr.whiteKingSide = false; nr.whiteQueenSide = false; }
+          else { nr.blackKingSide = false; nr.blackQueenSide = false; }
+        }
+        if (piece.type === 'rook') {
+          if (piece.color === 'white') {
+            if (fromCol === 0) nr.whiteQueenSide = false;
+            if (fromCol === 7) nr.whiteKingSide = false;
+          } else {
+            if (fromCol === 0) nr.blackQueenSide = false;
+            if (fromCol === 7) nr.blackKingSide = false;
+          }
+        }
+        return nr;
+      });
+
+      if (piece.type === 'pawn' && Math.abs(toRow - fromRow) === 2) {
+        setEnPassantTarget({ row: piece.color === 'white' ? fromRow - 1 : fromRow + 1, col: fromCol });
+      } else {
+        setEnPassantTarget(null);
+      }
+
+      setMoveHistory(prev => [...prev, notation]);
+      setBoardHistory(prev => [...prev, newBoard]);
+      setCurrentMoveIndex(prev => prev + 1);
+      setDisplayBoard(newBoard);
+
+      const nextPlayer: 'white' | 'black' = piece.color === 'white' ? 'black' : 'white';
+      setCurrentPlayer(nextPlayer);
+
+      setTimeout(() => {
+        if (isInCheck(newBoard, nextPlayer)) {
+          const kingPos = findKing(newBoard, nextPlayer);
+          setKingInCheckPosition(kingPos);
+        } else {
+          setKingInCheckPosition(null);
+        }
+      }, 100);
+
+      return newBoard;
+    });
+  }, []);
+
+  useEffect(() => {
+    if (!isOnlineGame || !onlineGameId) return;
+    if (gameStatus !== 'playing') return;
+    if (currentPlayer === playerColor) return;
+
+    const pollInterval = setInterval(async () => {
+      try {
+        const res = await fetch(`${ONLINE_MOVE_URL}?game_id=${onlineGameId}`);
+        const data = await res.json();
+        if (!data.game) return;
+
+        const serverMoves = data.game.move_history ? data.game.move_history.split(',').filter(Boolean) : [];
+        
+        if (data.game.status === 'finished') {
+          setGameStatus('checkmate');
+          clearInterval(pollInterval);
+          return;
+        }
+
+        if (serverMoves.length > onlineMoveCountRef.current) {
+          const newMoves = serverMoves.slice(onlineMoveCountRef.current);
+          for (const m of newMoves) {
+            applyMoveFromNotation(m);
+          }
+          onlineMoveCountRef.current = serverMoves.length;
+        }
+
+        if (data.game.white_time !== undefined) setWhiteTime(data.game.white_time);
+        if (data.game.black_time !== undefined) setBlackTime(data.game.black_time);
+      } catch (e) { console.error(e); }
+    }, 1500);
+
+    return () => clearInterval(pollInterval);
+  }, [isOnlineGame, onlineGameId, gameStatus, currentPlayer, playerColor, applyMoveFromNotation]);
+
+  useEffect(() => {
+    if (!isOnlineGame) return;
+    onlineMoveCountRef.current = moveHistory.length;
+  }, [moveHistory.length, isOnlineGame]);
 
   const submitGameResult = useCallback(async (status: 'checkmate' | 'stalemate' | 'draw', currentPlayerAtEnd: string) => {
     if (gameFinished.current) return;
@@ -369,7 +535,9 @@ export const useGameLogic = (
     const nextPlayer = currentPlayer === 'white' ? 'black' : 'white';
     setCurrentPlayer(nextPlayer);
     
-    // Проверка шаха
+    let finalGameStatus = 'playing';
+    let winnerId = '';
+
     setTimeout(() => {
       if (isInCheck(newBoard, nextPlayer)) {
         const kingPos = findKing(newBoard, nextPlayer);
@@ -378,11 +546,22 @@ export const useGameLogic = (
         setKingInCheckPosition(null);
       }
       
-      // Проверка мата или пата
       if (isCheckmate(newBoard, nextPlayer, newCastlingRights, newEnPassantTarget)) {
         setGameStatus('checkmate');
+        finalGameStatus = 'checkmate';
+        const saved = localStorage.getItem('chessUser');
+        if (saved) {
+          const uData = JSON.parse(saved);
+          const rawId = uData.email || uData.name || 'anonymous';
+          winnerId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+        }
       } else if (isStalemate(newBoard, nextPlayer, newCastlingRights, newEnPassantTarget)) {
         setGameStatus('stalemate');
+        finalGameStatus = 'stalemate';
+      }
+
+      if (isOnlineGame && piece?.color === playerColor) {
+        sendMoveToServer(moveNotation, JSON.stringify(newBoard), finalGameStatus, winnerId);
       }
     }, 100);
   };
