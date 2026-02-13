@@ -51,7 +51,7 @@ export const PlayerInfo = ({
     <div className={`backdrop-blur-sm rounded-lg p-2.5 md:p-3 border w-full md:w-auto min-h-[68px] md:min-h-[76px] ${
       theme === 'light' 
         ? (playerColor === 'black' ? 'bg-stone-700/80 border-stone-600' : 'bg-white/80 border-slate-300')
-        : (playerColor === 'black' ? 'bg-stone-900/80 border-stone-700' : 'bg-stone-800/50 border-stone-700/30')
+        : (playerColor === 'black' ? 'bg-stone-900/80 border-stone-700' : 'bg-stone-200/90 border-stone-400')
     }`}>
       <div className="flex items-center justify-between h-full">
         <div
@@ -69,22 +69,32 @@ export const PlayerInfo = ({
           )}
           <div className="min-w-0 flex-shrink">
             <div className={`text-[11px] md:text-xs font-medium truncate ${
-              theme === 'light' ? 'text-slate-800' : 'text-stone-200'
+              theme === 'light'
+                ? 'text-slate-800'
+                : (playerColor === 'white' ? 'text-stone-800' : 'text-stone-200')
             }`}>
               {playerName}{difficulty && ` (${difficulty})`}
             </div>
             <div className="flex items-center gap-2">
-              <div className={`text-[10px] md:text-xs whitespace-nowrap ${
-                playerColor === 'black' 
-                  ? 'text-stone-900 font-semibold'
-                  : (theme === 'light' ? 'text-slate-600' : 'text-stone-400')
-              }`}>
+              <div
+                className={`text-[10px] md:text-xs whitespace-nowrap ${
+                  playerColor === 'black' 
+                    ? (theme === 'dark' ? 'text-stone-900 font-semibold' : 'text-stone-900 font-semibold')
+                    : (theme === 'light' ? 'text-slate-600' : 'text-stone-600')
+                }`}
+                style={playerColor === 'black' && theme === 'dark' ? {
+                  WebkitTextStroke: '0.3px rgba(255,255,255,0.5)',
+                  paintOrder: 'stroke fill'
+                } : undefined}
+              >
                 {playerColor === 'white' ? 'Белые' : 'Черные'}
               </div>
               {rating && (
                 <div className="flex items-center gap-1">
                   <div className={`text-[10px] md:text-xs font-semibold whitespace-nowrap ${
-                    theme === 'light' ? 'text-blue-600' : 'text-blue-400'
+                    theme === 'light'
+                      ? 'text-blue-600'
+                      : (playerColor === 'white' ? 'text-blue-600' : 'text-blue-400')
                   }`}>
                     {rating}
                   </div>
@@ -123,7 +133,9 @@ export const PlayerInfo = ({
         <div className="flex flex-col items-end gap-1 flex-shrink-0">
           <div className="flex items-center gap-2">
             <div className={`text-lg md:text-xl font-bold whitespace-nowrap ${
-              time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer ? 'text-green-400' : 'text-stone-400'
+              time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer
+                ? (theme === 'dark' && playerColor === 'white' ? 'text-green-600' : 'text-green-400')
+                : (theme === 'dark' && playerColor === 'white' ? 'text-stone-500' : 'text-stone-400')
             }`}>
               {formatTime(time)}
             </div>
