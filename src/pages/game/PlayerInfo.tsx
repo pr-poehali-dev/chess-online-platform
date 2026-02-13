@@ -13,24 +13,7 @@ interface PlayerInfoProps {
   theme?: 'light' | 'dark';
 }
 
-const pieceSymbols: Record<string, Record<string, string>> = {
-  'white': {
-    'pawn': '♙',
-    'knight': '♘',
-    'bishop': '♗',
-    'rook': '♖',
-    'queen': '♕',
-    'king': '♔'
-  },
-  'black': {
-    'pawn': '♟',
-    'knight': '♞',
-    'bishop': '♝',
-    'rook': '♜',
-    'queen': '♛',
-    'king': '♚'
-  }
-};
+import { pieceImages } from './gameTypes';
 
 export const PlayerInfo = ({
   playerName,
@@ -105,17 +88,18 @@ export const PlayerInfo = ({
           {capturedPieces.length > 0 && sortedGroups.map((group, groupIndex) => (
             <div key={groupIndex} className="relative flex items-center flex-shrink-0" style={{ height: '1.5em' }}>
               {group.map((piece, index) => (
-                <span 
-                  key={index} 
-                  className={`text-xl md:text-2xl`}
+                <img
+                  key={index}
+                  src={pieceImages[piece.color]?.[piece.type]}
+                  alt={`${piece.color} ${piece.type}`}
+                  className="w-5 h-5 md:w-6 md:h-6"
                   style={{ 
-                    marginLeft: index > 0 ? '-0.4em' : '0',
+                    marginLeft: index > 0 ? '-0.3em' : '0',
                     zIndex: index,
-                    color: piece.color === 'white' ? '#e7e5e4' : '#1c1917'
+                    position: 'relative'
                   }}
-                >
-                  {pieceSymbols[piece.color][piece.type]}
-                </span>
+                  draggable={false}
+                />
               ))}
             </div>
           ))}
