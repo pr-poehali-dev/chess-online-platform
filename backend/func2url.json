@@ -1,4 +1,5 @@
 {
+  "geo-detect": "https://functions.poehali.dev/32db3d63-2a67-4f5e-b0f2-4f5aab3e8153",
   "send-otp": "https://functions.poehali.dev/534f2773-afe5-4714-82c2-4fa8ec20ed39",
   "verify-otp": "https://functions.poehali.dev/229812f6-6d4d-477a-b4cb-28b61b43937e",
   "site-settings": "https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286",

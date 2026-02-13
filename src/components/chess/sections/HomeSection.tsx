@@ -5,6 +5,7 @@ import { cityRegions } from '@/components/chess/data/cities';
 import { RankingCard } from './RankingCard';
 
 const SITE_SETTINGS_URL = 'https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286';
+const GEO_DETECT_URL = 'https://functions.poehali.dev/32db3d63-2a67-4f5e-b0f2-4f5aab3e8153';
 
 interface SiteSettingsData {
   [key: string]: { value: string; description: string };
@@ -42,6 +43,19 @@ export const HomeSection = ({
         setUserRegion(region || userData.city);
       }
       if (userData.rating) setUserRating(userData.rating);
+    } else {
+      fetch(GEO_DETECT_URL)
+        .then(r => r.json())
+        .then(data => {
+          if (data.city) {
+            setUserCity(data.city);
+            const region = cityRegions[data.city] || data.region || data.city;
+            setUserRegion(region);
+            sessionStorage.setItem('detectedCity', data.city);
+            sessionStorage.setItem('detectedRegion', region);
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 
