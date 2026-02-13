@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/chess/Navbar';
 import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection, NotificationsSection, HistorySection, ChatSection } from '@/components/chess/Sections';
 import { AuthModal, GameSettingsModal, OfflineGameModal } from '@/components/chess/Modals';
+const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-050d3d0c3ba2';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -30,12 +31,34 @@ const Index = () => {
     }
   }, [isDarkMode]);
 
-  const stats = {
-    games: 247,
-    wins: 156,
-    rating: 1842,
-    tournaments: 12
-  };
+  const [stats, setStats] = useState({
+    games: 0,
+    wins: 0,
+    rating: 1200,
+    tournaments: 0
+  });
+
+  useEffect(() => {
+    const savedUser = localStorage.getItem('chessUser');
+    if (!savedUser) return;
+    const userData = JSON.parse(savedUser);
+    const rawId = userData.email || userData.name || 'anonymous';
+    const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+
+    fetch(`${GAME_HISTORY_URL}?user_id=${encodeURIComponent(userId)}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.user) {
+          setStats({
+            games: data.user.games_played || 0,
+            wins: data.user.wins || 0,
+            rating: data.user.rating || 1200,
+            tournaments: 0
+          });
+        }
+      })
+      .catch(() => {});
+  }, [isAuthenticated]);
 
   const leaderboard = [
     { rank: 1, name: 'Александр Петров', rating: 2456, avatar: '🏆' },

@@ -33,7 +33,7 @@ const Game = () => {
   const savedUser = localStorage.getItem('chessUser');
   const userData = savedUser ? JSON.parse(savedUser) : null;
   const userAvatar = userData?.avatar || '';
-  const userRating = 1842;
+  const userRatingStored = userData?.rating || null;
 
   const isPlayingWithBot = !opponentType || opponentType === 'random';
   
@@ -61,6 +61,8 @@ const Game = () => {
     setTheme,
     boardTheme,
     setBoardTheme,
+    ratingChange,
+    newRating,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -183,7 +185,8 @@ const Game = () => {
               time={playerColor === 'white' ? whiteTime : blackTime}
               isCurrentPlayer={currentPlayer === playerColor}
               formatTime={formatTime}
-              rating={userRating}
+              rating={newRating || userRatingStored || undefined}
+              ratingChange={ratingChange}
               avatar={userAvatar}
               inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
               capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}

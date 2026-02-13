@@ -10,6 +10,7 @@ interface PlayerInfoProps {
   avatar?: string;
   inactivityTimer?: number;
   capturedPieces?: {type: string; color: string}[];
+  ratingChange?: number | null;
   theme?: 'light' | 'dark';
 }
 
@@ -27,6 +28,7 @@ export const PlayerInfo = ({
   avatar,
   inactivityTimer,
   capturedPieces = [],
+  ratingChange,
   theme = 'dark'
 }: PlayerInfoProps) => {
   const pieceOrder = ['pawn', 'knight', 'bishop', 'rook', 'queen', 'king'];
@@ -75,10 +77,19 @@ export const PlayerInfo = ({
                 {playerColor === 'white' ? 'Белые' : 'Черные'}
               </div>
               {rating && (
-                <div className={`text-[10px] md:text-xs font-semibold whitespace-nowrap ${
-                  theme === 'light' ? 'text-blue-600' : 'text-blue-400'
-                }`}>
-                  {rating}
+                <div className="flex items-center gap-1">
+                  <div className={`text-[10px] md:text-xs font-semibold whitespace-nowrap ${
+                    theme === 'light' ? 'text-blue-600' : 'text-blue-400'
+                  }`}>
+                    {rating}
+                  </div>
+                  {ratingChange != null && ratingChange !== 0 && (
+                    <div className={`text-[10px] md:text-xs font-bold whitespace-nowrap ${
+                      ratingChange > 0 ? 'text-green-400' : 'text-red-400'
+                    }`}>
+                      {ratingChange > 0 ? `+${ratingChange}` : ratingChange}
+                    </div>
+                  )}
                 </div>
               )}
             </div>

@@ -3,24 +3,36 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-
-interface Move {
-  move: string;
-  white: string;
-  black?: string;
-}
+const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-050d3d0c3ba2';
 
 interface Game {
-  id: string;
-  opponent: string;
-  opponentRating: number;
+  id: number;
+  opponent_name: string;
+  opponent_type: string;
+  opponent_rating: number | null;
   result: 'win' | 'loss' | 'draw';
-  date: string;
-  timeControl: string;
-  openingName: string;
-  userColor: 'white' | 'black';
-  moves: Move[];
-  finalPosition?: string;
+  user_color: 'white' | 'black';
+  time_control: string;
+  difficulty: string | null;
+  moves_count: number;
+  move_history: string | null;
+  rating_before: number;
+  rating_after: number;
+  rating_change: number;
+  duration_seconds: number | null;
+  end_reason: string;
+  created_at: string;
+}
+
+interface UserProfile {
+  id: string;
+  username: string;
+  avatar: string;
+  rating: number;
+  games_played: number;
+  wins: number;
+  losses: number;
+  draws: number;
 }
 
 interface HistorySectionProps {
@@ -29,153 +41,34 @@ interface HistorySectionProps {
 
 export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
   const [games, setGames] = useState<Game[]>([]);
+  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
-  const [currentMoveIndex, setCurrentMoveIndex] = useState(0);
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const savedGames = localStorage.getItem('chessGames');
-    if (savedGames) {
-      setGames(JSON.parse(savedGames));
-    } else {
-      const mockGames: Game[] = [
-        {
-          id: '1',
-          opponent: 'Александр Петров',
-          opponentRating: 1920,
-          result: 'win',
-          date: '2026-02-12T14:30:00',
-          timeControl: 'Блиц 3+2',
-          openingName: 'Испанская партия',
-          userColor: 'white',
-          moves: [
-            { move: '1', white: 'e4', black: 'e5' },
-            { move: '2', white: 'Nf3', black: 'Nc6' },
-            { move: '3', white: 'Bb5', black: 'a6' },
-            { move: '4', white: 'Ba4', black: 'Nf6' },
-            { move: '5', white: 'O-O', black: 'Be7' },
-            { move: '6', white: 'd3', black: 'b5' },
-            { move: '7', white: 'Bb3', black: 'd6' },
-            { move: '8', white: 'c3', black: 'O-O' },
-            { move: '9', white: 'h3', black: 'Na5' },
-            { move: '10', white: 'Bc2', black: 'c5' },
-            { move: '11', white: 'Re1', black: 'Re8' },
-            { move: '12', white: 'Nbd2', black: 'Bf8' },
-            { move: '13', white: 'Nf1', black: 'g6' },
-            { move: '14', white: 'Ng3', black: 'Bg7' },
-            { move: '15', white: 'Bg5', black: 'h6' },
-            { move: '16', white: 'Bd2', black: 'Nc6' },
-            { move: '17', white: 'Qe2', black: 'Be6' },
-            { move: '18', white: 'Rad1', black: 'Qc7' },
-            { move: '19', white: 'Nh4', black: 'Rad8' },
-            { move: '20', white: 'Nhf5', black: 'Bf8' },
-          ]
-        },
-        {
-          id: '2',
-          opponent: 'Мария Смирнова',
-          opponentRating: 1875,
-          result: 'loss',
-          date: '2026-02-11T18:15:00',
-          timeControl: 'Рапид 10+5',
-          openingName: 'Сицилианская защита',
-          userColor: 'black',
-          moves: [
-            { move: '1', white: 'e4', black: 'c5' },
-            { move: '2', white: 'Nf3', black: 'd6' },
-            { move: '3', white: 'd4', black: 'cxd4' },
-            { move: '4', white: 'Nxd4', black: 'Nf6' },
-            { move: '5', white: 'Nc3', black: 'a6' },
-            { move: '6', white: 'Be3', black: 'e5' },
-            { move: '7', white: 'Nb3', black: 'Be6' },
-            { move: '8', white: 'f3', black: 'Be7' },
-            { move: '9', white: 'Qd2', black: 'O-O' },
-            { move: '10', white: 'O-O-O', black: 'Nbd7' },
-            { move: '11', white: 'g4', black: 'b5' },
-            { move: '12', white: 'g5', black: 'Nh5' },
-            { move: '13', white: 'Kb1', black: 'Rc8' },
-            { move: '14', white: 'Nd5', black: 'Bxd5' },
-            { move: '15', white: 'exd5', black: 'Qa5' },
-          ]
-        },
-        {
-          id: '3',
-          opponent: 'Дмитрий Иванов',
-          opponentRating: 1835,
-          result: 'draw',
-          date: '2026-02-10T20:45:00',
-          timeControl: 'Блиц 5+3',
-          openingName: 'Французская защита',
-          userColor: 'white',
-          moves: [
-            { move: '1', white: 'e4', black: 'e6' },
-            { move: '2', white: 'd4', black: 'd5' },
-            { move: '3', white: 'Nc3', black: 'Bb4' },
-            { move: '4', white: 'e5', black: 'c5' },
-            { move: '5', white: 'a3', black: 'Bxc3+' },
-            { move: '6', white: 'bxc3', black: 'Ne7' },
-            { move: '7', white: 'Qg4', black: 'Qc7' },
-            { move: '8', white: 'Qxg7', black: 'Rg8' },
-            { move: '9', white: 'Qxh7', black: 'cxd4' },
-            { move: '10', white: 'Ne2', black: 'Nbc6' },
-            { move: '11', white: 'f4', black: 'dxc3' },
-            { move: '12', white: 'Qd3', black: 'Bd7' },
-          ]
-        },
-        {
-          id: '4',
-          opponent: 'Елена Козлова',
-          opponentRating: 1890,
-          result: 'win',
-          date: '2026-02-09T16:20:00',
-          timeControl: 'Классика 15+10',
-          openingName: 'Итальянская партия',
-          userColor: 'white',
-          moves: [
-            { move: '1', white: 'e4', black: 'e5' },
-            { move: '2', white: 'Nf3', black: 'Nc6' },
-            { move: '3', white: 'Bc4', black: 'Bc5' },
-            { move: '4', white: 'c3', black: 'Nf6' },
-            { move: '5', white: 'd4', black: 'exd4' },
-            { move: '6', white: 'cxd4', black: 'Bb4+' },
-            { move: '7', white: 'Nc3', black: 'Nxe4' },
-            { move: '8', white: 'O-O', black: 'Bxc3' },
-            { move: '9', white: 'bxc3', black: 'd5' },
-            { move: '10', white: 'Ba3', black: 'Be6' },
-            { move: '11', white: 'Re1', black: 'O-O' },
-            { move: '12', white: 'Rxe4', black: 'dxe4' },
-            { move: '13', white: 'Ne5', black: 'Nxe5' },
-            { move: '14', white: 'dxe5', black: 'Qd5' },
-            { move: '15', white: 'Qe2', black: 'Rad8' },
-          ]
-        },
-        {
-          id: '5',
-          opponent: 'Виктор Федоров',
-          opponentRating: 1805,
-          result: 'loss',
-          date: '2026-02-08T12:10:00',
-          timeControl: 'Блиц 3+2',
-          openingName: 'Королевский гамбит',
-          userColor: 'black',
-          moves: [
-            { move: '1', white: 'e4', black: 'e5' },
-            { move: '2', white: 'f4', black: 'exf4' },
-            { move: '3', white: 'Nf3', black: 'g5' },
-            { move: '4', white: 'Bc4', black: 'g4' },
-            { move: '5', white: 'O-O', black: 'gxf3' },
-            { move: '6', white: 'Qxf3', black: 'Qf6' },
-            { move: '7', white: 'd3', black: 'Bh6' },
-            { move: '8', white: 'Nc3', black: 'Ne7' },
-            { move: '9', white: 'Bxf4', black: 'Bxf4' },
-            { move: '10', white: 'Qxf4', black: 'Qxf4' },
-            { move: '11', white: 'Rxf4', black: 'd6' },
-          ]
-        },
-      ];
-      setGames(mockGames);
-      localStorage.setItem('chessGames', JSON.stringify(mockGames));
-    }
+    fetchHistory();
   }, []);
+
+  const fetchHistory = async () => {
+    const savedUser = localStorage.getItem('chessUser');
+    if (!savedUser) {
+      setLoading(false);
+      return;
+    }
+    const userData = JSON.parse(savedUser);
+    const rawId = userData.email || userData.name || 'anonymous';
+    const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+
+    try {
+      const res = await fetch(`${GAME_HISTORY_URL}?user_id=${encodeURIComponent(userId)}`);
+      const data = await res.json();
+      if (data.user) setUserProfile(data.user);
+      setGames(data.games || []);
+    } catch (e) {
+      console.error('Failed to fetch history:', e);
+    }
+    setLoading(false);
+  };
 
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
@@ -192,6 +85,13 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
       month: 'long', 
       year: 'numeric' 
     });
+  };
+
+  const formatDuration = (seconds: number | null) => {
+    if (!seconds) return '';
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs.toString().padStart(2, '0')}`;
   };
 
   const getResultColor = (result: string) => {
@@ -221,35 +121,42 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
     }
   };
 
-  const handleGameSelect = (game: Game) => {
-    setSelectedGame(game);
-    setCurrentMoveIndex(0);
-  };
-
-  const handleNextMove = () => {
-    if (selectedGame && currentMoveIndex < selectedGame.moves.length - 1) {
-      setCurrentMoveIndex(currentMoveIndex + 1);
+  const getEndReasonText = (reason: string) => {
+    switch (reason) {
+      case 'checkmate': return 'Мат';
+      case 'stalemate': return 'Пат';
+      case 'draw': return 'Ничья';
+      case 'surrender': return 'Сдача';
+      case 'timeout': return 'Время';
+      default: return reason;
     }
   };
 
-  const handlePrevMove = () => {
-    if (currentMoveIndex > 0) {
-      setCurrentMoveIndex(currentMoveIndex - 1);
-    }
-  };
-
-  const handleMoveClick = (index: number) => {
-    setCurrentMoveIndex(index);
-  };
-
-  const stats = {
+  const stats = userProfile ? {
+    total: userProfile.games_played,
+    wins: userProfile.wins,
+    losses: userProfile.losses,
+    draws: userProfile.draws,
+    rating: userProfile.rating
+  } : {
     total: games.length,
     wins: games.filter(g => g.result === 'win').length,
     losses: games.filter(g => g.result === 'loss').length,
     draws: games.filter(g => g.result === 'draw').length,
+    rating: null
   };
 
   if (selectedGame) {
+    const moves = selectedGame.move_history ? selectedGame.move_history.split(',') : [];
+    const movePairs: { num: number; white: string; black?: string }[] = [];
+    for (let i = 0; i < moves.length; i += 2) {
+      movePairs.push({
+        num: Math.floor(i / 2) + 1,
+        white: moves[i],
+        black: moves[i + 1] || undefined
+      });
+    }
+
     return (
       <div className="space-y-6 animate-fade-in">
         <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
@@ -259,26 +166,14 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                 <Icon name="ChevronLeft" className="text-blue-600 dark:text-blue-400" size={24} />
                 Просмотр партии
               </CardTitle>
-              <div className="flex gap-2">
-                {onOpenChat && (
-                  <Button
-                    onClick={() => onOpenChat(selectedGame.opponent, selectedGame.opponentRating, selectedGame.id)}
-                    variant="outline"
-                    className="border-blue-400/50 text-blue-600 dark:text-blue-400"
-                  >
-                    <Icon name="MessageCircle" size={18} className="mr-2" />
-                    Написать
-                  </Button>
-                )}
-                <Button
-                  onClick={() => setSelectedGame(null)}
-                  variant="outline"
-                  className="border-slate-200 dark:border-white/20"
-                >
-                  <Icon name="X" size={18} className="mr-2" />
-                  Закрыть
-                </Button>
-              </div>
+              <Button
+                onClick={() => setSelectedGame(null)}
+                variant="outline"
+                className="border-slate-200 dark:border-white/20"
+              >
+                <Icon name="X" size={18} className="mr-2" />
+                Закрыть
+              </Button>
             </div>
           </CardHeader>
           <CardContent>
@@ -290,90 +185,69 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                       <Icon name={getResultIcon(selectedGame.result)} size={14} className="mr-1" />
                       {getResultText(selectedGame.result)}
                     </Badge>
-                    <span className="text-sm text-gray-600 dark:text-gray-400">{formatDate(selectedGame.date)}</span>
+                    <span className="text-sm text-gray-600 dark:text-gray-400">{formatDate(selectedGame.created_at)}</span>
+                    {selectedGame.duration_seconds && (
+                      <span className="text-sm text-gray-500 dark:text-gray-500">
+                        {formatDuration(selectedGame.duration_seconds)}
+                      </span>
+                    )}
                   </div>
                   <div className="text-xl font-bold text-gray-900 dark:text-white">
-                    {selectedGame.userColor === 'white' ? 'Вы' : selectedGame.opponent} vs {selectedGame.userColor === 'black' ? 'Вы' : selectedGame.opponent}
+                    {selectedGame.user_color === 'white' ? 'Вы' : selectedGame.opponent_name} vs {selectedGame.user_color === 'black' ? 'Вы' : selectedGame.opponent_name}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-                    {selectedGame.openingName} • {selectedGame.timeControl} • Рейтинг соперника: {selectedGame.opponentRating}
+                    {selectedGame.time_control}
+                    {selectedGame.difficulty && ` (${selectedGame.difficulty})`}
+                    {' '} {getEndReasonText(selectedGame.end_reason)}
+                    {' '} {selectedGame.moves_count} ходов
+                  </div>
+                  <div className="flex items-center gap-2 mt-2">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">Рейтинг:</span>
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{selectedGame.rating_before}</span>
+                    <Icon name="ArrowRight" size={14} className="text-gray-400" />
+                    <span className="text-sm font-semibold text-gray-900 dark:text-white">{selectedGame.rating_after}</span>
+                    <span className={`text-sm font-bold ${selectedGame.rating_change > 0 ? 'text-green-500' : selectedGame.rating_change < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                      ({selectedGame.rating_change > 0 ? '+' : ''}{selectedGame.rating_change})
+                    </span>
                   </div>
                 </div>
               </div>
 
-              <div className="grid md:grid-cols-2 gap-6">
+              {movePairs.length > 0 && (
                 <div>
                   <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
                     <Icon name="List" size={20} className="text-blue-600 dark:text-blue-400" />
                     Ходы партии
                   </h3>
                   <div className="max-h-96 overflow-y-auto space-y-2 bg-slate-50 dark:bg-slate-800/30 p-4 rounded-lg border border-slate-200 dark:border-white/10">
-                    {selectedGame.moves.map((move, index) => (
+                    {movePairs.map((mp, index) => (
                       <div
                         key={index}
-                        onClick={() => handleMoveClick(index)}
-                        className={`flex gap-3 p-2 rounded cursor-pointer transition-all ${
-                          index === currentMoveIndex
-                            ? 'bg-blue-100 dark:bg-blue-900/30 border border-blue-300 dark:border-blue-500/30'
-                            : 'hover:bg-slate-100 dark:hover:bg-slate-700/50'
-                        }`}
+                        className="flex gap-3 p-2 rounded hover:bg-slate-100 dark:hover:bg-slate-700/50"
                       >
-                        <div className="w-8 text-sm font-bold text-gray-600 dark:text-gray-400">{move.move}.</div>
+                        <div className="w-8 text-sm font-bold text-gray-600 dark:text-gray-400">{mp.num}.</div>
                         <div className="flex-1 flex gap-4">
-                          <div className="flex-1 text-sm font-medium text-gray-900 dark:text-white">{move.white}</div>
-                          {move.black && (
-                            <div className="flex-1 text-sm font-medium text-gray-900 dark:text-white">{move.black}</div>
+                          <div className="flex-1 text-sm font-medium text-gray-900 dark:text-white">{mp.white}</div>
+                          {mp.black && (
+                            <div className="flex-1 text-sm font-medium text-gray-900 dark:text-white">{mp.black}</div>
                           )}
                         </div>
                       </div>
                     ))}
                   </div>
-
-                  <div className="flex items-center justify-between gap-3 mt-4">
-                    <Button
-                      onClick={handlePrevMove}
-                      disabled={currentMoveIndex === 0}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      <Icon name="ChevronLeft" size={18} className="mr-1" />
-                      Назад
-                    </Button>
-                    <div className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                      Ход {currentMoveIndex + 1} / {selectedGame.moves.length}
-                    </div>
-                    <Button
-                      onClick={handleNextMove}
-                      disabled={currentMoveIndex === selectedGame.moves.length - 1}
-                      variant="outline"
-                      className="flex-1"
-                    >
-                      Вперёд
-                      <Icon name="ChevronRight" size={18} className="ml-1" />
-                    </Button>
-                  </div>
                 </div>
-
-                <div>
-                  <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-                    <Icon name="Grid3x3" size={20} className="text-purple-600 dark:text-purple-400" />
-                    Позиция на доске
-                  </h3>
-                  <div className="aspect-square bg-gradient-to-br from-amber-200 to-amber-400 dark:from-amber-700 dark:to-amber-900 rounded-lg border-4 border-amber-800 dark:border-amber-950 flex items-center justify-center">
-                    <div className="text-center text-gray-700 dark:text-gray-300">
-                      <Icon name="Grid3x3" size={64} className="mx-auto mb-4 opacity-50" />
-                      <p className="text-lg font-medium">Позиция после хода {currentMoveIndex + 1}</p>
-                      <p className="text-sm mt-2">
-                        {selectedGame.moves[currentMoveIndex]?.white}
-                        {selectedGame.moves[currentMoveIndex]?.black ? ` ${selectedGame.moves[currentMoveIndex].black}` : ''}
-                      </p>
-                    </div>
-                  </div>
-                </div>
-              </div>
+              )}
             </div>
           </CardContent>
         </Card>
+      </div>
+    );
+  }
+
+  if (loading) {
+    return (
+      <div className="flex items-center justify-center py-20">
+        <div className="text-gray-400 animate-pulse">Загрузка истории...</div>
       </div>
     );
   }
@@ -385,6 +259,12 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Icon name="History" className="text-blue-600 dark:text-blue-400" size={24} />
             История партий
+            {stats.rating && (
+              <Badge variant="outline" className="ml-auto border-amber-400/50 text-amber-500">
+                <Icon name="Trophy" size={14} className="mr-1" />
+                Рейтинг: {stats.rating}
+              </Badge>
+            )}
           </CardTitle>
         </CardHeader>
         <CardContent>
@@ -418,7 +298,7 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
               games.map((game) => (
                 <div
                   key={game.id}
-                  onClick={() => handleGameSelect(game)}
+                  onClick={() => setSelectedGame(game)}
                   className="flex items-center gap-4 p-4 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all cursor-pointer"
                 >
                   <div className="flex-shrink-0">
@@ -428,24 +308,28 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                     </Badge>
                   </div>
 
-                  <div className="flex-1">
-                    <div className="font-semibold text-gray-900 dark:text-white">
-                      {game.opponent}
+                  <div className="flex-1 min-w-0">
+                    <div className="font-semibold text-gray-900 dark:text-white truncate">
+                      {game.opponent_name}
+                      {game.difficulty && <span className="text-xs text-gray-500 ml-2">({game.difficulty})</span>}
+                    </div>
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                      {game.time_control} {game.moves_count} ходов {formatDate(game.created_at)}
                     </div>
                   </div>
 
-                  <div className="flex-shrink-0">
-                    <Badge variant="outline" className="border-blue-400/50 text-blue-400">
-                      <Icon name="TrendingUp" className="mr-1" size={12} />
-                      {game.opponentRating}
-                    </Badge>
+                  <div className="flex-shrink-0 text-right">
+                    <div className={`text-sm font-bold ${game.rating_change > 0 ? 'text-green-500' : game.rating_change < 0 ? 'text-red-500' : 'text-gray-400'}`}>
+                      {game.rating_change > 0 ? '+' : ''}{game.rating_change}
+                    </div>
+                    <div className="text-xs text-gray-400">{game.rating_after}</div>
                   </div>
 
-                  {onOpenChat && (
+                  {onOpenChat && game.opponent_type !== 'bot' && (
                     <Button
                       onClick={(e) => {
                         e.stopPropagation();
-                        onOpenChat(game.opponent, game.opponentRating, game.id);
+                        onOpenChat(game.opponent_name, game.opponent_rating || 0, String(game.id));
                       }}
                       variant="outline"
                       size="sm"
@@ -455,7 +339,7 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                     </Button>
                   )}
 
-                  <Icon name="ChevronRight" size={20} className="text-gray-400" />
+                  <Icon name="ChevronRight" size={20} className="text-gray-400 flex-shrink-0" />
                 </div>
               ))
             )}
@@ -465,3 +349,5 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
     </div>
   );
 };
+
+export default HistorySection;

@@ -1,6 +1,7 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRights, BoardTheme } from './gameTypes';
 import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
+const FINISH_GAME_URL = 'https://functions.poehali.dev/24acb5e2-473c-4c15-a295-944e14d8aa96';
 
 export const useGameLogic = (
   difficulty: 'easy' | 'medium' | 'hard' | 'master',
@@ -53,8 +54,11 @@ export const useGameLogic = (
   const [boardTheme, setBoardTheme] = useState<BoardTheme>(
     savedState?.boardTheme || (localStorage.getItem('chessBoardTheme') as BoardTheme) || 'wood'
   );
+  const [ratingChange, setRatingChange] = useState<number | null>(null);
+  const [newRating, setNewRating] = useState<number | null>(null);
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
+  const gameFinished = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
 
   const playWarningSound = () => {
@@ -173,6 +177,64 @@ export const useGameLogic = (
       localStorage.removeItem('activeGame');
     }
   }, [board, currentPlayer, whiteTime, blackTime, gameStatus, moveHistory, boardHistory, currentMoveIndex, difficulty, timeControl, capturedByWhite, capturedByBlack, castlingRights, enPassantTarget, showPossibleMoves, theme, boardTheme]);
+
+  const submitGameResult = useCallback(async (status: 'checkmate' | 'stalemate' | 'draw', currentPlayerAtEnd: string) => {
+    if (gameFinished.current) return;
+    gameFinished.current = true;
+
+    const savedUser = localStorage.getItem('chessUser');
+    if (!savedUser) return;
+
+    const userData = JSON.parse(savedUser);
+    const rawId = userData.email || userData.name || 'anonymous';
+    const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+
+    let result: 'win' | 'loss' | 'draw';
+    if (status === 'draw' || status === 'stalemate') {
+      result = 'draw';
+    } else {
+      result = currentPlayerAtEnd === playerColor ? 'loss' : 'win';
+    }
+
+    const durationSeconds = Math.floor((Date.now() - gameStartTime.current) / 1000);
+
+    try {
+      const res = await fetch(FINISH_GAME_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          user_id: userId,
+          username: userData.name || 'Player',
+          avatar: userData.avatar || '',
+          result,
+          opponent_name: 'bot',
+          opponent_type: 'bot',
+          user_color: playerColor,
+          time_control: timeControl,
+          difficulty,
+          moves_count: moveHistory.length,
+          move_history: moveHistory.join(','),
+          duration_seconds: durationSeconds,
+          end_reason: status
+        })
+      });
+      const data = await res.json();
+      if (data.rating_change !== undefined) {
+        setRatingChange(data.rating_change);
+        setNewRating(data.rating_after);
+        const updatedUser = { ...userData, rating: data.rating_after };
+        localStorage.setItem('chessUser', JSON.stringify(updatedUser));
+      }
+    } catch (e) {
+      console.error('Failed to submit game result:', e);
+    }
+  }, [playerColor, timeControl, difficulty, moveHistory]);
+
+  useEffect(() => {
+    if (gameStatus !== 'playing' && !gameFinished.current && moveHistory.length > 2) {
+      submitGameResult(gameStatus as 'checkmate' | 'stalemate' | 'draw', currentPlayer);
+    }
+  }, [gameStatus]);
 
   const makeMove = (from: Position, to: Position) => {
     const newBoard = board.map(row => [...row]);
@@ -402,6 +464,8 @@ export const useGameLogic = (
     setTheme,
     boardTheme,
     setBoardTheme,
+    ratingChange,
+    newRating,
     historyRef,
     handleSquareClick,
     isSquareSelected,
