@@ -138,10 +138,20 @@ def handler(event, context):
 
     headers = {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}
 
-    source_ip = ''
-    rc = event.get('requestContext') or {}
-    identity = rc.get('identity') or {}
-    source_ip = identity.get('sourceIp', '')
+    hdrs = event.get('headers') or {}
+    source_ip = hdrs.get('X-Forwarded-For', hdrs.get('x-forwarded-for', ''))
+    if source_ip:
+        source_ip = source_ip.split(',')[0].strip()
+
+    if not source_ip:
+        source_ip = hdrs.get('X-Real-Ip', hdrs.get('x-real-ip', ''))
+
+    if not source_ip:
+        rc = event.get('requestContext') or {}
+        identity = rc.get('identity') or {}
+        source_ip = identity.get('sourceIp', '')
+
+    print('Detected IP: {}'.format(source_ip))
 
     if not source_ip or source_ip.startswith('127.') or source_ip.startswith('10.') or source_ip.startswith('192.168.'):
         return {

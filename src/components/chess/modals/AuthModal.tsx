@@ -41,12 +41,7 @@ export const AuthModal = ({
     }
   }, [showAuthModal, setIsAuthenticated, setShowAuthModal, setShowGameSettings]);
 
-  useEffect(() => {
-    if (showAuthModal && !selectedCity) {
-      const detected = sessionStorage.getItem('detectedCity');
-      if (detected) setSelectedCity(detected);
-    }
-  }, [showAuthModal, selectedCity]);
+
 
   useEffect(() => {
     if (resendTimer <= 0) return;
