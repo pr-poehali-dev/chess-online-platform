@@ -1,12 +1,14 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
+import { cityRegions } from '@/components/chess/data/cities';
 
 const MATCHMAKING_URL = 'https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299';
 const POLL_INTERVAL = 2000;
-const WIDEN_RATING_DELAY = 8000;
-const BOT_OFFER_DELAY = 8000;
+const STAGE_DURATION = 8000;
+const FINAL_STAGE_DURATION = 10000;
 
-export type SearchStatus = 'searching' | 'searching_any' | 'no_opponents' | 'found' | 'starting';
+export type SearchStage = 'city' | 'region' | 'rating' | 'any';
+export type SearchStatus = 'searching' | 'no_opponents' | 'found' | 'starting';
 
 export interface OpponentData {
   name: string;
@@ -14,6 +16,8 @@ export interface OpponentData {
   avatar: string;
   isBotGame: boolean;
 }
+
+const STAGE_ORDER: SearchStage[] = ['city', 'region', 'rating', 'any'];
 
 const useMatchmaking = () => {
   const navigate = useNavigate();
@@ -23,6 +27,7 @@ const useMatchmaking = () => {
   const colorParam = searchParams.get('color') || 'random';
 
   const [searchStatus, setSearchStatus] = useState<SearchStatus>('searching');
+  const [searchStage, setSearchStage] = useState<SearchStage>('city');
   const [opponent, setOpponent] = useState<OpponentData | null>(null);
   const [playerColor, setPlayerColor] = useState<'white' | 'black'>('white');
   const [gameId, setGameId] = useState<number | null>(null);
@@ -31,9 +36,10 @@ const useMatchmaking = () => {
 
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const botOfferTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const stageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const abortedRef = useRef(false);
   const matchFoundRef = useRef(false);
+  const currentStageRef = useRef<SearchStage>('city');
 
   const getUserData = useCallback(() => {
     const savedUser = localStorage.getItem('chessUser');
@@ -41,13 +47,15 @@ const useMatchmaking = () => {
     const userData = JSON.parse(savedUser);
     const rawId = userData.email || userData.name || 'anonymous';
     const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-    return { ...userData, id: userId };
+    const city = userData.city || '';
+    const region = city ? (cityRegions[city] || '') : '';
+    return { ...userData, id: userId, city, region };
   }, []);
 
   const cleanup = useCallback(() => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     if (searchTimerRef.current) { clearInterval(searchTimerRef.current); searchTimerRef.current = null; }
-    if (botOfferTimerRef.current) { clearTimeout(botOfferTimerRef.current); botOfferTimerRef.current = null; }
+    if (stageTimerRef.current) { clearTimeout(stageTimerRef.current); stageTimerRef.current = null; }
   }, []);
 
   const cancelSearch = useCallback(async () => {
@@ -64,6 +72,80 @@ const useMatchmaking = () => {
     navigate('/');
   }, [cleanup, getUserData, navigate]);
 
+  const handleMatchFound = useCallback((data: { opponent_name: string; opponent_rating: number; opponent_avatar?: string; player_color: 'white' | 'black'; game_id: number }, isBotGame = false) => {
+    matchFoundRef.current = true;
+    cleanup();
+    setOpponent({
+      name: data.opponent_name,
+      rating: data.opponent_rating,
+      avatar: data.opponent_avatar || '',
+      isBotGame
+    });
+    setPlayerColor(data.player_color);
+    setGameId(data.game_id);
+    setSearchStatus('found');
+    setTimeout(() => {
+      if (!abortedRef.current) setSearchStatus('starting');
+    }, 2000);
+  }, [cleanup]);
+
+  const doSearch = useCallback(async (user: { id: string; name?: string; avatar?: string; rating?: number; city?: string; region?: string }, stage: SearchStage) => {
+    if (abortedRef.current || matchFoundRef.current) return;
+
+    const res = await fetch(MATCHMAKING_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        action: 'search',
+        user_id: user.id,
+        username: user.name || 'Player',
+        avatar: user.avatar || '',
+        rating: user.rating || 1200,
+        opponent_type: opponentType || 'country',
+        time_control: timeControl,
+        city: user.city || '',
+        region: user.region || '',
+        search_stage: stage
+      })
+    });
+    const data = await res.json();
+
+    if (abortedRef.current || matchFoundRef.current) return;
+
+    if (data.status === 'matched') {
+      handleMatchFound(data);
+    }
+  }, [opponentType, timeControl, handleMatchFound]);
+
+  const advanceToNextStage = useCallback((user: { id: string; name?: string; avatar?: string; rating?: number; city?: string; region?: string }) => {
+    if (abortedRef.current || matchFoundRef.current) return;
+
+    const currentIdx = STAGE_ORDER.indexOf(currentStageRef.current);
+    if (currentIdx >= STAGE_ORDER.length - 1) {
+      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+      setSearchStatus('no_opponents');
+      return;
+    }
+
+    const nextStage = STAGE_ORDER[currentIdx + 1];
+    currentStageRef.current = nextStage;
+    setSearchStage(nextStage);
+
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+
+    doSearch(user, nextStage);
+    pollRef.current = setInterval(() => doSearch(user, nextStage), POLL_INTERVAL);
+
+    const duration = nextStage === 'any' ? FINAL_STAGE_DURATION : STAGE_DURATION;
+    stageTimerRef.current = setTimeout(() => advanceToNextStage(user), duration);
+  }, [doSearch]);
+
+  const getInitialStage = useCallback((): SearchStage => {
+    if (opponentType === 'city') return 'city';
+    if (opponentType === 'region') return 'region';
+    return 'rating';
+  }, [opponentType]);
+
   useEffect(() => {
     const user = getUserData();
     if (!user) { navigate('/'); return; }
@@ -71,59 +153,19 @@ const useMatchmaking = () => {
     abortedRef.current = false;
     matchFoundRef.current = false;
 
+    const initialStage = getInitialStage();
+    currentStageRef.current = initialStage;
+    setSearchStage(initialStage);
+    setSearchStatus('searching');
+
     searchTimerRef.current = setInterval(() => {
       setSearchTime(prev => prev + 1);
     }, 1000);
 
-    const searchForOpponent = async () => {
-      if (abortedRef.current) return;
+    doSearch(user, initialStage);
+    pollRef.current = setInterval(() => doSearch(user, initialStage), POLL_INTERVAL);
 
-      const res = await fetch(MATCHMAKING_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'search',
-          user_id: user.id,
-          username: user.name || 'Player',
-          avatar: user.avatar || '',
-          rating: user.rating || 1200,
-          opponent_type: opponentType || 'country',
-          time_control: timeControl
-        })
-      });
-      const data = await res.json();
-
-      if (abortedRef.current) return;
-
-      if (data.status === 'matched') {
-        matchFoundRef.current = true;
-        cleanup();
-        setOpponent({
-          name: data.opponent_name,
-          rating: data.opponent_rating,
-          avatar: data.opponent_avatar || '',
-          isBotGame: false
-        });
-        setPlayerColor(data.player_color);
-        setGameId(data.game_id);
-        setSearchStatus('found');
-        setTimeout(() => {
-          if (!abortedRef.current) setSearchStatus('starting');
-        }, 2000);
-        return;
-      }
-    };
-
-    searchForOpponent();
-    pollRef.current = setInterval(searchForOpponent, POLL_INTERVAL);
-
-    botOfferTimerRef.current = setTimeout(() => {
-      if (!abortedRef.current && !matchFoundRef.current) {
-        if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-        setSearchStatus('searching_any');
-        startAnyRatingSearch(user);
-      }
-    }, WIDEN_RATING_DELAY);
+    stageTimerRef.current = setTimeout(() => advanceToNextStage(user), STAGE_DURATION);
 
     return () => {
       cleanup();
@@ -160,122 +202,27 @@ const useMatchmaking = () => {
     const data = await res.json();
 
     if (data.status === 'bot_game') {
-      setOpponent({
-        name: data.opponent_name,
-        rating: data.opponent_rating,
-        avatar: '',
-        isBotGame: true
-      });
-      setPlayerColor(data.player_color);
-      setGameId(data.game_id);
-      setSearchStatus('found');
-      setTimeout(() => setSearchStatus('starting'), 2000);
+      handleMatchFound(data, true);
     }
-  }, [getUserData, opponentType, timeControl]);
-
-  const startAnyRatingSearch = useCallback((user: { id: string; name?: string; avatar?: string; rating?: number }) => {
-    abortedRef.current = false;
-    matchFoundRef.current = false;
-
-    const searchAny = async () => {
-      if (abortedRef.current) return;
-      const res = await fetch(MATCHMAKING_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'search',
-          user_id: user.id,
-          username: user.name || 'Player',
-          avatar: user.avatar || '',
-          rating: user.rating || 1200,
-          opponent_type: opponentType || 'country',
-          time_control: timeControl,
-          any_rating: true
-        })
-      });
-      const data = await res.json();
-      if (abortedRef.current) return;
-      if (data.status === 'matched') {
-        matchFoundRef.current = true;
-        cleanup();
-        setOpponent({
-          name: data.opponent_name,
-          rating: data.opponent_rating,
-          avatar: data.opponent_avatar || '',
-          isBotGame: false
-        });
-        setPlayerColor(data.player_color);
-        setGameId(data.game_id);
-        setSearchStatus('found');
-        setTimeout(() => {
-          if (!abortedRef.current) setSearchStatus('starting');
-        }, 2000);
-      }
-    };
-
-    searchAny();
-    pollRef.current = setInterval(searchAny, POLL_INTERVAL);
-
-    botOfferTimerRef.current = setTimeout(() => {
-      if (!abortedRef.current && !matchFoundRef.current) {
-        if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-        setSearchStatus('no_opponents');
-      }
-    }, BOT_OFFER_DELAY);
-  }, [opponentType, timeControl, cleanup]);
+  }, [getUserData, opponentType, timeControl, handleMatchFound]);
 
   const handleContinueSearch = useCallback(() => {
-    setSearchStatus('searching');
     abortedRef.current = false;
     matchFoundRef.current = false;
     const user = getUserData();
     if (!user) return;
 
-    const searchForOpponent = async () => {
-      if (abortedRef.current) return;
-      const res = await fetch(MATCHMAKING_URL, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          action: 'search',
-          user_id: user.id,
-          username: user.name || 'Player',
-          avatar: user.avatar || '',
-          rating: user.rating || 1200,
-          opponent_type: opponentType || 'country',
-          time_control: timeControl
-        })
-      });
-      const data = await res.json();
-      if (abortedRef.current) return;
-      if (data.status === 'matched') {
-        matchFoundRef.current = true;
-        cleanup();
-        setOpponent({
-          name: data.opponent_name,
-          rating: data.opponent_rating,
-          avatar: data.opponent_avatar || '',
-          isBotGame: false
-        });
-        setPlayerColor(data.player_color);
-        setGameId(data.game_id);
-        setSearchStatus('found');
-        setTimeout(() => {
-          if (!abortedRef.current) setSearchStatus('starting');
-        }, 2000);
-      }
-    };
+    const initialStage = getInitialStage();
+    currentStageRef.current = initialStage;
+    setSearchStage(initialStage);
+    setSearchStatus('searching');
+    setSearchTime(0);
 
-    searchForOpponent();
-    pollRef.current = setInterval(searchForOpponent, POLL_INTERVAL);
+    doSearch(user, initialStage);
+    pollRef.current = setInterval(() => doSearch(user, initialStage), POLL_INTERVAL);
 
-    botOfferTimerRef.current = setTimeout(() => {
-      if (!abortedRef.current && !matchFoundRef.current) {
-        if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-        setSearchStatus('no_opponents');
-      }
-    }, BOT_OFFER_DELAY);
-  }, [getUserData, opponentType, timeControl, cleanup]);
+    stageTimerRef.current = setTimeout(() => advanceToNextStage(user), STAGE_DURATION);
+  }, [getUserData, getInitialStage, doSearch, advanceToNextStage, cleanup]);
 
   useEffect(() => {
     if (searchStatus === 'starting') {
@@ -300,6 +247,7 @@ const useMatchmaking = () => {
 
   return {
     searchStatus,
+    searchStage,
     opponent,
     playerColor,
     gameId,

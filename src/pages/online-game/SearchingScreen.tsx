@@ -1,25 +1,38 @@
 import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
+import type { SearchStage } from './useMatchmaking';
 
 interface SearchingScreenProps {
   opponentType: string | null;
   timeControl: string;
   searchTime: number;
-  isAnyRating: boolean;
+  searchStage: SearchStage;
   onCancel: () => void;
   getTimeLabel: (time: string | null) => string;
   getOpponentTypeLabel: (type: string | null) => string;
 }
 
+const STAGE_LABELS: Record<SearchStage, string> = {
+  city: 'в вашем городе',
+  region: 'в вашем регионе',
+  rating: 'с рейтингом ±50',
+  any: 'любого соперника онлайн'
+};
+
+const STAGE_ORDER: SearchStage[] = ['city', 'region', 'rating', 'any'];
+
 const SearchingScreen = ({
   opponentType,
   timeControl,
   searchTime,
-  isAnyRating,
+  searchStage,
   onCancel,
   getTimeLabel,
-  getOpponentTypeLabel
 }: SearchingScreenProps) => {
+  const startStageIdx = opponentType === 'city' ? 0 : opponentType === 'region' ? 1 : 2;
+  const stages = STAGE_ORDER.slice(startStageIdx);
+  const currentIdx = stages.indexOf(searchStage);
+
   return (
     <div className="text-center space-y-6">
       <div className="flex justify-center">
@@ -33,24 +46,41 @@ const SearchingScreen = ({
 
       <div>
         <h2 className="text-2xl font-bold text-stone-100 mb-2">
-          {isAnyRating ? 'Ищем соперника' : 'Поиск соперника'}
+          Поиск соперника
         </h2>
-        {isAnyRating ? (
-          <p className="text-stone-400">Любой рейтинг</p>
-        ) : (
-          <p className="text-stone-400">
-            Ищем игрока {getOpponentTypeLabel(opponentType)}
-          </p>
-        )}
+        <p className="text-stone-300 text-lg">
+          Ищем {STAGE_LABELS[searchStage]}
+        </p>
         <p className="text-sm text-stone-500 mt-2">
           Контроль времени: {getTimeLabel(timeControl)}
         </p>
-        {!isAnyRating && (
-          <p className="text-xs text-stone-600 mt-2">
-            Поиск: {searchTime} сек
-          </p>
-        )}
       </div>
+
+      <div className="flex justify-center gap-2 mt-4">
+        {stages.map((stage, idx) => (
+          <div key={stage} className="flex items-center gap-2">
+            <div className={`w-2.5 h-2.5 rounded-full transition-colors ${
+              idx < currentIdx ? 'bg-amber-500' :
+              idx === currentIdx ? 'bg-amber-400 animate-pulse' :
+              'bg-stone-600'
+            }`} />
+            {idx < stages.length - 1 && (
+              <div className={`w-6 h-0.5 ${idx < currentIdx ? 'bg-amber-500/50' : 'bg-stone-700'}`} />
+            )}
+          </div>
+        ))}
+      </div>
+      <div className="flex justify-between text-[10px] text-stone-500 px-2">
+        {stages.map((stage) => (
+          <span key={stage} className={stage === searchStage ? 'text-amber-400' : ''}>
+            {stage === 'city' ? 'Город' : stage === 'region' ? 'Регион' : stage === 'rating' ? '±50' : 'Все'}
+          </span>
+        ))}
+      </div>
+
+      <p className="text-xs text-stone-600">
+        Поиск: {searchTime} сек
+      </p>
 
       <Button
         onClick={onCancel}

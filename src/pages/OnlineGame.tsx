@@ -30,6 +30,7 @@ const getOpponentTypeLabel = (type: string | null) => {
 const OnlineGame = () => {
   const {
     searchStatus,
+    searchStage,
     opponent,
     playerColor,
     countdown,
@@ -45,12 +46,12 @@ const OnlineGame = () => {
     <div className="min-h-screen bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950 flex flex-col items-center justify-center p-4">
       <Card className="w-full max-w-md bg-stone-900/80 border-stone-700 backdrop-blur-sm">
         <CardContent className="pt-8 pb-8">
-          {(searchStatus === 'searching' || searchStatus === 'searching_any') && (
+          {searchStatus === 'searching' && (
             <SearchingScreen
               opponentType={opponentType}
               timeControl={timeControl}
               searchTime={searchTime}
-              isAnyRating={searchStatus === 'searching_any'}
+              searchStage={searchStage}
               onCancel={cancelSearch}
               getTimeLabel={getTimeLabel}
               getOpponentTypeLabel={getOpponentTypeLabel}
