@@ -41,13 +41,29 @@ export const pieceSymbols: Record<string, Record<string, string>> = {
   }
 };
 
-export function getInitialTime(control: string): number {
-  switch (control) {
-    case 'blitz': return 180;
-    case 'rapid': return 600;
-    case 'classic': return 900;
-    default: return 600;
+export function parseTimeControl(control: string): { minutes: number; increment: number } {
+  if (control.includes('+')) {
+    const [mins, inc] = control.split('+').map(Number);
+    return { minutes: mins || 10, increment: inc || 0 };
   }
+  const mins = parseInt(control);
+  if (!isNaN(mins)) return { minutes: mins, increment: 0 };
+  switch (control) {
+    case 'blitz': return { minutes: 3, increment: 2 };
+    case 'rapid': return { minutes: 10, increment: 5 };
+    case 'classic': return { minutes: 15, increment: 10 };
+    default: return { minutes: 10, increment: 0 };
+  }
+}
+
+export function getInitialTime(control: string): number {
+  const { minutes } = parseTimeControl(control);
+  return minutes * 60;
+}
+
+export function getIncrement(control: string): number {
+  const { increment } = parseTimeControl(control);
+  return increment;
 }
 
 export function formatTime(seconds: number): string {

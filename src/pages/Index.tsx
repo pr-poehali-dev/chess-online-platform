@@ -150,11 +150,11 @@ const Index = () => {
       <GameSettingsModal
         showGameSettings={showGameSettings}
         setShowGameSettings={setShowGameSettings}
-        onStartGame={(difficulty, timeControl) => {
-          navigate(`/game?difficulty=${difficulty}&time=${timeControl}`);
+        onStartGame={(difficulty, timeControl, color) => {
+          navigate(`/game?difficulty=${difficulty}&time=${timeControl}&color=${color}`);
         }}
-        onStartOnlineGame={(opponentType, timeControl) => {
-          navigate(`/online-game?opponent=${opponentType}&time=${timeControl}`);
+        onStartOnlineGame={(opponentType, timeControl, color) => {
+          navigate(`/online-game?opponent=${opponentType}&time=${timeControl}&color=${color}`);
         }}
       />
 

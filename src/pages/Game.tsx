@@ -17,7 +17,7 @@ import { useGameHandlers } from './game/useGameHandlers';
 const Game = () => {
   const [searchParams] = useSearchParams();
   const difficulty = (searchParams.get('difficulty') || 'medium') as 'easy' | 'medium' | 'hard' | 'master';
-  const timeControl = (searchParams.get('time') || 'blitz') as 'blitz' | 'rapid' | 'classic';
+  const timeControl = searchParams.get('time') || '10+0';
   const opponentType = searchParams.get('opponent');
 
   const savedUser = localStorage.getItem('chessUser');

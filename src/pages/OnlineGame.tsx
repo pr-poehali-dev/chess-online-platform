@@ -8,7 +8,7 @@ const OnlineGame = () => {
   const navigate = useNavigate();
   const [searchParams] = useSearchParams();
   const opponentType = searchParams.get('opponent') as 'city' | 'region' | 'country' | null;
-  const timeControl = searchParams.get('time') as 'blitz' | 'rapid' | 'classic' | null;
+  const timeControl = searchParams.get('time') || '10+0';
   
   const [searchStatus, setSearchStatus] = useState<'searching' | 'found' | 'starting'>('searching');
   const [opponent, setOpponent] = useState<{

@@ -13,7 +13,7 @@ import { ChessBoard } from './game/ChessBoard';
 
 interface ChessGameProps {
   difficulty: 'easy' | 'medium' | 'hard' | 'master';
-  timeControl: 'blitz' | 'rapid' | 'classic';
+  timeControl: string;
   onClose: () => void;
 }
 
@@ -28,6 +28,10 @@ export const ChessGame = ({ difficulty, timeControl, onClose }: ChessGameProps) 
   const [moveHistory, setMoveHistory] = useState<string[]>([]);
 
   function getInitialTime(control: string): number {
+    if (control.includes('+')) {
+      const mins = parseInt(control.split('+')[0]);
+      return (isNaN(mins) ? 10 : mins) * 60;
+    }
     switch (control) {
       case 'blitz': return 180;
       case 'rapid': return 600;

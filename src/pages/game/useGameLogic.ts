@@ -1,10 +1,10 @@
 import { useState, useEffect, useRef } from 'react';
-import { Board, Position, initialBoard, getInitialTime, CastlingRights } from './gameTypes';
+import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRights } from './gameTypes';
 import { getPossibleMoves, getAllPossibleMovesForBoard, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
 
 export const useGameLogic = (
   difficulty: 'easy' | 'medium' | 'hard' | 'master',
-  timeControl: 'blitz' | 'rapid' | 'classic'
+  timeControl: string
 ) => {
   const loadGameState = () => {
     const saved = localStorage.getItem('activeGame');
@@ -269,6 +269,13 @@ export const useGameLogic = (
     setCurrentMoveIndex(newMoveHistory.length - 1);
     setSelectedSquare(null);
     setPossibleMoves([]);
+    
+    const increment = getIncrement(timeControl);
+    if (currentPlayer === 'white' && increment > 0) {
+      setWhiteTime(prev => prev + increment);
+    } else if (currentPlayer === 'black' && increment > 0) {
+      setBlackTime(prev => prev + increment);
+    }
     
     const nextPlayer = currentPlayer === 'white' ? 'black' : 'white';
     setCurrentPlayer(nextPlayer);
