@@ -123,75 +123,77 @@ const Navbar = ({
               )}
             </button>
 
-            <div className="relative">
-              <button
-                onClick={() => setShowMenu(!showMenu)}
-                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-300"
-              >
-                <Icon name="Menu" size={24} />
-              </button>
+            {isAuthenticated && (
+              <div className="relative">
+                <button
+                  onClick={() => setShowMenu(!showMenu)}
+                  className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-300"
+                >
+                  <Icon name="Menu" size={24} />
+                </button>
 
-              {showMenu && (
-                <>
-                  <div 
-                    className="fixed inset-0 z-40" 
-                    onClick={() => setShowMenu(false)}
-                  />
-                  <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-scale-in">
-                    <button
-                      onClick={() => {
-                        setActiveSection('profile');
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300"
-                    >
-                      <Icon name="User" size={20} />
-                      <span>Профиль</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveSection('friends');
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
-                    >
-                      <Icon name="Users" size={20} />
-                      <span>Друзья</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveSection('notifications');
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
-                    >
-                      <Icon name="Bell" size={20} />
-                      <span>Уведомления</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveSection('history');
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
-                    >
-                      <Icon name="History" size={20} />
-                      <span>История</span>
-                    </button>
-                    <button
-                      onClick={() => {
-                        setActiveSection('chat');
-                        setShowMenu(false);
-                      }}
-                      className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
-                    >
-                      <Icon name="MessageCircle" size={20} />
-                      <span>Сообщения</span>
-                    </button>
-                  </div>
-                </>
-              )}
-            </div>
+                {showMenu && (
+                  <>
+                    <div 
+                      className="fixed inset-0 z-40" 
+                      onClick={() => setShowMenu(false)}
+                    />
+                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-scale-in">
+                      <button
+                        onClick={() => {
+                          setActiveSection('profile');
+                          setShowMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300"
+                      >
+                        <Icon name="User" size={20} />
+                        <span>Профиль</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveSection('friends');
+                          setShowMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
+                      >
+                        <Icon name="Users" size={20} />
+                        <span>Друзья</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveSection('notifications');
+                          setShowMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
+                      >
+                        <Icon name="Bell" size={20} />
+                        <span>Уведомления</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveSection('history');
+                          setShowMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
+                      >
+                        <Icon name="History" size={20} />
+                        <span>История</span>
+                      </button>
+                      <button
+                        onClick={() => {
+                          setActiveSection('chat');
+                          setShowMenu(false);
+                        }}
+                        className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
+                      >
+                        <Icon name="MessageCircle" size={20} />
+                        <span>Сообщения</span>
+                      </button>
+                    </div>
+                  </>
+                )}
+              </div>
+            )}
           </div>
         </div>
       </div>
