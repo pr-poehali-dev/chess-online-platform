@@ -7,7 +7,10 @@ const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-
 
 const Index = () => {
   const navigate = useNavigate();
-  const [activeSection, setActiveSection] = useState('home');
+  const [activeSection, setActiveSection] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('invite') ? 'friends' : 'home';
+  });
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark' || savedTheme === null;
