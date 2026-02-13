@@ -59,11 +59,12 @@ def handler(event, context):
     )
     conn.commit()
 
-    smtp_host = os.environ.get('SMTP_HOST', 'smtp.yandex.ru')
-    smtp_port = int(os.environ.get('SMTP_PORT', '587'))
+    smtp_host = os.environ.get('SMTP_HOST', 'smtp.mail.ru')
+    smtp_port = int(os.environ.get('SMTP_PORT', '465'))
     smtp_user = os.environ.get('SMTP_USER', '')
     smtp_password = os.environ.get('SMTP_PASSWORD', '')
     from_email = os.environ.get('SMTP_FROM_EMAIL', smtp_user)
+    print('SMTP config: host={}, port={}, user={}, from={}'.format(smtp_host, smtp_port, smtp_user, from_email))
 
     msg = MIMEMultipart('alternative')
     msg['Subject'] = 'Код подтверждения - ЛигаШахмат'
