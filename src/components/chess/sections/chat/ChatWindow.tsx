@@ -1,9 +1,11 @@
-import { useState, useRef, useEffect } from 'react';
+import { useState, useRef, useEffect, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Icon from '@/components/ui/icon';
 import { Chat, Message } from './ChatTypes';
+
+const INVITE_URL = 'https://functions.poehali.dev/622400c1-79cc-4391-92fa-9995517f5de6';
 
 const TIME_OPTIONS = [
   { label: '1 мин', value: '1+0', cat: 'Пуля' },
@@ -48,6 +50,9 @@ export const ChatWindow = ({
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGameSetup, setShowGameSetup] = useState(false);
   const [showBlockMenu, setShowBlockMenu] = useState(false);
+  const [inviteSent, setInviteSent] = useState(false);
+  const [inviteId, setInviteId] = useState<number | null>(null);
+  const pollInviteRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const emojis = [
@@ -56,9 +61,51 @@ export const ChatWindow = ({
     '🎯', '🏆', '🎲', '♟️', '👑', '⭐', '💎', '🚀'
   ];
 
+  const getMyUserId = useCallback(() => {
+    const saved = localStorage.getItem('chessUser');
+    if (!saved) return '';
+    const user = JSON.parse(saved);
+    const rawId = user.email || user.name || 'anonymous';
+    return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+  }, []);
+
   useEffect(() => {
     scrollToBottom();
   }, [selectedChat.messages]);
+
+  useEffect(() => {
+    return () => {
+      if (pollInviteRef.current) clearInterval(pollInviteRef.current);
+    };
+  }, []);
+
+  const pollAccepted = useCallback((iid: number) => {
+    const uid = getMyUserId();
+    if (pollInviteRef.current) clearInterval(pollInviteRef.current);
+    pollInviteRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${INVITE_URL}?action=check_accepted&invite_id=${iid}&user_id=${encodeURIComponent(uid)}`);
+        const data = await res.json();
+        if (data.status === 'accepted' && data.game_id) {
+          if (pollInviteRef.current) clearInterval(pollInviteRef.current);
+          setInviteSent(false);
+          setInviteId(null);
+          const gameRes = await fetch(`https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299?game_id=${data.game_id}`);
+          const gameData = await gameRes.json();
+          const g = gameData.game;
+          const myColor = g.white_user_id === uid ? 'white' : 'black';
+          const oppName = g.white_user_id === uid ? g.black_username : g.white_username;
+          const oppRating = g.white_user_id === uid ? g.black_rating : g.white_rating;
+          const oppAvatar = g.white_user_id === uid ? (g.black_avatar || '') : (g.white_avatar || '');
+          navigate(`/game?time=${encodeURIComponent(g.time_control)}&color=${myColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(oppName)}&opponent_rating=${oppRating}&opponent_avatar=${encodeURIComponent(oppAvatar)}`);
+        } else if (data.status === 'declined') {
+          if (pollInviteRef.current) clearInterval(pollInviteRef.current);
+          setInviteSent(false);
+          setInviteId(null);
+        }
+      } catch { /* network error */ }
+    }, 2000);
+  }, [getMyUserId, navigate]);
 
   const scrollToBottom = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -98,7 +145,7 @@ export const ChatWindow = ({
     setShowEmojiPicker(false);
   };
 
-  const sendGameInvite = (timeControl: string) => {
+  const sendGameInvite = async (timeControl: string) => {
     localStorage.setItem('lastGameSettings', JSON.stringify({ time: timeControl, color: 'random' }));
     const inviteMsg: Message = {
       id: Date.now().toString(),
@@ -110,7 +157,30 @@ export const ChatWindow = ({
     };
     onSendMessage(inviteMsg);
     setShowGameSetup(false);
-    navigate(`/online-game?opponent=country&time=${encodeURIComponent(timeControl)}&color=random`);
+
+    const myUid = getMyUserId();
+    const friendUid = selectedChat.participantId;
+    if (!myUid || !friendUid) return;
+
+    try {
+      const res = await fetch(INVITE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send',
+          from_user_id: myUid,
+          to_user_id: friendUid,
+          time_control: timeControl,
+          color_choice: 'random'
+        })
+      });
+      const data = await res.json();
+      if (data.invite_id) {
+        setInviteSent(true);
+        setInviteId(data.invite_id);
+        pollAccepted(data.invite_id);
+      }
+    } catch { /* network error */ }
   };
 
   const handleQuickInvite = () => {
@@ -186,16 +256,26 @@ export const ChatWindow = ({
       </div>
 
       <div className="bg-white dark:bg-slate-900/80 border border-t-0 border-slate-200 dark:border-white/10 rounded-b-xl px-3 sm:px-4 py-2.5 sm:py-3 space-y-2">
-        <div className="flex gap-1.5 sm:gap-2">
-          <Button onClick={handleQuickInvite} className="bg-green-600 hover:bg-green-700 text-white border-0 flex-1 text-xs sm:text-sm h-8 sm:h-9">
-            <Icon name="Swords" size={15} className="mr-1" />
-            Играть {getTimeLabel(lastSettings.time)}
-          </Button>
-          <Button onClick={() => { setShowGameSetup(!showGameSetup); setShowEmojiPicker(false); }} variant="outline" className="border-blue-300 dark:border-blue-500/40 text-blue-600 dark:text-blue-400 flex-1 text-xs sm:text-sm h-8 sm:h-9">
-            <Icon name="Settings" size={15} className="mr-1" />
-            Режим
-          </Button>
-        </div>
+        {inviteSent ? (
+          <div className="flex items-center justify-center gap-2 py-2 px-3 rounded-xl bg-amber-50 dark:bg-amber-900/20 border border-amber-200 dark:border-amber-500/30">
+            <Icon name="Loader2" size={16} className="animate-spin text-amber-500" />
+            <span className="text-sm text-amber-700 dark:text-amber-400 font-medium">Ожидание ответа...</span>
+            <button onClick={() => { setInviteSent(false); setInviteId(null); if (pollInviteRef.current) clearInterval(pollInviteRef.current); }} className="text-xs text-gray-500 hover:text-gray-700 ml-auto">
+              Отмена
+            </button>
+          </div>
+        ) : (
+          <div className="flex gap-1.5 sm:gap-2">
+            <Button onClick={handleQuickInvite} className="bg-green-600 hover:bg-green-700 text-white border-0 flex-1 text-xs sm:text-sm h-8 sm:h-9">
+              <Icon name="Swords" size={15} className="mr-1" />
+              Играть {getTimeLabel(lastSettings.time)}
+            </Button>
+            <Button onClick={() => { setShowGameSetup(!showGameSetup); setShowEmojiPicker(false); }} variant="outline" className="border-blue-300 dark:border-blue-500/40 text-blue-600 dark:text-blue-400 flex-1 text-xs sm:text-sm h-8 sm:h-9">
+              <Icon name="Settings" size={15} className="mr-1" />
+              Режим
+            </Button>
+          </div>
+        )}
 
         {showGameSetup && (
           <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/10 animate-scale-in">

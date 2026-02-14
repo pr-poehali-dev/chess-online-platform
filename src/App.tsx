@@ -11,6 +11,7 @@ import OnlineGame from "./pages/OnlineGame";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
 import AuthGuard from "./components/AuthGuard";
+import GameInviteNotification from "./components/GameInviteNotification";
 
 const DECAY_URL = 'https://functions.poehali.dev/06f73421-41be-448f-a352-17e488dc15ef';
 
@@ -30,6 +31,7 @@ const App = () => (
       <Sonner />
       <DailyDecayTrigger />
       <BrowserRouter>
+        <GameInviteNotification />
         <Routes>
           <Route path="/" element={<Index />} />
           <Route path="/game" element={<AuthGuard><Game /></AuthGuard>} />
