@@ -16,6 +16,7 @@ export const API = {
   gameHistory: urls['game-history'],
   finishGame: urls['finish-game'],
   ratingSettings: urls['rating-settings'],
+  adminStats: urls['admin-stats'],
 } as const;
 
 export default API;
