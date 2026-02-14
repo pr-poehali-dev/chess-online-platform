@@ -156,6 +156,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
               const isLight = (rowIndex + colIndex) % 2 === 0;
               const isSelected = isSquareSelected(rowIndex, colIndex);
               const isPossible = showPossibleMoves && isSquarePossibleMove(rowIndex, colIndex);
+              const isLastMoveSquare = lastMove && ((lastMove.from.row === rowIndex && lastMove.from.col === colIndex) || (lastMove.to.row === rowIndex && lastMove.to.col === colIndex));
               const isKingInCheck = kingInCheckPosition?.row === rowIndex && kingInCheckPosition?.col === colIndex;
               const hasPiece = !!piece;
               const fileLabel = String.fromCharCode(97 + colIndex);
@@ -176,7 +177,9 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                     width: '12.5%',
                     height: 0,
                     paddingBottom: '12.5%',
-                    backgroundColor: isLight ? config.lightSquare : config.darkSquare,
+                    backgroundColor: isLastMoveSquare
+                      ? (isLight ? 'rgba(255, 255, 100, 0.45)' : 'rgba(200, 180, 50, 0.5)')
+                      : (isLight ? config.lightSquare : config.darkSquare),
                     ...(boardTheme === 'classic' ? {
                       boxShadow: isLight 
                         ? 'inset 0 1px 2px rgba(255,255,255,0.3), inset 0 -1px 2px rgba(0,0,0,0.05)'
