@@ -190,6 +190,8 @@ export const useGameLogic = (
   const serverMoveCountRef = useRef(0);
   const serverMoveNumberRef = useRef(0);
   const pendingMoveRef = useRef<string | null>(null);
+  const gameEndProcessedRef = useRef(false);
+  const audioCtxRef = useRef<AudioContext | null>(null);
 
   const displayBoard = useMemo(() => {
     return boardHistory[currentMoveIndex] || initialBoard;
@@ -226,10 +228,29 @@ export const useGameLogic = (
     oscillator.stop(audioContext.currentTime + 0.5);
   };
 
+  useEffect(() => {
+    const initAudio = () => {
+      if (!audioCtxRef.current) {
+        const AC = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+        audioCtxRef.current = new AC();
+      }
+      if (audioCtxRef.current.state === 'suspended') {
+        audioCtxRef.current.resume();
+      }
+    };
+    document.addEventListener('click', initAudio, { once: true });
+    document.addEventListener('touchstart', initAudio, { once: true });
+    return () => {
+      document.removeEventListener('click', initAudio);
+      document.removeEventListener('touchstart', initAudio);
+    };
+  }, []);
+
   const playMoveSound = useCallback(() => {
     try {
-      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
-      const ctx = new AudioContextClass();
+      const ctx = audioCtxRef.current;
+      if (!ctx) return;
+      if (ctx.state === 'suspended') ctx.resume();
       const osc = ctx.createOscillator();
       const gain = ctx.createGain();
       osc.connect(gain);
@@ -352,6 +373,7 @@ export const useGameLogic = (
   }, [isOnlineGame, onlineGameId]);
 
   const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string, moveNumber?: number, winner?: string, endReason?: string) => {
+    if (gameEndProcessedRef.current) return;
     if (pendingMoveRef.current && serverMoves.length < serverMoveCountRef.current) return;
     if (serverMoves.length === serverMoveCountRef.current && serverStatus !== 'finished') return;
     const prevCount = serverMoveCountRef.current;
@@ -401,6 +423,7 @@ export const useGameLogic = (
 
     if (serverStatus === 'finished' && endReason) {
       setEndReason(endReason);
+      gameEndProcessedRef.current = true;
     }
 
     if (serverStatus === 'finished' && winner) {
