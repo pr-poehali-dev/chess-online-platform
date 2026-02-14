@@ -98,6 +98,7 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
       { key: 'btn_play_online', label: 'Онлайн' },
       { key: 'btn_play_offline', label: 'Офлайн' },
       { key: 'btn_tournament', label: 'Турнир' },
+      { key: 'btn_rankings', label: 'Рейтинги' },
     ];
     return items.map(i => {
       const on = siteSettings[i.key]?.value === 'true';

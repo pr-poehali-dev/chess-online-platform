@@ -422,6 +422,7 @@ export const HomeSection = ({
         </p>
       </div>
 
+      {isButtonVisible("btn_rankings") && (
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <RankingCard
           title="Лучшие в России"
@@ -459,6 +460,7 @@ export const HomeSection = ({
           animationDelay="0.2s"
         />
       </div>
+      )}
     </div>
   );
 };

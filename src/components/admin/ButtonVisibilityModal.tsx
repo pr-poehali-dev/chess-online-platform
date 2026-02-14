@@ -15,6 +15,7 @@ const buttons = [
   { key: 'btn_play_online', label: 'Играть онлайн', icon: 'Play', color: 'text-green-400' },
   { key: 'btn_play_offline', label: 'Играть офлайн', icon: 'Gamepad2', color: 'text-blue-400' },
   { key: 'btn_tournament', label: 'Участвовать в турнире', icon: 'Trophy', color: 'text-purple-400' },
+  { key: 'btn_rankings', label: 'Рейтинги на главной', icon: 'BarChart3', color: 'text-orange-400' },
 ];
 
 export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
