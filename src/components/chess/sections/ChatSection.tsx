@@ -5,6 +5,7 @@ import { Chat, ChatSectionProps, CHAT_URL } from './chat/ChatTypes';
 import { ChatListItem } from './chat/ChatListItem';
 import { ChatWindow } from './chat/ChatWindow';
 import API from '@/config/api';
+import { emitBadge } from '@/lib/badgeEvents';
 
 const FRIENDS_URL = API.friends;
 
@@ -85,6 +86,8 @@ export const ChatSection = ({
       }
 
       setChats(chatList);
+      const totalUnread = chatList.reduce((sum: number, c: Chat) => sum + (c.unreadCount || 0), 0);
+      emitBadge({ messages: totalUnread });
 
       if (initialChatId && initialParticipantName) {
         const existing = chatList.find(c => c.participantId === initialChatId);
@@ -135,6 +138,8 @@ export const ChatSection = ({
 
   const handleChatSelect = (chat: Chat) => {
     setSelectedChat({ ...chat, unreadCount: 0 });
+    const newTotal = chats.reduce((sum, c) => sum + (c.id === chat.id ? 0 : (c.unreadCount || 0)), 0);
+    emitBadge({ messages: newTotal });
   };
 
   const handleBack = () => {

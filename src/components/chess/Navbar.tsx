@@ -1,10 +1,7 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
-import API from '@/config/api';
-
-const FRIENDS_URL = API.friends;
-const CHAT_URL = API.chat;
+import { onBadge } from '@/lib/badgeEvents';
 
 interface NavbarProps {
   activeSection: string;
@@ -21,14 +18,6 @@ interface NavbarProps {
     tournaments: number;
   };
 }
-
-const getUserId = () => {
-  const saved = localStorage.getItem('chessUser');
-  if (!saved) return '';
-  const user = JSON.parse(saved);
-  const rawId = user.email || user.name || 'anonymous';
-  return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-};
 
 const Badge = ({ count }: { count: number }) => {
   if (count <= 0) return null;
@@ -98,41 +87,17 @@ const Navbar = ({
     return () => clearInterval(interval);
   }, []);
 
-  const fetchBadges = useCallback(async () => {
-    const uid = getUserId();
-    if (!uid) return;
-
-    try {
-      const [pendingRes, convRes] = await Promise.all([
-        fetch(`${FRIENDS_URL}?action=pending&user_id=${encodeURIComponent(uid)}`).catch(() => null),
-        fetch(`${CHAT_URL}?action=conversations&user_id=${encodeURIComponent(uid)}`).catch(() => null)
-      ]);
-
-      if (pendingRes?.ok) {
-        const data = await pendingRes.json();
-        setPendingFriendsCount((data.pending || []).length);
-      }
-
-      if (convRes?.ok) {
-        const data = await convRes.json();
-        const total = (data.conversations || []).reduce(
-          (sum: number, c: { unread: number }) => sum + (c.unread || 0), 0
-        );
-        setUnreadMessagesCount(total);
-      }
-    } catch { /* network error */ }
-  }, []);
-
   useEffect(() => {
     if (!isAuthenticated) {
       setPendingFriendsCount(0);
       setUnreadMessagesCount(0);
       return;
     }
-    fetchBadges();
-    const interval = setInterval(fetchBadges, 30000);
-    return () => clearInterval(interval);
-  }, [isAuthenticated, fetchBadges]);
+    return onBadge((detail) => {
+      if (detail.friends !== undefined) setPendingFriendsCount(detail.friends);
+      if (detail.messages !== undefined) setUnreadMessagesCount(detail.messages);
+    });
+  }, [isAuthenticated]);
 
   const hasAnyBadge = pendingFriendsCount > 0 || unreadMessagesCount > 0;
 

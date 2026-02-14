@@ -4,6 +4,7 @@ import { Friend, PendingRequest, FriendProfile, FriendGame, FRIENDS_URL } from '
 import { FriendProfileView } from './friends/FriendProfileView';
 import { FriendInvitePanel } from './friends/FriendInvitePanel';
 import { FriendListPanel } from './friends/FriendListPanel';
+import { emitBadge } from '@/lib/badgeEvents';
 
 interface FriendsSectionProps {
   onOpenChat?: (friendName: string, friendRating: number, friendId: string) => void;
@@ -73,7 +74,9 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
     try {
       const res = await fetch(`${FRIENDS_URL}?action=pending&user_id=${encodeURIComponent(uid)}`);
       const data = await res.json();
-      setPendingRequests(data.pending || []);
+      const pending = data.pending || [];
+      setPendingRequests(pending);
+      emitBadge({ friends: pending.length });
     } catch { /* network error */ }
   }, []);
 
