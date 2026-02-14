@@ -17,6 +17,7 @@ import {
   OfflineGameModal,
 } from "@/components/chess/Modals";
 import { ConfirmDialog } from "@/pages/game/ConfirmDialog";
+import Icon from "@/components/ui/icon";
 import API from "@/config/api";
 import getDeviceToken from "@/lib/deviceToken";
 const GAME_HISTORY_URL = API.gameHistory;
@@ -181,6 +182,15 @@ const Index = () => {
   ];
 
   const [offlineRegMsg, setOfflineRegMsg] = useState<string | null>(null);
+  const [showRules, setShowRules] = useState(false);
+  const [showSupport, setShowSupport] = useState(false);
+  const [copied, setCopied] = useState(false);
+
+  const copyEmail = () => {
+    navigator.clipboard.writeText("ligachess.ru@mail.ru");
+    setCopied(true);
+    setTimeout(() => setCopied(false), 2000);
+  };
 
   return (
     <div className="min-h-screen bg-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:bg-gradient-to-br transition-colors duration-300 overflow-x-hidden">
@@ -324,31 +334,43 @@ const Index = () => {
         <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
           <p>© 2026 Лига Шахмат. Все права защищены.</p>
           <div className="flex justify-center gap-6 mt-4">
-            <a
-              href="#"
-              className="hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              О нас
-            </a>
-            <a
-              href="#"
+            <button
+              onClick={() => { setShowRules(!showRules); setShowSupport(false); }}
               className="hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               Правила
-            </a>
-            <a
-              href="#"
+            </button>
+            <button
+              onClick={() => { setShowSupport(!showSupport); setShowRules(false); }}
               className="hover:text-gray-900 dark:hover:text-white transition-colors"
             >
               Поддержка
-            </a>
-            <a
-              href="#"
-              className="hover:text-gray-900 dark:hover:text-white transition-colors"
-            >
-              Контакты
-            </a>
+            </button>
           </div>
+
+          {showRules && (
+            <div className="mt-6 max-w-2xl mx-auto text-left bg-slate-50 dark:bg-slate-800/60 rounded-xl p-5 sm:p-6 border border-slate-200 dark:border-white/10 animate-fade-in">
+              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">1. Правила шахмат</h3>
+              <div className="space-y-3 text-sm leading-relaxed text-gray-600 dark:text-gray-400">
+                <p>В шахматы играют на квадратной доске, состоящей из восьми рядов (называемых горизонталями и обозначаемых числами от 1 до 8) и восьми столбцов (называемых вертикалями и обозначаемых буквами от a до h). Цвета шестидесяти четырех клеток чередуются между светлыми и темными и называются «светлыми клетками» и «темными клетками». Шахматная доска располагается таким образом, чтобы у каждого игрока была белая клетка в правом верхнем углу, а фигуры расставляются, как показано на схеме, причем каждая ферзь находится на клетке соответствующего цвета.</p>
+                <p>Каждый игрок начинает игру с шестнадцатью фигурами: у каждого игрока один король, одна ферзь, две ладьи, два слона, два коня и восемь пешек. Один игрок, называемый Белыми, управляет белыми фигурами, а другой игрок, Черный, — черными; Белые всегда ходят первыми. Цвета выбираются либо по дружеской договоренности, либо в результате случайной игры, либо по решению организатора турнира. Игроки по очереди ходят по одной фигуре за раз (за исключением рокировки, когда ходят две фигуры одновременно). Фигуры перемещаются либо на свободное поле, либо на поле, занятое фигурой противника, захватывая ее и удаляя из игры. За одним исключением (на проходе), все фигуры захватывают фигуры противника, перемещаясь на поле, которое занимает фигура противника.</p>
+              </div>
+            </div>
+          )}
+
+          {showSupport && (
+            <div className="mt-6 max-w-md mx-auto animate-fade-in">
+              <button
+                onClick={copyEmail}
+                className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors"
+              >
+                <Icon name="Mail" size={18} className="text-blue-500" />
+                <span className="text-slate-900 dark:text-white font-medium">ligachess.ru@mail.ru</span>
+                <Icon name={copied ? "Check" : "Copy"} size={16} className={copied ? "text-green-500" : "text-gray-400"} />
+              </button>
+              {copied && <p className="text-green-500 text-sm mt-2">Скопировано!</p>}
+            </div>
+          )}
         </div>
       </footer>
     </div>
