@@ -286,6 +286,7 @@ const Game = () => {
               boardTheme={boardTheme}
               lastMove={lastMove}
               gameResult={gameResult}
+              onResultClick={() => setResultDismissed(true)}
             />
 
             <PlayerInfo

@@ -14,9 +14,10 @@ interface GameBoardProps {
   boardTheme?: BoardTheme;
   lastMove?: { from: Position; to: Position } | null;
   gameResult?: GameResult;
+  onResultClick?: () => void;
 }
 
-export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition, showPossibleMoves = true, flipped = false, boardTheme = 'wood', lastMove, gameResult }: GameBoardProps) => {
+export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition, showPossibleMoves = true, flipped = false, boardTheme = 'wood', lastMove, gameResult, onResultClick }: GameBoardProps) => {
   const config = boardThemes[boardTheme];
   const useImages = boardTheme !== 'classic';
 
@@ -152,8 +153,8 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
       }}>
         {renderOverlayPiece()}
         {gameResult && (
-          <div className="absolute inset-0 z-[60] flex items-center justify-center pointer-events-none" style={{ animation: 'resultFadeIn 0.5s ease-out' }}>
-            <div className="rounded-2xl px-6 py-4 md:px-8 md:py-5 flex flex-col items-center gap-1 pointer-events-auto" style={{
+          <div className="absolute inset-0 z-[60] flex items-center justify-center cursor-pointer" onClick={onResultClick} style={{ animation: 'resultFadeIn 0.5s ease-out' }}>
+            <div className="rounded-2xl px-6 py-4 md:px-8 md:py-5 flex flex-col items-center gap-1" style={{
               background: gameResult === 'loss' ? 'rgba(30,10,10,0.88)' : gameResult === 'draw' ? 'rgba(30,30,30,0.88)' : 'rgba(10,30,10,0.88)',
               backdropFilter: 'blur(8px)',
               boxShadow: gameResult === 'loss' ? '0 0 40px rgba(220,50,50,0.4)' : gameResult === 'draw' ? '0 0 40px rgba(180,180,180,0.3)' : '0 0 40px rgba(50,200,80,0.4)',
