@@ -275,54 +275,56 @@ const Game = () => {
 
       <main className="flex-1 flex items-center justify-center p-1 sm:p-2 md:p-3 overflow-hidden min-h-0">
         <div className="w-full h-full flex items-center justify-center">
-          <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2 w-full" style={{ maxWidth: 'min(calc(100vw - 8px), min(calc(100dvh - 240px), 700px))' }}>
-            <GameControls
-              showSettingsMenu={showSettingsMenu}
-              setShowSettingsMenu={setShowSettingsMenu}
-              setShowChat={setShowChat}
-              handleExitClick={handleExitClick}
-              handleOfferDraw={handleOfferDraw}
-              handleSurrender={handleSurrender}
-              handleNewGame={handleNewGame}
-              setShowNotifications={setShowNotifications}
-              showPossibleMoves={showPossibleMoves}
-              setShowPossibleMoves={setShowPossibleMoves}
-              theme={theme}
-              setTheme={setTheme}
-              boardTheme={boardTheme}
-              setBoardTheme={setBoardTheme}
-              gameStatus={gameStatus}
-              currentPlayer={currentPlayer}
-              playerColor={playerColor}
-              setShowRematchOffer={setShowRematchOffer}
-              onOfferRematch={isOnlineReal ? async () => {
-                setRematchSent(true);
-                const result = await handleOfferRematch();
-                if (result.error) {
-                  setRematchSent(false);
-                  setRematchCooldown(true);
-                  setRematchError(result.error);
-                }
-              } : () => { window.location.reload(); }}
-              rematchSent={rematchSent}
-              rematchCooldown={rematchCooldown}
-            />
+          <div className="flex flex-col gap-2 sm:gap-2.5 md:gap-3 w-full" style={{ maxWidth: 'min(calc(100vw - 8px), min(calc(100dvh - 240px), 700px))' }}>
+            <div className="flex flex-col gap-1 sm:gap-1.5">
+              <GameControls
+                showSettingsMenu={showSettingsMenu}
+                setShowSettingsMenu={setShowSettingsMenu}
+                setShowChat={setShowChat}
+                handleExitClick={handleExitClick}
+                handleOfferDraw={handleOfferDraw}
+                handleSurrender={handleSurrender}
+                handleNewGame={handleNewGame}
+                setShowNotifications={setShowNotifications}
+                showPossibleMoves={showPossibleMoves}
+                setShowPossibleMoves={setShowPossibleMoves}
+                theme={theme}
+                setTheme={setTheme}
+                boardTheme={boardTheme}
+                setBoardTheme={setBoardTheme}
+                gameStatus={gameStatus}
+                currentPlayer={currentPlayer}
+                playerColor={playerColor}
+                setShowRematchOffer={setShowRematchOffer}
+                onOfferRematch={isOnlineReal ? async () => {
+                  setRematchSent(true);
+                  const result = await handleOfferRematch();
+                  if (result.error) {
+                    setRematchSent(false);
+                    setRematchCooldown(true);
+                    setRematchError(result.error);
+                  }
+                } : () => { window.location.reload(); }}
+                rematchSent={rematchSent}
+                rematchCooldown={rematchCooldown}
+              />
 
-            <PlayerInfo
-              playerName={opponentName}
-              playerColor={playerColor === 'white' ? 'black' : 'white'}
-              icon={playerColor === 'white' ? '♚' : '♔'}
-              time={playerColor === 'white' ? blackTime : whiteTime}
-              isCurrentPlayer={currentPlayer !== playerColor}
-              formatTime={formatTime}
-              difficulty={(isPlayingWithBot || isBotFromMatchmaking) ? getDifficultyLabel(difficulty) : undefined}
-              rating={opponentRating}
-              avatar={opponentAvatar}
-              inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}
-              capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
-              theme={theme}
-              onClickProfile={() => setShowOpponentProfile(true)}
-            />
+              <PlayerInfo
+                playerName={opponentName}
+                playerColor={playerColor === 'white' ? 'black' : 'white'}
+                icon={playerColor === 'white' ? '♚' : '♔'}
+                time={playerColor === 'white' ? blackTime : whiteTime}
+                isCurrentPlayer={currentPlayer !== playerColor}
+                formatTime={formatTime}
+                difficulty={(isPlayingWithBot || isBotFromMatchmaking) ? getDifficultyLabel(difficulty) : undefined}
+                rating={opponentRating}
+                avatar={opponentAvatar}
+                inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}
+                capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
+                theme={theme}
+                onClickProfile={() => setShowOpponentProfile(true)}
+              />
+            </div>
 
             <GameBoard
               board={displayBoard}
@@ -338,34 +340,36 @@ const Game = () => {
               onResultClick={() => setResultDismissed(true)}
             />
 
-            <PlayerInfo
-              playerName="Вы"
-              playerColor={playerColor}
-              icon={playerColor === 'white' ? '♔' : '♚'}
-              time={playerColor === 'white' ? whiteTime : blackTime}
-              isCurrentPlayer={currentPlayer === playerColor}
-              formatTime={formatTime}
-              rating={newRating || userRating || undefined}
-              ratingChange={ratingChange}
-              avatar={userAvatar}
-              inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
-              capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}
-              theme={theme}
-              onClickProfile={() => setShowMyProfile(true)}
-            />
+            <div className="flex flex-col gap-1 sm:gap-1.5">
+              <PlayerInfo
+                playerName="Вы"
+                playerColor={playerColor}
+                icon={playerColor === 'white' ? '♔' : '♚'}
+                time={playerColor === 'white' ? whiteTime : blackTime}
+                isCurrentPlayer={currentPlayer === playerColor}
+                formatTime={formatTime}
+                rating={newRating || userRating || undefined}
+                ratingChange={ratingChange}
+                avatar={userAvatar}
+                inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
+                capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}
+                theme={theme}
+                onClickProfile={() => setShowMyProfile(true)}
+              />
 
-            <MoveHistory
-              moveHistory={moveHistory}
-              currentMoveIndex={currentMoveIndex}
-              isDragging={isDragging}
-              onMouseDown={(e) => handleMouseDown(e, historyRef)}
-              onMouseMove={(e) => handleMouseMove(e, historyRef)}
-              onMouseUpOrLeave={handleMouseUpOrLeave}
-              onPreviousMove={handlePreviousMove}
-              onNextMove={handleNextMove}
-              historyRef={historyRef}
-              theme={theme}
-            />
+              <MoveHistory
+                moveHistory={moveHistory}
+                currentMoveIndex={currentMoveIndex}
+                isDragging={isDragging}
+                onMouseDown={(e) => handleMouseDown(e, historyRef)}
+                onMouseMove={(e) => handleMouseMove(e, historyRef)}
+                onMouseUpOrLeave={handleMouseUpOrLeave}
+                onPreviousMove={handlePreviousMove}
+                onNextMove={handleNextMove}
+                historyRef={historyRef}
+                theme={theme}
+              />
+            </div>
           </div>
         </div>
       </main>
