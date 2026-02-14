@@ -421,7 +421,7 @@ export const HomeSection = ({
         </p>
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
         <RankingCard
           title="Лучшие в России"
           subtitle="Лидеры страны"
