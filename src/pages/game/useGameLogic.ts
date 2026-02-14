@@ -163,6 +163,7 @@ export const useGameLogic = (
   });
   const [enPassantTarget, setEnPassantTarget] = useState<Position | null>(savedState?.enPassantTarget || null);
   const [kingInCheckPosition, setKingInCheckPosition] = useState<Position | null>(null);
+  const [lastMove, setLastMove] = useState<{ from: Position; to: Position } | null>(null);
   const [showPossibleMoves, setShowPossibleMoves] = useState<boolean>(
     savedState?.showPossibleMoves !== undefined ? savedState.showPossibleMoves : true
   );
@@ -350,6 +351,7 @@ export const useGameLogic = (
   }, [isOnlineGame, onlineGameId]);
 
   const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string, moveNumber?: number) => {
+    if (pendingMoveRef.current && serverMoves.length < serverMoveCountRef.current) return;
     if (serverMoves.length === serverMoveCountRef.current && serverStatus !== 'finished') return;
     const prevCount = serverMoveCountRef.current;
     serverMoveCountRef.current = serverMoves.length;
@@ -361,6 +363,18 @@ export const useGameLogic = (
     const opponentMoved = serverMoves.length > prevCount && prevCount > 0;
 
     const result = replayMoves(serverMoves);
+
+    if (opponentMoved && serverMoves.length > 0) {
+      const lastNotation = serverMoves[serverMoves.length - 1];
+      const parts = lastNotation.split('-');
+      if (parts.length === 2) {
+        const fromCol = parts[0].charCodeAt(0) - 97;
+        const fromRow = 8 - parseInt(parts[0][1]);
+        const toCol = parts[1].charCodeAt(0) - 97;
+        const toRow = 8 - parseInt(parts[1][1]);
+        setLastMove({ from: { row: fromRow, col: fromCol }, to: { row: toRow, col: toCol } });
+      }
+    }
 
     setBoard(result.board);
     setBoardHistory(result.boardHistory);
@@ -570,6 +584,7 @@ export const useGameLogic = (
     setBoardHistory(newBoardHistory);
     setMoveTimes(newMoveTimes);
 
+    setLastMove({ from, to });
     setBoard(newBoard);
     setCurrentMoveIndex(newBoardHistory.length - 1);
     setSelectedSquare(null);
@@ -704,6 +719,7 @@ export const useGameLogic = (
     capturedByWhite,
     capturedByBlack,
     kingInCheckPosition,
+    lastMove,
     showPossibleMoves,
     setShowPossibleMoves,
     theme,

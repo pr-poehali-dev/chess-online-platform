@@ -64,6 +64,7 @@ const Game = () => {
     capturedByWhite,
     capturedByBlack,
     kingInCheckPosition,
+    lastMove,
     showPossibleMoves,
     setShowPossibleMoves,
     theme,
@@ -190,6 +191,7 @@ const Game = () => {
               showPossibleMoves={showPossibleMoves}
               flipped={flipped}
               boardTheme={boardTheme}
+              lastMove={lastMove}
             />
 
             <PlayerInfo
