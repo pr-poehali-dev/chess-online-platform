@@ -104,6 +104,7 @@ const Game = () => {
     userRating,
     connectionLost,
     connectionRestored,
+    p2pConnected,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -263,6 +264,12 @@ const Game = () => {
         <div className="fixed top-0 left-0 right-0 z-[100] bg-green-600 text-white text-center text-sm py-2 font-semibold">
           <Icon name="Wifi" size={16} className="inline mr-2 -mt-0.5" />
           Связь восстановлена
+        </div>
+      )}
+      {isOnlineReal && p2pConnected && !connectionLost && gameStatus === 'playing' && (
+        <div className="fixed top-14 right-3 z-[90] bg-emerald-600/90 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
+          <Icon name="Zap" size={10} />
+          P2P
         </div>
       )}
 

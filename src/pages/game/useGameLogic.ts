@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRights, BoardTheme } from './gameTypes';
 import { getPossibleMoves, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
+import { usePeerConnection, PeerMessage } from './usePeerConnection';
+import { queueGameResult } from '@/lib/serviceWorker';
 import API from '@/config/api';
 const FINISH_GAME_URL = API.finishGame;
 const GAME_HISTORY_URL = API.gameHistory;
@@ -199,6 +201,76 @@ export const useGameLogic = (
   const pendingMoveRef = useRef<string | null>(null);
   const gameEndProcessedRef = useRef(false);
   const audioCtxRef = useRef<AudioContext | null>(null);
+
+  const myUserId = useMemo(() => {
+    const saved = localStorage.getItem('chessUser');
+    if (!saved) return '';
+    const userData = JSON.parse(saved);
+    const rawId = userData.email || userData.name || 'anonymous';
+    return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+  }, []);
+
+  const handleP2PMessage = useCallback((msg: PeerMessage) => {
+    if (msg.type === 'move' && msg.data) {
+      const moveData = msg.data as { move: string; whiteTime: number; blackTime: number; gameStatus: string; winnerId?: string };
+      const allMoves = [...moveHistory, moveData.move];
+      const result = replayMoves(allMoves);
+
+      if (allMoves.length > 0) {
+        const lastNotation = allMoves[allMoves.length - 1];
+        const parts = lastNotation.split('-');
+        if (parts.length === 2) {
+          const fromCol = parts[0].charCodeAt(0) - 97;
+          const fromRow = 8 - parseInt(parts[0][1]);
+          const toCol = parts[1].charCodeAt(0) - 97;
+          const toRow = 8 - parseInt(parts[1][1]);
+          setLastMove({ from: { row: fromRow, col: fromCol }, to: { row: toRow, col: toCol } });
+        }
+      }
+
+      setBoard(result.board);
+      setBoardHistory(result.boardHistory);
+      setMoveHistory(allMoves);
+      setCurrentMoveIndex(result.boardHistory.length - 1);
+      setCurrentPlayer(result.currentPlayer);
+      setCastlingRights(result.castlingRights);
+      setEnPassantTarget(result.enPassantTarget);
+      setCapturedByWhite(result.capturedByWhite);
+      setCapturedByBlack(result.capturedByBlack);
+      setKingInCheckPosition(result.kingInCheck);
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+      setWhiteTime(moveData.whiteTime);
+      setBlackTime(moveData.blackTime);
+
+      if (moveData.gameStatus === 'checkmate') setGameStatus('checkmate');
+      else if (moveData.gameStatus === 'stalemate') setGameStatus('stalemate');
+
+      pendingMoveRef.current = null;
+      playMoveSound();
+    } else if (msg.type === 'resign') {
+      setGameStatus('checkmate');
+      setEndReason('resign');
+      setCurrentPlayer(playerColor === 'white' ? 'black' : 'white');
+      gameEndProcessedRef.current = true;
+    } else if (msg.type === 'draw') {
+      setGameStatus('draw');
+      setEndReason('draw');
+      gameEndProcessedRef.current = true;
+    } else if (msg.type === 'time_sync' && msg.data) {
+      const sync = msg.data as { whiteTime: number; blackTime: number };
+      setWhiteTime(sync.whiteTime);
+      setBlackTime(sync.blackTime);
+    }
+  }, [moveHistory, playerColor]);
+
+  const { p2pConnected, p2pAttempted, sendPeerMessage, processSignals } = usePeerConnection({
+    gameId: onlineGameId || 0,
+    userId: myUserId,
+    isWhite: playerColor === 'white',
+    onMessage: handleP2PMessage,
+    enabled: isOnlineGame && !!(onlineGameId) && !!myUserId,
+  });
 
   const displayBoard = useMemo(() => {
     return boardHistory[currentMoveIndex] || initialBoard;
@@ -531,7 +603,9 @@ export const useGameLogic = (
 
     const poll = async () => {
       try {
-        const res = await fetch(`${ONLINE_MOVE_URL}?game_id=${onlineGameId}`);
+        let url = `${ONLINE_MOVE_URL}?game_id=${onlineGameId}`;
+        if (myUserId) url += `&user_id=${encodeURIComponent(myUserId)}`;
+        const res = await fetch(url);
         if (!res.ok) {
           pollFailCountRef.current++;
           if (pollFailCountRef.current >= 4) setConnectionLost(true);
@@ -547,24 +621,30 @@ export const useGameLogic = (
         pollFailCountRef.current = 0;
         setConnectionLost(false);
 
-        const serverMoves: string[] = data.game.move_history
-          ? data.game.move_history.split(',').filter(Boolean)
-          : [];
-
-        if (data.game.seconds_since_move !== undefined) {
-          inactivitySyncRef.current = data.game.seconds_since_move;
+        if (data.signals && data.signals.length > 0) {
+          processSignals(data.signals);
         }
 
-        applyServerState(
-          serverMoves,
-          data.game.white_time ?? getInitialTime(timeControl),
-          data.game.black_time ?? getInitialTime(timeControl),
-          data.game.status,
-          data.game.move_number,
-          data.game.winner,
-          data.game.end_reason,
-          data.game.seconds_since_move
-        );
+        if (!p2pConnected) {
+          const serverMoves: string[] = data.game.move_history
+            ? data.game.move_history.split(',').filter(Boolean)
+            : [];
+
+          if (data.game.seconds_since_move !== undefined) {
+            inactivitySyncRef.current = data.game.seconds_since_move;
+          }
+
+          applyServerState(
+            serverMoves,
+            data.game.white_time ?? getInitialTime(timeControl),
+            data.game.black_time ?? getInitialTime(timeControl),
+            data.game.status,
+            data.game.move_number,
+            data.game.winner,
+            data.game.end_reason,
+            data.game.seconds_since_move
+          );
+        }
 
         if (data.game.rematch_offered_by) setRematchOfferedBy(data.game.rematch_offered_by);
         if (data.game.rematch_status) setRematchStatus(data.game.rematch_status);
@@ -583,16 +663,17 @@ export const useGameLogic = (
 
     poll();
 
+    const pollInterval = p2pConnected ? 10000 : 1500;
     const intervalId = setInterval(() => {
       if (!active) return;
       poll();
-    }, 1500);
+    }, pollInterval);
 
     return () => {
       active = false;
       clearInterval(intervalId);
     };
-  }, [isOnlineGame, onlineGameId, timeControl, applyServerState]);
+  }, [isOnlineGame, onlineGameId, timeControl, applyServerState, myUserId, p2pConnected, processSignals]);
 
   const submitGameResult = useCallback(async (status: 'checkmate' | 'stalemate' | 'draw', currentPlayerAtEnd: string) => {
     if (gameFinished.current) return;
@@ -639,6 +720,22 @@ export const useGameLogic = (
       }
     } catch (e) {
       console.error('Failed to submit game result:', e);
+      queueGameResult(FINISH_GAME_URL, {
+        user_id: userId,
+        username: userData.name || 'Player',
+        avatar: userData.avatar || '',
+        result,
+        opponent_name: 'bot',
+        opponent_type: 'bot',
+        user_color: playerColor,
+        time_control: timeControl,
+        difficulty,
+        moves_count: moveHistory.length,
+        move_history: moveHistory.join(','),
+        move_times: moveTimes.join(','),
+        duration_seconds: durationSeconds,
+        end_reason: status
+      });
     }
   }, [playerColor, timeControl, difficulty, moveHistory, moveTimes]);
 
@@ -774,6 +871,21 @@ export const useGameLogic = (
     if (isOnlineGame && piece?.color === playerColor) {
       pendingMoveRef.current = moveNotation;
       serverMoveCountRef.current = newMoveHistory.length;
+
+      if (p2pConnected) {
+        sendPeerMessage({
+          type: 'move',
+          data: {
+            move: moveNotation,
+            whiteTime: currentPlayer === 'white' ? whiteTime + getIncrement(timeControl) : whiteTime,
+            blackTime: currentPlayer === 'black' ? blackTime + getIncrement(timeControl) : blackTime,
+            gameStatus: finalGameStatus,
+            winnerId
+          }
+        });
+        pendingMoveRef.current = null;
+      }
+
       sendMoveToServer(moveNotation, finalGameStatus, winnerId);
     }
   };
@@ -885,6 +997,7 @@ export const useGameLogic = (
     userRating,
     connectionLost,
     connectionRestored,
+    p2pConnected,
     historyRef,
     handleSquareClick,
     isSquareSelected,

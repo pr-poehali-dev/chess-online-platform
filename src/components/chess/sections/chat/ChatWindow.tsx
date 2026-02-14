@@ -4,8 +4,9 @@ import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Icon from '@/components/ui/icon';
 import { Chat, Message, CHAT_URL } from './ChatTypes';
+import API from '@/config/api';
 
-const INVITE_URL = 'https://functions.poehali.dev/622400c1-79cc-4391-92fa-9995517f5de6';
+const INVITE_URL = API.inviteGame;
 
 const TIME_OPTIONS = [
   { label: '1 мин', value: '1+0', cat: 'Пуля' },
@@ -125,7 +126,7 @@ export const ChatWindow = ({
           if (pollInviteRef.current) clearInterval(pollInviteRef.current);
           setInviteSent(false);
           setInviteId(null);
-          const gameRes = await fetch(`https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299?game_id=${data.game_id}`);
+          const gameRes = await fetch(`${API.matchmaking}?game_id=${data.game_id}`);
           const gameData = await gameRes.json();
           const g = gameData.game;
           const myColor = g.white_user_id === uid ? 'white' : 'black';

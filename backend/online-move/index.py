@@ -80,10 +80,10 @@ def handler(event: dict, context) -> dict:
             FROM online_games WHERE id = %d""" % int(game_id)
         )
         row = cur.fetchone()
-        cur.close()
-        conn.close()
 
         if not row:
+            cur.close()
+            conn.close()
             return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'game not found'})}
 
         seconds_since_move = row[19] or 0
@@ -99,6 +99,24 @@ def handler(event: dict, context) -> dict:
             else:
                 black_time = max(0, black_time - seconds_since_move)
 
+        signals = []
+        req_user_id = qs.get('user_id', '')
+        if req_user_id:
+            safe_uid = req_user_id.replace("'", "''")
+            cur.execute(
+                "SELECT id, from_user_id, signal_type, signal_data FROM webrtc_signals WHERE game_id = %d AND to_user_id = '%s' AND consumed = FALSE ORDER BY id ASC LIMIT 20"
+                % (int(game_id), safe_uid)
+            )
+            sig_rows = cur.fetchall()
+            if sig_rows:
+                sig_ids = ','.join(str(r[0]) for r in sig_rows)
+                cur.execute("UPDATE webrtc_signals SET consumed = TRUE WHERE id IN (%s)" % sig_ids)
+                conn.commit()
+                signals = [{'from': r[1], 'type': r[2], 'data': r[3]} for r in sig_rows]
+
+        cur.close()
+        conn.close()
+
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
             'game': {
                 'id': row[0],
@@ -112,7 +130,8 @@ def handler(event: dict, context) -> dict:
                 'move_number': move_number,
                 'seconds_since_move': seconds_since_move,
                 'rematch_offered_by': row[21], 'rematch_status': row[22], 'rematch_game_id': row[23]
-            }
+            },
+            'signals': signals
         })}
 
     if event.get('httpMethod') != 'POST':
@@ -156,6 +175,23 @@ def handler(event: dict, context) -> dict:
 
     def esc(val):
         return str(val).replace("'", "''")
+
+    if action == 'signal':
+        signal_type = body.get('signal_type', '')
+        signal_data = body.get('signal_data', '')
+        if not signal_type or not signal_data:
+            cur.close()
+            conn.close()
+            return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'signal_type and signal_data required'})}
+        to_user = black_uid if user_id == white_uid else white_uid
+        cur.execute(
+            "INSERT INTO webrtc_signals (game_id, from_user_id, to_user_id, signal_type, signal_data) VALUES (%d, '%s', '%s', '%s', '%s')"
+            % (g_id, esc(user_id), esc(to_user), esc(signal_type), esc(signal_data))
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'signal_sent'})}
 
     if action == 'rematch_offer':
         cur.execute(
