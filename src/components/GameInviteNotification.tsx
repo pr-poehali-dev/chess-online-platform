@@ -120,9 +120,8 @@ const GameInviteNotification = () => {
         setVisible(false);
         setInvite(null);
         setShowSurrenderConfirm(false);
-        navigate(
-          `/game?time=${encodeURIComponent(data.time_control)}&color=${data.player_color}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(data.opponent_name || '')}&opponent_rating=${data.opponent_rating || 0}&opponent_avatar=${encodeURIComponent(data.opponent_avatar || '')}`
-        );
+        const url = `/game?time=${encodeURIComponent(data.time_control)}&color=${data.player_color}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(data.opponent_name || '')}&opponent_rating=${data.opponent_rating || 0}&opponent_avatar=${encodeURIComponent(data.opponent_avatar || '')}`;
+        window.location.href = url;
       }
     } catch { /* network error */ }
     setAccepting(false);

@@ -137,7 +137,7 @@ export const GameSettingsModal = ({
           setSelectedFriendName('');
           setInviteDeclined(false);
           setShowGameSettings(false);
-          navigate(`/game?time=${encodeURIComponent(g.time_control)}&color=${myColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(oppName)}&opponent_rating=${oppRating}&opponent_avatar=${encodeURIComponent(oppAvatar)}`);
+          window.location.href = `/game?time=${encodeURIComponent(g.time_control)}&color=${myColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(oppName)}&opponent_rating=${oppRating}&opponent_avatar=${encodeURIComponent(oppAvatar)}`;
         } else if (data.status === 'declined') {
           if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
           setInviteSent(false);

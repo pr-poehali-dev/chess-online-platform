@@ -132,7 +132,7 @@ export const ChatWindow = ({
           const oppName = g.white_user_id === uid ? g.black_username : g.white_username;
           const oppRating = g.white_user_id === uid ? g.black_rating : g.white_rating;
           const oppAvatar = g.white_user_id === uid ? (g.black_avatar || '') : (g.white_avatar || '');
-          navigate(`/game?time=${encodeURIComponent(g.time_control)}&color=${myColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(oppName)}&opponent_rating=${oppRating}&opponent_avatar=${encodeURIComponent(oppAvatar)}`);
+          window.location.href = `/game?time=${encodeURIComponent(g.time_control)}&color=${myColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(oppName)}&opponent_rating=${oppRating}&opponent_avatar=${encodeURIComponent(oppAvatar)}`;
         } else if (data.status === 'declined') {
           if (pollInviteRef.current) clearInterval(pollInviteRef.current);
           setInviteSent(false);
