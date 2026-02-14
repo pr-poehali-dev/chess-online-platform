@@ -181,7 +181,6 @@ const Game = () => {
   const [rematchSent, setRematchSent] = useState(false);
   const [rematchCooldown, setRematchCooldown] = useState(false);
   const [resultDismissed, setResultDismissed] = useState(false);
-  const [opponentIdleToast, setOpponentIdleToast] = useState(false);
   const [rematchError, setRematchError] = useState<string | null>(null);
 
   useEffect(() => {
@@ -206,14 +205,6 @@ const Game = () => {
       setRematchCooldown(true);
     }
   }, [rematchStatus]);
-
-  useEffect(() => {
-    if (isOnlineReal && gameStatus === 'playing' && currentPlayer !== playerColor && opponentInactivityTimer <= 30) {
-      setOpponentIdleToast(true);
-    } else {
-      setOpponentIdleToast(false);
-    }
-  }, [opponentInactivityTimer, currentPlayer, playerColor, gameStatus, isOnlineReal]);
 
   const isViewingHistory = currentMoveIndex < moveHistory.length;
 
@@ -425,22 +416,6 @@ const Game = () => {
         playerAvatar={userAvatar}
         playerRating={newRating || userRating || undefined}
       />
-
-      {opponentIdleToast && (
-        <div className="fixed bottom-6 left-1/2 -translate-x-1/2 z-[100] animate-in slide-in-from-bottom duration-300">
-          <div className={`flex items-center gap-3 px-5 py-3 rounded-xl shadow-2xl border backdrop-blur-md ${
-            theme === 'light'
-              ? 'bg-orange-50/95 border-orange-300 text-orange-800'
-              : 'bg-orange-900/90 border-orange-600/50 text-orange-200'
-          }`}>
-            <span className="text-xl">⏳</span>
-            <div>
-              <div className="text-sm font-semibold">Соперник бездействует</div>
-              <div className="text-xs opacity-80">Осталось {opponentInactivityTimer}с до автопоражения</div>
-            </div>
-          </div>
-        </div>
-      )}
 
       <ConfirmDialog
         open={confirmDialog.open}

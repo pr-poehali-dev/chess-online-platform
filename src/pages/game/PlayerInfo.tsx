@@ -139,19 +139,19 @@ export const PlayerInfo = ({
             }`}>
               {formatTime(time)}
             </div>
-            {inactivityTimer !== undefined && inactivityTimer <= 20 && (
+            {inactivityTimer !== undefined && inactivityTimer <= 30 && (
               <div className={`text-sm md:text-base font-semibold whitespace-nowrap ${
-                inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
+                inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
               }`}>
                 ({inactivityTimer}с)
               </div>
             )}
           </div>
-          {inactivityTimer !== undefined && inactivityTimer <= 20 && (
+          {inactivityTimer !== undefined && inactivityTimer <= 30 && (
             <div className={`text-[10px] md:text-xs text-right whitespace-nowrap ${
-              inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
+              inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
             }`}>
-              Бездействие игрока. До поражения.
+              {inactivityTimer <= 20 ? 'Бездействие. До поражения.' : 'Бездействует...'}
             </div>
           )}
         </div>
