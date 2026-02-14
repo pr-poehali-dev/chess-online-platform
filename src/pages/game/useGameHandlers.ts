@@ -160,19 +160,13 @@ export const useGameHandlers = (
   const handleNewGame = () => {
     setShowSettingsMenu(false);
     
-    const reloadViaNavigate = () => {
-      const params = new URLSearchParams(window.location.search);
-      params.set('t', String(Date.now()));
-      navigate(`/game?${params.toString()}`);
-    };
-
     if (gameStatus === 'playing') {
       if (confirm('Чтобы начать новую партию, необходимо завершить текущую. Сдаться и начать новую игру?')) {
         setGameStatus('checkmate');
-        setTimeout(reloadViaNavigate, 1500);
+        setTimeout(() => window.location.reload(), 1500);
       }
     } else {
-      reloadViaNavigate();
+      window.location.reload();
     }
   };
 
@@ -198,13 +192,11 @@ export const useGameHandlers = (
           params.set('online_game_id', String(data.new_game_id));
           params.set('color', newColor);
           params.set('online', 'true');
-          navigate(`/game?${params.toString()}`);
+          window.location.href = `/game?${params.toString()}`;
         }
       } catch { /* ignore */ }
     } else {
-      const params = new URLSearchParams(window.location.search);
-      params.set('t', String(Date.now()));
-      navigate(`/game?${params.toString()}`);
+      window.location.reload();
     }
   };
 

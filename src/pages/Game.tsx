@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useSearchParams } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { getDifficultyLabel, formatTime } from './game/gameTypes';
 import { GameBoard, GameResult } from './game/GameBoard';
@@ -19,7 +19,6 @@ import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
 
 const Game = () => {
   const [searchParams] = useSearchParams();
-  const navigateGame = useNavigate();
   const difficulty = (searchParams.get('difficulty') || 'medium') as 'easy' | 'medium' | 'hard' | 'master';
   const timeControl = searchParams.get('time') || '10+0';
   const opponentType = searchParams.get('opponent');
@@ -174,7 +173,7 @@ const Game = () => {
     params.set('online_game_id', String(rematchGameId));
     params.set('color', newColor);
     params.set('online', 'true');
-    navigateGame(`/game?${params.toString()}`);
+    window.location.href = `/game?${params.toString()}`;
   }, [rematchGameId, rematchStatus]);
 
   useEffect(() => {
