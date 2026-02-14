@@ -82,6 +82,7 @@ const Game = () => {
     moveHistory,
     currentMoveIndex,
     inactivityTimer,
+    opponentInactivityTimer,
     capturedByWhite,
     capturedByBlack,
     kingInCheckPosition,
@@ -113,7 +114,24 @@ const Game = () => {
   }, [gameStatus]);
 
   useEffect(() => {
-    return () => { localStorage.removeItem('currentGameFinished'); };
+    if (isOnlineReal && onlineGameId && gameStatus === 'playing') {
+      localStorage.setItem('activeOnlineGame', JSON.stringify({
+        gameId: onlineGameId,
+        color: playerColor,
+        opponentName,
+        opponentAvatar,
+        opponentRating,
+        url: window.location.pathname + window.location.search
+      }));
+    } else if (isOnlineReal && gameStatus !== 'playing') {
+      localStorage.removeItem('activeOnlineGame');
+    }
+  }, [gameStatus, isOnlineReal, onlineGameId]);
+
+  useEffect(() => {
+    return () => {
+      localStorage.removeItem('currentGameFinished');
+    };
   }, []);
 
   const {
@@ -274,6 +292,7 @@ const Game = () => {
               difficulty={(isPlayingWithBot || isBotFromMatchmaking) ? getDifficultyLabel(difficulty) : undefined}
               rating={opponentRating}
               avatar={opponentAvatar}
+              inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}
               capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
               theme={theme}
               onClickProfile={() => setShowOpponentProfile(true)}

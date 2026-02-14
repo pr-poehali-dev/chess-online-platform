@@ -30,22 +30,40 @@ const Navbar = ({
 }: NavbarProps) => {
   const [showMenu, setShowMenu] = useState(false);
   const [hasActiveGame, setHasActiveGame] = useState(false);
+  const [activeGameUrl, setActiveGameUrl] = useState('');
+  const [activeGameLabel, setActiveGameLabel] = useState('');
   const navigate = useNavigate();
   const location = useLocation();
 
   useEffect(() => {
     const checkActiveGame = () => {
-      const saved = localStorage.getItem('activeGame');
-      if (saved) {
+      const savedBot = localStorage.getItem('activeGame');
+      if (savedBot) {
         try {
-          const gameState = JSON.parse(saved);
-          setHasActiveGame(gameState.gameStatus === 'playing');
-        } catch {
-          setHasActiveGame(false);
-        }
-      } else {
-        setHasActiveGame(false);
+          const gameState = JSON.parse(savedBot);
+          if (gameState.gameStatus === 'playing') {
+            setHasActiveGame(true);
+            setActiveGameUrl(`/game?difficulty=${gameState.difficulty}&time=${gameState.timeControl}`);
+            setActiveGameLabel('Вернуться к игре');
+            return;
+          }
+        } catch { /* ignore */ }
       }
+
+      const savedOnline = localStorage.getItem('activeOnlineGame');
+      if (savedOnline) {
+        try {
+          const onlineState = JSON.parse(savedOnline);
+          setHasActiveGame(true);
+          setActiveGameUrl(onlineState.url);
+          setActiveGameLabel(onlineState.opponentName ? `Игра vs ${onlineState.opponentName}` : 'Вернуться к игре');
+          return;
+        } catch { /* ignore */ }
+      }
+
+      setHasActiveGame(false);
+      setActiveGameUrl('');
+      setActiveGameLabel('');
     };
 
     checkActiveGame();
@@ -54,14 +72,10 @@ const Navbar = ({
   }, []);
 
   const handleReturnToGame = () => {
-    const saved = localStorage.getItem('activeGame');
-    if (saved) {
-      try {
-        const gameState = JSON.parse(saved);
-        navigate(`/game?difficulty=${gameState.difficulty}&time=${gameState.timeControl}`);
-      } catch {
-        navigate('/game');
-      }
+    if (activeGameUrl) {
+      window.location.href = activeGameUrl;
+    } else {
+      navigate('/game');
     }
   };
 
@@ -105,10 +119,11 @@ const Navbar = ({
             {hasActiveGame && location.pathname !== '/game' && (
               <button
                 onClick={handleReturnToGame}
-                className="p-2 rounded-lg bg-green-600 hover:bg-green-700 transition-colors animate-pulse"
-                title="Вернуться к игре"
+                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition-colors animate-pulse"
+                title={activeGameLabel || 'Вернуться к игре'}
               >
-                <Icon name="Gamepad2" size={22} className="text-white" />
+                <Icon name="Gamepad2" size={20} className="text-white" />
+                <span className="text-white text-sm font-medium hidden sm:inline">{activeGameLabel || 'К игре'}</span>
               </button>
             )}
 

@@ -63,6 +63,7 @@ def handler(event: dict, context) -> dict:
                 'move_history': row[15], 'board_state': row[16],
                 'winner': row[17], 'end_reason': row[18],
                 'move_number': move_number,
+                'seconds_since_move': seconds_since_move,
                 'rematch_offered_by': row[21], 'rematch_status': row[22], 'rematch_game_id': row[23]
             }
         })}

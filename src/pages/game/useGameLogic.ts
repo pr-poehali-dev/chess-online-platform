@@ -153,6 +153,7 @@ export const useGameLogic = (
   const [moveTimes, setMoveTimes] = useState<string[]>(savedState?.moveTimes || []);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(savedState?.currentMoveIndex || 0);
   const [inactivityTimer, setInactivityTimer] = useState(60);
+  const [opponentInactivityTimer, setOpponentInactivityTimer] = useState(60);
   const [capturedByWhite, setCapturedByWhite] = useState<{type: string; color: string}[]>(savedState?.capturedByWhite || []);
   const [capturedByBlack, setCapturedByBlack] = useState<{type: string; color: string}[]>(savedState?.capturedByBlack || []);
   const [castlingRights, setCastlingRights] = useState<CastlingRights>(savedState?.castlingRights || {
@@ -292,24 +293,65 @@ export const useGameLogic = (
     return () => clearInterval(timer);
   }, [currentPlayer, gameStatus, whiteTime, blackTime]);
 
+  const hasPlayedOpponentWarning = useRef(false);
+  const inactivitySyncRef = useRef<number>(0);
+
+  const sendInactivityTimeout = useCallback((losingPlayer: 'white' | 'black') => {
+    if (!isOnlineGame || !onlineGameId) return;
+    const saved = localStorage.getItem('chessUser');
+    if (!saved) return;
+    const uData = JSON.parse(saved);
+    const rawId = uData.email || uData.name || 'anonymous';
+    const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+    fetch(ONLINE_MOVE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'timeout', game_id: onlineGameId, user_id: userId, loser_color: losingPlayer })
+    }).catch(() => {});
+  }, [isOnlineGame, onlineGameId]);
+
   useEffect(() => {
     if (gameStatus !== 'playing') return;
-    if (isOnlineGame && currentPlayer !== playerColor) return;
-    setInactivityTimer(60);
-    hasPlayedWarning.current = false;
+    const isMyTurn = currentPlayer === playerColor;
+
+    if (isMyTurn) {
+      setInactivityTimer(60);
+      hasPlayedWarning.current = false;
+    } else if (isOnlineGame) {
+      setOpponentInactivityTimer(Math.max(0, 60 - (inactivitySyncRef.current || 0)));
+      hasPlayedOpponentWarning.current = false;
+    }
+
     const inactivityInterval = setInterval(() => {
-      if (isOnlineGame && currentPlayer !== playerColor) return;
-      setInactivityTimer(prev => {
-        if (prev === 20 && !hasPlayedWarning.current && currentPlayer === playerColor) {
-          playWarningSound();
-          hasPlayedWarning.current = true;
-        }
-        if (prev <= 1) {
-          setGameStatus('checkmate');
-          return 0;
-        }
-        return prev - 1;
-      });
+      if (isMyTurn) {
+        setInactivityTimer(prev => {
+          if (prev === 20 && !hasPlayedWarning.current) {
+            playWarningSound();
+            hasPlayedWarning.current = true;
+          }
+          if (prev <= 1) {
+            if (isOnlineGame) {
+              sendInactivityTimeout(currentPlayer);
+            }
+            setGameStatus('checkmate');
+            return 0;
+          }
+          return prev - 1;
+        });
+      } else if (isOnlineGame) {
+        setOpponentInactivityTimer(prev => {
+          if (prev === 20 && !hasPlayedOpponentWarning.current) {
+            playWarningSound();
+            hasPlayedOpponentWarning.current = true;
+          }
+          if (prev <= 1) {
+            sendInactivityTimeout(currentPlayer);
+            setGameStatus('checkmate');
+            return 0;
+          }
+          return prev - 1;
+        });
+      }
     }, 1000);
     return () => clearInterval(inactivityInterval);
   }, [currentPlayer, gameStatus, isOnlineGame, playerColor]);
@@ -375,7 +417,7 @@ export const useGameLogic = (
     } catch(e) { console.error('sendMove error', e); }
   }, [isOnlineGame, onlineGameId]);
 
-  const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string, moveNumber?: number, winner?: string, endReason?: string) => {
+  const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string, moveNumber?: number, winner?: string, endReason?: string, secondsSinceMove?: number) => {
     if (gameEndProcessedRef.current) return;
     if (pendingMoveRef.current && serverMoves.length < serverMoveCountRef.current) return;
     if (serverMoves.length === serverMoveCountRef.current && serverStatus !== 'finished') return;
@@ -447,6 +489,16 @@ export const useGameLogic = (
     setWhiteTime(wTime);
     setBlackTime(bTime);
 
+    if (secondsSinceMove !== undefined) {
+      inactivitySyncRef.current = secondsSinceMove;
+      const remaining = Math.max(0, 60 - secondsSinceMove);
+      if (result.currentPlayer === playerColor) {
+        setInactivityTimer(remaining);
+      } else {
+        setOpponentInactivityTimer(remaining);
+      }
+    }
+
     pendingMoveRef.current = null;
 
     if (opponentMoved && result.currentPlayer === playerColor) {
@@ -474,6 +526,10 @@ export const useGameLogic = (
           ? data.game.move_history.split(',').filter(Boolean)
           : [];
 
+        if (data.game.seconds_since_move !== undefined) {
+          inactivitySyncRef.current = data.game.seconds_since_move;
+        }
+
         applyServerState(
           serverMoves,
           data.game.white_time ?? getInitialTime(timeControl),
@@ -481,7 +537,8 @@ export const useGameLogic = (
           data.game.status,
           data.game.move_number,
           data.game.winner,
-          data.game.end_reason
+          data.game.end_reason,
+          data.game.seconds_since_move
         );
 
         if (data.game.rematch_offered_by) setRematchOfferedBy(data.game.rematch_offered_by);
@@ -771,6 +828,7 @@ export const useGameLogic = (
     boardHistory,
     currentMoveIndex,
     inactivityTimer,
+    opponentInactivityTimer,
     capturedByWhite,
     capturedByBlack,
     kingInCheckPosition,
