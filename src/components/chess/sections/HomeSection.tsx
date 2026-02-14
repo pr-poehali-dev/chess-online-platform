@@ -310,7 +310,7 @@ export const HomeSection = ({
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in overflow-hidden">
-      <div className="text-center pt-2 pb-6 sm:pb-12">
+      <div className="text-center pt-2 pb-0">
         <div className="flex flex-col items-center gap-3 sm:gap-4 mb-6 sm:mb-8 animate-slide-up max-w-md mx-auto px-1">
           {isButtonVisible("btn_play_online") && (
             <div className="w-full relative">
@@ -414,7 +414,7 @@ export const HomeSection = ({
           Шахматный мир ждет тебя
         </h2>
         <p
-          className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 animate-slide-up px-2"
+          className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-0 animate-slide-up px-2"
           style={{ animationDelay: "0.2s" }}
         >
           Играем онлайн с людьми со всей страны. Найдем достойного соперника для
