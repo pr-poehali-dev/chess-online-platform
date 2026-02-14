@@ -12,6 +12,7 @@ import { NotificationsModal } from './game/NotificationsModal';
 import { RematchModal } from './game/RematchModal';
 import { OpponentLeftModal } from './game/OpponentLeftModal';
 import { GameHeader, GameControls } from './game/GameHeader';
+import { ConfirmDialog } from './game/ConfirmDialog';
 import { useGameLogic } from './game/useGameLogic';
 import API from '@/config/api';
 import { useGameHandlers } from './game/useGameHandlers';
@@ -171,13 +172,17 @@ const Game = () => {
     handleNewGame,
     handleAcceptRematch,
     handleDeclineRematch,
-    handleOfferRematch
+    handleOfferRematch,
+    confirmDialog,
+    handleConfirmDialogConfirm,
+    handleConfirmDialogCancel
   } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined);
 
   const [rematchSent, setRematchSent] = useState(false);
   const [rematchCooldown, setRematchCooldown] = useState(false);
   const [resultDismissed, setResultDismissed] = useState(false);
   const [opponentIdleToast, setOpponentIdleToast] = useState(false);
+  const [rematchError, setRematchError] = useState<string | null>(null);
 
   useEffect(() => {
     if (!isOnlineReal || !rematchOfferedBy || rematchStatus !== 'pending') return;
@@ -284,7 +289,7 @@ const Game = () => {
                 if (result.error) {
                   setRematchSent(false);
                   setRematchCooldown(true);
-                  alert(result.error);
+                  setRematchError(result.error);
                 }
               } : undefined}
               rematchSent={rematchSent}
@@ -436,6 +441,26 @@ const Game = () => {
           </div>
         </div>
       )}
+
+      <ConfirmDialog
+        open={confirmDialog.open}
+        message={confirmDialog.message}
+        title={confirmDialog.title}
+        variant={confirmDialog.variant}
+        alertOnly={confirmDialog.alertOnly}
+        onConfirm={handleConfirmDialogConfirm}
+        onCancel={handleConfirmDialogCancel}
+      />
+
+      <ConfirmDialog
+        open={!!rematchError}
+        message={rematchError || ''}
+        title="Реванш"
+        variant="info"
+        alertOnly
+        onConfirm={() => setRematchError(null)}
+        onCancel={() => setRematchError(null)}
+      />
     </div>
   );
 };

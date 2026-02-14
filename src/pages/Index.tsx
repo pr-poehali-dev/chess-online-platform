@@ -3,6 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/chess/Navbar';
 import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection, NotificationsSection, HistorySection, ChatSection } from '@/components/chess/Sections';
 import { AuthModal, GameSettingsModal, OfflineGameModal } from '@/components/chess/Modals';
+import { ConfirmDialog } from '@/pages/game/ConfirmDialog';
 import API from '@/config/api';
 const GAME_HISTORY_URL = API.gameHistory;
 const USER_CHECK_URL = API.userCheck;
@@ -150,7 +151,7 @@ const Index = () => {
     },
   ];
 
-
+  const [offlineRegMsg, setOfflineRegMsg] = useState<string | null>(null);
 
   return (
     <div className="min-h-screen bg-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:bg-gradient-to-br transition-colors duration-300">
@@ -258,8 +259,18 @@ const Index = () => {
         setShowModal={setShowOfflineGameModal}
         onRegister={(data) => {
           console.log('Регистрация на офлайн игру:', data);
-          alert(`Вы зарегистрированы на игру\nДень: ${data.day}\nВремя: ${data.time}${data.district ? `\nРайон: ${data.district}` : ''}`);
+          setOfflineRegMsg(`Вы зарегистрированы на игру\nДень: ${data.day}\nВремя: ${data.time}${data.district ? `\nРайон: ${data.district}` : ''}`);
         }}
+      />
+
+      <ConfirmDialog
+        open={!!offlineRegMsg}
+        message={offlineRegMsg || ''}
+        title="Регистрация"
+        variant="info"
+        alertOnly
+        onConfirm={() => setOfflineRegMsg(null)}
+        onCancel={() => setOfflineRegMsg(null)}
       />
 
       <footer className="border-t border-slate-200 dark:border-white/10 mt-16 py-8">

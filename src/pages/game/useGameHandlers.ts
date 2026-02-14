@@ -1,5 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+export interface ConfirmState {
+  open: boolean;
+  message: string;
+  title?: string;
+  variant?: 'danger' | 'info';
+  alertOnly?: boolean;
+}
 
 export const useGameHandlers = (
   gameStatus: 'playing' | 'checkmate' | 'stalemate' | 'draw', 
@@ -29,6 +37,32 @@ export const useGameHandlers = (
   const [isChatBlockedByOpponent, setIsChatBlockedByOpponent] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
 
+  const [confirmDialog, setConfirmDialog] = useState<ConfirmState>({ open: false, message: '' });
+  const pendingActionRef = useRef<(() => void) | null>(null);
+
+  const showConfirm = useCallback((message: string, onConfirm: () => void, opts?: { title?: string; variant?: 'danger' | 'info' }) => {
+    pendingActionRef.current = onConfirm;
+    setConfirmDialog({ open: true, message, title: opts?.title, variant: opts?.variant || 'danger' });
+  }, []);
+
+  const showAlert = useCallback((message: string, opts?: { title?: string; variant?: 'danger' | 'info' }) => {
+    pendingActionRef.current = null;
+    setConfirmDialog({ open: true, message, title: opts?.title, variant: opts?.variant || 'info', alertOnly: true });
+  }, []);
+
+  const handleConfirmDialogConfirm = useCallback(() => {
+    setConfirmDialog({ open: false, message: '' });
+    if (pendingActionRef.current) {
+      pendingActionRef.current();
+      pendingActionRef.current = null;
+    }
+  }, []);
+
+  const handleConfirmDialogCancel = useCallback(() => {
+    setConfirmDialog({ open: false, message: '' });
+    pendingActionRef.current = null;
+  }, []);
+
   const handleMouseDown = (e: React.MouseEvent, historyRef: React.RefObject<HTMLDivElement>) => {
     if (!historyRef.current) return;
     setIsDragging(true);
@@ -53,46 +87,54 @@ export const useGameHandlers = (
       navigate('/');
     } else {
       if (moveCount <= 2) {
-        if (confirm('Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.')) {
-          localStorage.removeItem('activeGame');
-          navigate('/');
-        }
+        showConfirm(
+          'Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.',
+          () => {
+            localStorage.removeItem('activeGame');
+            navigate('/');
+          },
+          { title: 'Выход из игры' }
+        );
       } else {
         setShowExitDialog(true);
       }
     }
   };
 
-  const handleSurrender = () => {
-    setShowSettingsMenu(false);
-    
-    const message = moveCount <= 2 
-      ? 'Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.'
-      : 'Вы действительно хотите сдаться? Партия будет засчитана как поражение.';
-    
-    if (confirm(message)) {
-      if (moveCount <= 2) {
-        localStorage.removeItem('activeGame');
-        navigate('/');
-      } else {
-        if (setCurrentPlayer) setCurrentPlayer(playerColor);
-        setGameStatus('checkmate');
-        if (onlineGameId && onlineMoveUrl) {
-          const saved = localStorage.getItem('chessUser');
-          if (saved) {
-            const uData = JSON.parse(saved);
-            const rawId = uData.email || uData.name || 'anonymous';
-            const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-            fetch(onlineMoveUrl, {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ action: 'resign', game_id: onlineGameId, user_id: userId })
-            }).catch(() => {});
-          }
+  const doSurrender = () => {
+    if (moveCount <= 2) {
+      localStorage.removeItem('activeGame');
+      navigate('/');
+    } else {
+      if (setCurrentPlayer) setCurrentPlayer(playerColor);
+      setGameStatus('checkmate');
+      if (onlineGameId && onlineMoveUrl) {
+        const saved = localStorage.getItem('chessUser');
+        if (saved) {
+          const uData = JSON.parse(saved);
+          const rawId = uData.email || uData.name || 'anonymous';
+          const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+          fetch(onlineMoveUrl, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'resign', game_id: onlineGameId, user_id: userId })
+          }).catch(() => {});
         }
       }
-      setShowExitDialog(false);
     }
+    setShowExitDialog(false);
+  };
+
+  const handleSurrender = () => {
+    setShowSettingsMenu(false);
+
+    const message = moveCount <= 2
+      ? 'Выйти из игры? Так как партия только началась (менее 3 ходов), это не повлияет на рейтинг.'
+      : 'Вы действительно хотите сдаться? Партия будет засчитана как поражение.';
+
+    const title = moveCount <= 2 ? 'Выход из игры' : 'Сдаться';
+
+    showConfirm(message, doSurrender, { title });
   };
 
   const handleContinue = () => {
@@ -138,7 +180,7 @@ export const useGameHandlers = (
     setShowSettingsMenu(false);
     
     if (drawOffersCount >= 2) {
-      alert('Вы уже предлагали ничью 2 раза. Больше нельзя предлагать ничью в этой партии.');
+      showAlert('Вы уже предлагали ничью 2 раза. Больше нельзя предлагать ничью в этой партии.', { title: 'Ничья' });
       return;
     }
     
@@ -161,10 +203,14 @@ export const useGameHandlers = (
     setShowSettingsMenu(false);
     
     if (gameStatus === 'playing') {
-      if (confirm('Чтобы начать новую партию, необходимо завершить текущую. Сдаться и начать новую игру?')) {
-        setGameStatus('checkmate');
-        setTimeout(() => window.location.reload(), 1500);
-      }
+      showConfirm(
+        'Чтобы начать новую партию, необходимо завершить текущую. Сдаться и начать новую игру?',
+        () => {
+          setGameStatus('checkmate');
+          setTimeout(() => window.location.reload(), 1500);
+        },
+        { title: 'Новая партия' }
+      );
     } else {
       window.location.reload();
     }
@@ -275,6 +321,9 @@ export const useGameHandlers = (
     handleNewGame,
     handleAcceptRematch,
     handleDeclineRematch,
-    handleOfferRematch
+    handleOfferRematch,
+    confirmDialog,
+    handleConfirmDialogConfirm,
+    handleConfirmDialogCancel
   };
 };
