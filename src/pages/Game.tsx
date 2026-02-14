@@ -85,6 +85,7 @@ const Game = () => {
     capturedByBlack,
     kingInCheckPosition,
     lastMove,
+    setCurrentPlayer,
     showPossibleMoves,
     setShowPossibleMoves,
     theme,
@@ -139,7 +140,7 @@ const Game = () => {
     handleNewGame,
     handleAcceptRematch,
     handleDeclineRematch
-  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length);
+  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer);
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors ${

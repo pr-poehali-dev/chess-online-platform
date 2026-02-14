@@ -4,7 +4,9 @@ import { useNavigate } from 'react-router-dom';
 export const useGameHandlers = (
   gameStatus: 'playing' | 'checkmate' | 'stalemate' | 'draw', 
   setGameStatus: (status: 'playing' | 'checkmate' | 'stalemate' | 'draw') => void,
-  moveCount: number = 0
+  moveCount: number = 0,
+  playerColor: 'white' | 'black' = 'white',
+  setCurrentPlayer?: (player: 'white' | 'black') => void
 ) => {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
@@ -71,6 +73,7 @@ export const useGameHandlers = (
         localStorage.removeItem('activeGame');
         navigate('/');
       } else {
+        if (setCurrentPlayer) setCurrentPlayer(playerColor);
         setGameStatus('checkmate');
       }
       setShowExitDialog(false);

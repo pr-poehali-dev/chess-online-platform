@@ -741,6 +741,7 @@ export const useGameLogic = (
     capturedByBlack,
     kingInCheckPosition,
     lastMove,
+    setCurrentPlayer,
     showPossibleMoves,
     setShowPossibleMoves,
     theme,
