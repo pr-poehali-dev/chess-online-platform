@@ -158,6 +158,7 @@ const Game = () => {
 
   const [rematchSent, setRematchSent] = useState(false);
   const [rematchCooldown, setRematchCooldown] = useState(false);
+  const [resultDismissed, setResultDismissed] = useState(false);
 
   useEffect(() => {
     if (!isOnlineReal || !rematchOfferedBy || rematchStatus !== 'pending') return;
@@ -182,8 +183,15 @@ const Game = () => {
     }
   }, [rematchStatus]);
 
+  const isViewingHistory = currentMoveIndex < moveHistory.length;
+
+  useEffect(() => {
+    if (isViewingHistory) setResultDismissed(true);
+    else setResultDismissed(false);
+  }, [isViewingHistory]);
+
   const gameResult: GameResult = (() => {
-    if (showRematchOffer) return null;
+    if (showRematchOffer || resultDismissed) return null;
     if (gameStatus === 'playing') return null;
     if (gameStatus === 'draw' || gameStatus === 'stalemate') return 'draw';
     if (gameStatus === 'checkmate') {
