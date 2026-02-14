@@ -4,6 +4,7 @@ import psycopg2
 from datetime import datetime
 
 
+
 def esc(val):
     return str(val).replace("'", "''")
 

@@ -4,6 +4,7 @@ import psycopg2
 import time as time_module
 
 
+
 def get_client_ip(event):
     hdrs = event.get('headers') or {}
     ip = hdrs.get('X-Forwarded-For', hdrs.get('x-forwarded-for', ''))

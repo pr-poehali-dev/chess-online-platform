@@ -4,6 +4,7 @@ import psycopg2
 import random
 
 
+
 def esc(val):
     return str(val).replace("'", "''")
 
