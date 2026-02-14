@@ -1,6 +1,10 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
+import API from '@/config/api';
+
+const FRIENDS_URL = API.friends;
+const CHAT_URL = API.chat;
 
 interface NavbarProps {
   activeSection: string;
@@ -18,6 +22,27 @@ interface NavbarProps {
   };
 }
 
+const getUserId = () => {
+  const saved = localStorage.getItem('chessUser');
+  if (!saved) return '';
+  const user = JSON.parse(saved);
+  const rawId = user.email || user.name || 'anonymous';
+  return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+};
+
+const Badge = ({ count }: { count: number }) => {
+  if (count <= 0) return null;
+  return (
+    <span className="absolute -top-1 -right-1 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-red-500 text-white text-[10px] font-bold px-1 leading-none">
+      {count > 99 ? '99+' : count}
+    </span>
+  );
+};
+
+const Dot = () => (
+  <span className="absolute -top-0.5 -right-0.5 w-2.5 h-2.5 rounded-full bg-red-500 border-2 border-white dark:border-slate-900" />
+);
+
 const Navbar = ({ 
   activeSection, 
   setActiveSection, 
@@ -32,6 +57,8 @@ const Navbar = ({
   const [hasActiveGame, setHasActiveGame] = useState(false);
   const [activeGameUrl, setActiveGameUrl] = useState('');
   const [activeGameLabel, setActiveGameLabel] = useState('');
+  const [pendingFriendsCount, setPendingFriendsCount] = useState(0);
+  const [unreadMessagesCount, setUnreadMessagesCount] = useState(0);
   const navigate = useNavigate();
   const location = useLocation();
 
@@ -70,6 +97,44 @@ const Navbar = ({
     const interval = setInterval(checkActiveGame, 5000);
     return () => clearInterval(interval);
   }, []);
+
+  const fetchBadges = useCallback(async () => {
+    const uid = getUserId();
+    if (!uid) return;
+
+    try {
+      const [pendingRes, convRes] = await Promise.all([
+        fetch(`${FRIENDS_URL}?action=pending&user_id=${encodeURIComponent(uid)}`).catch(() => null),
+        fetch(`${CHAT_URL}?action=conversations&user_id=${encodeURIComponent(uid)}`).catch(() => null)
+      ]);
+
+      if (pendingRes?.ok) {
+        const data = await pendingRes.json();
+        setPendingFriendsCount((data.pending || []).length);
+      }
+
+      if (convRes?.ok) {
+        const data = await convRes.json();
+        const total = (data.conversations || []).reduce(
+          (sum: number, c: { unread: number }) => sum + (c.unread || 0), 0
+        );
+        setUnreadMessagesCount(total);
+      }
+    } catch { /* network error */ }
+  }, []);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setPendingFriendsCount(0);
+      setUnreadMessagesCount(0);
+      return;
+    }
+    fetchBadges();
+    const interval = setInterval(fetchBadges, 30000);
+    return () => clearInterval(interval);
+  }, [isAuthenticated, fetchBadges]);
+
+  const hasAnyBadge = pendingFriendsCount > 0 || unreadMessagesCount > 0;
 
   const handleReturnToGame = () => {
     if (activeGameUrl) {
@@ -142,9 +207,10 @@ const Navbar = ({
               <div className="relative">
                 <button
                   onClick={() => setShowMenu(!showMenu)}
-                  className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-300"
+                  className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-300"
                 >
                   <Icon name="Menu" size={24} />
+                  {hasAnyBadge && <Dot />}
                 </button>
 
                 {showMenu && (
@@ -171,8 +237,12 @@ const Navbar = ({
                         }}
                         className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
                       >
-                        <Icon name="Users" size={20} />
-                        <span>Друзья</span>
+                        <div className="relative">
+                          <Icon name="Users" size={20} />
+                          {pendingFriendsCount > 0 && <Dot />}
+                        </div>
+                        <span className="flex-1">Друзья</span>
+                        <Badge count={pendingFriendsCount} />
                       </button>
                       <button
                         onClick={() => {
@@ -201,8 +271,12 @@ const Navbar = ({
                         }}
                         className="w-full px-4 py-3 text-left hover:bg-slate-100 dark:hover:bg-slate-700 transition-colors flex items-center gap-3 text-slate-700 dark:text-slate-300 border-t border-slate-200 dark:border-white/10"
                       >
-                        <Icon name="MessageCircle" size={20} />
-                        <span>Сообщения</span>
+                        <div className="relative">
+                          <Icon name="MessageCircle" size={20} />
+                          {unreadMessagesCount > 0 && <Dot />}
+                        </div>
+                        <span className="flex-1">Сообщения</span>
+                        <Badge count={unreadMessagesCount} />
                       </button>
                     </div>
                   </>
