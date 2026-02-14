@@ -419,27 +419,26 @@ export const useGameLogic = (
         if (endReason === 'draw' || endReason === 'stalemate') setGameStatus('draw');
         else setGameStatus('checkmate');
       }
-    }
 
-    if (serverStatus === 'finished' && endReason) {
-      setEndReason(endReason);
-      gameEndProcessedRef.current = true;
-    }
+      if (serverStatus === 'finished') {
+        if (endReason) setEndReason(endReason);
 
-    if (serverStatus === 'finished' && winner) {
-      const saved = localStorage.getItem('chessUser');
-      if (saved) {
-        const uData = JSON.parse(saved);
-        const rawId = uData.email || uData.name || 'anonymous';
-        const myId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-        if (winner === myId) {
-          setGameStatus('checkmate');
-          setCurrentPlayer(playerColor === 'white' ? 'black' : 'white');
-        } else {
-          setGameStatus('checkmate');
-          setCurrentPlayer(playerColor);
+        if (winner) {
+          const saved = localStorage.getItem('chessUser');
+          if (saved) {
+            const uData = JSON.parse(saved);
+            const rawId = uData.email || uData.name || 'anonymous';
+            const myId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+            if (winner === myId) {
+              setCurrentPlayer(playerColor === 'white' ? 'black' : 'white');
+            } else {
+              setCurrentPlayer(playerColor);
+            }
+          }
         }
       }
+
+      gameEndProcessedRef.current = true;
     }
 
     setWhiteTime(wTime);
