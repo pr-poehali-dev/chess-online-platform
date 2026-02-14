@@ -131,7 +131,8 @@ const GameInviteNotification = () => {
   if (!visible || !invite) return null;
 
   return (
-    <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[9999] w-[calc(100vw-2rem)] max-w-sm animate-slide-down">
+    <div className="fixed inset-0 z-[9999] flex items-center justify-center bg-black/40 p-4">
+      <div className="w-full max-w-sm">
       <div className="bg-white dark:bg-slate-800 rounded-2xl shadow-2xl border border-slate-200 dark:border-white/10 overflow-hidden">
         <div className="bg-gradient-to-r from-green-500 to-emerald-600 px-4 py-2 flex items-center gap-2">
           <Icon name="Swords" size={18} className="text-white" />
@@ -204,6 +205,7 @@ const GameInviteNotification = () => {
             </div>
           )}
         </div>
+      </div>
       </div>
     </div>
   );
