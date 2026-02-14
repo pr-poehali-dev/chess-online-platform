@@ -70,19 +70,20 @@ const TimeSelectStep = ({
   isFriendGame,
 }: TimeSelectStepProps) => {
   return (
-    <div className="space-y-4">
-      <div className="max-h-[50vh] overflow-y-auto space-y-5 pr-1">
+    <div className="space-y-3 sm:space-y-4">
+      <div className="max-h-[45vh] sm:max-h-[50vh] overflow-y-auto space-y-3 sm:space-y-5 pr-1">
         {timeCategories.map((category) => (
           <div key={category.name}>
-            <div className="flex items-center gap-2 mb-2">
-              <Icon name={category.icon} size={18} className="text-slate-600 dark:text-slate-400" />
-              <span className="text-sm font-medium text-slate-600 dark:text-slate-400">{category.name}</span>
+            <div className="flex items-center gap-1.5 sm:gap-2 mb-1.5 sm:mb-2">
+              <Icon name={category.icon} size={16} className="text-slate-600 dark:text-slate-400 sm:hidden" />
+              <Icon name={category.icon} size={18} className="text-slate-600 dark:text-slate-400 hidden sm:block" />
+              <span className="text-xs sm:text-sm font-medium text-slate-600 dark:text-slate-400">{category.name}</span>
             </div>
-            <div className="grid grid-cols-3 gap-2">
+            <div className="grid grid-cols-3 gap-1.5 sm:gap-2">
               {category.options.map((option) => (
                 <Button
                   key={option.value}
-                  className={`h-12 text-sm font-medium border ${
+                  className={`h-10 sm:h-12 text-xs sm:text-sm font-medium border px-1 sm:px-3 ${
                     selectedTime === option.value
                       ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-300'
                       : 'bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white'
@@ -98,27 +99,27 @@ const TimeSelectStep = ({
       </div>
 
       <div 
-        className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-4 border border-slate-200 dark:border-white/10 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+        className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-3 sm:p-4 border border-slate-200 dark:border-white/10 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
         onClick={onCycleColor}
       >
         <div className="flex items-center justify-between">
-          <div className="flex items-center gap-3">
-            <span className="text-2xl">{getColorIcon(selectedColor)}</span>
+          <div className="flex items-center gap-2 sm:gap-3">
+            <span className="text-xl sm:text-2xl">{getColorIcon(selectedColor)}</span>
             <div>
-              <span className="text-sm font-medium text-slate-900 dark:text-white">Цвет фигур</span>
-              <div className="text-xs text-slate-500 dark:text-gray-400">Нажмите для смены</div>
+              <span className="text-xs sm:text-sm font-medium text-slate-900 dark:text-white">Цвет фигур</span>
+              <div className="text-[10px] sm:text-xs text-slate-500 dark:text-gray-400">Нажмите для смены</div>
             </div>
           </div>
-          <span className="text-sm font-semibold text-slate-900 dark:text-white">{getColorLabel(selectedColor)}</span>
+          <span className="text-xs sm:text-sm font-semibold text-slate-900 dark:text-white">{getColorLabel(selectedColor)}</span>
         </div>
       </div>
 
       <Button 
-        className="w-full gradient-primary border-0 text-white h-12"
+        className="w-full gradient-primary border-0 text-white h-10 sm:h-12 text-sm sm:text-base"
         onClick={onStartGame}
         disabled={!selectedTime}
       >
-        <Icon name={isFriendGame ? "Swords" : "Play"} className="mr-2" size={20} />
+        <Icon name={isFriendGame ? "Swords" : "Play"} className="mr-2" size={18} />
         {isFriendGame ? 'Пригласить на игру' : 'Начать игру'}
       </Button>
     </div>

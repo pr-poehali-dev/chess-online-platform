@@ -310,29 +310,29 @@ export const GameSettingsModal = ({
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4" onClick={handleClose}>
       <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in" onClick={(e) => e.stopPropagation()}>
-        <CardHeader>
+        <CardHeader className="px-4 sm:px-6 py-4 sm:py-6">
           <div className="flex items-center justify-between">
             {(step > 1 || inviteSent) && (
               <Button
                 variant="ghost"
                 size="icon"
                 onClick={handleBack}
-                className="text-gray-600 dark:text-gray-400"
+                className="text-gray-600 dark:text-gray-400 h-8 w-8 sm:h-10 sm:w-10"
               >
-                <Icon name="ChevronLeft" size={24} />
+                <Icon name="ChevronLeft" size={20} />
               </Button>
             )}
-            <CardTitle className="flex-1 text-center text-gray-900 dark:text-white">
+            <CardTitle className="flex-1 text-center text-sm sm:text-base text-gray-900 dark:text-white">
               {getTitle()}
             </CardTitle>
-            {(step > 1 || inviteSent) && <div className="w-10" />}
+            {(step > 1 || inviteSent) && <div className="w-8 sm:w-10" />}
           </div>
           {!inviteSent && (
-            <div className="flex justify-center gap-2 mt-4">
+            <div className="flex justify-center gap-1.5 sm:gap-2 mt-3 sm:mt-4">
               {Array.from({ length: getStepCount() }).map((_, i) => (
                 <div 
                   key={i}
-                  className={`h-1.5 w-10 rounded-full transition-colors ${
+                  className={`h-1 sm:h-1.5 w-8 sm:w-10 rounded-full transition-colors ${
                     step >= i + 1 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
                   }`} 
                 />
@@ -340,15 +340,15 @@ export const GameSettingsModal = ({
             </div>
           )}
         </CardHeader>
-        <CardContent className="space-y-6">
+        <CardContent className="space-y-4 sm:space-y-6 px-4 sm:px-6">
           {inviteSent ? (
-            <div className="text-center py-8 space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
-                <Icon name="Loader2" size={32} className="animate-spin text-amber-500" />
+            <div className="text-center py-6 sm:py-8 space-y-3 sm:space-y-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <Icon name="Loader2" size={28} className="animate-spin text-amber-500" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900 dark:text-white text-lg">{selectedFriendName}</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Ожидаем ответ на приглашение...</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-base sm:text-lg">{selectedFriendName}</p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400 mt-1">Ожидаем ответ на приглашение...</p>
               </div>
               <Button
                 variant="outline"
@@ -371,13 +371,13 @@ export const GameSettingsModal = ({
               </Button>
             </div>
           ) : inviteDeclined ? (
-            <div className="text-center py-8 space-y-4">
-              <div className="w-16 h-16 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
-                <Icon name="X" size={32} className="text-red-500" />
+            <div className="text-center py-6 sm:py-8 space-y-3 sm:space-y-4">
+              <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <Icon name="X" size={28} className="text-red-500" />
               </div>
               <div>
-                <p className="font-semibold text-gray-900 dark:text-white">{selectedFriendName}</p>
-                <p className="text-sm text-red-500 mt-1">Отклонил приглашение</p>
+                <p className="font-semibold text-gray-900 dark:text-white text-sm sm:text-base">{selectedFriendName}</p>
+                <p className="text-xs sm:text-sm text-red-500 mt-1">Отклонил приглашение</p>
               </div>
             </div>
           ) : (

@@ -124,24 +124,24 @@ const FriendAndDifficultyStep = ({
 
   if (selectedOpponent === 'computer') {
     return (
-      <div className="space-y-3">
-        <div className="text-sm text-slate-600 dark:text-slate-400 mb-2">
+      <div className="space-y-2 sm:space-y-3">
+        <div className="text-xs sm:text-sm text-slate-600 dark:text-slate-400 mb-1 sm:mb-2">
           Выберите уровень сложности
         </div>
         {difficulties.map((d) => (
           <Button
             key={d.key}
-            className="w-full h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
+            className="w-full h-14 sm:h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
             onClick={() => onDifficultySelect(d.key)}
           >
-            <div className="flex items-center gap-3">
-              <div className="text-2xl">{d.emoji}</div>
-              <div className="text-left">
-                <div className="text-sm font-medium text-slate-900 dark:text-white">{d.label}</div>
-                <div className="text-xs text-slate-500 dark:text-gray-400">{d.desc}</div>
+            <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+              <div className="text-xl sm:text-2xl flex-shrink-0">{d.emoji}</div>
+              <div className="text-left min-w-0">
+                <div className="text-xs sm:text-sm font-medium text-slate-900 dark:text-white">{d.label}</div>
+                <div className="text-[10px] sm:text-xs text-slate-500 dark:text-gray-400 truncate">{d.desc}</div>
               </div>
             </div>
-            <Icon name="ChevronRight" size={20} className="text-slate-400" />
+            <Icon name="ChevronRight" size={18} className="text-slate-400 flex-shrink-0" />
           </Button>
         ))}
       </div>
