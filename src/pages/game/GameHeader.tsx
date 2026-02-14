@@ -18,6 +18,7 @@ interface GameHeaderProps {
   setBoardTheme?: (value: BoardTheme) => void;
   gameStatus?: 'playing' | 'checkmate' | 'stalemate' | 'draw';
   currentPlayer?: 'white' | 'black';
+  playerColor?: 'white' | 'black';
   setShowRematchOffer?: (value: boolean) => void;
 }
 
@@ -72,8 +73,10 @@ export const GameControls = ({
   setBoardTheme,
   gameStatus,
   currentPlayer,
+  playerColor,
   setShowRematchOffer
 }: GameHeaderProps) => {
+  const isGameOver = gameStatus && gameStatus !== 'playing';
   const themeKeys: BoardTheme[] = ['classic', 'flat', 'wood'];
   return (
     <div className="w-full md:w-auto h-[52px] md:h-[56px]">
@@ -220,28 +223,32 @@ export const GameControls = ({
                     })}
                   </div>
                 </div>
-                <button
-                  onClick={handleOfferDraw}
-                  className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 border-t ${
-                    theme === 'light'
-                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
-                      : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50 border-stone-700/50'
-                  }`}
-                >
-                  <Icon name="Handshake" size={20} />
-                  <span>Предложить ничью</span>
-                </button>
-                <button
-                  onClick={handleSurrender}
-                  className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 ${
-                    theme === 'light'
-                      ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
-                      : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50'
-                  }`}
-                >
-                  <Icon name="Flag" size={20} />
-                  <span>Сдаться</span>
-                </button>
+                {!isGameOver && (
+                  <>
+                    <button
+                      onClick={handleOfferDraw}
+                      className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 border-t ${
+                        theme === 'light'
+                          ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100 border-slate-200'
+                          : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50 border-stone-700/50'
+                      }`}
+                    >
+                      <Icon name="Handshake" size={20} />
+                      <span>Предложить ничью</span>
+                    </button>
+                    <button
+                      onClick={handleSurrender}
+                      className={`w-full px-4 py-3 text-left transition-colors flex items-center gap-3 ${
+                        theme === 'light'
+                          ? 'text-slate-700 hover:text-slate-900 hover:bg-slate-100'
+                          : 'text-stone-300 hover:text-stone-100 hover:bg-stone-700/50'
+                      }`}
+                    >
+                      <Icon name="Flag" size={20} />
+                      <span>Сдаться</span>
+                    </button>
+                  </>
+                )}
                 <button
                   onClick={() => {
                     setShowSettingsMenu(false);
@@ -279,9 +286,9 @@ export const GameControls = ({
               : 'bg-blue-600/90 border-blue-700'
           }`}>
             <div className="text-xs md:text-sm font-bold text-white truncate">
-              {gameStatus === 'checkmate' && currentPlayer === 'white' && 'Вы проиграли'}
-              {gameStatus === 'checkmate' && currentPlayer === 'black' && 'Вы выиграли'}
-              {gameStatus === 'stalemate' && 'Пат'}
+              {gameStatus === 'checkmate' && currentPlayer === playerColor && 'Поражение'}
+              {gameStatus === 'checkmate' && currentPlayer !== playerColor && 'Победа'}
+              {gameStatus === 'stalemate' && 'Ничья'}
               {gameStatus === 'draw' && 'Ничья'}
             </div>
             <button

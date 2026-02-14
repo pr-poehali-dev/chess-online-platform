@@ -184,6 +184,7 @@ const Game = () => {
               setBoardTheme={setBoardTheme}
               gameStatus={gameStatus}
               currentPlayer={currentPlayer}
+              playerColor={playerColor}
               setShowRematchOffer={setShowRematchOffer}
             />
 
