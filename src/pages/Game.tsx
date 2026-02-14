@@ -1,5 +1,5 @@
-import { useState, useEffect } from 'react';
-import { useSearchParams, useNavigate } from 'react-router-dom';
+import { useState } from 'react';
+import { useSearchParams } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { getDifficultyLabel, formatTime } from './game/gameTypes';
 import { GameBoard } from './game/GameBoard';
@@ -18,7 +18,6 @@ import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
 
 const Game = () => {
   const [searchParams] = useSearchParams();
-  const navigate = useNavigate();
   const difficulty = (searchParams.get('difficulty') || 'medium') as 'easy' | 'medium' | 'hard' | 'master';
   const timeControl = searchParams.get('time') || '10+0';
   const opponentType = searchParams.get('opponent');
@@ -52,8 +51,6 @@ const Game = () => {
   const opponentName = isOnlineReal ? (paramOpponentName || 'Соперник') : (isPlayingWithBot || isBotFromMatchmaking) ? (paramOpponentName || 'Бот') : 'Соперник';
   const opponentRating = isOnlineReal ? (paramOpponentRating || undefined) : (isPlayingWithBot ? undefined : paramOpponentRating || undefined);
 
-  const onlineGameIdNum = isOnlineReal ? Number(onlineGameId) : undefined;
-
   const {
     displayBoard,
     currentPlayer,
@@ -77,15 +74,12 @@ const Game = () => {
     newRating,
     userRating,
     historyRef,
-    rematchOfferedBy,
-    rematchStatus,
-    rematchGameId,
     handleSquareClick,
     isSquareSelected,
     isSquarePossibleMove,
     handlePreviousMove,
     handleNextMove
-  } = useGameLogic(difficulty, timeControl, playerColor, onlineGameIdNum);
+  } = useGameLogic(difficulty, timeControl, playerColor, isOnlineReal ? Number(onlineGameId) : undefined);
 
   const {
     isDragging,
@@ -122,34 +116,9 @@ const Game = () => {
     handleAcceptDraw,
     handleDeclineDraw,
     handleNewGame,
-    handleOfferRematch,
     handleAcceptRematch,
-    handleDeclineRematch,
-    rematchSent,
-    rematchDeclinedByOpponent,
-    setRematchDeclinedByOpponent
-  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, onlineGameIdNum);
-
-  useEffect(() => {
-    if (!rematchOfferedBy || !myUserId) return;
-    if (rematchOfferedBy !== myUserId && rematchStatus === 'pending') {
-      setShowRematchOffer(true);
-    }
-  }, [rematchOfferedBy, rematchStatus, myUserId]);
-
-  useEffect(() => {
-    if (rematchStatus === 'declined' && rematchOfferedBy === myUserId) {
-      setRematchDeclinedByOpponent(true);
-    }
-  }, [rematchStatus, rematchOfferedBy, myUserId]);
-
-  useEffect(() => {
-    if (rematchStatus === 'accepted' && rematchGameId && rematchOfferedBy === myUserId) {
-      const newColor = playerColor === 'white' ? 'black' : 'white';
-      navigate(`/game?online=true&online_game_id=${rematchGameId}&color=${newColor}&time=${timeControl}&opponent_name=${encodeURIComponent(paramOpponentName)}&opponent_rating=${paramOpponentRating}&opponent_avatar=${encodeURIComponent(paramOpponentAvatar)}`);
-      setTimeout(() => window.location.reload(), 100);
-    }
-  }, [rematchStatus, rematchGameId, rematchOfferedBy, myUserId]);
+    handleDeclineRematch
+  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length);
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors ${
@@ -195,9 +164,6 @@ const Game = () => {
               gameStatus={gameStatus}
               currentPlayer={currentPlayer}
               setShowRematchOffer={setShowRematchOffer}
-              handleOfferRematch={handleOfferRematch}
-              rematchSent={rematchSent}
-              rematchDeclinedByOpponent={rematchDeclinedByOpponent}
             />
 
             <PlayerInfo

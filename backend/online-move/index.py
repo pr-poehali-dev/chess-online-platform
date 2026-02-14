@@ -1,23 +1,10 @@
 import json
 import os
 import psycopg2
-import random
-
-
-def esc(val):
-    return str(val).replace("'", "''")
-
-
-def get_initial_time(time_control):
-    if '+' in time_control:
-        parts = time_control.split('+')
-        return int(parts[0]) * 60
-    mapping = {'blitz': 180, 'rapid': 600, 'classic': 900}
-    return mapping.get(time_control, 600)
-
+import time as time_module
 
 def handler(event: dict, context) -> dict:
-    """Ходы и состояние онлайн-партии: отправка хода, получение состояния, реванш"""
+    """Ходы и состояние онлайн-партии: отправка хода, получение состояния, завершение игры"""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id, X-Auth-Token, X-Session-Id', 'Access-Control-Max-Age': '86400'}, 'body': ''}
 
@@ -40,8 +27,7 @@ def handler(event: dict, context) -> dict:
                       time_control, status, is_bot_game, current_player,
                       white_time, black_time, move_history, board_state,
                       winner, end_reason,
-                      EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move,
-                      rematch_offered_by, rematch_status, rematch_game_id
+                      EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move
             FROM online_games WHERE id = %d""" % int(game_id)
         )
         row = cur.fetchone()
@@ -72,10 +58,7 @@ def handler(event: dict, context) -> dict:
                 'current_player': current_player,
                 'white_time': white_time, 'black_time': black_time,
                 'move_history': row[15], 'board_state': row[16],
-                'winner': row[17], 'end_reason': row[18],
-                'rematch_offered_by': row[20],
-                'rematch_status': row[21],
-                'rematch_game_id': row[22]
+                'winner': row[17], 'end_reason': row[18]
             }
         })}
 
@@ -97,10 +80,7 @@ def handler(event: dict, context) -> dict:
     cur.execute(
         """SELECT id, white_user_id, black_user_id, current_player, status,
                   white_time, black_time, move_history, is_bot_game, time_control,
-                  EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move,
-                  rematch_offered_by, rematch_status,
-                  white_username, white_avatar, white_rating,
-                  black_username, black_avatar, black_rating
+                  EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move
         FROM online_games WHERE id = %d""" % int(game_id)
     )
     game = cur.fetchone()
@@ -110,25 +90,7 @@ def handler(event: dict, context) -> dict:
         conn.close()
         return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'game not found'})}
 
-    g_id = game[0]
-    white_uid = game[1]
-    black_uid = game[2]
-    current_player = game[3]
-    status = game[4]
-    white_time = game[5]
-    black_time = game[6]
-    move_hist = game[7]
-    is_bot = game[8]
-    tc = game[9]
-    secs_since = game[10]
-    rematch_offered_by = game[11]
-    rematch_status = game[12]
-    w_name = game[13]
-    w_avatar = game[14]
-    w_rating = game[15]
-    b_name = game[16]
-    b_avatar = game[17]
-    b_rating = game[18]
+    g_id, white_uid, black_uid, current_player, status, white_time, black_time, move_hist, is_bot, tc, secs_since = game
 
     if user_id != white_uid and user_id != black_uid:
         cur.close()
@@ -137,69 +99,11 @@ def handler(event: dict, context) -> dict:
 
     player_color = 'white' if user_id == white_uid else 'black'
 
-    if action == 'offer_rematch':
-        if rematch_offered_by and rematch_offered_by == user_id:
-            cur.close()
-            conn.close()
-            return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'you already offered rematch'})}
-
-        cur.execute(
-            "UPDATE online_games SET rematch_offered_by = '%s', rematch_status = 'pending', updated_at = NOW() WHERE id = %d"
-            % (esc(user_id), g_id)
-        )
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_offered'})}
-
-    if action == 'accept_rematch':
-        if not rematch_offered_by or rematch_offered_by == user_id:
-            cur.close()
-            conn.close()
-            return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'no rematch to accept'})}
-
-        initial_time = get_initial_time(tc)
-        new_w_uid, new_w_name, new_w_avatar, new_w_rating = black_uid, b_name, b_avatar, b_rating
-        new_b_uid, new_b_name, new_b_avatar, new_b_rating = white_uid, w_name, w_avatar, w_rating
-
-        cur.execute(
-            """INSERT INTO online_games (white_user_id, white_username, white_avatar, white_rating,
-                black_user_id, black_username, black_avatar, black_rating,
-                time_control, opponent_type, is_bot_game, white_time, black_time)
-            VALUES ('%s', '%s', '%s', %d, '%s', '%s', '%s', %d, '%s', 'rematch', FALSE, %d, %d) RETURNING id"""
-            % (esc(new_w_uid), esc(new_w_name), esc(new_w_avatar or ''), new_w_rating,
-               esc(new_b_uid), esc(new_b_name), esc(new_b_avatar or ''), new_b_rating,
-               esc(tc), initial_time, initial_time)
-        )
-        new_game_id = cur.fetchone()[0]
-
-        cur.execute(
-            "UPDATE online_games SET rematch_status = 'accepted', rematch_game_id = %d, updated_at = NOW() WHERE id = %d"
-            % (new_game_id, g_id)
-        )
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
-            'status': 'rematch_accepted',
-            'new_game_id': new_game_id,
-            'player_color': 'white' if user_id == new_w_uid else 'black'
-        })}
-
-    if action == 'decline_rematch':
-        cur.execute(
-            "UPDATE online_games SET rematch_status = 'declined', updated_at = NOW() WHERE id = %d" % g_id
-        )
-        conn.commit()
-        cur.close()
-        conn.close()
-        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_declined'})}
-
     if action == 'resign':
         winner = black_uid if player_color == 'white' else white_uid
         cur.execute(
             "UPDATE online_games SET status = 'finished', winner = '%s', end_reason = 'resign', updated_at = NOW() WHERE id = %d"
-            % (esc(winner), g_id)
+            % (winner.replace("'", "''"), g_id)
         )
         conn.commit()
         cur.close()
@@ -220,7 +124,7 @@ def handler(event: dict, context) -> dict:
         winner = white_uid if loser_color == 'black' else black_uid
         cur.execute(
             "UPDATE online_games SET status = 'finished', winner = '%s', end_reason = 'timeout', updated_at = NOW() WHERE id = %d"
-            % (esc(winner), g_id)
+            % (winner.replace("'", "''"), g_id)
         )
         conn.commit()
         cur.close()
@@ -279,12 +183,12 @@ def handler(event: dict, context) -> dict:
     if game_status in ('checkmate', 'stalemate', 'finished'):
         new_status = 'finished'
         if game_status == 'checkmate' and winner_id:
-            winner_val = "'%s'" % esc(winner_id)
+            winner_val = "'%s'" % winner_id.replace("'", "''")
             end_reason_val = "'checkmate'"
         elif game_status == 'stalemate':
             end_reason_val = "'stalemate'"
         else:
-            end_reason_val = "'%s'" % esc(game_status)
+            end_reason_val = "'%s'" % game_status.replace("'", "''")
 
     cur.execute(
         """UPDATE online_games SET
@@ -300,8 +204,8 @@ def handler(event: dict, context) -> dict:
             updated_at = NOW()
         WHERE id = %d"""
         % (next_player, new_white_time, new_black_time,
-           esc(new_move_hist),
-           esc(board_state) if board_state else 'initial',
+           new_move_hist.replace("'", "''"),
+           board_state.replace("'", "''") if board_state else 'initial',
            new_status, winner_val, end_reason_val, g_id)
     )
     conn.commit()
@@ -313,5 +217,5 @@ def handler(event: dict, context) -> dict:
         'current_player': next_player,
         'white_time': new_white_time,
         'black_time': new_black_time,
-        'move_count': len(new_move_hist.split(',')) if new_move_hist else 0
+        'move_history': new_move_hist
     })}
