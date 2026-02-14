@@ -186,6 +186,9 @@ export const useGameLogic = (
   });
   const [onlineReady, setOnlineReady] = useState(!isOnlineGame);
   const onlineReadyRef = useRef(!isOnlineGame);
+  const [connectionLost, setConnectionLost] = useState(false);
+  const [connectionRestored, setConnectionRestored] = useState(false);
+  const pollFailCountRef = useRef(0);
 
   const historyRef = useRef<HTMLDivElement>(null);
   const hasPlayedWarning = useRef(false);
@@ -522,9 +525,20 @@ export const useGameLogic = (
     const poll = async () => {
       try {
         const res = await fetch(`${ONLINE_MOVE_URL}?game_id=${onlineGameId}`);
-        if (!res.ok) return;
+        if (!res.ok) {
+          pollFailCountRef.current++;
+          if (pollFailCountRef.current >= 4) setConnectionLost(true);
+          return;
+        }
         const data = await res.json();
         if (!active || !data.game) return;
+
+        if (pollFailCountRef.current >= 4) {
+          setConnectionRestored(true);
+          setTimeout(() => setConnectionRestored(false), 3000);
+        }
+        pollFailCountRef.current = 0;
+        setConnectionLost(false);
 
         const serverMoves: string[] = data.game.move_history
           ? data.game.move_history.split(',').filter(Boolean)
@@ -553,7 +567,11 @@ export const useGameLogic = (
           onlineReadyRef.current = true;
           setOnlineReady(true);
         }
-      } catch (e) { console.error('poll error', e); }
+      } catch (e) {
+        console.error('poll error', e);
+        pollFailCountRef.current++;
+        if (pollFailCountRef.current >= 4) setConnectionLost(true);
+      }
     };
 
     poll();
@@ -858,6 +876,8 @@ export const useGameLogic = (
     ratingChange,
     newRating,
     userRating,
+    connectionLost,
+    connectionRestored,
     historyRef,
     handleSquareClick,
     isSquareSelected,

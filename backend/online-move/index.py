@@ -111,26 +111,6 @@ def handler(event: dict, context) -> dict:
         return str(val).replace("'", "''")
 
     if action == 'rematch_offer':
-        opponent_id = black_uid if player_color == 'white' else white_uid
-        cur.execute(
-            """SELECT id FROM online_games
-            WHERE status = 'finished'
-              AND rematch_offered_by = '%s'
-              AND rematch_status IN ('declined', 'expired')
-              AND rematch_offered_at > NOW() - INTERVAL '24 hours'
-              AND (
-                (white_user_id = '%s' AND black_user_id = '%s')
-                OR (white_user_id = '%s' AND black_user_id = '%s')
-              )
-            LIMIT 1"""
-            % (esc(user_id), esc(user_id), esc(opponent_id), esc(opponent_id), esc(user_id))
-        )
-        cooldown_hit = cur.fetchone()
-        if cooldown_hit:
-            cur.close()
-            conn.close()
-            return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'rematch_cooldown', 'message': 'Повторное предложение реванша этому сопернику доступно через 24 часа'})}
-
         cur.execute(
             "UPDATE online_games SET rematch_offered_by = '%s', rematch_status = 'pending', rematch_offered_at = NOW(), updated_at = NOW() WHERE id = %d"
             % (esc(user_id), g_id)

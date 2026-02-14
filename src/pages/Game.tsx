@@ -102,6 +102,8 @@ const Game = () => {
     ratingChange,
     newRating,
     userRating,
+    connectionLost,
+    connectionRestored,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -202,7 +204,6 @@ const Game = () => {
   useEffect(() => {
     if ((rematchStatus === 'declined' || rematchStatus === 'expired') && rematchSent) {
       setRematchSent(false);
-      setRematchCooldown(true);
     }
   }, [rematchStatus]);
 
@@ -251,6 +252,19 @@ const Game = () => {
         boardTheme={boardTheme}
         setBoardTheme={setBoardTheme}
       />
+
+      {isOnlineReal && connectionLost && (
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-red-600 text-white text-center text-sm py-2 font-semibold animate-pulse">
+          <Icon name="WifiOff" size={16} className="inline mr-2 -mt-0.5" />
+          Потеря связи с сервером...
+        </div>
+      )}
+      {isOnlineReal && connectionRestored && !connectionLost && (
+        <div className="fixed top-0 left-0 right-0 z-[100] bg-green-600 text-white text-center text-sm py-2 font-semibold">
+          <Icon name="Wifi" size={16} className="inline mr-2 -mt-0.5" />
+          Связь восстановлена
+        </div>
+      )}
 
       <main className="flex-1 flex items-center justify-center p-2 md:p-3 overflow-y-auto md:overflow-hidden">
         <div className="w-full h-full flex items-center justify-center">
