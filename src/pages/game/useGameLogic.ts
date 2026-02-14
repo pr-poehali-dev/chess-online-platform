@@ -174,6 +174,9 @@ export const useGameLogic = (
     savedState?.boardTheme || (localStorage.getItem('chessBoardTheme') as BoardTheme) || 'wood'
   );
   const [endReason, setEndReason] = useState<string | null>(null);
+  const [rematchOfferedBy, setRematchOfferedBy] = useState<string | null>(null);
+  const [rematchStatus, setRematchStatus] = useState<string | null>(null);
+  const [rematchGameId, setRematchGameId] = useState<number | null>(null);
   const [ratingChange, setRatingChange] = useState<number | null>(null);
   const [newRating, setNewRating] = useState<number | null>(null);
   const [userRating, setUserRating] = useState<number | null>(() => {
@@ -481,6 +484,10 @@ export const useGameLogic = (
           data.game.end_reason
         );
 
+        if (data.game.rematch_offered_by) setRematchOfferedBy(data.game.rematch_offered_by);
+        if (data.game.rematch_status) setRematchStatus(data.game.rematch_status);
+        if (data.game.rematch_game_id) setRematchGameId(data.game.rematch_game_id);
+
         if (!onlineReadyRef.current) {
           onlineReadyRef.current = true;
           setOnlineReady(true);
@@ -769,6 +776,9 @@ export const useGameLogic = (
     kingInCheckPosition,
     lastMove,
     endReason,
+    rematchOfferedBy,
+    rematchStatus,
+    rematchGameId,
     setCurrentPlayer,
     showPossibleMoves,
     setShowPossibleMoves,

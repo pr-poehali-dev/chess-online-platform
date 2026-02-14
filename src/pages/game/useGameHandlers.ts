@@ -172,13 +172,67 @@ export const useGameHandlers = (
     }
   };
 
-  const handleAcceptRematch = () => {
+  const handleAcceptRematch = async () => {
     setShowRematchOffer(false);
-    window.location.reload();
+    if (onlineGameId && onlineMoveUrl) {
+      const saved = localStorage.getItem('chessUser');
+      if (!saved) return;
+      const uData = JSON.parse(saved);
+      const rawId = uData.email || uData.name || 'anonymous';
+      const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+      try {
+        const res = await fetch(onlineMoveUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'rematch_accept', game_id: onlineGameId, user_id: userId })
+        });
+        const data = await res.json();
+        if (data.new_game_id) {
+          const myOldColor = playerColor;
+          const newColor = myOldColor === 'white' ? 'black' : 'white';
+          const params = new URLSearchParams(window.location.search);
+          params.set('online_game_id', String(data.new_game_id));
+          params.set('color', newColor);
+          params.set('online', 'true');
+          window.location.href = `/game?${params.toString()}`;
+        }
+      } catch { /* ignore */ }
+    } else {
+      window.location.reload();
+    }
   };
 
   const handleDeclineRematch = () => {
     setShowRematchOffer(false);
+    if (onlineGameId && onlineMoveUrl) {
+      const saved = localStorage.getItem('chessUser');
+      if (!saved) return;
+      const uData = JSON.parse(saved);
+      const rawId = uData.email || uData.name || 'anonymous';
+      const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+      fetch(onlineMoveUrl, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'rematch_decline', game_id: onlineGameId, user_id: userId })
+      }).catch(() => {});
+    }
+  };
+
+  const handleOfferRematch = async () => {
+    if (onlineGameId && onlineMoveUrl) {
+      const saved = localStorage.getItem('chessUser');
+      if (!saved) return;
+      const uData = JSON.parse(saved);
+      const rawId = uData.email || uData.name || 'anonymous';
+      const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+      try {
+        await fetch(onlineMoveUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'rematch_offer', game_id: onlineGameId, user_id: userId })
+        });
+      } catch { /* ignore */ }
+    }
   };
 
   return {
@@ -217,6 +271,7 @@ export const useGameHandlers = (
     handleDeclineDraw,
     handleNewGame,
     handleAcceptRematch,
-    handleDeclineRematch
+    handleDeclineRematch,
+    handleOfferRematch
   };
 };

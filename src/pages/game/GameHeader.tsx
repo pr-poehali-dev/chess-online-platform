@@ -20,6 +20,8 @@ interface GameHeaderProps {
   currentPlayer?: 'white' | 'black';
   playerColor?: 'white' | 'black';
   setShowRematchOffer?: (value: boolean) => void;
+  onOfferRematch?: () => void;
+  rematchSent?: boolean;
 }
 
 export const GameHeader = ({
@@ -74,7 +76,9 @@ export const GameControls = ({
   gameStatus,
   currentPlayer,
   playerColor,
-  setShowRematchOffer
+  setShowRematchOffer,
+  onOfferRematch,
+  rematchSent
 }: GameHeaderProps) => {
   const isGameOver = gameStatus && gameStatus !== 'playing';
   const themeKeys: BoardTheme[] = ['classic', 'flat', 'wood'];
@@ -293,16 +297,21 @@ export const GameControls = ({
             </div>
             <button
               onClick={() => {
-                if (setShowRematchOffer) {
+                if (onOfferRematch) {
+                  onOfferRematch();
+                } else if (setShowRematchOffer) {
                   setTimeout(() => {
                     setShowRematchOffer(true);
                   }, 500);
                 }
               }}
-              className="p-2 rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 ml-2 bg-green-600 hover:bg-green-700 text-white"
+              disabled={rematchSent}
+              className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 ml-2 text-white ${
+                rematchSent ? 'bg-stone-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+              }`}
             >
               <Icon name="RotateCcw" size={18} />
-              <span className="font-semibold text-xs md:text-sm">Реванш</span>
+              <span className="font-semibold text-xs md:text-sm">{rematchSent ? 'Ожидание...' : 'Реванш'}</span>
             </button>
           </div>
         )}

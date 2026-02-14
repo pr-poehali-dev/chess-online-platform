@@ -87,6 +87,9 @@ const Game = () => {
     kingInCheckPosition,
     lastMove,
     endReason: serverEndReason,
+    rematchOfferedBy,
+    rematchStatus,
+    rematchGameId,
     setCurrentPlayer,
     showPossibleMoves,
     setShowPossibleMoves,
@@ -141,8 +144,34 @@ const Game = () => {
     handleDeclineDraw,
     handleNewGame,
     handleAcceptRematch,
-    handleDeclineRematch
+    handleDeclineRematch,
+    handleOfferRematch
   } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined);
+
+  const [rematchSent, setRematchSent] = useState(false);
+
+  useEffect(() => {
+    if (!isOnlineReal || !rematchOfferedBy || rematchStatus !== 'pending') return;
+    if (rematchOfferedBy === myUserId) return;
+    setShowRematchOffer(true);
+  }, [rematchOfferedBy, rematchStatus]);
+
+  useEffect(() => {
+    if (!isOnlineReal || !rematchGameId || rematchStatus !== 'accepted') return;
+    const myOldColor = playerColor;
+    const newColor = myOldColor === 'white' ? 'black' : 'white';
+    const params = new URLSearchParams(window.location.search);
+    params.set('online_game_id', String(rematchGameId));
+    params.set('color', newColor);
+    params.set('online', 'true');
+    window.location.href = `/game?${params.toString()}`;
+  }, [rematchGameId, rematchStatus]);
+
+  useEffect(() => {
+    if (rematchStatus === 'declined' && rematchSent) {
+      setRematchSent(false);
+    }
+  }, [rematchStatus]);
 
   const gameResult: GameResult = (() => {
     if (gameStatus === 'playing') return null;
@@ -200,6 +229,11 @@ const Game = () => {
               currentPlayer={currentPlayer}
               playerColor={playerColor}
               setShowRematchOffer={setShowRematchOffer}
+              onOfferRematch={isOnlineReal ? async () => {
+                setRematchSent(true);
+                await handleOfferRematch();
+              } : undefined}
+              rematchSent={rematchSent}
             />
 
             <PlayerInfo

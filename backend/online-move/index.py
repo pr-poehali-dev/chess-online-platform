@@ -28,7 +28,8 @@ def handler(event: dict, context) -> dict:
                       white_time, black_time, move_history, board_state,
                       winner, end_reason,
                       EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move,
-                      move_number
+                      move_number,
+                      rematch_offered_by, rematch_status, rematch_game_id
             FROM online_games WHERE id = %d""" % int(game_id)
         )
         row = cur.fetchone()
@@ -61,7 +62,8 @@ def handler(event: dict, context) -> dict:
                 'white_time': white_time, 'black_time': black_time,
                 'move_history': row[15], 'board_state': row[16],
                 'winner': row[17], 'end_reason': row[18],
-                'move_number': move_number
+                'move_number': move_number,
+                'rematch_offered_by': row[21], 'rematch_status': row[22], 'rematch_game_id': row[23]
             }
         })}
 
@@ -103,6 +105,77 @@ def handler(event: dict, context) -> dict:
         return {'statusCode': 403, 'headers': headers, 'body': json.dumps({'error': 'not a player in this game'})}
 
     player_color = 'white' if user_id == white_uid else 'black'
+
+    def esc(val):
+        return str(val).replace("'", "''")
+
+    if action == 'rematch_offer':
+        cur.execute(
+            "UPDATE online_games SET rematch_offered_by = '%s', rematch_status = 'pending', updated_at = NOW() WHERE id = %d"
+            % (esc(user_id), g_id)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_offered'})}
+
+    if action == 'rematch_decline':
+        cur.execute(
+            "UPDATE online_games SET rematch_status = 'declined', updated_at = NOW() WHERE id = %d" % g_id
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_declined'})}
+
+    if action == 'rematch_accept':
+        cur.execute(
+            """SELECT white_user_id, white_username, white_avatar, white_rating,
+                      black_user_id, black_username, black_avatar, black_rating,
+                      time_control, opponent_type
+            FROM online_games WHERE id = %d""" % g_id
+        )
+        old = cur.fetchone()
+        if not old:
+            cur.close()
+            conn.close()
+            return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'game not found'})}
+
+        ow_uid, ow_name, ow_avatar, ow_rating = old[0], old[1], old[2] or '', old[3]
+        ob_uid, ob_name, ob_avatar, ob_rating = old[4], old[5], old[6] or '', old[7]
+        otc, oop = old[8], old[9]
+
+        def get_initial_time(tc):
+            if '+' in tc:
+                return int(tc.split('+')[0]) * 60
+            return {'blitz': 180, 'rapid': 600, 'classic': 900}.get(tc, 600)
+
+        init_time = get_initial_time(otc)
+
+        cur.execute(
+            """INSERT INTO online_games (white_user_id, white_username, white_avatar, white_rating,
+                black_user_id, black_username, black_avatar, black_rating,
+                time_control, opponent_type, is_bot_game, white_time, black_time)
+            VALUES ('%s', '%s', '%s', %d, '%s', '%s', '%s', %d, '%s', '%s', FALSE, %d, %d) RETURNING id"""
+            % (esc(ob_uid), esc(ob_name), esc(ob_avatar), ob_rating,
+               esc(ow_uid), esc(ow_name), esc(ow_avatar), ow_rating,
+               esc(otc), esc(oop), init_time, init_time)
+        )
+        new_game_id = cur.fetchone()[0]
+
+        cur.execute(
+            "UPDATE online_games SET rematch_status = 'accepted', rematch_game_id = %d, updated_at = NOW() WHERE id = %d"
+            % (new_game_id, g_id)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
+            'status': 'rematch_accepted',
+            'new_game_id': new_game_id,
+            'old_white': ow_uid,
+            'old_black': ob_uid
+        })}
 
     if action == 'resign':
         winner = black_uid if player_color == 'white' else white_uid
