@@ -42,6 +42,7 @@ interface TimeSelectStepProps {
   onTimeSelect: (time: string) => void;
   onCycleColor: () => void;
   onStartGame: () => void;
+  isFriendGame?: boolean;
 }
 
 const getColorLabel = (color: 'white' | 'black' | 'random') => {
@@ -66,6 +67,7 @@ const TimeSelectStep = ({
   onTimeSelect,
   onCycleColor,
   onStartGame,
+  isFriendGame,
 }: TimeSelectStepProps) => {
   return (
     <div className="space-y-4">
@@ -116,8 +118,8 @@ const TimeSelectStep = ({
         onClick={onStartGame}
         disabled={!selectedTime}
       >
-        <Icon name="Play" className="mr-2" size={20} />
-        Начать игру
+        <Icon name={isFriendGame ? "Swords" : "Play"} className="mr-2" size={20} />
+        {isFriendGame ? 'Пригласить на игру' : 'Начать игру'}
       </Button>
     </div>
   );

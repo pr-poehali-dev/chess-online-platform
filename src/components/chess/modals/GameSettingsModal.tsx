@@ -1,4 +1,5 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
@@ -7,20 +8,15 @@ import OpponentSelectStep from './game-settings/OpponentSelectStep';
 import FriendAndDifficultyStep from './game-settings/FriendAndDifficultyStep';
 import TimeSelectStep from './game-settings/TimeSelectStep';
 
+const INVITE_URL = 'https://functions.poehali.dev/622400c1-79cc-4391-92fa-9995517f5de6';
+const MATCHMAKING_URL = 'https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299';
+
 interface GameSettingsModalProps {
   showGameSettings: boolean;
   setShowGameSettings: (value: boolean) => void;
   onStartGame: (difficulty: 'easy' | 'medium' | 'hard' | 'master', timeControl: string, color: 'white' | 'black' | 'random') => void;
   onStartOnlineGame?: (opponentType: 'city' | 'region' | 'country', timeControl: string, color: 'white' | 'black' | 'random') => void;
 }
-
-const friends = [
-  { id: '1', name: 'Иван Петров', rating: 1756, avatar: '👤', city: 'Москва' },
-  { id: '2', name: 'Мария Сидорова', rating: 1834, avatar: '👤', city: 'Санкт-Петербург' },
-  { id: '3', name: 'Алексей Козлов', rating: 1678, avatar: '👤', city: 'Казань' },
-  { id: '4', name: 'Ольга Новикова', rating: 1923, avatar: '👤', city: 'Екатеринбург' },
-  { id: '5', name: 'Дмитрий Волков', rating: 1789, avatar: '👤', city: 'Новосибирск' },
-];
 
 const getOpponentLabel = (type: string) => {
   switch(type) {
@@ -57,12 +53,21 @@ const getDifficultyLabel = (difficulty?: string) => {
   }
 };
 
+const getUserId = () => {
+  const saved = localStorage.getItem('chessUser');
+  if (!saved) return '';
+  const user = JSON.parse(saved);
+  const rawId = user.email || user.name || 'anonymous';
+  return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+};
+
 export const GameSettingsModal = ({ 
   showGameSettings, 
   setShowGameSettings,
   onStartGame,
   onStartOnlineGame
 }: GameSettingsModalProps) => {
+  const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const [selectedOpponent, setSelectedOpponent] = useState<'city' | 'region' | 'country' | 'friend' | 'computer' | null>(null);
   const [selectedTime, setSelectedTime] = useState<string | null>(null);
@@ -70,6 +75,12 @@ export const GameSettingsModal = ({
   const [selectedColor, setSelectedColor] = useState<'white' | 'black' | 'random'>('random');
   const [userCity, setUserCity] = useState<string>('');
   const [userRegion, setUserRegion] = useState<string>('');
+  const [selectedFriendId, setSelectedFriendId] = useState<string>('');
+  const [selectedFriendName, setSelectedFriendName] = useState<string>('');
+  const [inviteSent, setInviteSent] = useState(false);
+  const [inviteId, setInviteId] = useState<number | null>(null);
+  const [inviteDeclined, setInviteDeclined] = useState(false);
+  const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const [lastGameSettings, setLastGameSettings] = useState<{
     opponent: 'city' | 'region' | 'country' | 'friend' | 'computer';
     time: string;
@@ -93,6 +104,44 @@ export const GameSettingsModal = ({
     }
   }, [showGameSettings]);
 
+  useEffect(() => {
+    return () => {
+      if (pollRef.current) clearInterval(pollRef.current);
+    };
+  }, []);
+
+  const pollAccepted = useCallback((iid: number) => {
+    const uid = getUserId();
+    if (pollRef.current) clearInterval(pollRef.current);
+    pollRef.current = setInterval(async () => {
+      try {
+        const res = await fetch(`${INVITE_URL}?action=check_accepted&invite_id=${iid}&user_id=${encodeURIComponent(uid)}`);
+        const data = await res.json();
+        if (data.status === 'accepted' && data.game_id) {
+          if (pollRef.current) clearInterval(pollRef.current);
+          setInviteSent(false);
+          setInviteId(null);
+          const gameRes = await fetch(`${MATCHMAKING_URL}?game_id=${data.game_id}`);
+          const gameData = await gameRes.json();
+          const g = gameData.game;
+          const myColor = g.white_user_id === uid ? 'white' : 'black';
+          const oppName = g.white_user_id === uid ? g.black_username : g.white_username;
+          const oppRating = g.white_user_id === uid ? g.black_rating : g.white_rating;
+          const oppAvatar = g.white_user_id === uid ? (g.black_avatar || '') : (g.white_avatar || '');
+          setShowGameSettings(false);
+          resetState();
+          navigate(`/game?time=${encodeURIComponent(g.time_control)}&color=${myColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(oppName)}&opponent_rating=${oppRating}&opponent_avatar=${encodeURIComponent(oppAvatar)}`);
+        } else if (data.status === 'declined') {
+          if (pollRef.current) clearInterval(pollRef.current);
+          setInviteSent(false);
+          setInviteId(null);
+          setInviteDeclined(true);
+          setTimeout(() => setInviteDeclined(false), 3000);
+        }
+      } catch { /* network error */ }
+    }, 2000);
+  }, [navigate, setShowGameSettings]);
+
   if (!showGameSettings) return null;
 
   const resetState = () => {
@@ -100,14 +149,37 @@ export const GameSettingsModal = ({
     setSelectedOpponent(null);
     setSelectedTime(null);
     setSelectedDifficulty(null);
+    setSelectedFriendId('');
+    setSelectedFriendName('');
+    setInviteSent(false);
+    setInviteId(null);
+    setInviteDeclined(false);
+    if (pollRef.current) clearInterval(pollRef.current);
+  };
+
+  const handleClose = () => {
+    if (inviteSent && inviteId) {
+      const uid = getUserId();
+      fetch(INVITE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ action: 'decline', invite_id: inviteId, user_id: uid })
+      }).catch(() => {});
+    }
+    if (pollRef.current) clearInterval(pollRef.current);
+    setShowGameSettings(false);
+    resetState();
   };
 
   const handleBack = () => {
+    if (inviteSent) {
+      if (pollRef.current) clearInterval(pollRef.current);
+      setInviteSent(false);
+      setInviteId(null);
+      return;
+    }
     if (step > 1) {
       setStep(step - 1);
-      if (step === 2 && selectedOpponent === 'friend') {
-        // reset handled by step change
-      }
       if (step === 2 && selectedOpponent === 'computer') {
         setSelectedDifficulty(null);
       }
@@ -119,7 +191,9 @@ export const GameSettingsModal = ({
     setStep(2);
   };
 
-  const handleFriendSelect = (_friendId: string) => {
+  const handleFriendSelect = (friendId: string, friendName: string, _friendRating: number, _friendAvatar: string) => {
+    setSelectedFriendId(friendId);
+    setSelectedFriendName(friendName);
     setStep(3);
   };
 
@@ -140,7 +214,35 @@ export const GameSettingsModal = ({
     });
   };
 
+  const sendFriendInvite = async (timeControl: string) => {
+    const uid = getUserId();
+    if (!uid || !selectedFriendId) return;
+    try {
+      const res = await fetch(INVITE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send',
+          from_user_id: uid,
+          to_user_id: selectedFriendId,
+          time_control: timeControl,
+          color_choice: 'random'
+        })
+      });
+      const data = await res.json();
+      if (data.invite_id) {
+        setInviteSent(true);
+        setInviteId(data.invite_id);
+        pollAccepted(data.invite_id);
+      }
+    } catch { /* network error */ }
+  };
+
   const handleStartGame = () => {
+    if (selectedOpponent === 'friend' && selectedTime) {
+      sendFriendInvite(selectedTime);
+      return;
+    }
     if (selectedOpponent === 'computer' && selectedDifficulty && selectedTime) {
       const settings = {
         opponent: selectedOpponent,
@@ -161,8 +263,6 @@ export const GameSettingsModal = ({
       localStorage.setItem('lastGameSettings', JSON.stringify(settings));
       if ((selectedOpponent === 'city' || selectedOpponent === 'region' || selectedOpponent === 'country') && onStartOnlineGame) {
         onStartOnlineGame(selectedOpponent, selectedTime, selectedColor);
-      } else {
-        alert(`Поиск соперника...\nТип: ${selectedOpponent}\nВремя: ${selectedTime}`);
       }
       setShowGameSettings(false);
       resetState();
@@ -179,28 +279,33 @@ export const GameSettingsModal = ({
     } else if ((lastGameSettings.opponent === 'city' || lastGameSettings.opponent === 'region' || lastGameSettings.opponent === 'country') && onStartOnlineGame) {
       onStartOnlineGame(lastGameSettings.opponent, lastGameSettings.time, color);
       setShowGameSettings(false);
-    } else {
-      setShowGameSettings(false);
-      alert(`Поиск соперника...\nТип: ${lastGameSettings.opponent}\nВремя: ${lastGameSettings.time}`);
     }
   };
 
   const getStepCount = () => {
-    if (selectedOpponent === 'friend' || selectedOpponent === 'computer') {
-      return 3;
-    }
+    if (selectedOpponent === 'friend' || selectedOpponent === 'computer') return 3;
     return 2;
   };
 
   const showTimeStep = (step === 2 && selectedOpponent !== 'friend' && selectedOpponent !== 'computer') || step === 3;
   const showFriendOrDifficulty = step === 2 && (selectedOpponent === 'friend' || selectedOpponent === 'computer');
 
+  const getTitle = () => {
+    if (inviteSent) return 'Ожидание ответа';
+    if (step === 1) return 'Выбор противника';
+    if (step === 2 && selectedOpponent === 'friend') return 'Выбор друга';
+    if (step === 2 && selectedOpponent === 'computer') return 'Уровень сложности';
+    if ((step === 2 || step === 3) && selectedOpponent !== 'friend' && selectedOpponent !== 'computer') return 'Время';
+    if (step === 3) return 'Время';
+    return '';
+  };
+
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" onClick={() => setShowGameSettings(false)}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" onClick={handleClose}>
       <Card className="w-full max-w-md mx-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in" onClick={(e) => e.stopPropagation()}>
         <CardHeader>
           <div className="flex items-center justify-between">
-            {step > 1 && (
+            {(step > 1 || inviteSent) && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -211,59 +316,102 @@ export const GameSettingsModal = ({
               </Button>
             )}
             <CardTitle className="flex-1 text-center text-gray-900 dark:text-white">
-              {step === 1 && 'Выбор противника'}
-              {step === 2 && selectedOpponent === 'friend' && 'Выбор друга'}
-              {step === 2 && selectedOpponent === 'computer' && 'Уровень сложности'}
-              {step === 2 && selectedOpponent !== 'friend' && selectedOpponent !== 'computer' && 'Время'}
-              {step === 3 && 'Время'}
+              {getTitle()}
             </CardTitle>
-            {step > 1 && <div className="w-10" />}
+            {(step > 1 || inviteSent) && <div className="w-10" />}
           </div>
-          <div className="flex justify-center gap-2 mt-4">
-            {Array.from({ length: getStepCount() }).map((_, i) => (
-              <div 
-                key={i}
-                className={`h-1.5 w-10 rounded-full transition-colors ${
-                  step >= i + 1 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
-                }`} 
-              />
-            ))}
-          </div>
+          {!inviteSent && (
+            <div className="flex justify-center gap-2 mt-4">
+              {Array.from({ length: getStepCount() }).map((_, i) => (
+                <div 
+                  key={i}
+                  className={`h-1.5 w-10 rounded-full transition-colors ${
+                    step >= i + 1 ? 'bg-blue-600 dark:bg-blue-400' : 'bg-slate-200 dark:bg-slate-700'
+                  }`} 
+                />
+              ))}
+            </div>
+          )}
         </CardHeader>
         <CardContent className="space-y-6">
-          {step === 1 && (
-            <OpponentSelectStep
-              userCity={userCity}
-              userRegion={userRegion}
-              lastGameSettings={lastGameSettings}
-              onQuickStart={handleQuickStart}
-              onSelect={handleOpponentSelect}
-              getOpponentLabel={getOpponentLabel}
-              getTimeLabel={getTimeLabel}
-              getDifficultyLabel={getDifficultyLabel}
-            />
-          )}
+          {inviteSent ? (
+            <div className="text-center py-8 space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
+                <Icon name="Loader2" size={32} className="animate-spin text-amber-500" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white text-lg">{selectedFriendName}</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400 mt-1">Ожидаем ответ на приглашение...</p>
+              </div>
+              <Button
+                variant="outline"
+                onClick={() => {
+                  if (pollRef.current) clearInterval(pollRef.current);
+                  if (inviteId) {
+                    const uid = getUserId();
+                    fetch(INVITE_URL, {
+                      method: 'POST',
+                      headers: { 'Content-Type': 'application/json' },
+                      body: JSON.stringify({ action: 'decline', invite_id: inviteId, user_id: uid })
+                    }).catch(() => {});
+                  }
+                  setInviteSent(false);
+                  setInviteId(null);
+                }}
+                className="text-sm"
+              >
+                Отменить приглашение
+              </Button>
+            </div>
+          ) : inviteDeclined ? (
+            <div className="text-center py-8 space-y-4">
+              <div className="w-16 h-16 mx-auto rounded-full bg-red-100 dark:bg-red-900/30 flex items-center justify-center">
+                <Icon name="X" size={32} className="text-red-500" />
+              </div>
+              <div>
+                <p className="font-semibold text-gray-900 dark:text-white">{selectedFriendName}</p>
+                <p className="text-sm text-red-500 mt-1">Отклонил приглашение</p>
+              </div>
+            </div>
+          ) : (
+            <>
+              {step === 1 && (
+                <OpponentSelectStep
+                  userCity={userCity}
+                  userRegion={userRegion}
+                  lastGameSettings={lastGameSettings}
+                  onQuickStart={handleQuickStart}
+                  onSelect={handleOpponentSelect}
+                  getOpponentLabel={getOpponentLabel}
+                  getTimeLabel={getTimeLabel}
+                  getDifficultyLabel={getDifficultyLabel}
+                />
+              )}
 
-          {showFriendOrDifficulty && (
-            <FriendAndDifficultyStep
-              selectedOpponent={selectedOpponent}
-              friends={friends}
-              onFriendSelect={handleFriendSelect}
-              onDifficultySelect={handleDifficultySelect}
-            />
-          )}
+              {showFriendOrDifficulty && (
+                <FriendAndDifficultyStep
+                  selectedOpponent={selectedOpponent}
+                  onFriendSelect={handleFriendSelect}
+                  onDifficultySelect={handleDifficultySelect}
+                />
+              )}
 
-          {showTimeStep && (
-            <TimeSelectStep
-              selectedTime={selectedTime}
-              selectedColor={selectedColor}
-              onTimeSelect={handleTimeSelect}
-              onCycleColor={cycleColor}
-              onStartGame={handleStartGame}
-            />
+              {showTimeStep && (
+                <TimeSelectStep
+                  selectedTime={selectedTime}
+                  selectedColor={selectedColor}
+                  onTimeSelect={handleTimeSelect}
+                  onCycleColor={cycleColor}
+                  onStartGame={handleStartGame}
+                  isFriendGame={selectedOpponent === 'friend'}
+                />
+              )}
+            </>
           )}
         </CardContent>
       </Card>
     </div>
   );
 };
+
+export default GameSettingsModal;
