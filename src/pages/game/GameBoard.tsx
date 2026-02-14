@@ -178,7 +178,11 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                     height: 0,
                     paddingBottom: '12.5%',
                     backgroundColor: isLastMoveSquare
-                      ? (isLight ? 'rgba(255, 255, 100, 0.45)' : 'rgba(200, 180, 50, 0.5)')
+                      ? (boardTheme === 'classic'
+                        ? (isLight ? 'rgba(170, 140, 60, 0.55)' : 'rgba(140, 110, 40, 0.6)')
+                        : boardTheme === 'flat'
+                        ? (isLight ? '#c9a84e' : '#a08230')
+                        : (isLight ? '#d4b86a' : '#a89050'))
                       : (isLight ? config.lightSquare : config.darkSquare),
                     ...(boardTheme === 'classic' ? {
                       boxShadow: isLight 
