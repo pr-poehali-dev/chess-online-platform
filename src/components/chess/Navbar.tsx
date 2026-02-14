@@ -118,10 +118,9 @@ const Navbar = ({
             className="flex items-center gap-3 hover:opacity-80 transition-opacity"
           >
             <img 
-              src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/3ee6bec8-8bbe-4d6e-9963-b3a0399d074a.png" 
+              src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/70fa1147-826f-4c89-8da6-773ff084ce53.jpg" 
               alt="Logo" 
               className="w-10 h-10 object-contain"
-              style={isDarkMode ? { filter: 'invert(1)' } : undefined}
             />
             <h1 className="text-2xl font-bold tracking-wide text-slate-900 dark:text-white" style={{ fontFamily: 'Montserrat, sans-serif' }}>
               Лига Шахмат

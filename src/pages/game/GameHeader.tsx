@@ -42,22 +42,19 @@ export const GameHeader = ({
         ? 'bg-white/80 border-slate-300'
         : 'bg-stone-900/80 border-stone-700/50'
     }`}>
-      <div className="flex items-center gap-2">
-        <img
-          src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/3ee6bec8-8bbe-4d6e-9963-b3a0399d074a.png"
-          alt="Logo"
-          className="w-7 h-7 sm:w-8 sm:h-8 md:w-9 md:h-9 object-contain"
-          style={theme === 'dark' ? { filter: 'invert(1)' } : undefined}
-        />
-        <h1 className={`text-lg sm:text-2xl md:text-3xl font-bold tracking-wide ${
-          theme === 'light' ? 'text-slate-900' : 'text-white'
-        }`} style={{
-          fontFamily: 'Montserrat, sans-serif',
-          letterSpacing: '0.05em'
-        }}>
-          ЛигаШахмат
-        </h1>
-      </div>
+      <h1 className={`text-lg sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r tracking-wide ${
+        theme === 'light'
+          ? 'from-amber-600 via-yellow-500 to-amber-600'
+          : 'from-amber-200 via-yellow-400 to-amber-200'
+      }`} style={{
+        fontFamily: 'Montserrat, sans-serif',
+        textShadow: theme === 'light' 
+          ? '0 2px 10px rgba(217, 119, 6, 0.2), 0 0 30px rgba(217, 119, 6, 0.1)'
+          : '0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)',
+        letterSpacing: '0.05em'
+      }}>
+        ЛигаШахмат
+      </h1>
     </header>
   );
 };
