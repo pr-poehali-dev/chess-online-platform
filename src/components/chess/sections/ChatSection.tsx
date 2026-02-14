@@ -15,149 +15,28 @@ export const ChatSection = ({
 
   useEffect(() => {
     const savedChats = localStorage.getItem('chessChats');
-    if (savedChats) {
-      const parsedChats = JSON.parse(savedChats);
-      setChats(parsedChats);
+    let chatList: Chat[] = savedChats ? JSON.parse(savedChats) : [];
 
-      if (initialChatId) {
-        const chat = parsedChats.find((c: Chat) => c.id === initialChatId);
-        if (chat) {
-          setSelectedChat(chat);
-        }
-      }
-    } else {
-      const mockChats: Chat[] = [
-        {
-          id: '1',
-          participantId: 'USER-A1B2C3D',
-          participantName: 'Александр Петров',
-          participantAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=AlexanderP',
-          participantRating: 1920,
-          lastMessage: 'Отличная партия! Спасибо за игру',
-          lastMessageTime: '2026-02-12T14:35:00',
+    if (initialChatId && initialParticipantName) {
+      const existing = chatList.find((c: Chat) => c.id === initialChatId || c.participantId === initialChatId);
+      if (existing) {
+        setSelectedChat(existing);
+      } else {
+        const newChat: Chat = {
+          id: initialChatId,
+          participantId: initialChatId,
+          participantName: initialParticipantName,
+          participantRating: initialParticipantRating || 1200,
           unreadCount: 0,
-          messages: [
-            {
-              id: '1',
-              senderId: 'USER-A1B2C3D',
-              senderName: 'Александр Петров',
-              text: 'Привет! Хорошая игра получилась',
-              timestamp: '2026-02-12T14:32:00',
-              isOwn: false
-            },
-            {
-              id: '2',
-              senderId: 'me',
-              senderName: 'Вы',
-              text: 'Спасибо! Ты отлично защищался',
-              timestamp: '2026-02-12T14:33:00',
-              isOwn: true
-            },
-            {
-              id: '3',
-              senderId: 'USER-A1B2C3D',
-              senderName: 'Александр Петров',
-              text: 'Отличная партия! Спасибо за игру',
-              timestamp: '2026-02-12T14:35:00',
-              isOwn: false
-            }
-          ]
-        },
-        {
-          id: '2',
-          participantId: 'USER-E4F5G6H',
-          participantName: 'Мария Смирнова',
-          participantAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=MariaS',
-          participantRating: 1875,
-          lastMessage: 'Хочешь реванш?',
-          lastMessageTime: '2026-02-11T18:20:00',
-          unreadCount: 2,
-          messages: [
-            {
-              id: '1',
-              senderId: 'me',
-              senderName: 'Вы',
-              text: 'Хорошая игра была!',
-              timestamp: '2026-02-11T18:17:00',
-              isOwn: true
-            },
-            {
-              id: '2',
-              senderId: 'USER-E4F5G6H',
-              senderName: 'Мария Смирнова',
-              text: 'Да, спасибо! Твоя защита была сильной',
-              timestamp: '2026-02-11T18:18:00',
-              isOwn: false
-            },
-            {
-              id: '3',
-              senderId: 'USER-E4F5G6H',
-              senderName: 'Мария Смирнова',
-              text: 'Хочешь реванш?',
-              timestamp: '2026-02-11T18:20:00',
-              isOwn: false
-            }
-          ]
-        },
-        {
-          id: '3',
-          participantId: 'USER-I7J8K9L',
-          participantName: 'Дмитрий Иванов',
-          participantAvatar: 'https://api.dicebear.com/7.x/avataaars/svg?seed=DmitryI',
-          participantRating: 1835,
-          lastMessage: 'Ничья - справедливый результат',
-          lastMessageTime: '2026-02-10T20:50:00',
-          unreadCount: 0,
-          messages: [
-            {
-              id: '1',
-              senderId: 'USER-I7J8K9L',
-              senderName: 'Дмитрий Иванов',
-              text: 'Напряженная партия!',
-              timestamp: '2026-02-10T20:48:00',
-              isOwn: false
-            },
-            {
-              id: '2',
-              senderId: 'me',
-              senderName: 'Вы',
-              text: 'Согласен, оба играли хорошо',
-              timestamp: '2026-02-10T20:49:00',
-              isOwn: true
-            },
-            {
-              id: '3',
-              senderId: 'USER-I7J8K9L',
-              senderName: 'Дмитрий Иванов',
-              text: 'Ничья - справедливый результат',
-              timestamp: '2026-02-10T20:50:00',
-              isOwn: false
-            }
-          ]
-        }
-      ];
-
-      if (initialChatId && initialParticipantName && initialParticipantRating) {
-        const existingChat = mockChats.find(c => c.id === initialChatId);
-        if (!existingChat) {
-          const newChat: Chat = {
-            id: initialChatId,
-            participantId: initialChatId,
-            participantName: initialParticipantName,
-            participantRating: initialParticipantRating,
-            unreadCount: 0,
-            messages: []
-          };
-          mockChats.unshift(newChat);
-          setSelectedChat(newChat);
-        } else {
-          setSelectedChat(existingChat);
-        }
+          messages: []
+        };
+        chatList = [newChat, ...chatList];
+        setSelectedChat(newChat);
       }
-
-      setChats(mockChats);
-      localStorage.setItem('chessChats', JSON.stringify(mockChats));
     }
+
+    setChats(chatList);
+    localStorage.setItem('chessChats', JSON.stringify(chatList));
   }, [initialChatId, initialParticipantName, initialParticipantRating]);
 
   const formatTime = (dateString: string) => {
