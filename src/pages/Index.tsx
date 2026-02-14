@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { useNavigate } from "react-router-dom";
 import Navbar from "@/components/chess/Navbar";
 import {
@@ -185,12 +185,21 @@ const Index = () => {
   const [showRules, setShowRules] = useState(false);
   const [showSupport, setShowSupport] = useState(false);
   const [copied, setCopied] = useState(false);
+  const footerContentRef = useRef<HTMLDivElement>(null);
 
   const copyEmail = () => {
     navigator.clipboard.writeText("ligachess.ru@mail.ru");
     setCopied(true);
     setTimeout(() => setCopied(false), 2000);
   };
+
+  useEffect(() => {
+    if ((showRules || showSupport) && footerContentRef.current) {
+      setTimeout(() => {
+        footerContentRef.current?.scrollIntoView({ behavior: "smooth", block: "nearest" });
+      }, 50);
+    }
+  }, [showRules, showSupport]);
 
   return (
     <div className="min-h-screen bg-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:bg-gradient-to-br transition-colors duration-300 overflow-x-hidden">
@@ -355,7 +364,7 @@ const Index = () => {
           </div>
 
           {showRules && (
-            <div className="mt-6 max-w-2xl mx-auto text-left bg-slate-50 dark:bg-slate-800/60 rounded-xl p-5 sm:p-6 border border-slate-200 dark:border-white/10 animate-fade-in">
+            <div ref={footerContentRef} className="mt-6 max-w-2xl mx-auto text-left bg-slate-50 dark:bg-slate-800/60 rounded-xl p-5 sm:p-6 border border-slate-200 dark:border-white/10">
               <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-3">
                 1. Правила шахмат
               </h3>
@@ -492,7 +501,7 @@ const Index = () => {
           )}
 
           {showSupport && (
-            <div className="mt-6 max-w-md mx-auto animate-fade-in">
+            <div ref={footerContentRef} className="mt-6 max-w-md mx-auto">
               <button
                 onClick={copyEmail}
                 className="inline-flex items-center gap-2 px-5 py-3 rounded-xl bg-slate-50 dark:bg-slate-800/60 border border-slate-200 dark:border-white/10 hover:bg-slate-100 dark:hover:bg-slate-700/60 transition-colors"
