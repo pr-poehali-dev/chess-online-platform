@@ -350,7 +350,7 @@ export const useGameLogic = (
     } catch(e) { console.error('sendMove error', e); }
   }, [isOnlineGame, onlineGameId]);
 
-  const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string, moveNumber?: number) => {
+  const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string, moveNumber?: number, winner?: string, endReason?: string) => {
     if (pendingMoveRef.current && serverMoves.length < serverMoveCountRef.current) return;
     if (serverMoves.length === serverMoveCountRef.current && serverStatus !== 'finished') return;
     const prevCount = serverMoveCountRef.current;
@@ -392,7 +392,26 @@ export const useGameLogic = (
     if (serverStatus === 'finished' || result.status !== 'playing') {
       if (result.status === 'checkmate') setGameStatus('checkmate');
       else if (result.status === 'stalemate') setGameStatus('stalemate');
-      else if (serverStatus === 'finished') setGameStatus('checkmate');
+      else if (serverStatus === 'finished') {
+        if (endReason === 'draw' || endReason === 'stalemate') setGameStatus('draw');
+        else setGameStatus('checkmate');
+      }
+    }
+
+    if (serverStatus === 'finished' && winner) {
+      const saved = localStorage.getItem('chessUser');
+      if (saved) {
+        const uData = JSON.parse(saved);
+        const rawId = uData.email || uData.name || 'anonymous';
+        const myId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+        if (winner === myId) {
+          setGameStatus('checkmate');
+          setCurrentPlayer(playerColor === 'white' ? 'black' : 'white');
+        } else {
+          setGameStatus('checkmate');
+          setCurrentPlayer(playerColor);
+        }
+      }
     }
 
     setWhiteTime(wTime);
@@ -430,7 +449,9 @@ export const useGameLogic = (
           data.game.white_time ?? getInitialTime(timeControl),
           data.game.black_time ?? getInitialTime(timeControl),
           data.game.status,
-          data.game.move_number
+          data.game.move_number,
+          data.game.winner,
+          data.game.end_reason
         );
 
         if (!onlineReadyRef.current) {
