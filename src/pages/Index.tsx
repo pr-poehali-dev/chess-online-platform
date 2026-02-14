@@ -4,6 +4,7 @@ import Navbar from '@/components/chess/Navbar';
 import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection, NotificationsSection, HistorySection, ChatSection } from '@/components/chess/Sections';
 import { AuthModal, GameSettingsModal, OfflineGameModal } from '@/components/chess/Modals';
 const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-050d3d0c3ba2';
+const USER_CHECK_URL = 'https://functions.poehali.dev/3a8fa375-82f7-41f7-823b-3910eafac641';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -11,30 +12,60 @@ const Index = () => {
     const params = new URLSearchParams(window.location.search);
     return params.get('invite');
   });
-  const [activeSection, setActiveSection] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    const hasInvite = params.get('invite');
-    const savedUser = localStorage.getItem('chessUser');
-    if (hasInvite && savedUser) return 'friends';
-    return 'home';
-  });
+  const [activeSection, setActiveSection] = useState('home');
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
     return savedTheme === 'dark' || savedTheme === null;
   });
-  const [isAuthenticated, setIsAuthenticated] = useState(() => {
-    const savedUser = localStorage.getItem('chessUser');
-    return !!savedUser;
-  });
-  const [showAuthModal, setShowAuthModal] = useState(() => {
-    const params = new URLSearchParams(window.location.search);
-    const hasInvite = params.get('invite');
-    const savedUser = localStorage.getItem('chessUser');
-    return !!(hasInvite && !savedUser);
-  });
+  const [isAuthenticated, setIsAuthenticated] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGameSettings, setShowGameSettings] = useState(false);
   const [showOfflineGameModal, setShowOfflineGameModal] = useState(false);
   const [chatParams, setChatParams] = useState<{ name: string; rating: number; id: string } | null>(null);
+  const [authChecked, setAuthChecked] = useState(false);
+
+  useEffect(() => {
+    const checkAuth = async () => {
+      const savedUser = localStorage.getItem('chessUser');
+      if (!savedUser) {
+        setIsAuthenticated(false);
+        setAuthChecked(true);
+        const params = new URLSearchParams(window.location.search);
+        if (params.get('invite')) {
+          setShowAuthModal(true);
+        }
+        return;
+      }
+
+      try {
+        const userData = JSON.parse(savedUser);
+        const rawId = userData.email || userData.name || 'anonymous';
+        const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+        const res = await fetch(`${USER_CHECK_URL}?user_id=${encodeURIComponent(userId)}`);
+        const data = await res.json();
+
+        if (data.exists) {
+          setIsAuthenticated(true);
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('invite')) {
+            setActiveSection('friends');
+          }
+        } else {
+          localStorage.removeItem('chessUser');
+          setIsAuthenticated(false);
+          const params = new URLSearchParams(window.location.search);
+          if (params.get('invite')) {
+            setShowAuthModal(true);
+          }
+        }
+      } catch {
+        const savedU = localStorage.getItem('chessUser');
+        setIsAuthenticated(!!savedU);
+      }
+      setAuthChecked(true);
+    };
+    checkAuth();
+  }, []);
 
   useEffect(() => {
     if (isDarkMode) {
@@ -54,6 +85,7 @@ const Index = () => {
   });
 
   useEffect(() => {
+    if (!isAuthenticated || !authChecked) return;
     const savedUser = localStorage.getItem('chessUser');
     if (!savedUser) return;
     const userData = JSON.parse(savedUser);
@@ -73,7 +105,7 @@ const Index = () => {
         }
       })
       .catch(() => {});
-  }, [isAuthenticated]);
+  }, [isAuthenticated, authChecked]);
 
   useEffect(() => {
     if (isAuthenticated && pendingInviteCode) {

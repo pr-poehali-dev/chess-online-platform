@@ -1,8 +1,14 @@
 import json
 import os
-import hashlib
+import random
+import string
 from datetime import datetime
 import psycopg2
+
+
+def generate_code():
+    chars = string.ascii_uppercase + string.digits
+    return 'USER-' + ''.join(random.choices(chars, k=7))
 
 
 def handler(event, context):
@@ -69,7 +75,7 @@ def handler(event, context):
     user_id = 'u_' + email.replace("'", "''")
 
     cur.execute(
-        "SELECT id, username, rating, city, games_played, wins, losses, draws FROM {schema}.users WHERE id = '{uid}'".format(
+        "SELECT id, username, rating, city, games_played, wins, losses, draws, user_code FROM {schema}.users WHERE id = '{uid}'".format(
             schema=schema, uid=user_id.replace("'", "''")
         )
     )
@@ -102,6 +108,7 @@ def handler(event, context):
             'wins': existing[5],
             'losses': existing[6],
             'draws': existing[7],
+            'user_code': existing[8] or '',
             'is_new': False
         }
     elif existing:
@@ -128,6 +135,7 @@ def handler(event, context):
             'wins': existing[5],
             'losses': existing[6],
             'draws': existing[7],
+            'user_code': existing[8] or '',
             'is_new': False
         }
     else:
@@ -136,13 +144,21 @@ def handler(event, context):
             conn.close()
             return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'Name required for new user'})}
 
+        new_code = generate_code()
+        for _ in range(10):
+            cur.execute("SELECT id FROM {schema}.users WHERE user_code = '{code}'".format(schema=schema, code=new_code.replace("'", "''")))
+            if not cur.fetchone():
+                break
+            new_code = generate_code()
+
         cur.execute(
-            "INSERT INTO {schema}.users (id, username, email, city, rating, games_played, wins, losses, draws) VALUES ('{uid}', '{name}', '{email}', '{city}', 500, 0, 0, 0, 0)".format(
+            "INSERT INTO {schema}.users (id, username, email, city, rating, games_played, wins, losses, draws, user_code) VALUES ('{uid}', '{name}', '{email}', '{city}', 500, 0, 0, 0, 0, '{code}')".format(
                 schema=schema,
                 uid=user_id.replace("'", "''"),
                 name=name.replace("'", "''"),
                 email=email.replace("'", "''"),
-                city=city.replace("'", "''")
+                city=city.replace("'", "''"),
+                code=new_code.replace("'", "''")
             )
         )
         conn.commit()
@@ -156,6 +172,7 @@ def handler(event, context):
             'wins': 0,
             'losses': 0,
             'draws': 0,
+            'user_code': new_code,
             'is_new': True
         }
 

@@ -37,7 +37,10 @@ export const AuthModal = ({
     if (savedUser && showAuthModal) {
       setIsAuthenticated(true);
       setShowAuthModal(false);
-      setShowGameSettings(true);
+      const params = new URLSearchParams(window.location.search);
+      if (!params.get('invite')) {
+        setShowGameSettings(true);
+      }
     }
   }, [showAuthModal, setIsAuthenticated, setShowAuthModal, setShowGameSettings]);
 
@@ -106,6 +109,7 @@ export const AuthModal = ({
           city: user.city || selectedCity,
           rating: user.rating,
           id: user.id,
+          userId: user.user_code || '',
           games_played: user.games_played,
           wins: user.wins,
           losses: user.losses,
@@ -114,7 +118,10 @@ export const AuthModal = ({
         localStorage.setItem('chessUser', JSON.stringify(userData));
         setIsAuthenticated(true);
         setShowAuthModal(false);
-        setShowGameSettings(true);
+        const params = new URLSearchParams(window.location.search);
+        if (!params.get('invite')) {
+          setShowGameSettings(true);
+        }
         resetForm();
       } else {
         if (data.error === 'User not found') {

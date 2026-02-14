@@ -97,16 +97,22 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
   }, []);
 
   const fetchMyCode = useCallback(async (uid: string) => {
+    const saved = localStorage.getItem('chessUser');
+    if (saved) {
+      try {
+        const u = JSON.parse(saved);
+        if (u.userId) { setUserCode(u.userId); return; }
+      } catch { /* ignore */ }
+    }
     try {
       const res = await fetch(`${FRIENDS_URL}?action=my_code&user_id=${encodeURIComponent(uid)}`);
       const data = await res.json();
       if (data.code) {
         setUserCode(data.code);
-        const savedUser = localStorage.getItem('chessUser');
-        if (savedUser) {
-          const user = JSON.parse(savedUser);
-          user.userId = data.code;
-          localStorage.setItem('chessUser', JSON.stringify(user));
+        if (saved) {
+          const u = JSON.parse(saved);
+          u.userId = data.code;
+          localStorage.setItem('chessUser', JSON.stringify(u));
         }
       }
     } catch { /* network error */ }
