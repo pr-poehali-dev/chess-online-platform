@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRights, BoardTheme } from './gameTypes';
 import { getPossibleMoves, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
 const FINISH_GAME_URL = 'https://functions.poehali.dev/24acb5e2-473c-4c15-a295-944e14d8aa96';
@@ -39,7 +39,6 @@ export const useGameLogic = (
   const [boardHistory, setBoardHistory] = useState<Board[]>(savedState?.boardHistory || [initialBoard]);
   const [moveTimes, setMoveTimes] = useState<string[]>(savedState?.moveTimes || []);
   const [currentMoveIndex, setCurrentMoveIndex] = useState(savedState?.boardHistory ? savedState.boardHistory.length - 1 : 0);
-  const [displayBoard, setDisplayBoard] = useState<Board>(savedState?.board || initialBoard);
   const [inactivityTimer, setInactivityTimer] = useState(60);
   const [capturedByWhite, setCapturedByWhite] = useState<{type: string; color: string}[]>(savedState?.capturedByWhite || []);
   const [capturedByBlack, setCapturedByBlack] = useState<{type: string; color: string}[]>(savedState?.capturedByBlack || []);
@@ -83,6 +82,10 @@ export const useGameLogic = (
   const onlineMoveCountRef = useRef(0);
   const isApplyingMoveRef = useRef(false);
   const onlineReadyRef = useRef(!isOnlineGame);
+
+  const displayBoard = useMemo(() => {
+    return boardHistory[currentMoveIndex] || initialBoard;
+  }, [boardHistory, currentMoveIndex]);
 
   useEffect(() => {
     const saved = localStorage.getItem('chessUser');
@@ -166,9 +169,7 @@ export const useGameLogic = (
   useEffect(() => {
     if (isOnlineGame) return;
     if (currentPlayer === botColor && gameStatus === 'playing') {
-      const idx = boardHistoryRef.current.length - 1;
-      setCurrentMoveIndex(idx);
-      setDisplayBoard(boardHistoryRef.current[idx] || boardRef.current);
+      setCurrentMoveIndex(boardHistoryRef.current.length - 1);
       setTimeout(() => makeComputerMove(), 500);
     }
   }, [currentPlayer, gameStatus]);
@@ -306,7 +307,6 @@ export const useGameLogic = (
     boardHistoryRef.current = newBH;
 
     setBoard(newBoard);
-    setDisplayBoard(newBoard);
     setCastlingRights(curCR);
     setEnPassantTarget(newEP);
     setMoveHistory(newMH);
@@ -546,7 +546,6 @@ export const useGameLogic = (
     boardHistoryRef.current = newBH;
 
     setBoard(newBoard);
-    setDisplayBoard(newBoard);
     setCastlingRights(newCastlingRights);
     setEnPassantTarget(newEnPassantTarget);
     setMoveHistory(newMH);
@@ -663,17 +662,13 @@ export const useGameLogic = (
 
   const handlePreviousMove = () => {
     if (currentMoveIndex > 0) {
-      const newIdx = currentMoveIndex - 1;
-      setCurrentMoveIndex(newIdx);
-      setDisplayBoard(boardHistoryRef.current[newIdx] || initialBoard);
+      setCurrentMoveIndex(currentMoveIndex - 1);
     }
   };
 
   const handleNextMove = () => {
     if (currentMoveIndex < boardHistoryRef.current.length - 1) {
-      const newIdx = currentMoveIndex + 1;
-      setCurrentMoveIndex(newIdx);
-      setDisplayBoard(boardHistoryRef.current[newIdx] || boardRef.current);
+      setCurrentMoveIndex(currentMoveIndex + 1);
     }
   };
 
