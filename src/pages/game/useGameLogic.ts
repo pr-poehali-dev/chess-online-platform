@@ -775,6 +775,13 @@ export const useGameLogic = (
     if (currentPlayer !== playerColor || gameStatus !== 'playing') return;
     if (isOnlineGame && pendingMoveRef.current) return;
 
+    if (currentMoveIndex < boardHistory.length - 1) {
+      setCurrentMoveIndex(boardHistory.length - 1);
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+      return;
+    }
+
     const piece = board[row][col];
 
     if (selectedSquare) {
