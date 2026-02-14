@@ -27,7 +27,8 @@ def handler(event: dict, context) -> dict:
                       time_control, status, is_bot_game, current_player,
                       white_time, black_time, move_history, board_state,
                       winner, end_reason,
-                      EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move
+                      EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move,
+                      move_number
             FROM online_games WHERE id = %d""" % int(game_id)
         )
         row = cur.fetchone()
@@ -42,6 +43,7 @@ def handler(event: dict, context) -> dict:
         current_player = row[12]
         white_time = row[13]
         black_time = row[14]
+        move_number = row[20] or 0
 
         if status == 'playing' and seconds_since_move > 0:
             if current_player == 'white':
@@ -58,7 +60,8 @@ def handler(event: dict, context) -> dict:
                 'current_player': current_player,
                 'white_time': white_time, 'black_time': black_time,
                 'move_history': row[15], 'board_state': row[16],
-                'winner': row[17], 'end_reason': row[18]
+                'winner': row[17], 'end_reason': row[18],
+                'move_number': move_number
             }
         })}
 
@@ -80,7 +83,8 @@ def handler(event: dict, context) -> dict:
     cur.execute(
         """SELECT id, white_user_id, black_user_id, current_player, status,
                   white_time, black_time, move_history, is_bot_game, time_control,
-                  EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move
+                  EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move,
+                  move_number
         FROM online_games WHERE id = %d""" % int(game_id)
     )
     game = cur.fetchone()
@@ -90,7 +94,8 @@ def handler(event: dict, context) -> dict:
         conn.close()
         return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'game not found'})}
 
-    g_id, white_uid, black_uid, current_player, status, white_time, black_time, move_hist, is_bot, tc, secs_since = game
+    g_id, white_uid, black_uid, current_player, status, white_time, black_time, move_hist, is_bot, tc, secs_since, db_move_number = game
+    db_move_number = db_move_number or 0
 
     if user_id != white_uid and user_id != black_uid:
         cur.close()
@@ -145,11 +150,17 @@ def handler(event: dict, context) -> dict:
     board_state = body.get('board_state', '')
     game_status = body.get('game_status', 'playing')
     winner_id = body.get('winner_id', '')
+    client_move_number = body.get('move_number', -1)
 
     if not move:
         cur.close()
         conn.close()
         return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'move required'})}
+
+    if client_move_number >= 0 and client_move_number != db_move_number:
+        cur.close()
+        conn.close()
+        return {'statusCode': 409, 'headers': headers, 'body': json.dumps({'error': 'move_number mismatch', 'expected': db_move_number, 'got': client_move_number})}
 
     increment = 0
     if '+' in tc:
@@ -175,6 +186,7 @@ def handler(event: dict, context) -> dict:
 
     new_move_hist = (move_hist + ',' + move) if move_hist else move
     next_player = 'black' if current_player == 'white' else 'white'
+    new_move_number = db_move_number + 1
 
     new_status = 'playing'
     winner_val = 'NULL'
@@ -200,22 +212,28 @@ def handler(event: dict, context) -> dict:
             status = '%s',
             winner = %s,
             end_reason = %s,
+            move_number = %d,
             last_move_at = NOW(),
             updated_at = NOW()
-        WHERE id = %d"""
+        WHERE id = %d AND move_number = %d"""
         % (next_player, new_white_time, new_black_time,
            new_move_hist.replace("'", "''"),
            board_state.replace("'", "''") if board_state else 'initial',
-           new_status, winner_val, end_reason_val, g_id)
+           new_status, winner_val, end_reason_val, new_move_number, g_id, db_move_number)
     )
+
+    rows_updated = cur.rowcount
     conn.commit()
     cur.close()
     conn.close()
 
+    if rows_updated == 0:
+        return {'statusCode': 409, 'headers': headers, 'body': json.dumps({'error': 'concurrent move detected, retry'})}
+
     return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
         'status': new_status,
         'current_player': next_player,
+        'move_number': new_move_number,
         'white_time': new_white_time,
-        'black_time': new_black_time,
-        'move_history': new_move_hist
+        'black_time': new_black_time
     })}

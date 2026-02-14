@@ -1,9 +1,10 @@
 import { useState, useEffect, useRef, useCallback, useMemo } from 'react';
 import { Board, Position, initialBoard, getInitialTime, getIncrement, CastlingRights, BoardTheme } from './gameTypes';
 import { getPossibleMoves, getBestMove, isCheckmate, isStalemate, getAllLegalMoves, isInCheck, findKing } from './gameLogic';
-const FINISH_GAME_URL = 'https://functions.poehali.dev/24acb5e2-473c-4c15-a295-944e14d8aa96';
-const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-050d3d0c3ba2';
-const ONLINE_MOVE_URL = 'https://functions.poehali.dev/58a413af-81c4-47bd-b3ce-4552a349ae19';
+import API from '@/config/api';
+const FINISH_GAME_URL = API.finishGame;
+const GAME_HISTORY_URL = API.gameHistory;
+const ONLINE_MOVE_URL = API.onlineMove;
 
 function replayMoves(moves: string[]): {
   board: Board;
@@ -185,6 +186,7 @@ export const useGameLogic = (
   const gameFinished = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
   const serverMoveCountRef = useRef(0);
+  const serverMoveNumberRef = useRef(0);
   const pendingMoveRef = useRef<string | null>(null);
 
   const displayBoard = useMemo(() => {
@@ -221,6 +223,23 @@ export const useGameLogic = (
     oscillator.start(audioContext.currentTime);
     oscillator.stop(audioContext.currentTime + 0.5);
   };
+
+  const playMoveSound = useCallback(() => {
+    try {
+      const AudioContextClass = window.AudioContext || (window as unknown as { webkitAudioContext: typeof AudioContext }).webkitAudioContext;
+      const ctx = new AudioContextClass();
+      const osc = ctx.createOscillator();
+      const gain = ctx.createGain();
+      osc.connect(gain);
+      gain.connect(ctx.destination);
+      osc.frequency.value = 440;
+      osc.type = 'sine';
+      gain.gain.setValueAtTime(0.15, ctx.currentTime);
+      gain.gain.exponentialRampToValueAtTime(0.01, ctx.currentTime + 0.15);
+      osc.start(ctx.currentTime);
+      osc.stop(ctx.currentTime + 0.15);
+    } catch { /* audio not available */ }
+  }, []);
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
@@ -312,18 +331,34 @@ export const useGameLogic = (
           move,
           board_state: '',
           game_status: gameStatusVal,
-          winner_id: winnerId || ''
+          winner_id: winnerId || '',
+          move_number: serverMoveNumberRef.current
         })
       });
-      if (!res.ok) {
+      if (res.ok) {
+        const data = await res.json();
+        if (data.move_number !== undefined) {
+          serverMoveNumberRef.current = data.move_number;
+        }
+      } else if (res.status === 409) {
+        console.warn('Move conflict, will re-sync from server');
+        pendingMoveRef.current = null;
+      } else {
         console.error('Move rejected:', res.status);
       }
     } catch(e) { console.error('sendMove error', e); }
   }, [isOnlineGame, onlineGameId]);
 
-  const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string) => {
+  const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string, moveNumber?: number) => {
     if (serverMoves.length === serverMoveCountRef.current && serverStatus !== 'finished') return;
+    const prevCount = serverMoveCountRef.current;
     serverMoveCountRef.current = serverMoves.length;
+
+    if (moveNumber !== undefined) {
+      serverMoveNumberRef.current = moveNumber;
+    }
+
+    const opponentMoved = serverMoves.length > prevCount && prevCount > 0;
 
     const result = replayMoves(serverMoves);
 
@@ -351,12 +386,16 @@ export const useGameLogic = (
 
     pendingMoveRef.current = null;
 
+    if (opponentMoved && result.currentPlayer === playerColor) {
+      playMoveSound();
+    }
+
     setTimeout(() => {
       if (historyRef.current) {
         historyRef.current.scrollLeft = historyRef.current.scrollWidth;
       }
     }, 10);
-  }, []);
+  }, [playerColor, playMoveSound]);
 
   useEffect(() => {
     if (!isOnlineGame || !onlineGameId) return;
@@ -376,7 +415,8 @@ export const useGameLogic = (
           serverMoves,
           data.game.white_time ?? getInitialTime(timeControl),
           data.game.black_time ?? getInitialTime(timeControl),
-          data.game.status
+          data.game.status,
+          data.game.move_number
         );
 
         if (!onlineReadyRef.current) {
@@ -391,7 +431,7 @@ export const useGameLogic = (
     const intervalId = setInterval(() => {
       if (!active) return;
       poll();
-    }, 800);
+    }, 500);
 
     return () => {
       active = false;

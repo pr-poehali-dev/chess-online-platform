@@ -3,8 +3,9 @@ import { Dialog, DialogContent, DialogTitle } from '@/components/ui/dialog';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
+import API from '@/config/api';
 
-const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-050d3d0c3ba2';
+const GAME_HISTORY_URL = API.gameHistory;
 
 interface Game {
   id: number;
