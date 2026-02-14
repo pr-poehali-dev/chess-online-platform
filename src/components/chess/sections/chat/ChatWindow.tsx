@@ -1,6 +1,5 @@
 import { useState, useRef, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Icon from '@/components/ui/icon';
@@ -48,6 +47,7 @@ export const ChatWindow = ({
   const [messageText, setMessageText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGameSetup, setShowGameSetup] = useState(false);
+  const [showBlockMenu, setShowBlockMenu] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
 
   const emojis = [
@@ -121,132 +121,131 @@ export const ChatWindow = ({
   const lastSettings = getLastGameSettings();
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
-        <CardHeader>
-          <div className="flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <Button onClick={onBack} variant="outline" size="sm" className="border-slate-200 dark:border-white/20">
-                <Icon name="ChevronLeft" size={18} />
-              </Button>
-              <Avatar className="w-10 h-10">
-                {selectedChat.participantAvatar ? (
-                  <AvatarImage src={selectedChat.participantAvatar} alt={selectedChat.participantName} />
-                ) : (
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold">
-                    {getInitials(selectedChat.participantName)}
-                  </AvatarFallback>
-                )}
-              </Avatar>
-              <div>
-                <CardTitle className="text-lg text-gray-900 dark:text-white">
-                  {selectedChat.participantName}
-                </CardTitle>
-                <div className="text-sm text-gray-600 dark:text-gray-400">
-                  Рейтинг: {selectedChat.participantRating}
-                </div>
-              </div>
-            </div>
-            <Button onClick={onBlock} variant="outline" size="sm" className="border-red-400/50 text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20">
-              <Icon name="Ban" size={16} className="mr-1" /> Заблокировать
-            </Button>
-          </div>
-        </CardHeader>
-        <CardContent>
-          <div className="flex flex-col h-[500px]">
-            <div className="flex-1 overflow-y-auto mb-4 space-y-3 p-4 bg-slate-50 dark:bg-slate-800/30 rounded-lg">
-              {selectedChat.messages.length === 0 ? (
-                <div className="text-center py-12 text-gray-600 dark:text-gray-400">
-                  <Icon name="MessageCircle" className="mx-auto mb-4" size={48} />
-                  <p>Начните разговор</p>
-                </div>
-              ) : (
-                selectedChat.messages.map((message) => (
-                  <div key={message.id} className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}>
-                    <div className={`max-w-[70%] rounded-lg p-3 ${
-                      message.isOwn ? 'bg-blue-600 text-white' : 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white border border-slate-200 dark:border-white/10'
-                    }`}>
-                      <div className="text-sm break-words">{message.text}</div>
-                      <div className={`text-xs mt-1 ${message.isOwn ? 'text-blue-100' : 'text-gray-500 dark:text-gray-400'}`}>
-                        {formatTime(message.timestamp)}
-                      </div>
-                    </div>
-                  </div>
-                ))
-              )}
-              <div ref={messagesEndRef} />
-            </div>
-
-            {/* Game invite buttons */}
-            <div className="flex gap-2 mb-3">
-              <Button
-                onClick={handleQuickInvite}
-                className="bg-green-600 hover:bg-green-700 text-white border-0 flex-1 text-sm"
-              >
-                <Icon name="Swords" size={16} className="mr-1.5" />
-                Играть {getTimeLabel(lastSettings.time)}
-              </Button>
-              <Button
-                onClick={() => setShowGameSetup(!showGameSetup)}
-                variant="outline"
-                className="border-blue-300 dark:border-blue-500/40 text-blue-600 dark:text-blue-400 flex-1 text-sm"
-              >
-                <Icon name="Settings" size={16} className="mr-1.5" />
-                Выбрать режим
-              </Button>
-            </div>
-
-            {showGameSetup && (
-              <div className="mb-3 p-3 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/10 animate-scale-in">
-                <p className="text-xs font-medium text-gray-500 dark:text-gray-400 mb-2">Выберите контроль времени:</p>
-                <div className="grid grid-cols-4 gap-1.5">
-                  {TIME_OPTIONS.map((opt) => (
-                    <button
-                      key={opt.value}
-                      onClick={() => sendGameInvite(opt.value)}
-                      className="px-2 py-2 rounded-lg text-xs font-medium border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 text-gray-900 dark:text-white hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-500/30 transition-colors text-center"
-                    >
-                      <div>{opt.label}</div>
-                      <div className="text-[9px] text-gray-400">{opt.cat}</div>
-                    </button>
-                  ))}
-                </div>
-              </div>
+    <div className="animate-fade-in flex flex-col h-[calc(100vh-5rem)] sm:h-[calc(100vh-6rem)] max-w-2xl mx-auto w-full">
+      <div className="flex items-center justify-between px-3 sm:px-4 py-2.5 sm:py-3 bg-white dark:bg-slate-900/80 border border-slate-200 dark:border-white/10 rounded-t-xl">
+        <div className="flex items-center gap-2 sm:gap-3 min-w-0">
+          <Button onClick={onBack} variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
+            <Icon name="ChevronLeft" size={20} />
+          </Button>
+          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
+            {selectedChat.participantAvatar ? (
+              <AvatarImage src={selectedChat.participantAvatar} alt={selectedChat.participantName} />
+            ) : (
+              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-xs sm:text-sm">
+                {getInitials(selectedChat.participantName)}
+              </AvatarFallback>
             )}
-
-            <div className="space-y-2">
-              {showEmojiPicker && (
-                <div className="p-3 bg-white dark:bg-slate-800 rounded-lg border border-slate-200 dark:border-white/10 shadow-lg animate-scale-in">
-                  <div className="grid grid-cols-8 gap-2">
-                    {emojis.map((emoji, index) => (
-                      <button key={index} onClick={() => handleEmojiSelect(emoji)} className="text-2xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded p-1 transition-colors">
-                        {emoji}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              )}
-
-              <div className="flex gap-2">
-                <Button onClick={() => setShowEmojiPicker(!showEmojiPicker)} variant="outline" className="border-slate-200 dark:border-white/20">
-                  <Icon name="Smile" size={18} />
-                </Button>
-                <input
-                  type="text"
-                  value={messageText}
-                  onChange={(e) => setMessageText(e.target.value)}
-                  onKeyDown={handleKeyPress}
-                  placeholder="Написать сообщение..."
-                  className="flex-1 px-4 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
-                />
-                <Button onClick={handleSendMessage} disabled={!messageText.trim()} className="bg-blue-600 hover:bg-blue-700 text-white border-0">
-                  <Icon name="Send" size={18} />
-                </Button>
-              </div>
+          </Avatar>
+          <div className="min-w-0">
+            <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
+              {selectedChat.participantName}
+            </div>
+            <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400">
+              Рейтинг: {selectedChat.participantRating}
             </div>
           </div>
-        </CardContent>
-      </Card>
+        </div>
+        <div className="relative flex-shrink-0">
+          <Button onClick={() => setShowBlockMenu(!showBlockMenu)} variant="ghost" size="sm" className="h-8 w-8 p-0 text-gray-400">
+            <Icon name="MoreVertical" size={18} />
+          </Button>
+          {showBlockMenu && (
+            <>
+              <div className="fixed inset-0 z-40" onClick={() => setShowBlockMenu(false)} />
+              <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden animate-scale-in">
+                <button onClick={() => { onBlock(); setShowBlockMenu(false); }} className="px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 whitespace-nowrap">
+                  <Icon name="Ban" size={14} /> Заблокировать
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      </div>
+
+      <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 bg-slate-50 dark:bg-slate-800/30 border-x border-slate-200 dark:border-white/10 space-y-2.5">
+        {selectedChat.messages.length === 0 ? (
+          <div className="text-center py-8 text-gray-400">
+            <Icon name="MessageCircle" className="mx-auto mb-3 opacity-40" size={36} />
+            <p className="text-sm">Начните разговор</p>
+          </div>
+        ) : (
+          selectedChat.messages.map((message) => (
+            <div key={message.id} className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}>
+              <div className={`max-w-[80%] sm:max-w-[70%] rounded-2xl px-3 py-2 ${
+                message.isOwn ? 'bg-blue-600 text-white rounded-br-md' : 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-bl-md'
+              }`}>
+                <div className="text-sm break-words">{message.text}</div>
+                <div className={`text-[10px] mt-0.5 ${message.isOwn ? 'text-blue-200' : 'text-gray-400'}`}>
+                  {formatTime(message.timestamp)}
+                </div>
+              </div>
+            </div>
+          ))
+        )}
+        <div ref={messagesEndRef} />
+      </div>
+
+      <div className="bg-white dark:bg-slate-900/80 border border-t-0 border-slate-200 dark:border-white/10 rounded-b-xl px-3 sm:px-4 py-2.5 sm:py-3 space-y-2">
+        <div className="flex gap-1.5 sm:gap-2">
+          <Button onClick={handleQuickInvite} className="bg-green-600 hover:bg-green-700 text-white border-0 flex-1 text-xs sm:text-sm h-8 sm:h-9">
+            <Icon name="Swords" size={15} className="mr-1" />
+            Играть {getTimeLabel(lastSettings.time)}
+          </Button>
+          <Button onClick={() => { setShowGameSetup(!showGameSetup); setShowEmojiPicker(false); }} variant="outline" className="border-blue-300 dark:border-blue-500/40 text-blue-600 dark:text-blue-400 flex-1 text-xs sm:text-sm h-8 sm:h-9">
+            <Icon name="Settings" size={15} className="mr-1" />
+            Режим
+          </Button>
+        </div>
+
+        {showGameSetup && (
+          <div className="p-2.5 rounded-xl bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/10 animate-scale-in">
+            <p className="text-[11px] font-medium text-gray-500 dark:text-gray-400 mb-1.5">Контроль времени:</p>
+            <div className="grid grid-cols-4 gap-1">
+              {TIME_OPTIONS.map((opt) => (
+                <button
+                  key={opt.value}
+                  onClick={() => sendGameInvite(opt.value)}
+                  className="px-1.5 py-1.5 rounded-lg text-[11px] sm:text-xs font-medium border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 text-gray-900 dark:text-white hover:bg-blue-50 dark:hover:bg-blue-900/20 hover:border-blue-300 dark:hover:border-blue-500/30 transition-colors text-center"
+                >
+                  <div>{opt.label}</div>
+                  <div className="text-[8px] sm:text-[9px] text-gray-400">{opt.cat}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {showEmojiPicker && (
+          <div className="p-2.5 bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-white/10 shadow-lg animate-scale-in">
+            <div className="grid grid-cols-8 gap-1">
+              {emojis.map((emoji, index) => (
+                <button key={index} onClick={() => handleEmojiSelect(emoji)} className="text-xl sm:text-2xl hover:bg-slate-100 dark:hover:bg-slate-700 rounded p-0.5 sm:p-1 transition-colors">
+                  {emoji}
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        <div className="flex gap-1.5 sm:gap-2">
+          <Button onClick={() => { setShowEmojiPicker(!showEmojiPicker); setShowGameSetup(false); }} variant="ghost" size="sm" className="h-9 w-9 p-0 flex-shrink-0">
+            <Icon name="Smile" size={18} />
+          </Button>
+          <input
+            type="text"
+            value={messageText}
+            onChange={(e) => setMessageText(e.target.value)}
+            onKeyDown={handleKeyPress}
+            placeholder="Сообщение..."
+            className="flex-1 min-w-0 px-3 py-2 rounded-full border border-slate-200 dark:border-white/10 bg-slate-50 dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
+          />
+          <Button onClick={handleSendMessage} disabled={!messageText.trim()} size="sm" className="bg-blue-600 hover:bg-blue-700 text-white border-0 h-9 w-9 p-0 flex-shrink-0 rounded-full">
+            <Icon name="Send" size={16} />
+          </Button>
+        </div>
+      </div>
     </div>
   );
 };
+
+export default ChatWindow;
