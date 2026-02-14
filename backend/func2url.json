@@ -1,4 +1,5 @@
 {
+  "friends": "https://functions.poehali.dev/5ffb6c1a-2221-4a90-943a-b29a0a4b9700",
   "admin-auth": "https://functions.poehali.dev/a6359d67-4dd2-4b8c-9433-fbcebed89cc6",
   "geo-detect": "https://functions.poehali.dev/32db3d63-2a67-4f5e-b0f2-4f5aab3e8153",
   "send-otp": "https://functions.poehali.dev/534f2773-afe5-4714-82c2-4fa8ec20ed39",

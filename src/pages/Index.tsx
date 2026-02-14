@@ -7,9 +7,16 @@ const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-
 
 const Index = () => {
   const navigate = useNavigate();
+  const [pendingInviteCode, setPendingInviteCode] = useState<string | null>(() => {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('invite');
+  });
   const [activeSection, setActiveSection] = useState(() => {
     const params = new URLSearchParams(window.location.search);
-    return params.get('invite') ? 'friends' : 'home';
+    const hasInvite = params.get('invite');
+    const savedUser = localStorage.getItem('chessUser');
+    if (hasInvite && savedUser) return 'friends';
+    return 'home';
   });
   const [isDarkMode, setIsDarkMode] = useState(() => {
     const savedTheme = localStorage.getItem('theme');
@@ -19,7 +26,12 @@ const Index = () => {
     const savedUser = localStorage.getItem('chessUser');
     return !!savedUser;
   });
-  const [showAuthModal, setShowAuthModal] = useState(false);
+  const [showAuthModal, setShowAuthModal] = useState(() => {
+    const params = new URLSearchParams(window.location.search);
+    const hasInvite = params.get('invite');
+    const savedUser = localStorage.getItem('chessUser');
+    return !!(hasInvite && !savedUser);
+  });
   const [showGameSettings, setShowGameSettings] = useState(false);
   const [showOfflineGameModal, setShowOfflineGameModal] = useState(false);
   const [chatParams, setChatParams] = useState<{ name: string; rating: number; id: string } | null>(null);
@@ -62,6 +74,13 @@ const Index = () => {
       })
       .catch(() => {});
   }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (isAuthenticated && pendingInviteCode) {
+      setActiveSection('friends');
+      window.history.replaceState({}, '', window.location.pathname);
+    }
+  }, [isAuthenticated, pendingInviteCode]);
 
   const leaderboard = [
     { rank: 1, name: 'Александр Петров', rating: 2456, avatar: '🏆' },
@@ -145,6 +164,8 @@ const Index = () => {
               setChatParams({ name, rating, id });
               setActiveSection('chat');
             }}
+            pendingInviteCode={pendingInviteCode}
+            onInviteProcessed={() => setPendingInviteCode(null)}
           />
         )}
 
@@ -183,7 +204,7 @@ const Index = () => {
         showAuthModal={showAuthModal}
         setShowAuthModal={setShowAuthModal}
         setIsAuthenticated={setIsAuthenticated}
-        setShowGameSettings={setShowGameSettings}
+        setShowGameSettings={pendingInviteCode ? () => {} : setShowGameSettings}
       />
 
       <GameSettingsModal
