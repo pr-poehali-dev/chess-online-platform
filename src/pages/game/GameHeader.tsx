@@ -22,6 +22,7 @@ interface GameHeaderProps {
   setShowRematchOffer?: (value: boolean) => void;
   onOfferRematch?: () => void;
   rematchSent?: boolean;
+  rematchCooldown?: boolean;
 }
 
 export const GameHeader = ({
@@ -78,7 +79,8 @@ export const GameControls = ({
   playerColor,
   setShowRematchOffer,
   onOfferRematch,
-  rematchSent
+  rematchSent,
+  rematchCooldown
 }: GameHeaderProps) => {
   const isGameOver = gameStatus && gameStatus !== 'playing';
   const themeKeys: BoardTheme[] = ['classic', 'flat', 'wood'];
@@ -297,6 +299,7 @@ export const GameControls = ({
             </div>
             <button
               onClick={() => {
+                if (rematchSent || rematchCooldown) return;
                 if (onOfferRematch) {
                   onOfferRematch();
                 } else if (setShowRematchOffer) {
@@ -305,13 +308,13 @@ export const GameControls = ({
                   }, 500);
                 }
               }}
-              disabled={rematchSent}
+              disabled={rematchSent || rematchCooldown}
               className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 ml-2 text-white ${
-                rematchSent ? 'bg-stone-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
+                rematchSent || rematchCooldown ? 'bg-stone-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
               }`}
             >
               <Icon name="RotateCcw" size={18} />
-              <span className="font-semibold text-xs md:text-sm">{rematchSent ? 'Ожидание...' : 'Реванш'}</span>
+              <span className="font-semibold text-xs md:text-sm">{rematchCooldown ? 'Недоступно' : rematchSent ? 'Ожидание...' : 'Реванш'}</span>
             </button>
           </div>
         )}

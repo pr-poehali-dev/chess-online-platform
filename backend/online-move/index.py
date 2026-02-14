@@ -110,8 +110,28 @@ def handler(event: dict, context) -> dict:
         return str(val).replace("'", "''")
 
     if action == 'rematch_offer':
+        opponent_id = black_uid if player_color == 'white' else white_uid
         cur.execute(
-            "UPDATE online_games SET rematch_offered_by = '%s', rematch_status = 'pending', updated_at = NOW() WHERE id = %d"
+            """SELECT id FROM online_games
+            WHERE status = 'finished'
+              AND rematch_offered_by = '%s'
+              AND rematch_status IN ('declined', 'expired')
+              AND rematch_offered_at > NOW() - INTERVAL '24 hours'
+              AND (
+                (white_user_id = '%s' AND black_user_id = '%s')
+                OR (white_user_id = '%s' AND black_user_id = '%s')
+              )
+            LIMIT 1"""
+            % (esc(user_id), esc(user_id), esc(opponent_id), esc(opponent_id), esc(user_id))
+        )
+        cooldown_hit = cur.fetchone()
+        if cooldown_hit:
+            cur.close()
+            conn.close()
+            return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'rematch_cooldown', 'message': 'Повторное предложение реванша этому сопернику доступно через 24 часа'})}
+
+        cur.execute(
+            "UPDATE online_games SET rematch_offered_by = '%s', rematch_status = 'pending', rematch_offered_at = NOW(), updated_at = NOW() WHERE id = %d"
             % (esc(user_id), g_id)
         )
         conn.commit()
@@ -119,14 +139,15 @@ def handler(event: dict, context) -> dict:
         conn.close()
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_offered'})}
 
-    if action == 'rematch_decline':
+    if action in ('rematch_decline', 'rematch_expired'):
+        new_rs = 'expired' if action == 'rematch_expired' else 'declined'
         cur.execute(
-            "UPDATE online_games SET rematch_status = 'declined', updated_at = NOW() WHERE id = %d" % g_id
+            "UPDATE online_games SET rematch_status = '%s', updated_at = NOW() WHERE id = %d" % (new_rs, g_id)
         )
         conn.commit()
         cur.close()
         conn.close()
-        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_declined'})}
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_' + new_rs})}
 
     if action == 'rematch_accept':
         cur.execute(

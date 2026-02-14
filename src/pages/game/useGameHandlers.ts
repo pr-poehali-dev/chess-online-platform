@@ -202,7 +202,7 @@ export const useGameHandlers = (
     }
   };
 
-  const handleDeclineRematch = () => {
+  const handleDeclineRematch = (expired?: boolean) => {
     setShowRematchOffer(false);
     if (onlineGameId && onlineMoveUrl) {
       const saved = localStorage.getItem('chessUser');
@@ -213,26 +213,31 @@ export const useGameHandlers = (
       fetch(onlineMoveUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ action: 'rematch_decline', game_id: onlineGameId, user_id: userId })
+        body: JSON.stringify({ action: expired ? 'rematch_expired' : 'rematch_decline', game_id: onlineGameId, user_id: userId })
       }).catch(() => {});
     }
   };
 
-  const handleOfferRematch = async () => {
+  const handleOfferRematch = async (): Promise<{ error?: string }> => {
     if (onlineGameId && onlineMoveUrl) {
       const saved = localStorage.getItem('chessUser');
-      if (!saved) return;
+      if (!saved) return {};
       const uData = JSON.parse(saved);
       const rawId = uData.email || uData.name || 'anonymous';
       const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
       try {
-        await fetch(onlineMoveUrl, {
+        const res = await fetch(onlineMoveUrl, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'rematch_offer', game_id: onlineGameId, user_id: userId })
         });
+        if (res.status === 429) {
+          const data = await res.json();
+          return { error: data.message || 'Реванш недоступен' };
+        }
       } catch { /* ignore */ }
     }
+    return {};
   };
 
   return {

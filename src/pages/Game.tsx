@@ -149,6 +149,7 @@ const Game = () => {
   } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined);
 
   const [rematchSent, setRematchSent] = useState(false);
+  const [rematchCooldown, setRematchCooldown] = useState(false);
 
   useEffect(() => {
     if (!isOnlineReal || !rematchOfferedBy || rematchStatus !== 'pending') return;
@@ -158,8 +159,7 @@ const Game = () => {
 
   useEffect(() => {
     if (!isOnlineReal || !rematchGameId || rematchStatus !== 'accepted') return;
-    const myOldColor = playerColor;
-    const newColor = myOldColor === 'white' ? 'black' : 'white';
+    const newColor = playerColor === 'white' ? 'black' : 'white';
     const params = new URLSearchParams(window.location.search);
     params.set('online_game_id', String(rematchGameId));
     params.set('color', newColor);
@@ -168,8 +168,9 @@ const Game = () => {
   }, [rematchGameId, rematchStatus]);
 
   useEffect(() => {
-    if (rematchStatus === 'declined' && rematchSent) {
+    if ((rematchStatus === 'declined' || rematchStatus === 'expired') && rematchSent) {
       setRematchSent(false);
+      setRematchCooldown(true);
     }
   }, [rematchStatus]);
 
@@ -231,9 +232,15 @@ const Game = () => {
               setShowRematchOffer={setShowRematchOffer}
               onOfferRematch={isOnlineReal ? async () => {
                 setRematchSent(true);
-                await handleOfferRematch();
+                const result = await handleOfferRematch();
+                if (result.error) {
+                  setRematchSent(false);
+                  setRematchCooldown(true);
+                  alert(result.error);
+                }
               } : undefined}
               rematchSent={rematchSent}
+              rematchCooldown={rematchCooldown}
             />
 
             <PlayerInfo
