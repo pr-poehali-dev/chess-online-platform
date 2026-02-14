@@ -411,7 +411,7 @@ export const HomeSection = ({
           className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up"
           style={{ animationDelay: "0.1s" }}
         >
-          Шаматный мир ждет тебя
+          Шахматный мир ждет тебя
         </h2>
         <p
           className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 animate-slide-up px-2"
