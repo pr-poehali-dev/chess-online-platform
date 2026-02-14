@@ -37,12 +37,12 @@ export const GameHeader = ({
   theme
 }: GameHeaderProps) => {
   return (
-    <header className={`backdrop-blur-sm border-b px-4 py-3 flex items-center justify-center ${
+    <header className={`backdrop-blur-sm border-b px-4 py-1.5 sm:py-2 md:py-3 flex items-center justify-center flex-shrink-0 ${
       theme === 'light'
         ? 'bg-white/80 border-slate-300'
         : 'bg-stone-900/80 border-stone-700/50'
     }`}>
-      <h1 className={`text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r tracking-wide ${
+      <h1 className={`text-lg sm:text-2xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r tracking-wide ${
         theme === 'light'
           ? 'from-amber-600 via-yellow-500 to-amber-600'
           : 'from-amber-200 via-yellow-400 to-amber-200'
@@ -85,11 +85,11 @@ export const GameControls = ({
   const isGameOver = gameStatus && gameStatus !== 'playing';
   const themeKeys: BoardTheme[] = ['classic', 'flat', 'wood'];
   return (
-    <div className="w-full md:w-auto h-[52px] md:h-[56px]">
-      <div className="flex items-center gap-1.5 md:gap-2 h-full">
+    <div className="w-full md:w-auto h-[40px] sm:h-[48px] md:h-[56px]">
+      <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 h-full">
         <button
           onClick={handleExitClick}
-          className={`p-3 md:p-2.5 border rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 ${
+          className={`p-2 sm:p-3 md:p-2.5 border rounded-lg transition-colors min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center flex-shrink-0 ${
             theme === 'light'
               ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
               : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
@@ -97,31 +97,31 @@ export const GameControls = ({
           title="Выход из игры"
         >
           <div className="rotate-180">
-            <Icon name="LogOut" size={20} />
+            <Icon name="LogOut" size={18} />
           </div>
         </button>
         <button
           onClick={() => setShowChat(true)}
-          className={`p-3 md:p-2.5 border rounded-lg transition-colors min-w-[44px] min-h-[44px] flex items-center justify-center flex-shrink-0 ${
+          className={`p-2 sm:p-3 md:p-2.5 border rounded-lg transition-colors min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center flex-shrink-0 ${
             theme === 'light'
               ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
               : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
           }`}
           title="Чат"
         >
-          <Icon name="MessageCircle" size={20} />
+          <Icon name="MessageCircle" size={18} />
         </button>
         <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            className={`p-4 md:p-3 border rounded-lg transition-colors min-w-[48px] min-h-[48px] flex items-center justify-center ${
+            className={`p-2 sm:p-3 md:p-3 border rounded-lg transition-colors min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center ${
               theme === 'light'
                 ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
                 : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
             }`}
             title="Опции"
           >
-            <Icon name="Settings" size={20} />
+            <Icon name="Settings" size={18} />
           </button>
           {showSettingsMenu && (
             <>
@@ -286,12 +286,12 @@ export const GameControls = ({
           )}
         </div>
         {gameStatus !== 'playing' && (
-          <div className={`backdrop-blur-sm rounded-lg p-2 md:p-3 border flex items-center justify-between flex-1 min-w-0 ml-1 md:ml-2 ${
+          <div className={`backdrop-blur-sm rounded-lg p-1.5 sm:p-2 md:p-3 border flex items-center justify-between flex-1 min-w-0 ml-1 md:ml-2 ${
             theme === 'light'
               ? 'bg-blue-500/90 border-blue-600'
               : 'bg-blue-600/90 border-blue-700'
           }`}>
-            <div className="text-xs md:text-sm font-bold text-white truncate">
+            <div className="text-[10px] sm:text-xs md:text-sm font-bold text-white truncate">
               {gameStatus === 'checkmate' && currentPlayer === playerColor && 'Поражение'}
               {gameStatus === 'checkmate' && currentPlayer !== playerColor && 'Победа'}
               {gameStatus === 'stalemate' && 'Ничья'}
@@ -309,12 +309,12 @@ export const GameControls = ({
                 }
               }}
               disabled={rematchSent || rematchCooldown}
-              className={`p-2 rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 ml-2 text-white ${
+              className={`p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ml-1 sm:ml-2 text-white ${
                 rematchSent || rematchCooldown ? 'bg-stone-600 cursor-not-allowed' : 'bg-green-600 hover:bg-green-700'
               }`}
             >
-              <Icon name="RotateCcw" size={18} />
-              <span className="font-semibold text-xs md:text-sm">{rematchCooldown ? 'Недоступно' : rematchSent ? 'Ожидание...' : 'Реванш'}</span>
+              <Icon name="RotateCcw" size={16} />
+              <span className="font-semibold text-[10px] sm:text-xs md:text-sm">{rematchCooldown ? 'Недоступно' : rematchSent ? 'Ожидание...' : 'Реванш'}</span>
             </button>
           </div>
         )}

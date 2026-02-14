@@ -152,8 +152,8 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
           }
         }
       `}</style>
-      <div className="inline-block rounded-sm overflow-hidden shadow-2xl relative w-full md:w-auto md:h-[min(calc(100vh-310px),700px)]" style={{ 
-        boxShadow: `0 0 0 3px ${config.borderColor}, 0 0 0 5px ${config.borderOuterColor}, 0 15px 30px rgba(0,0,0,0.4)`,
+      <div className="inline-block rounded-sm overflow-hidden shadow-2xl relative w-full md:w-auto" style={{ 
+        boxShadow: `0 0 0 2px ${config.borderColor}, 0 0 0 4px ${config.borderOuterColor}, 0 15px 30px rgba(0,0,0,0.4)`,
         aspectRatio: '1/1',
         ...(config.backgroundImage ? {
           backgroundImage: `url(${config.backgroundImage})`,
@@ -164,19 +164,19 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
         {renderOverlayPiece()}
         {gameResult && (
           <div className="absolute inset-0 z-[60] flex items-center justify-center cursor-pointer" onClick={onResultClick} style={{ animation: 'resultFadeIn 0.5s ease-out' }}>
-            <div className="rounded-2xl px-6 py-4 md:px-8 md:py-5 flex flex-col items-center gap-1" style={{
+            <div className="rounded-xl sm:rounded-2xl px-4 py-3 sm:px-6 sm:py-4 md:px-8 md:py-5 flex flex-col items-center gap-1" style={{
               background: gameResult === 'loss' ? 'rgba(30,10,10,0.88)' : gameResult === 'draw' ? 'rgba(30,30,30,0.88)' : 'rgba(10,30,10,0.88)',
               backdropFilter: 'blur(8px)',
               boxShadow: gameResult === 'loss' ? '0 0 40px rgba(220,50,50,0.4)' : gameResult === 'draw' ? '0 0 40px rgba(180,180,180,0.3)' : '0 0 40px rgba(50,200,80,0.4)',
               border: gameResult === 'loss' ? '2px solid rgba(220,80,80,0.5)' : gameResult === 'draw' ? '2px solid rgba(180,180,180,0.4)' : '2px solid rgba(80,200,100,0.5)',
             }}>
-              <div className="text-4xl md:text-5xl">
+              <div className="text-3xl sm:text-4xl md:text-5xl">
                 {gameResult === 'win' && '🏆'}
                 {gameResult === 'opponent_resigned' && '🏳️'}
                 {gameResult === 'loss' && '😞'}
                 {gameResult === 'draw' && '🤝'}
               </div>
-              <div className="text-lg md:text-xl font-bold text-white tracking-wide">
+              <div className="text-sm sm:text-lg md:text-xl font-bold text-white tracking-wide">
                 {gameResult === 'win' && 'Победа'}
                 {gameResult === 'opponent_resigned' && 'Победа'}
                 {gameResult === 'loss' && 'Поражение'}
@@ -188,7 +188,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
             </div>
           </div>
         )}
-        <table className="w-full h-full border-collapse" style={{ borderSpacing: 0 }}>
+        <table className="w-full h-full border-collapse" style={{ borderSpacing: 0, touchAction: 'manipulation' }}>
           <tbody>
           {Array.from({ length: 8 }).map((_, viewRow) => {
             const rowIndex = flipped ? 7 - viewRow : viewRow;
@@ -259,7 +259,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                       {hasPiece ? (
                         <div className="w-full h-full rounded-full border-4 border-green-400/70 animate-pulse" />
                       ) : (
-                        <div className="w-3 h-3 md:w-4 md:h-4 rounded-full bg-green-400/70" />
+                        <div className="w-2.5 h-2.5 sm:w-3 sm:h-3 md:w-4 md:h-4 rounded-full bg-green-400/70" />
                       )}
                     </div>
                   )}

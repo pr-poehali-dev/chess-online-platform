@@ -232,7 +232,7 @@ const Game = () => {
   };
 
   return (
-    <div onClick={dismissResult} className={`min-h-screen flex flex-col transition-colors ${
+    <div onClick={dismissResult} className={`h-[100dvh] flex flex-col transition-colors overflow-hidden ${
       theme === 'light' 
         ? 'bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300' 
         : 'bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950'
@@ -273,9 +273,9 @@ const Game = () => {
         </div>
       )}
 
-      <main className="flex-1 flex items-center justify-center p-2 md:p-3 overflow-y-auto md:overflow-hidden">
+      <main className="flex-1 flex items-center justify-center p-1 sm:p-2 md:p-3 overflow-hidden min-h-0">
         <div className="w-full h-full flex items-center justify-center">
-          <div className="flex flex-col gap-1.5 md:gap-2 w-full max-w-[calc(100vw-16px)]" style={{ maxWidth: 'min(calc(100vw - 16px), min(calc(100vh - 310px), 700px))' }}>
+          <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-2 w-full" style={{ maxWidth: 'min(calc(100vw - 8px), min(calc(100dvh - 240px), 700px))' }}>
             <GameControls
               showSettingsMenu={showSettingsMenu}
               setShowSettingsMenu={setShowSettingsMenu}

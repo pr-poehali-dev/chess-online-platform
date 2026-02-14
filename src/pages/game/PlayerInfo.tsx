@@ -48,27 +48,27 @@ export const PlayerInfo = ({
     .filter(type => groupedPieces[type])
     .map(type => groupedPieces[type]);
   return (
-    <div className={`backdrop-blur-sm rounded-lg p-2.5 md:p-3 border w-full md:w-auto min-h-[68px] md:min-h-[76px] ${
+    <div className={`backdrop-blur-sm rounded-lg p-1.5 sm:p-2.5 md:p-3 border w-full md:w-auto min-h-[52px] sm:min-h-[64px] md:min-h-[76px] ${
       theme === 'light' 
         ? (playerColor === 'black' ? 'bg-stone-700/80 border-stone-600' : 'bg-white/80 border-slate-300')
         : (playerColor === 'black' ? 'bg-stone-900/80 border-stone-700' : 'bg-stone-200/90 border-stone-400')
     }`}>
       <div className="flex items-center justify-between h-full">
         <div
-          className={`flex items-center gap-2 md:gap-3 min-w-0 flex-shrink ${onClickProfile ? 'cursor-pointer hover:opacity-80 active:scale-95 transition-all' : ''}`}
+          className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 min-w-0 flex-shrink ${onClickProfile ? 'cursor-pointer hover:opacity-80 active:scale-95 transition-all' : ''}`}
           onClick={onClickProfile}
         >
           {avatar ? (
             <img 
               src={avatar} 
               alt={playerName}
-              className="w-9 h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-stone-600 flex-shrink-0"
+              className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-stone-600 flex-shrink-0"
             />
           ) : (
-            <div className="text-3xl md:text-4xl flex-shrink-0">{icon}</div>
+            <div className="text-2xl sm:text-3xl md:text-4xl flex-shrink-0">{icon}</div>
           )}
           <div className="min-w-0 flex-shrink">
-            <div className={`text-[11px] md:text-xs font-medium truncate ${
+            <div className={`text-[10px] sm:text-[11px] md:text-xs font-medium truncate ${
               theme === 'light'
                 ? 'text-slate-800'
                 : (playerColor === 'white' ? 'text-stone-800' : 'text-stone-200')
@@ -118,7 +118,7 @@ export const PlayerInfo = ({
                   key={index}
                   src={pieceImages[piece.color]?.[piece.type]}
                   alt={`${piece.color} ${piece.type}`}
-                  className="w-5 h-5 md:w-6 md:h-6"
+                  className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
                   style={{ 
                     marginLeft: index > 0 ? '-0.3em' : '0',
                     zIndex: index,
@@ -130,9 +130,9 @@ export const PlayerInfo = ({
             </div>
           ))}
         </div>
-        <div className="flex flex-col items-end gap-1 flex-shrink-0">
-          <div className="flex items-center gap-2">
-            <div className={`text-lg md:text-xl font-bold whitespace-nowrap ${
+        <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
+          <div className="flex items-center gap-1 sm:gap-2">
+            <div className={`text-base sm:text-lg md:text-xl font-bold whitespace-nowrap ${
               time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer
                 ? (theme === 'dark' && playerColor === 'white' ? 'text-green-600' : 'text-green-400')
                 : (theme === 'dark' && playerColor === 'white' ? 'text-stone-500' : 'text-stone-400')
@@ -140,7 +140,7 @@ export const PlayerInfo = ({
               {formatTime(time)}
             </div>
             {inactivityTimer !== undefined && inactivityTimer <= 30 && (
-              <div className={`text-sm md:text-base font-semibold whitespace-nowrap ${
+              <div className={`text-xs sm:text-sm md:text-base font-semibold whitespace-nowrap ${
                 inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
               }`}>
                 ({inactivityTimer}с)
@@ -148,10 +148,10 @@ export const PlayerInfo = ({
             )}
           </div>
           {inactivityTimer !== undefined && inactivityTimer <= 30 && (
-            <div className={`text-[10px] md:text-xs text-right whitespace-nowrap ${
+            <div className={`text-[9px] sm:text-[10px] md:text-xs text-right whitespace-nowrap ${
               inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
             }`}>
-              {inactivityTimer <= 20 ? 'Бездействие. До поражения.' : 'Бездействует...'}
+              {inactivityTimer <= 20 ? 'До поражения' : 'Бездействует...'}
             </div>
           )}
         </div>
