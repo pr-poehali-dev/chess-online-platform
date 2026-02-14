@@ -82,6 +82,7 @@ export const useGameLogic = (
   const gameStatusRef = useRef<string>(savedState?.gameStatus || 'playing');
   const onlineMoveCountRef = useRef(0);
   const isApplyingMoveRef = useRef(false);
+  const onlineReadyRef = useRef(!isOnlineGame);
 
   useEffect(() => {
     const saved = localStorage.getItem('chessUser');
@@ -141,9 +142,11 @@ export const useGameLogic = (
 
   useEffect(() => {
     if (gameStatus !== 'playing') return;
+    if (isOnlineGame && currentPlayerRef.current !== playerColor) return;
     setInactivityTimer(60);
     hasPlayedWarning.current = false;
     const inactivityInterval = setInterval(() => {
+      if (isOnlineGame && currentPlayerRef.current !== playerColor) return;
       setInactivityTimer(prev => {
         if (prev === 20 && !hasPlayedWarning.current && currentPlayerRef.current === playerColor) {
           playWarningSound();
@@ -198,7 +201,7 @@ export const useGameLogic = (
     const rawId = uData.email || uData.name || 'anonymous';
     const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
     try {
-      await fetch(ONLINE_MOVE_URL, {
+      const res = await fetch(ONLINE_MOVE_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -211,6 +214,9 @@ export const useGameLogic = (
           winner_id: winnerId || ''
         })
       });
+      if (!res.ok) {
+        console.error('Move rejected by server, status:', res.status);
+      }
     } catch(e) { console.error('sendMove error', e); }
   }, [isOnlineGame, onlineGameId]);
 
@@ -331,55 +337,55 @@ export const useGameLogic = (
 
   useEffect(() => {
     if (!isOnlineGame || !onlineGameId) return;
-    if (gameStatusRef.current !== 'playing') return;
-    if (currentPlayerRef.current === playerColor) return;
 
     let active = true;
 
-    const poll = async () => {
-      while (active && currentPlayerRef.current !== playerColor && gameStatusRef.current === 'playing') {
-        try {
-          const res = await fetch(`${ONLINE_MOVE_URL}?game_id=${onlineGameId}`);
-          const data = await res.json();
-          if (!active) break;
-          if (!data.game) { await sleep(800); continue; }
+    const syncFromServer = async () => {
+      try {
+        const res = await fetch(`${ONLINE_MOVE_URL}?game_id=${onlineGameId}`);
+        const data = await res.json();
+        if (!active || !data.game) return;
 
-          if (data.game.status === 'finished') {
-            setGameStatus('checkmate');
-            gameStatusRef.current = 'checkmate';
-            break;
+        if (data.game.status === 'finished') {
+          setGameStatus('checkmate');
+          gameStatusRef.current = 'checkmate';
+          return;
+        }
+
+        const serverMoves: string[] = data.game.move_history ? data.game.move_history.split(',').filter(Boolean) : [];
+        const localCount = onlineMoveCountRef.current;
+
+        if (serverMoves.length > localCount) {
+          const newMoves = serverMoves.slice(localCount);
+          for (const m of newMoves) {
+            applyMoveFromNotation(m);
           }
+          onlineMoveCountRef.current = serverMoves.length;
+        }
 
-          const serverMoves: string[] = data.game.move_history ? data.game.move_history.split(',').filter(Boolean) : [];
-          const localCount = onlineMoveCountRef.current;
+        if (data.game.white_time !== undefined) setWhiteTime(data.game.white_time);
+        if (data.game.black_time !== undefined) setBlackTime(data.game.black_time);
+      } catch (e) { console.error('poll error', e); }
+    };
 
-          if (serverMoves.length > localCount) {
-            const newMoves = serverMoves.slice(localCount);
-            for (const m of newMoves) {
-              applyMoveFromNotation(m);
-            }
-            onlineMoveCountRef.current = serverMoves.length;
-          }
+    const startPolling = async () => {
+      await syncFromServer();
+      onlineReadyRef.current = true;
 
-          if (data.game.white_time !== undefined) setWhiteTime(data.game.white_time);
-          if (data.game.black_time !== undefined) setBlackTime(data.game.black_time);
-
-          if (currentPlayerRef.current === playerColor) break;
-        } catch (e) { console.error('poll error', e); }
-        await sleep(800);
+      while (active) {
+        await sleep(600);
+        if (!active) break;
+        if (gameStatusRef.current !== 'playing') break;
+        if (currentPlayerRef.current !== playerColor) {
+          await syncFromServer();
+        }
       }
     };
 
-    poll();
+    startPolling();
 
     return () => { active = false; };
-  }, [isOnlineGame, onlineGameId, currentPlayer, gameStatus, playerColor, applyMoveFromNotation]);
-
-  useEffect(() => {
-    if (isOnlineGame) {
-      onlineMoveCountRef.current = moveHistoryRef.current.length;
-    }
-  }, [isOnlineGame]);
+  }, [isOnlineGame, onlineGameId, playerColor, applyMoveFromNotation]);
 
   const [rematchOfferedBy, setRematchOfferedBy] = useState<string | null>(null);
   const [rematchStatus, setRematchStatus] = useState<string | null>(null);
@@ -624,6 +630,7 @@ export const useGameLogic = (
   };
 
   const handleSquareClick = (row: number, col: number) => {
+    if (!onlineReadyRef.current) return;
     if (currentPlayerRef.current !== playerColor) return;
     if (gameStatusRef.current !== 'playing') return;
 
