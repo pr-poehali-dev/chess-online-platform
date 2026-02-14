@@ -13,6 +13,7 @@ import { RematchModal } from './game/RematchModal';
 import { OpponentLeftModal } from './game/OpponentLeftModal';
 import { GameHeader, GameControls } from './game/GameHeader';
 import { useGameLogic } from './game/useGameLogic';
+import API from '@/config/api';
 import { useGameHandlers } from './game/useGameHandlers';
 import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
 
@@ -140,7 +141,7 @@ const Game = () => {
     handleNewGame,
     handleAcceptRematch,
     handleDeclineRematch
-  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer);
+  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined);
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors ${

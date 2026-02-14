@@ -6,7 +6,9 @@ export const useGameHandlers = (
   setGameStatus: (status: 'playing' | 'checkmate' | 'stalemate' | 'draw') => void,
   moveCount: number = 0,
   playerColor: 'white' | 'black' = 'white',
-  setCurrentPlayer?: (player: 'white' | 'black') => void
+  setCurrentPlayer?: (player: 'white' | 'black') => void,
+  onlineGameId?: number,
+  onlineMoveUrl?: string
 ) => {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
@@ -75,6 +77,19 @@ export const useGameHandlers = (
       } else {
         if (setCurrentPlayer) setCurrentPlayer(playerColor);
         setGameStatus('checkmate');
+        if (onlineGameId && onlineMoveUrl) {
+          const saved = localStorage.getItem('chessUser');
+          if (saved) {
+            const uData = JSON.parse(saved);
+            const rawId = uData.email || uData.name || 'anonymous';
+            const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+            fetch(onlineMoveUrl, {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ action: 'resign', game_id: onlineGameId, user_id: userId })
+            }).catch(() => {});
+          }
+        }
       }
       setShowExitDialog(false);
     }
