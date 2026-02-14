@@ -133,30 +133,28 @@ const Navbar = ({
   return (
     <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in">
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
-        <div className="flex items-center justify-between gap-2">
-          <button 
+        <div className="relative flex items-center justify-between gap-2">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 z-10">
+            {isAuthenticated && (
+              <div className="flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-500/30">
+                <Icon name="TrendingUp" size={16} className="text-blue-600 dark:text-blue-400" />
+                <span className="text-sm font-bold text-blue-600 dark:text-blue-400">{stats.rating}</span>
+              </div>
+            )}
+          </div>
+
+          <button
             onClick={() => setActiveSection('home')}
-            className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity min-w-0 flex-shrink-0"
+            className="absolute left-1/2 -translate-x-1/2 hover:opacity-80 transition-opacity z-0"
           >
-            <img 
-              src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/70fa1147-826f-4c89-8da6-773ff084ce53.jpg" 
-              alt="Logo" 
-              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
+            <img
+              src="https://cdn.poehali.dev/files/b65b6dce-69cf-4817-9d97-acd50822bf09.png"
+              alt="Лига Шахмат"
+              className="h-8 sm:h-10 w-auto object-contain"
             />
-            <h1 className="text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-              Лига Шахмат
-            </h1>
           </button>
 
-          {isAuthenticated && (
-            <div className="hidden md:flex items-center gap-2 px-4 py-2 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-500/30">
-              <Icon name="TrendingUp" size={18} className="text-blue-600 dark:text-blue-400" />
-              <span className="text-sm font-medium text-gray-700 dark:text-gray-300">Мой рейтинг:</span>
-              <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{stats.rating}</span>
-            </div>
-          )}
-
-          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0 z-10">
             {!isAuthenticated && (
               <button
                 onClick={() => setShowAuthModal(true)}
