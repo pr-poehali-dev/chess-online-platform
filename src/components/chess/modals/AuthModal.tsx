@@ -225,8 +225,8 @@ export const AuthModal = ({
   const showBack = authMode !== 'choose';
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" onClick={() => { setShowAuthModal(false); resetForm(); }}>
-      <Card className="w-full max-w-md mx-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4" onClick={() => { setShowAuthModal(false); resetForm(); }}>
+      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in" onClick={(e) => e.stopPropagation()}>
         <CardHeader>
           <div className="flex items-center justify-between">
             {showBack && (

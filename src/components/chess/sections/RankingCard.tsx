@@ -83,35 +83,35 @@ export const RankingCard = ({
     const rest = topPlayers.slice(1, 4);
 
     return (
-      <div className="flex gap-4 mb-4">
-        <div className="flex-1">
+      <div className="flex gap-3 sm:gap-4 mb-4">
+        <div className="flex-1 min-w-0">
           <div className="text-center mb-2">
-            <div className="text-2xl font-bold text-yellow-400">1 место</div>
+            <div className="text-xl sm:text-2xl font-bold text-yellow-400">1 место</div>
           </div>
           <div
-            className="p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30 cursor-pointer hover:ring-2 hover:ring-yellow-400 transition-all"
+            className="p-3 sm:p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30 cursor-pointer hover:ring-2 hover:ring-yellow-400 transition-all"
             onClick={() => setSelectedPlayer(first)}
           >
-            <div className="flex flex-col items-center text-center gap-3">
+            <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
               <div className="relative">
                 {first.avatar ? (
-                  <img src={first.avatar} alt={first.name} className="w-20 h-20 rounded-full object-cover ring-4 ring-yellow-400" />
+                  <img src={first.avatar} alt={first.name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-4 ring-yellow-400" />
                 ) : (
-                  <div className={`w-20 h-20 rounded-full flex items-center justify-center font-bold text-xl text-white ${colors.bg} ring-4 ring-yellow-400`}>
+                  <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center font-bold text-lg sm:text-xl text-white ${colors.bg} ring-4 ring-yellow-400`}>
                     {getInitials(first.name)}
                   </div>
                 )}
               </div>
-              <div className="flex-1">
-                <div className="font-bold text-lg text-gray-900 dark:text-white">{first.name}</div>
-                <div className="text-sm text-gray-600 dark:text-gray-400">{first.city}</div>
-                <div className={`text-lg font-bold ${colors.text} mt-1`}>{first.rating}</div>
+              <div className="flex-1 min-w-0">
+                <div className="font-bold text-base sm:text-lg text-gray-900 dark:text-white truncate">{first.name}</div>
+                <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{first.city}</div>
+                <div className={`text-base sm:text-lg font-bold ${colors.text} mt-1`}>{first.rating}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
+        <div className="flex flex-col gap-2 min-w-0 flex-1">
           {rest.map((player) => (
             <div key={player.rank} className="flex-1">
               <div className="text-center mb-1">
@@ -121,18 +121,18 @@ export const RankingCard = ({
                 className="flex items-center gap-2 p-2 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 cursor-pointer hover:border-amber-400 transition-colors"
                 onClick={() => setSelectedPlayer(player)}
               >
-                <div className="relative">
+                <div className="flex-shrink-0">
                   {player.avatar ? (
-                    <img src={player.avatar} alt={player.name} className="w-12 h-12 rounded-full object-cover" />
+                    <img src={player.avatar} alt={player.name} className="w-10 h-10 sm:w-12 sm:h-12 rounded-full object-cover" />
                   ) : (
-                    <div className={`w-12 h-12 rounded-full flex items-center justify-center font-bold text-sm text-white ${colors.bg}`}>
+                    <div className={`w-10 h-10 sm:w-12 sm:h-12 rounded-full flex items-center justify-center font-bold text-xs sm:text-sm text-white ${colors.bg}`}>
                       {getInitials(player.name)}
                     </div>
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">{player.name}</div>
-                  <div className={`text-sm font-bold ${colors.text}`}>{player.rating}</div>
+                  <div className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{player.name}</div>
+                  <div className={`text-xs sm:text-sm font-bold ${colors.text}`}>{player.rating}</div>
                 </div>
               </div>
             </div>

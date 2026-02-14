@@ -125,11 +125,11 @@ export const OfflineGameModal = ({
 
   return (
     <div 
-      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in" 
+      className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4" 
       onClick={handleClose}
     >
       <Card 
-        className="w-full max-w-md mx-4 bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in" 
+        className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in" 
         onClick={(e) => e.stopPropagation()}
       >
         <CardHeader>

@@ -44,7 +44,7 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
       <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
-      <div className="relative w-full max-w-md bg-slate-800 rounded-2xl border border-slate-700/50 shadow-2xl">
+      <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-slate-800 rounded-2xl border border-slate-700/50 shadow-2xl">
         <div className="flex items-center justify-between p-5 border-b border-slate-700/50">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-lg bg-emerald-500/20 flex items-center justify-center">

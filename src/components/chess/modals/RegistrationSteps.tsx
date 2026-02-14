@@ -145,7 +145,7 @@ export const OtpStep = ({ otpCode, setOtpCode, handleNextStep, userEmail, isVeri
       <p className="text-sm text-gray-600 dark:text-gray-300 text-center">
         Код отправлен на <span className="font-medium text-gray-900 dark:text-white">{userEmail}</span>
       </p>
-      <div className="flex justify-center gap-2">
+      <div className="flex justify-center gap-1.5 sm:gap-2">
         {[0, 1, 2, 3, 4, 5].map((i) => (
           <input
             key={i}
@@ -156,7 +156,7 @@ export const OtpStep = ({ otpCode, setOtpCode, handleNextStep, userEmail, isVeri
             value={digits[i] || ''}
             onChange={(e) => handleDigitChange(i, e.target.value)}
             onKeyDown={(e) => handleKeyDown(i, e)}
-            className={`w-11 h-14 text-center text-2xl font-bold rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors ${
+            className={`w-10 h-12 sm:w-11 sm:h-14 text-center text-xl sm:text-2xl font-bold rounded-lg border focus:outline-none focus:ring-2 focus:ring-blue-400 transition-colors ${
               otpError
                 ? 'border-red-400 dark:border-red-500 bg-red-50 dark:bg-red-900/20 text-red-600 dark:text-red-400'
                 : 'border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white'

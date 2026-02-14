@@ -113,30 +113,30 @@ export const ProfileSection = ({ stats, onLogout }: ProfileSectionProps) => {
     <div className="space-y-6 animate-fade-in">
       <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
         <CardHeader>
-          <div className="flex items-center justify-between">
-            <CardTitle className="text-2xl text-gray-900 dark:text-white">Профиль пользователя</CardTitle>
+          <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-3">
+            <CardTitle className="text-xl sm:text-2xl text-gray-900 dark:text-white">Профиль пользователя</CardTitle>
             {!isEditing ? (
               <Button
                 onClick={handleEditStart}
                 variant="outline"
-                className="border-blue-400/50 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20"
+                className="border-blue-400/50 text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 w-full sm:w-auto"
               >
                 <Icon name="Edit" size={18} className="mr-2" />
                 Редактировать
               </Button>
             ) : (
-              <div className="flex gap-2">
+              <div className="flex gap-2 w-full sm:w-auto">
                 <Button
                   onClick={handleCancel}
                   variant="outline"
-                  className="border-slate-200 dark:border-white/20"
+                  className="border-slate-200 dark:border-white/20 flex-1 sm:flex-initial"
                 >
                   <Icon name="X" size={18} className="mr-2" />
                   Отмена
                 </Button>
                 <Button
                   onClick={handleSave}
-                  className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0"
+                  className="bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 flex-1 sm:flex-initial"
                 >
                   <Icon name="Check" size={18} className="mr-2" />
                   Сохранить

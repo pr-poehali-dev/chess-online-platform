@@ -111,18 +111,18 @@ const Navbar = ({
 
   return (
     <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in">
-      <div className="container mx-auto px-4 py-4">
-        <div className="flex items-center justify-between">
+      <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
+        <div className="flex items-center justify-between gap-2">
           <button 
             onClick={() => setActiveSection('home')}
-            className="flex items-center gap-3 hover:opacity-80 transition-opacity"
+            className="flex items-center gap-2 sm:gap-3 hover:opacity-80 transition-opacity min-w-0 flex-shrink-0"
           >
             <img 
               src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/70fa1147-826f-4c89-8da6-773ff084ce53.jpg" 
               alt="Logo" 
-              className="w-10 h-10 object-contain"
+              className="w-8 h-8 sm:w-10 sm:h-10 object-contain"
             />
-            <h1 className="text-2xl font-bold tracking-wide text-slate-900 dark:text-white" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+            <h1 className="text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
               Лига Шахмат
             </h1>
           </button>
@@ -135,25 +135,25 @@ const Navbar = ({
             </div>
           )}
 
-          <div className="flex items-center gap-3">
+          <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {!isAuthenticated && (
               <button
                 onClick={() => setShowAuthModal(true)}
-                className="px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors text-white text-sm font-medium flex items-center gap-2"
+                className="px-3 sm:px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors text-white text-sm font-medium flex items-center gap-1.5 sm:gap-2"
               >
                 <Icon name="LogIn" size={18} />
-                <span>Войти</span>
+                <span className="hidden sm:inline">Войти</span>
               </button>
             )}
 
             {hasActiveGame && location.pathname !== '/game' && (
               <button
                 onClick={handleReturnToGame}
-                className="flex items-center gap-2 px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition-colors animate-pulse"
+                className="flex items-center gap-1.5 px-2.5 sm:px-3 py-2 rounded-lg bg-green-600 hover:bg-green-700 transition-colors animate-pulse flex-shrink-0"
                 title={activeGameLabel || 'Вернуться к игре'}
               >
-                <Icon name="Gamepad2" size={20} className="text-white" />
-                <span className="text-white text-sm font-medium hidden sm:inline">{activeGameLabel || 'К игре'}</span>
+                <Icon name="Gamepad2" size={18} className="text-white" />
+                <span className="text-white text-xs sm:text-sm font-medium hidden sm:inline max-w-[120px] truncate">{activeGameLabel || 'К игре'}</span>
               </button>
             )}
 
@@ -184,7 +184,7 @@ const Navbar = ({
                       className="fixed inset-0 z-40" 
                       onClick={() => setShowMenu(false)}
                     />
-                    <div className="absolute right-0 mt-2 w-56 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-scale-in">
+                    <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-scale-in">
                       <button
                         onClick={() => {
                           setActiveSection('profile');

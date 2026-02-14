@@ -183,9 +183,9 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
           </CardHeader>
           <CardContent>
             <div className="space-y-6">
-              <div className="flex items-center justify-between p-4 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-500/30">
-                <div className="flex-1">
-                  <div className="flex items-center gap-3 mb-2">
+              <div className="p-3 sm:p-4 rounded-lg bg-gradient-to-r from-blue-50 to-purple-50 dark:from-blue-900/20 dark:to-purple-900/20 border border-blue-200 dark:border-blue-500/30">
+                <div>
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3 mb-2">
                     <Badge className={getResultColor(selectedGame.result)}>
                       <Icon name={getResultIcon(selectedGame.result)} size={14} className="mr-1" />
                       {getResultText(selectedGame.result)}
@@ -197,7 +197,7 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                       </span>
                     )}
                   </div>
-                  <div className="text-xl font-bold text-gray-900 dark:text-white">
+                  <div className="text-lg sm:text-xl font-bold text-gray-900 dark:text-white break-words">
                     {selectedGame.user_color === 'white' ? 'Вы' : selectedGame.opponent_name} vs {selectedGame.user_color === 'black' ? 'Вы' : selectedGame.opponent_name}
                   </div>
                   <div className="text-sm text-gray-600 dark:text-gray-400 mt-1">
@@ -271,34 +271,34 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
     <div className="space-y-6 animate-fade-in">
       <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
         <CardHeader>
-          <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
-            <Icon name="History" className="text-blue-600 dark:text-blue-400" size={24} />
-            История партий
+          <CardTitle className="flex flex-wrap items-center gap-2 text-gray-900 dark:text-white">
+            <Icon name="History" className="text-blue-600 dark:text-blue-400 flex-shrink-0" size={22} />
+            <span>История партий</span>
             {stats.rating && (
-              <Badge variant="outline" className="ml-auto border-amber-400/50 text-amber-500">
-                <Icon name="Trophy" size={14} className="mr-1" />
-                Рейтинг: {stats.rating}
+              <Badge variant="outline" className="ml-auto border-amber-400/50 text-amber-500 text-xs">
+                <Icon name="Trophy" size={12} className="mr-1" />
+                {stats.rating}
               </Badge>
             )}
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
-            <div className="p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/10">
-              <div className="text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Всего партий</div>
+          <div className="grid grid-cols-2 md:grid-cols-4 gap-2 sm:gap-4 mb-6">
+            <div className="p-3 sm:p-4 rounded-lg bg-slate-50 dark:bg-slate-800/30 border border-slate-200 dark:border-white/10">
+              <div className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">{stats.total}</div>
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Всего партий</div>
             </div>
-            <div className="p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-500/30">
-              <div className="text-2xl font-bold text-green-700 dark:text-green-400">{stats.wins}</div>
-              <div className="text-sm text-green-600 dark:text-green-400">Побед</div>
+            <div className="p-3 sm:p-4 rounded-lg bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-500/30">
+              <div className="text-xl sm:text-2xl font-bold text-green-700 dark:text-green-400">{stats.wins}</div>
+              <div className="text-xs sm:text-sm text-green-600 dark:text-green-400">Побед</div>
             </div>
-            <div className="p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30">
-              <div className="text-2xl font-bold text-red-700 dark:text-red-400">{stats.losses}</div>
-              <div className="text-sm text-red-600 dark:text-red-400">Поражений</div>
+            <div className="p-3 sm:p-4 rounded-lg bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-500/30">
+              <div className="text-xl sm:text-2xl font-bold text-red-700 dark:text-red-400">{stats.losses}</div>
+              <div className="text-xs sm:text-sm text-red-600 dark:text-red-400">Поражений</div>
             </div>
-            <div className="p-4 rounded-lg bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-500/30">
-              <div className="text-2xl font-bold text-gray-700 dark:text-gray-400">{stats.draws}</div>
-              <div className="text-sm text-gray-600 dark:text-gray-400">Ничьих</div>
+            <div className="p-3 sm:p-4 rounded-lg bg-gray-50 dark:bg-gray-900/20 border border-gray-200 dark:border-gray-500/30">
+              <div className="text-xl sm:text-2xl font-bold text-gray-700 dark:text-gray-400">{stats.draws}</div>
+              <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">Ничьих</div>
             </div>
           </div>
 
@@ -314,21 +314,22 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                 <div
                   key={game.id}
                   onClick={() => setSelectedGame(game)}
-                  className="flex items-center gap-4 p-4 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all cursor-pointer"
+                  className="flex items-center gap-2 sm:gap-4 p-3 sm:p-4 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all cursor-pointer"
                 >
                   <div className="flex-shrink-0">
-                    <Badge className={getResultColor(game.result)}>
-                      <Icon name={getResultIcon(game.result)} size={14} className="mr-1" />
-                      {getResultText(game.result)}
+                    <Badge className={`${getResultColor(game.result)} text-xs`}>
+                      <Icon name={getResultIcon(game.result)} size={12} className="mr-1" />
+                      <span className="hidden sm:inline">{getResultText(game.result)}</span>
+                      <span className="sm:hidden">{game.result === 'win' ? 'W' : game.result === 'loss' ? 'L' : 'D'}</span>
                     </Badge>
                   </div>
 
                   <div className="flex-1 min-w-0">
-                    <div className="font-semibold text-gray-900 dark:text-white truncate">
+                    <div className="font-semibold text-sm text-gray-900 dark:text-white truncate">
                       {game.opponent_name}
-                      {game.difficulty && <span className="text-xs text-gray-500 ml-2">({game.difficulty})</span>}
+                      {game.difficulty && <span className="text-xs text-gray-500 ml-1">({game.difficulty})</span>}
                     </div>
-                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5">
+                    <div className="text-xs text-gray-500 dark:text-gray-400 mt-0.5 truncate">
                       {game.time_control} {game.moves_count} ходов {formatDate(game.created_at)}
                     </div>
                   </div>
@@ -348,13 +349,13 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                       }}
                       variant="outline"
                       size="sm"
-                      className="border-blue-400/50 text-blue-600 dark:text-blue-400"
+                      className="border-blue-400/50 text-blue-600 dark:text-blue-400 hidden sm:flex"
                     >
                       <Icon name="MessageCircle" size={16} />
                     </Button>
                   )}
 
-                  <Icon name="ChevronRight" size={20} className="text-gray-400 flex-shrink-0" />
+                  <Icon name="ChevronRight" size={16} className="text-gray-400 flex-shrink-0" />
                 </div>
               ))
             )}

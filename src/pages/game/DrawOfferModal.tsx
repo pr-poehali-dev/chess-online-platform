@@ -12,8 +12,8 @@ export const DrawOfferModal = ({ showModal, onAccept, onDecline }: DrawOfferModa
   if (!showModal) return null;
 
   return (
-    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in">
-      <Card className="w-full max-w-md mx-4 bg-stone-800 border-stone-700/50 animate-scale-in">
+    <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-4">
+      <Card className="w-full max-w-md max-h-[90vh] overflow-y-auto bg-stone-800 border-stone-700/50 animate-scale-in">
         <CardHeader>
           <CardTitle className="text-center text-white flex items-center justify-center gap-2">
             <Icon name="Handshake" size={24} className="text-blue-400" />

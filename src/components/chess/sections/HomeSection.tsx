@@ -126,14 +126,14 @@ export const HomeSection = ({
   const topCity = fullCityRanking.slice(0, 4);
 
   return (
-    <div className="space-y-8 animate-fade-in">
-      <div className="text-center pt-2 pb-12">
-        <div className="flex flex-col items-center gap-4 mb-8 animate-slide-up max-w-md mx-auto">
+    <div className="space-y-6 sm:space-y-8 animate-fade-in overflow-hidden">
+      <div className="text-center pt-2 pb-6 sm:pb-12">
+        <div className="flex flex-col items-center gap-3 sm:gap-4 mb-6 sm:mb-8 animate-slide-up max-w-md mx-auto px-1">
           {isButtonVisible('btn_play_online') && (
             <div className="w-full relative">
               <Button 
                 size="lg" 
-                className={`w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_play_online') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
+                className={`w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-6 sm:px-12 py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_play_online') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
                 onClick={() => {
                   if (!isLevelAllowed('level_play_online')) {
                     const minR = siteSettings?.level_play_online?.value || '0';
@@ -159,7 +159,7 @@ export const HomeSection = ({
             <div className="w-full relative">
               <Button 
                 size="lg" 
-                className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_play_offline') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
+                className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-6 sm:px-12 py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_play_offline') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
                 onClick={() => {
                   if (!isLevelAllowed('level_play_offline')) {
                     const minR = siteSettings?.level_play_offline?.value || '0';
@@ -185,7 +185,7 @@ export const HomeSection = ({
             <div className="w-full relative">
               <Button 
                 size="lg" 
-                className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-12 py-6 text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_tournament') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
+                className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-6 sm:px-12 py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed('level_tournament') ? 'opacity-60 cursor-not-allowed hover:scale-100' : 'hover:scale-105'}`}
                 onClick={() => {
                   if (!isLevelAllowed('level_tournament')) {
                     const minR = siteSettings?.level_tournament?.value || '1000';
@@ -217,15 +217,15 @@ export const HomeSection = ({
           </div>
         )}
 
-        <h2 className="text-5xl font-bold mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up" style={{ animationDelay: '0.1s' }}>
+        <h2 className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up" style={{ animationDelay: '0.1s' }}>
           Играйте в шахматы онлайн
         </h2>
-        <p className="text-xl text-gray-600 dark:text-gray-400 mb-8 animate-slide-up" style={{ animationDelay: '0.2s' }}>
+        <p className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 animate-slide-up px-2" style={{ animationDelay: '0.2s' }}>
           Соревнуйтесь с игроками со всего мира или бросьте вызов компьютеру
         </p>
       </div>
 
-      <div className="grid md:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-6">
         <RankingCard
           title="Лучшие в России"
           subtitle="Лидеры страны"

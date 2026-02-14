@@ -1,9 +1,10 @@
 
-import { useEffect, lazy, Suspense } from "react";
+import { useEffect, useState, lazy, Suspense } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AuthGuard from "./components/AuthGuard";
 import GameInviteNotification from "./components/GameInviteNotification";
+import Icon from "@/components/ui/icon";
 import API from "@/config/api";
 
 const Game = lazy(() => import("./pages/Game"));
@@ -24,8 +25,43 @@ const Loading = () => (
   </div>
 );
 
+const LandscapeBlocker = () => {
+  const [isLandscape, setIsLandscape] = useState(false);
+
+  useEffect(() => {
+    const checkOrientation = () => {
+      const isMobile = window.innerWidth <= 1024 && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+      const landscape = window.innerWidth > window.innerHeight;
+      setIsLandscape(isMobile && landscape);
+    };
+
+    checkOrientation();
+    window.addEventListener('resize', checkOrientation);
+    window.addEventListener('orientationchange', checkOrientation);
+    return () => {
+      window.removeEventListener('resize', checkOrientation);
+      window.removeEventListener('orientationchange', checkOrientation);
+    };
+  }, []);
+
+  if (!isLandscape) return null;
+
+  return (
+    <div className="fixed inset-0 z-[99999] bg-slate-900 flex flex-col items-center justify-center text-white p-8 text-center">
+      <Icon name="ScreenShareOff" size={64} className="text-amber-400 mb-6" />
+      <h2 className="text-2xl font-bold mb-3" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+        Переверните устройство
+      </h2>
+      <p className="text-slate-400 text-base max-w-xs">
+        Лига Шахмат работает только в вертикальном режиме
+      </p>
+    </div>
+  );
+};
+
 const App = () => (
   <>
+    <LandscapeBlocker />
     <DailyDecayTrigger />
     <BrowserRouter>
       <GameInviteNotification />
