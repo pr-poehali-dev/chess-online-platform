@@ -21,6 +21,12 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
   const config = boardThemes[boardTheme];
   const useImages = boardTheme !== 'classic';
 
+  const [entrancePhase, setEntrancePhase] = useState(true);
+  useEffect(() => {
+    const timer = setTimeout(() => setEntrancePhase(false), 800);
+    return () => clearTimeout(timer);
+  }, []);
+
   const [animatingMove, setAnimatingMove] = useState<{
     piece: { type: string; color: string };
     from: Position;
@@ -129,6 +135,10 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
       <style>{`
         @keyframes resultFadeIn {
           from { opacity: 0; transform: scale(0.7); }
+          to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pieceEntrance {
+          from { opacity: 0; transform: scale(0.3); }
           to { opacity: 1; transform: scale(1); }
         }
         @keyframes pieceOverlaySlide {
@@ -253,34 +263,46 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
                       )}
                     </div>
                   )}
-                  {piece && !hidden && useImages && (
-                    <img
-                      src={pieceImages[piece.color][piece.type]}
-                      alt={`${piece.color} ${piece.type}`}
-                      className="w-[80%] h-[80%] relative z-20 pointer-events-none"
-                      style={{
-                        filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))'
-                      }}
-                      draggable={false}
-                    />
-                  )}
-                  {piece && !hidden && !useImages && (
-                    <div 
-                      className="text-3xl md:text-5xl lg:text-6xl relative z-20"
-                      style={{
-                        filter: piece.color === 'white' 
-                          ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.4))' 
-                          : 'drop-shadow(0 2px 3px rgba(0,0,0,0.8)) drop-shadow(0 0 1px rgba(255,255,255,0.2))',
-                        color: piece.color === 'white' ? '#f5f5f5' : '#1a1a1a',
-                        WebkitTextStroke: piece.color === 'white' ? '1px #d0d0d0' : '1px #000000',
-                        textShadow: piece.color === 'white' 
-                          ? '0 1px 0 #ffffff, 0 -1px 0 #c0c0c0' 
-                          : '0 1px 0 #000000, 0 -1px 0 #333333'
-                      }}
-                    >
-                      {pieceSymbols[piece.color][piece.type]}
-                    </div>
-                  )}
+                  {piece && !hidden && useImages && (() => {
+                    const entranceDelay = entrancePhase ? `${(viewRow * 8 + viewCol) * 15 + 50}ms` : undefined;
+                    return (
+                      <img
+                        src={pieceImages[piece.color][piece.type]}
+                        alt={`${piece.color} ${piece.type}`}
+                        className="w-[80%] h-[80%] relative z-20 pointer-events-none"
+                        style={{
+                          filter: 'drop-shadow(0 2px 3px rgba(0,0,0,0.4))',
+                          ...(entrancePhase ? {
+                            animation: `pieceEntrance 0.35s ease-out ${entranceDelay} both`
+                          } : {})
+                        }}
+                        draggable={false}
+                      />
+                    );
+                  })()}
+                  {piece && !hidden && !useImages && (() => {
+                    const entranceDelay = entrancePhase ? `${(viewRow * 8 + viewCol) * 15 + 50}ms` : undefined;
+                    return (
+                      <div 
+                        className="text-3xl md:text-5xl lg:text-6xl relative z-20"
+                        style={{
+                          filter: piece.color === 'white' 
+                            ? 'drop-shadow(0 2px 3px rgba(0,0,0,0.6)) drop-shadow(0 0 1px rgba(0,0,0,0.4))' 
+                            : 'drop-shadow(0 2px 3px rgba(0,0,0,0.8)) drop-shadow(0 0 1px rgba(255,255,255,0.2))',
+                          color: piece.color === 'white' ? '#f5f5f5' : '#1a1a1a',
+                          WebkitTextStroke: piece.color === 'white' ? '1px #d0d0d0' : '1px #000000',
+                          textShadow: piece.color === 'white' 
+                            ? '0 1px 0 #ffffff, 0 -1px 0 #c0c0c0' 
+                            : '0 1px 0 #000000, 0 -1px 0 #333333',
+                          ...(entrancePhase ? {
+                            animation: `pieceEntrance 0.35s ease-out ${entranceDelay} both`
+                          } : {})
+                        }}
+                      >
+                        {pieceSymbols[piece.color][piece.type]}
+                      </div>
+                    );
+                  })()}
                   </div>
                 </td>
               );

@@ -160,15 +160,19 @@ export const useGameHandlers = (
   const handleNewGame = () => {
     setShowSettingsMenu(false);
     
+    const reloadViaNavigate = () => {
+      const params = new URLSearchParams(window.location.search);
+      params.set('t', String(Date.now()));
+      navigate(`/game?${params.toString()}`);
+    };
+
     if (gameStatus === 'playing') {
       if (confirm('Чтобы начать новую партию, необходимо завершить текущую. Сдаться и начать новую игру?')) {
         setGameStatus('checkmate');
-        setTimeout(() => {
-          window.location.reload();
-        }, 1500);
+        setTimeout(reloadViaNavigate, 1500);
       }
     } else {
-      window.location.reload();
+      reloadViaNavigate();
     }
   };
 
@@ -194,15 +198,13 @@ export const useGameHandlers = (
           params.set('online_game_id', String(data.new_game_id));
           params.set('color', newColor);
           params.set('online', 'true');
-          document.documentElement.style.backgroundColor = '#1c1917';
-          document.body.style.backgroundColor = '#1c1917';
-          window.location.href = `/game?${params.toString()}`;
+          navigate(`/game?${params.toString()}`);
         }
       } catch { /* ignore */ }
     } else {
-      document.documentElement.style.backgroundColor = '#1c1917';
-      document.body.style.backgroundColor = '#1c1917';
-      window.location.reload();
+      const params = new URLSearchParams(window.location.search);
+      params.set('t', String(Date.now()));
+      navigate(`/game?${params.toString()}`);
     }
   };
 
