@@ -417,7 +417,7 @@ export const HomeSection = ({
           className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-6 sm:mb-8 animate-slide-up px-2"
           style={{ animationDelay: "0.2s" }}
         >
-          Соревнуйтесь с игроками со всего мира или бросьте вызов компьютеру
+          Играем онлайн с людьми со всей страны. Найдем достойного соперника.
         </p>
       </div>
 
