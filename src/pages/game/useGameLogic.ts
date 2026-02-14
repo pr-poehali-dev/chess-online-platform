@@ -173,6 +173,7 @@ export const useGameLogic = (
   const [boardTheme, setBoardTheme] = useState<BoardTheme>(
     savedState?.boardTheme || (localStorage.getItem('chessBoardTheme') as BoardTheme) || 'wood'
   );
+  const [endReason, setEndReason] = useState<string | null>(null);
   const [ratingChange, setRatingChange] = useState<number | null>(null);
   const [newRating, setNewRating] = useState<number | null>(null);
   const [userRating, setUserRating] = useState<number | null>(() => {
@@ -396,6 +397,10 @@ export const useGameLogic = (
         if (endReason === 'draw' || endReason === 'stalemate') setGameStatus('draw');
         else setGameStatus('checkmate');
       }
+    }
+
+    if (serverStatus === 'finished' && endReason) {
+      setEndReason(endReason);
     }
 
     if (serverStatus === 'finished' && winner) {
@@ -741,6 +746,7 @@ export const useGameLogic = (
     capturedByBlack,
     kingInCheckPosition,
     lastMove,
+    endReason,
     setCurrentPlayer,
     showPossibleMoves,
     setShowPossibleMoves,

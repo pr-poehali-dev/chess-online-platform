@@ -2,7 +2,7 @@ import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { getDifficultyLabel, formatTime } from './game/gameTypes';
-import { GameBoard } from './game/GameBoard';
+import { GameBoard, GameResult } from './game/GameBoard';
 import { PlayerInfo } from './game/PlayerInfo';
 import { MoveHistory } from './game/MoveHistory';
 import { ExitDialog } from './game/ExitDialog';
@@ -86,6 +86,7 @@ const Game = () => {
     capturedByBlack,
     kingInCheckPosition,
     lastMove,
+    endReason: serverEndReason,
     setCurrentPlayer,
     showPossibleMoves,
     setShowPossibleMoves,
@@ -142,6 +143,17 @@ const Game = () => {
     handleAcceptRematch,
     handleDeclineRematch
   } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined);
+
+  const gameResult: GameResult = (() => {
+    if (gameStatus === 'playing') return null;
+    if (gameStatus === 'draw' || gameStatus === 'stalemate') return 'draw';
+    if (gameStatus === 'checkmate') {
+      const iWon = currentPlayer !== playerColor;
+      if (iWon && serverEndReason === 'resign') return 'opponent_resigned';
+      return iWon ? 'win' : 'loss';
+    }
+    return null;
+  })();
 
   return (
     <div className={`min-h-screen flex flex-col transition-colors ${
@@ -215,6 +227,7 @@ const Game = () => {
               flipped={flipped}
               boardTheme={boardTheme}
               lastMove={lastMove}
+              gameResult={gameResult}
             />
 
             <PlayerInfo

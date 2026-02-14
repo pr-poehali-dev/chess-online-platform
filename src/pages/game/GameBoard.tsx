@@ -1,6 +1,8 @@
 import { useState, useEffect, useRef } from 'react';
 import { Board, Position, pieceImages, pieceSymbols, BoardTheme, boardThemes } from './gameTypes';
 
+export type GameResult = 'win' | 'loss' | 'draw' | 'opponent_resigned' | null;
+
 interface GameBoardProps {
   board: Board;
   onSquareClick: (row: number, col: number) => void;
@@ -11,9 +13,10 @@ interface GameBoardProps {
   flipped?: boolean;
   boardTheme?: BoardTheme;
   lastMove?: { from: Position; to: Position } | null;
+  gameResult?: GameResult;
 }
 
-export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition, showPossibleMoves = true, flipped = false, boardTheme = 'wood', lastMove }: GameBoardProps) => {
+export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePossibleMove, kingInCheckPosition, showPossibleMoves = true, flipped = false, boardTheme = 'wood', lastMove, gameResult }: GameBoardProps) => {
   const config = boardThemes[boardTheme];
   const useImages = boardTheme !== 'classic';
 
@@ -123,6 +126,10 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
   return (
     <>
       <style>{`
+        @keyframes resultFadeIn {
+          from { opacity: 0; transform: scale(0.7); }
+          to { opacity: 1; transform: scale(1); }
+        }
         @keyframes pieceOverlaySlide {
           from {
             left: var(--start-left);
@@ -144,6 +151,32 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
         } : {})
       }}>
         {renderOverlayPiece()}
+        {gameResult && (
+          <div className="absolute inset-0 z-[60] flex items-center justify-center pointer-events-none" style={{ animation: 'resultFadeIn 0.5s ease-out' }}>
+            <div className="rounded-2xl px-6 py-4 md:px-8 md:py-5 flex flex-col items-center gap-1 pointer-events-auto" style={{
+              background: gameResult === 'loss' ? 'rgba(30,10,10,0.88)' : gameResult === 'draw' ? 'rgba(30,30,30,0.88)' : 'rgba(10,30,10,0.88)',
+              backdropFilter: 'blur(8px)',
+              boxShadow: gameResult === 'loss' ? '0 0 40px rgba(220,50,50,0.4)' : gameResult === 'draw' ? '0 0 40px rgba(180,180,180,0.3)' : '0 0 40px rgba(50,200,80,0.4)',
+              border: gameResult === 'loss' ? '2px solid rgba(220,80,80,0.5)' : gameResult === 'draw' ? '2px solid rgba(180,180,180,0.4)' : '2px solid rgba(80,200,100,0.5)',
+            }}>
+              <div className="text-4xl md:text-5xl">
+                {gameResult === 'win' && '🏆'}
+                {gameResult === 'opponent_resigned' && '🏳️'}
+                {gameResult === 'loss' && '😞'}
+                {gameResult === 'draw' && '🤝'}
+              </div>
+              <div className="text-lg md:text-xl font-bold text-white tracking-wide">
+                {gameResult === 'win' && 'Победа'}
+                {gameResult === 'opponent_resigned' && 'Победа'}
+                {gameResult === 'loss' && 'Поражение'}
+                {gameResult === 'draw' && 'Ничья'}
+              </div>
+              {gameResult === 'opponent_resigned' && (
+                <div className="text-xs md:text-sm text-stone-400">Соперник сдался</div>
+              )}
+            </div>
+          </div>
+        )}
         <table className="w-full h-full border-collapse" style={{ borderSpacing: 0 }}>
           <tbody>
           {Array.from({ length: 8 }).map((_, viewRow) => {
