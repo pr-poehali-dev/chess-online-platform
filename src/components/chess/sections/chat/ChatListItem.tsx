@@ -13,10 +13,10 @@ export const ChatListItem = ({ chat, onSelect, formatChatTime, getInitials }: Ch
   return (
     <div
       onClick={() => onSelect(chat)}
-      className="flex items-center gap-4 p-4 rounded-lg border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all cursor-pointer"
+      className="flex items-center gap-3 p-3 sm:p-4 rounded-xl border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all cursor-pointer"
     >
-      <div className="relative">
-        <Avatar className="w-12 h-12">
+      <div className="relative flex-shrink-0">
+        <Avatar className="w-11 h-11 sm:w-12 sm:h-12">
           {chat.participantAvatar ? (
             <AvatarImage src={chat.participantAvatar} alt={chat.participantName} />
           ) : (
@@ -25,31 +25,40 @@ export const ChatListItem = ({ chat, onSelect, formatChatTime, getInitials }: Ch
             </AvatarFallback>
           )}
         </Avatar>
-        {chat.unreadCount > 0 && (
-          <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full flex items-center justify-center text-white text-xs font-bold">
-            {chat.unreadCount}
-          </div>
+        {chat.participantStatus && (
+          <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${
+            chat.participantStatus === 'online' ? 'bg-green-500' : 'bg-gray-400'
+          }`} />
         )}
       </div>
 
       <div className="flex-1 min-w-0">
-        <div className="font-semibold text-gray-900 dark:text-white">
-          {chat.participantName}
+        <div className="flex items-center justify-between gap-2">
+          <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">{chat.participantName}</span>
+          {chat.lastMessageTime && (
+            <span className="text-[11px] text-gray-500 dark:text-gray-500 flex-shrink-0">
+              {formatChatTime(chat.lastMessageTime)}
+            </span>
+          )}
         </div>
-        <div className="text-sm text-gray-600 dark:text-gray-400 truncate">
-          {chat.lastMessage || 'Нет сообщений'}
+        <div className="flex items-center justify-between gap-2 mt-0.5">
+          <span className="text-sm text-gray-500 dark:text-gray-400 truncate">
+            {chat.lastMessage
+              ? (chat.lastMessageIsOwn ? `Вы: ${chat.lastMessage}` : chat.lastMessage)
+              : 'Нет сообщений'
+            }
+          </span>
+          {chat.unreadCount > 0 && (
+            <div className="w-5 h-5 bg-blue-600 rounded-full flex items-center justify-center flex-shrink-0">
+              <span className="text-white text-[10px] font-bold">{chat.unreadCount}</span>
+            </div>
+          )}
         </div>
       </div>
 
-      <div className="flex flex-col items-end gap-1">
-        {chat.lastMessageTime && (
-          <div className="text-xs text-gray-500 dark:text-gray-500">
-            {formatChatTime(chat.lastMessageTime)}
-          </div>
-        )}
-      </div>
-
-      <Icon name="ChevronRight" size={20} className="text-gray-400" />
+      <Icon name="ChevronRight" size={18} className="text-gray-400 flex-shrink-0" />
     </div>
   );
 };
+
+export default ChatListItem;

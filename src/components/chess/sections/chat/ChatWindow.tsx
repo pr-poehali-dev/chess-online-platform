@@ -3,7 +3,7 @@ import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Icon from '@/components/ui/icon';
-import { Chat, Message } from './ChatTypes';
+import { Chat, Message, CHAT_URL } from './ChatTypes';
 
 const INVITE_URL = 'https://functions.poehali.dev/622400c1-79cc-4391-92fa-9995517f5de6';
 
@@ -31,29 +31,35 @@ const getTimeLabel = (time: string) => {
 interface ChatWindowProps {
   selectedChat: Chat;
   onBack: () => void;
-  onBlock: () => void;
-  onSendMessage: (message: Message) => void;
-  formatTime: (dateString: string) => string;
   getInitials: (name: string) => string;
 }
+
+const getUserId = () => {
+  const saved = localStorage.getItem('chessUser');
+  if (!saved) return '';
+  const user = JSON.parse(saved);
+  const rawId = user.email || user.name || 'anonymous';
+  return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+};
 
 export const ChatWindow = ({
   selectedChat,
   onBack,
-  onBlock,
-  onSendMessage,
-  formatTime,
   getInitials
 }: ChatWindowProps) => {
   const navigate = useNavigate();
+  const [messages, setMessages] = useState<Message[]>([]);
   const [messageText, setMessageText] = useState('');
   const [showEmojiPicker, setShowEmojiPicker] = useState(false);
   const [showGameSetup, setShowGameSetup] = useState(false);
   const [showBlockMenu, setShowBlockMenu] = useState(false);
   const [inviteSent, setInviteSent] = useState(false);
   const [inviteId, setInviteId] = useState<number | null>(null);
+  const [loading, setLoading] = useState(true);
   const pollInviteRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const pollMessagesRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
+  const isFirstLoad = useRef(true);
 
   const emojis = [
     '😊', '😂', '❤️', '👍', '👏', '🔥', '💯', '🎉',
@@ -61,17 +67,46 @@ export const ChatWindow = ({
     '🎯', '🏆', '🎲', '♟️', '👑', '⭐', '💎', '🚀'
   ];
 
-  const getMyUserId = useCallback(() => {
-    const saved = localStorage.getItem('chessUser');
-    if (!saved) return '';
-    const user = JSON.parse(saved);
-    const rawId = user.email || user.name || 'anonymous';
-    return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-  }, []);
+  const formatTime = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
+  };
+
+  const loadMessages = useCallback(async () => {
+    const uid = getUserId();
+    if (!uid) return;
+    try {
+      const res = await fetch(`${CHAT_URL}?action=messages&user_id=${encodeURIComponent(uid)}&partner_id=${encodeURIComponent(selectedChat.participantId)}`);
+      const data = await res.json();
+      const msgs: Message[] = (data.messages || []).map((m: { id: number; sender_id: string; text: string; created_at: string; sender_name: string; is_own: boolean }) => ({
+        id: String(m.id),
+        senderId: m.sender_id,
+        senderName: m.sender_name,
+        text: m.text,
+        timestamp: m.created_at,
+        isOwn: m.is_own
+      }));
+      setMessages(msgs);
+    } catch { /* network error */ }
+    setLoading(false);
+  }, [selectedChat.participantId]);
 
   useEffect(() => {
-    scrollToBottom();
-  }, [selectedChat.messages]);
+    loadMessages();
+    pollMessagesRef.current = setInterval(loadMessages, 3000);
+    return () => {
+      if (pollMessagesRef.current) clearInterval(pollMessagesRef.current);
+    };
+  }, [loadMessages]);
+
+  useEffect(() => {
+    if (isFirstLoad.current && messages.length > 0) {
+      isFirstLoad.current = false;
+      messagesEndRef.current?.scrollIntoView({ behavior: 'instant' as ScrollBehavior });
+    } else if (!isFirstLoad.current) {
+      messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    }
+  }, [messages]);
 
   useEffect(() => {
     return () => {
@@ -80,7 +115,7 @@ export const ChatWindow = ({
   }, []);
 
   const pollAccepted = useCallback((iid: number) => {
-    const uid = getMyUserId();
+    const uid = getUserId();
     if (pollInviteRef.current) clearInterval(pollInviteRef.current);
     pollInviteRef.current = setInterval(async () => {
       try {
@@ -105,11 +140,7 @@ export const ChatWindow = ({
         }
       } catch { /* network error */ }
     }, 2000);
-  }, [getMyUserId, navigate]);
-
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  }, [navigate]);
 
   const getLastGameSettings = () => {
     const saved = localStorage.getItem('lastGameSettings');
@@ -119,18 +150,34 @@ export const ChatWindow = ({
     return { time: '10+0', color: 'random' };
   };
 
-  const handleSendMessage = () => {
+  const handleSendMessage = async () => {
     if (!messageText.trim()) return;
-    const newMessage: Message = {
-      id: Date.now().toString(),
-      senderId: 'me',
+    const uid = getUserId();
+    const text = messageText.trim();
+    setMessageText('');
+
+    const tempMsg: Message = {
+      id: 'temp_' + Date.now(),
+      senderId: uid,
       senderName: 'Вы',
-      text: messageText,
+      text,
       timestamp: new Date().toISOString(),
       isOwn: true
     };
-    onSendMessage(newMessage);
-    setMessageText('');
+    setMessages(prev => [...prev, tempMsg]);
+
+    try {
+      await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send',
+          user_id: uid,
+          receiver_id: selectedChat.participantId,
+          text
+        })
+      });
+    } catch { /* network error */ }
   };
 
   const handleKeyPress = (e: React.KeyboardEvent) => {
@@ -147,20 +194,27 @@ export const ChatWindow = ({
 
   const sendGameInvite = async (timeControl: string) => {
     localStorage.setItem('lastGameSettings', JSON.stringify({ time: timeControl, color: 'random' }));
-    const inviteMsg: Message = {
-      id: Date.now().toString(),
-      senderId: 'me',
-      senderName: 'Вы',
-      text: `♟️ Приглашение на партию: ${getTimeLabel(timeControl)}`,
-      timestamp: new Date().toISOString(),
-      isOwn: true
-    };
-    onSendMessage(inviteMsg);
+
+    const uid = getUserId();
+    const inviteText = `♟️ Приглашение на партию: ${getTimeLabel(timeControl)}`;
+
+    try {
+      await fetch(CHAT_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send',
+          user_id: uid,
+          receiver_id: selectedChat.participantId,
+          text: inviteText
+        })
+      });
+    } catch { /* ignore */ }
+
     setShowGameSetup(false);
 
-    const myUid = getMyUserId();
     const friendUid = selectedChat.participantId;
-    if (!myUid || !friendUid) return;
+    if (!uid || !friendUid) return;
 
     try {
       const res = await fetch(INVITE_URL, {
@@ -168,7 +222,7 @@ export const ChatWindow = ({
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
           action: 'send',
-          from_user_id: myUid,
+          from_user_id: uid,
           to_user_id: friendUid,
           time_control: timeControl,
           color_choice: 'random'
@@ -188,6 +242,15 @@ export const ChatWindow = ({
     sendGameInvite(settings.time);
   };
 
+  const handleBlock = () => {
+    if (!confirm(`Вы действительно хотите заблокировать ${selectedChat.participantName}?`)) return;
+    const blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
+    blockedUsers.push(selectedChat.participantId);
+    localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
+    setShowBlockMenu(false);
+    onBack();
+  };
+
   const lastSettings = getLastGameSettings();
 
   return (
@@ -197,15 +260,22 @@ export const ChatWindow = ({
           <Button onClick={onBack} variant="ghost" size="sm" className="h-8 w-8 p-0 flex-shrink-0">
             <Icon name="ChevronLeft" size={20} />
           </Button>
-          <Avatar className="w-8 h-8 sm:w-10 sm:h-10 flex-shrink-0">
-            {selectedChat.participantAvatar ? (
-              <AvatarImage src={selectedChat.participantAvatar} alt={selectedChat.participantName} />
-            ) : (
-              <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-xs sm:text-sm">
-                {getInitials(selectedChat.participantName)}
-              </AvatarFallback>
+          <div className="relative flex-shrink-0">
+            <Avatar className="w-8 h-8 sm:w-10 sm:h-10">
+              {selectedChat.participantAvatar ? (
+                <AvatarImage src={selectedChat.participantAvatar} alt={selectedChat.participantName} />
+              ) : (
+                <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-xs sm:text-sm">
+                  {getInitials(selectedChat.participantName)}
+                </AvatarFallback>
+              )}
+            </Avatar>
+            {selectedChat.participantStatus && (
+              <div className={`absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-white dark:border-slate-900 ${
+                selectedChat.participantStatus === 'online' ? 'bg-green-500' : 'bg-gray-400'
+              }`} />
             )}
-          </Avatar>
+          </div>
           <div className="min-w-0">
             <div className="text-sm sm:text-base font-semibold text-gray-900 dark:text-white truncate">
               {selectedChat.participantName}
@@ -223,7 +293,7 @@ export const ChatWindow = ({
             <>
               <div className="fixed inset-0 z-40" onClick={() => setShowBlockMenu(false)} />
               <div className="absolute right-0 top-full mt-1 z-50 bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden animate-scale-in">
-                <button onClick={() => { onBlock(); setShowBlockMenu(false); }} className="px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 whitespace-nowrap">
+                <button onClick={handleBlock} className="px-4 py-2.5 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 flex items-center gap-2 whitespace-nowrap">
                   <Icon name="Ban" size={14} /> Заблокировать
                 </button>
               </div>
@@ -233,13 +303,18 @@ export const ChatWindow = ({
       </div>
 
       <div className="flex-1 overflow-y-auto px-3 sm:px-4 py-3 bg-slate-50 dark:bg-slate-800/30 border-x border-slate-200 dark:border-white/10 space-y-2.5">
-        {selectedChat.messages.length === 0 ? (
+        {loading ? (
+          <div className="text-center py-8 text-gray-400">
+            <Icon name="Loader2" size={28} className="animate-spin mx-auto mb-2" />
+            <p className="text-sm">Загрузка...</p>
+          </div>
+        ) : messages.length === 0 ? (
           <div className="text-center py-8 text-gray-400">
             <Icon name="MessageCircle" className="mx-auto mb-3 opacity-40" size={36} />
             <p className="text-sm">Начните разговор</p>
           </div>
         ) : (
-          selectedChat.messages.map((message) => (
+          messages.map((message) => (
             <div key={message.id} className={`flex ${message.isOwn ? 'justify-end' : 'justify-start'}`}>
               <div className={`max-w-[80%] sm:max-w-[70%] rounded-2xl px-3 py-2 ${
                 message.isOwn ? 'bg-blue-600 text-white rounded-br-md' : 'bg-white dark:bg-slate-700 text-gray-900 dark:text-white border border-slate-200 dark:border-white/10 rounded-bl-md'

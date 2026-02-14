@@ -1,9 +1,19 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import Icon from '@/components/ui/icon';
-import { Chat, ChatSectionProps, Message } from './chat/ChatTypes';
+import { Chat, ChatSectionProps, CHAT_URL } from './chat/ChatTypes';
 import { ChatListItem } from './chat/ChatListItem';
 import { ChatWindow } from './chat/ChatWindow';
+
+const FRIENDS_URL = 'https://functions.poehali.dev/5ffb6c1a-2221-4a90-943a-b29a0a4b9700';
+
+const getUserId = () => {
+  const saved = localStorage.getItem('chessUser');
+  if (!saved) return '';
+  const user = JSON.parse(saved);
+  const rawId = user.email || user.name || 'anonymous';
+  return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+};
 
 export const ChatSection = ({
   initialChatId,
@@ -12,37 +22,97 @@ export const ChatSection = ({
 }: ChatSectionProps) => {
   const [chats, setChats] = useState<Chat[]>([]);
   const [selectedChat, setSelectedChat] = useState<Chat | null>(null);
+  const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    const savedChats = localStorage.getItem('chessChats');
-    let chatList: Chat[] = savedChats ? JSON.parse(savedChats) : [];
+  const loadConversations = useCallback(async () => {
+    const uid = getUserId();
+    if (!uid) { setLoading(false); return; }
 
-    if (initialChatId && initialParticipantName) {
-      const existing = chatList.find((c: Chat) => c.id === initialChatId || c.participantId === initialChatId);
-      if (existing) {
-        setSelectedChat(existing);
-      } else {
-        const newChat: Chat = {
-          id: initialChatId,
-          participantId: initialChatId,
-          participantName: initialParticipantName,
-          participantRating: initialParticipantRating || 1200,
-          unreadCount: 0,
-          messages: []
-        };
-        chatList = [newChat, ...chatList];
-        setSelectedChat(newChat);
+    try {
+      const [convRes, friendsRes] = await Promise.all([
+        fetch(`${CHAT_URL}?action=conversations&user_id=${encodeURIComponent(uid)}`),
+        fetch(`${FRIENDS_URL}?action=list&user_id=${encodeURIComponent(uid)}`)
+      ]);
+      const convData = await convRes.json();
+      const friendsData = await friendsRes.json();
+
+      const conversations = convData.conversations || [];
+      const friends = friendsData.friends || [];
+
+      const convPartnerIds = new Set(conversations.map((c: { partner_id: string }) => c.partner_id));
+
+      const chatList: Chat[] = conversations.map((c: {
+        partner_id: string;
+        username: string;
+        avatar: string;
+        rating: number;
+        city: string;
+        status: string;
+        last_message: string;
+        last_message_time: string;
+        unread: number;
+        last_message_is_own: boolean;
+      }) => ({
+        id: c.partner_id,
+        participantId: c.partner_id,
+        participantName: c.username,
+        participantAvatar: c.avatar || undefined,
+        participantRating: c.rating,
+        participantCity: c.city,
+        participantStatus: c.status as 'online' | 'offline',
+        lastMessage: c.last_message,
+        lastMessageTime: c.last_message_time,
+        lastMessageIsOwn: c.last_message_is_own,
+        unreadCount: c.unread,
+        messages: []
+      }));
+
+      for (const f of friends) {
+        if (!convPartnerIds.has(f.id)) {
+          chatList.push({
+            id: f.id,
+            participantId: f.id,
+            participantName: f.username,
+            participantAvatar: f.avatar || undefined,
+            participantRating: f.rating,
+            participantCity: f.city,
+            participantStatus: f.status as 'online' | 'offline',
+            unreadCount: 0,
+            messages: []
+          });
+        }
       }
-    }
 
-    setChats(chatList);
-    localStorage.setItem('chessChats', JSON.stringify(chatList));
+      setChats(chatList);
+
+      if (initialChatId && initialParticipantName) {
+        const existing = chatList.find(c => c.participantId === initialChatId);
+        if (existing) {
+          setSelectedChat(existing);
+        } else {
+          const newChat: Chat = {
+            id: initialChatId,
+            participantId: initialChatId,
+            participantName: initialParticipantName,
+            participantRating: initialParticipantRating || 1200,
+            unreadCount: 0,
+            messages: []
+          };
+          setChats([newChat, ...chatList]);
+          setSelectedChat(newChat);
+        }
+      }
+    } catch { /* network error */ }
+    setLoading(false);
   }, [initialChatId, initialParticipantName, initialParticipantRating]);
 
-  const formatTime = (dateString: string) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
-  };
+  useEffect(() => {
+    loadConversations();
+    const interval = setInterval(() => {
+      if (!selectedChat) loadConversations();
+    }, 10000);
+    return () => clearInterval(interval);
+  }, [loadConversations, selectedChat]);
 
   const formatChatTime = (dateString: string) => {
     const date = new Date(dateString);
@@ -50,81 +120,32 @@ export const ChatSection = ({
     const diffTime = Math.abs(now.getTime() - date.getTime());
     const diffDays = Math.floor(diffTime / (1000 * 60 * 60 * 24));
 
-    if (diffDays === 0) return formatTime(dateString);
+    if (diffDays === 0) return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
     if (diffDays === 1) return 'Вчера';
     if (diffDays < 7) return `${diffDays} дн. назад`;
-
     return date.toLocaleDateString('ru-RU', { day: 'numeric', month: 'short' });
   };
 
   const getInitials = (name: string) => {
     const parts = name.split(' ');
-    if (parts.length >= 2) {
-      return parts[0][0] + parts[1][0];
-    }
+    if (parts.length >= 2) return parts[0][0] + parts[1][0];
     return name.substring(0, 2).toUpperCase();
   };
 
-  const handleSendMessage = (newMessage: Message) => {
-    if (!selectedChat) return;
-
-    const settings = localStorage.getItem('notificationSettings');
-    const soundEnabled = settings ? JSON.parse(settings).messageSound : true;
-
-    if (soundEnabled) {
-      const audio = new Audio('data:audio/wav;base64,UklGRnoGAABXQVZFZm10IBAAAAABAAEAQB8AAEAfAAABAAgAZGF0YQoGAACBhYqFbF1fdJivrJBhNjVgodDbq2EcBj+a2/LDciUFLIHO8tiJNwgZaLvt559NEAxQp+PwtmMcBjiR1/LMeSwFJHfH8N2QQAoUXrTp66hVFApGn+DyvmwhBSuBzvLZiTcIGWi77eefTRAMUKfj8LZjHAY4ktfyzHksBSR3x/DdkEAKFF606+uoVRQKRp/g8r5sIQUrgc7y2Yk3CBlou+3nn00QDFCn4/C2YxwGOJLX8sx5LAUkd8fw3ZBAC');
-      audio.play().catch(() => {});
-    }
-
-    const updatedChat = {
-      ...selectedChat,
-      messages: [...selectedChat.messages, newMessage],
-      lastMessage: newMessage.text,
-      lastMessageTime: new Date().toISOString()
-    };
-
-    const updatedChats = chats.map(chat =>
-      chat.id === selectedChat.id ? updatedChat : chat
-    );
-
-    setChats(updatedChats);
-    setSelectedChat(updatedChat);
-    localStorage.setItem('chessChats', JSON.stringify(updatedChats));
-  };
-
   const handleChatSelect = (chat: Chat) => {
-    const updatedChat = { ...chat, unreadCount: 0 };
-    const updatedChats = chats.map(c => c.id === chat.id ? updatedChat : c);
-    setChats(updatedChats);
-    setSelectedChat(updatedChat);
-    localStorage.setItem('chessChats', JSON.stringify(updatedChats));
+    setSelectedChat({ ...chat, unreadCount: 0 });
   };
 
-  const handleBlockUser = () => {
-    if (!selectedChat) return;
-
-    if (confirm(`Вы действительно хотите заблокировать ${selectedChat.participantName}?`)) {
-      const blockedUsers = JSON.parse(localStorage.getItem('blockedUsers') || '[]');
-      blockedUsers.push(selectedChat.participantId);
-      localStorage.setItem('blockedUsers', JSON.stringify(blockedUsers));
-
-      const updatedChats = chats.filter(chat => chat.id !== selectedChat.id);
-      setChats(updatedChats);
-      localStorage.setItem('chessChats', JSON.stringify(updatedChats));
-
-      setSelectedChat(null);
-      alert(`Пользователь ${selectedChat.participantName} заблокирован`);
-    }
+  const handleBack = () => {
+    setSelectedChat(null);
+    loadConversations();
   };
 
   if (selectedChat) {
     return (
       <ChatWindow
         selectedChat={selectedChat}
-        onBack={() => setSelectedChat(null)}
-        onBlock={handleBlockUser}
-        onSendMessage={handleSendMessage}
-        formatTime={formatTime}
+        onBack={handleBack}
         getInitials={getInitials}
       />
     );
@@ -141,11 +162,16 @@ export const ChatSection = ({
         </CardHeader>
         <CardContent>
           <div className="space-y-3">
-            {chats.length === 0 ? (
+            {loading ? (
+              <div className="text-center py-12 text-gray-400">
+                <Icon name="Loader2" size={32} className="animate-spin mx-auto mb-2" />
+                <p className="text-sm">Загрузка...</p>
+              </div>
+            ) : chats.length === 0 ? (
               <div className="text-center py-12 text-gray-600 dark:text-gray-400">
-                <Icon name="MessageCircle" className="mx-auto mb-4" size={48} />
-                <p>Нет сообщений</p>
-                <p className="text-sm">Начните диалог с соперниками или друзьями</p>
+                <Icon name="MessageCircle" className="mx-auto mb-4 opacity-40" size={48} />
+                <p className="font-medium">Нет сообщений</p>
+                <p className="text-sm mt-1">Добавьте друзей и начните общение</p>
               </div>
             ) : (
               chats.map((chat) => (
@@ -164,3 +190,5 @@ export const ChatSection = ({
     </div>
   );
 };
+
+export default ChatSection;
