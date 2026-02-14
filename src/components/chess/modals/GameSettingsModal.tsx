@@ -118,9 +118,7 @@ export const GameSettingsModal = ({
         const res = await fetch(`${INVITE_URL}?action=check_accepted&invite_id=${iid}&user_id=${encodeURIComponent(uid)}`);
         const data = await res.json();
         if (data.status === 'accepted' && data.game_id) {
-          if (pollRef.current) clearInterval(pollRef.current);
-          setInviteSent(false);
-          setInviteId(null);
+          if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
           const gameRes = await fetch(`${MATCHMAKING_URL}?game_id=${data.game_id}`);
           const gameData = await gameRes.json();
           const g = gameData.game;
@@ -128,11 +126,19 @@ export const GameSettingsModal = ({
           const oppName = g.white_user_id === uid ? g.black_username : g.white_username;
           const oppRating = g.white_user_id === uid ? g.black_rating : g.white_rating;
           const oppAvatar = g.white_user_id === uid ? (g.black_avatar || '') : (g.white_avatar || '');
+          setInviteSent(false);
+          setInviteId(null);
+          setStep(1);
+          setSelectedOpponent(null);
+          setSelectedTime(null);
+          setSelectedDifficulty(null);
+          setSelectedFriendId('');
+          setSelectedFriendName('');
+          setInviteDeclined(false);
           setShowGameSettings(false);
-          resetState();
           navigate(`/game?time=${encodeURIComponent(g.time_control)}&color=${myColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(oppName)}&opponent_rating=${oppRating}&opponent_avatar=${encodeURIComponent(oppAvatar)}`);
         } else if (data.status === 'declined') {
-          if (pollRef.current) clearInterval(pollRef.current);
+          if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
           setInviteSent(false);
           setInviteId(null);
           setInviteDeclined(true);
