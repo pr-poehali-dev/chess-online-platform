@@ -202,8 +202,12 @@ const Game = () => {
     return null;
   })();
 
+  const dismissResult = () => {
+    if (gameResult) setResultDismissed(true);
+  };
+
   return (
-    <div className={`min-h-screen flex flex-col transition-colors ${
+    <div onClick={dismissResult} className={`min-h-screen flex flex-col transition-colors ${
       theme === 'light' 
         ? 'bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300' 
         : 'bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950'
