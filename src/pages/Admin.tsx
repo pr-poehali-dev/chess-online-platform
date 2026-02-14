@@ -34,7 +34,8 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
   const [showLevelsModal, setShowLevelsModal] = useState(false);
   const [settings, setSettings] = useState<RatingSettings | null>(null);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
-  const [loading, setLoading] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState(false);
   const [stats, setStats] = useState<{ total_users: number; online_users: number; active_games: number } | null>(null);
 
   const fetchStats = async () => {
@@ -47,6 +48,7 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
 
   const fetchSettings = async () => {
     setLoading(true);
+    setLoadError(false);
     try {
       const [ratingRes, siteRes] = await Promise.all([
         fetch(API_URL),
@@ -56,7 +58,9 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
       const siteData = await siteRes.json();
       setSettings(ratingData);
       setSiteSettings(siteData);
-    } catch { /* network error */ }
+    } catch {
+      setLoadError(true);
+    }
     setLoading(false);
   };
 
@@ -89,7 +93,7 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
   };
 
   const getButtonsDescription = () => {
-    if (!siteSettings) return 'Загрузка...';
+    if (!siteSettings) return loadError ? 'Нажмите, чтобы повторить загрузку' : 'Загрузка...';
     const items = [
       { key: 'btn_play_online', label: 'Онлайн' },
       { key: 'btn_play_offline', label: 'Офлайн' },
@@ -102,7 +106,7 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
   };
 
   const getLevelsDescription = () => {
-    if (!siteSettings) return 'Загрузка...';
+    if (!siteSettings) return loadError ? 'Нажмите, чтобы повторить загрузку' : 'Загрузка...';
     const items = [
       { key: 'level_play_online', label: 'Онлайн' },
       { key: 'level_play_offline', label: 'Офлайн' },
@@ -117,6 +121,13 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
     }).join(' | ');
   };
 
+  const openWithRetry = async (openFn: () => void) => {
+    if (!settings || !siteSettings) {
+      await fetchSettings();
+    }
+    openFn();
+  };
+
   const adminItems = [
     {
       id: 'rating',
@@ -124,22 +135,22 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
       title: 'Принципы построения рейтинга',
       description: settings
         ? `Победа: +${settings.win_points.value} | Поражение: -${settings.loss_points.value} | Ничья: +${settings.draw_points.value} | Начальный: ${settings.initial_rating.value} | Мин: ${settings.min_rating.value}`
-        : 'Загрузка...',
-      onClick: () => setShowRatingModal(true)
+        : loadError ? 'Нажмите, чтобы повторить загрузку' : 'Загрузка...',
+      onClick: () => openWithRetry(() => setShowRatingModal(true))
     },
     {
       id: 'levels',
       icon: 'ShieldCheck',
       title: 'Доступы по уровням',
       description: getLevelsDescription(),
-      onClick: () => setShowLevelsModal(true)
+      onClick: () => openWithRetry(() => setShowLevelsModal(true))
     },
     {
       id: 'buttons',
       icon: 'ToggleRight',
       title: 'Видимость кнопок на сайте',
       description: getButtonsDescription(),
-      onClick: () => setShowButtonsModal(true)
+      onClick: () => openWithRetry(() => setShowButtonsModal(true))
     }
   ];
 
@@ -177,7 +188,6 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
             <button
               key={item.id}
               onClick={item.onClick}
-              disabled={loading}
               className="w-full flex items-center gap-4 p-4 rounded-xl bg-slate-800/60 border border-slate-700/50 hover:bg-slate-700/60 hover:border-slate-600 transition-all text-left group"
             >
               <div className="w-12 h-12 rounded-lg bg-amber-500/20 flex items-center justify-center flex-shrink-0">
@@ -191,7 +201,11 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
                   {item.description}
                 </div>
               </div>
-              <Icon name="ChevronRight" size={20} className="text-slate-500 group-hover:text-slate-300 flex-shrink-0" />
+              {loading ? (
+                <Icon name="Loader2" size={20} className="text-slate-500 animate-spin flex-shrink-0" />
+              ) : (
+                <Icon name="ChevronRight" size={20} className="text-slate-500 group-hover:text-slate-300 flex-shrink-0" />
+              )}
             </button>
           ))}
 
