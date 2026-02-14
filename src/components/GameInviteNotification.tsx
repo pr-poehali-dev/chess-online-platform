@@ -91,8 +91,11 @@ const GameInviteNotification = () => {
 
   const handleAccept = async () => {
     if (isInGame) {
-      setShowSurrenderConfirm(true);
-      return;
+      const gameFinished = localStorage.getItem('currentGameFinished') === '1';
+      if (!gameFinished) {
+        setShowSurrenderConfirm(true);
+        return;
+      }
     }
     doAccept();
   };

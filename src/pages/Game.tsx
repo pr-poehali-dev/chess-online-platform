@@ -38,6 +38,14 @@ const Game = () => {
   
   const flipped = playerColor === 'black';
 
+  useEffect(() => {
+    localStorage.setItem('currentGameFinished', gameStatus !== 'playing' ? '1' : '');
+  }, [gameStatus]);
+
+  useEffect(() => {
+    return () => { localStorage.removeItem('currentGameFinished'); };
+  }, []);
+
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   useEffect(() => {
     const requestWakeLock = async () => {
