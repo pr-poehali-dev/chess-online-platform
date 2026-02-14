@@ -3,6 +3,7 @@ import os
 import psycopg2
 import random
 import string
+from datetime import datetime, timedelta
 
 
 def esc(val):
@@ -15,13 +16,12 @@ def generate_code():
 
 
 def handler(event: dict, context) -> dict:
-    """Управление друзьями: добавление, удаление, список, профиль друга, история игр друга"""
+    """Управление друзьями: добавление с подтверждением, удаление, список, профиль, история"""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id, X-Auth-Token, X-Session-Id', 'Access-Control-Max-Age': '86400'}, 'body': ''}
 
     headers = {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}
-    dsn = os.environ['DATABASE_URL']
-    conn = psycopg2.connect(dsn)
+    conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor()
 
     if event.get('httpMethod') == 'GET':
@@ -73,10 +73,7 @@ def handler(event: dict, context) -> dict:
             if not row:
                 return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'User not found'})}
             return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
-                'user': {
-                    'id': row[0], 'username': row[1], 'avatar': row[2] or '',
-                    'rating': row[3], 'city': row[4] or '', 'user_code': row[5]
-                }
+                'user': {'id': row[0], 'username': row[1], 'avatar': row[2] or '', 'rating': row[3], 'city': row[4] or '', 'user_code': row[5]}
             })}
 
         if action == 'profile':
@@ -85,21 +82,16 @@ def handler(event: dict, context) -> dict:
                 cur.close()
                 conn.close()
                 return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'friend_id required'})}
-            cur.execute(
-                "SELECT id, username, avatar, rating, city, games_played, wins, losses, draws, last_online FROM users WHERE id = '%s'" % esc(friend_id)
-            )
+            cur.execute("SELECT id, username, avatar, rating, city, games_played, wins, losses, draws, last_online FROM users WHERE id = '%s'" % esc(friend_id))
             row = cur.fetchone()
             cur.close()
             conn.close()
             if not row:
                 return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'User not found'})}
             return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
-                'user': {
-                    'id': row[0], 'username': row[1], 'avatar': row[2] or '',
-                    'rating': row[3], 'city': row[4] or '',
-                    'games_played': row[5], 'wins': row[6], 'losses': row[7], 'draws': row[8],
-                    'last_online': row[9].isoformat() if row[9] else None
-                }
+                'user': {'id': row[0], 'username': row[1], 'avatar': row[2] or '', 'rating': row[3], 'city': row[4] or '',
+                         'games_played': row[5], 'wins': row[6], 'losses': row[7], 'draws': row[8],
+                         'last_online': row[9].isoformat() if row[9] else None}
             })}
 
         if action == 'friend_games':
@@ -112,47 +104,50 @@ def handler(event: dict, context) -> dict:
                 """SELECT id, opponent_name, opponent_type, opponent_rating, result, user_color,
                           time_control, difficulty, moves_count, rating_before, rating_after,
                           rating_change, duration_seconds, end_reason, created_at
-                   FROM game_history WHERE user_id = '%s' ORDER BY created_at DESC LIMIT 50""" % esc(friend_id)
-            )
+                   FROM game_history WHERE user_id = '%s' ORDER BY created_at DESC LIMIT 50""" % esc(friend_id))
             rows = cur.fetchall()
             cur.close()
             conn.close()
             games = []
             for r in rows:
-                games.append({
-                    'id': r[0], 'opponent_name': r[1], 'opponent_type': r[2],
-                    'opponent_rating': r[3], 'result': r[4], 'user_color': r[5],
-                    'time_control': r[6], 'difficulty': r[7], 'moves_count': r[8],
-                    'rating_before': r[9], 'rating_after': r[10], 'rating_change': r[11],
-                    'duration_seconds': r[12], 'end_reason': r[13],
-                    'created_at': r[14].isoformat() if r[14] else None
-                })
+                games.append({'id': r[0], 'opponent_name': r[1], 'opponent_type': r[2], 'opponent_rating': r[3],
+                              'result': r[4], 'user_color': r[5], 'time_control': r[6], 'difficulty': r[7],
+                              'moves_count': r[8], 'rating_before': r[9], 'rating_after': r[10], 'rating_change': r[11],
+                              'duration_seconds': r[12], 'end_reason': r[13],
+                              'created_at': r[14].isoformat() if r[14] else None})
             return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'games': games})}
 
+        if action == 'pending':
+            cur.execute(
+                """SELECT u.id, u.username, u.avatar, u.rating, u.city, u.user_code
+                   FROM friends f JOIN users u ON u.id = f.user_id
+                   WHERE f.friend_id = '%s' AND f.status = 'pending'
+                   AND NOT EXISTS (SELECT 1 FROM friends f2 WHERE f2.user_id = '%s' AND f2.friend_id = f.user_id)
+                   ORDER BY f.created_at DESC""" % (esc(user_id), esc(user_id)))
+            rows = cur.fetchall()
+            cur.close()
+            conn.close()
+            pending = []
+            for r in rows:
+                pending.append({'id': r[0], 'username': r[1], 'avatar': r[2] or '', 'rating': r[3], 'city': r[4] or '', 'user_code': r[5] or ''})
+            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'pending': pending})}
+
         cur.execute(
-            """SELECT u.id, u.username, u.avatar, u.rating, u.city, u.last_online, u.user_code
+            """SELECT u.id, u.username, u.avatar, u.rating, u.city, u.last_online, u.user_code, f.status
                FROM friends f
                JOIN users u ON u.id = f.friend_id
-               WHERE f.user_id = '%s'
-               ORDER BY u.last_online DESC NULLS LAST""" % esc(user_id)
-        )
+               WHERE f.user_id = '%s' AND f.status = 'confirmed'
+               ORDER BY u.last_online DESC NULLS LAST""" % esc(user_id))
         rows = cur.fetchall()
         cur.close()
         conn.close()
         friends = []
-        from datetime import datetime, timedelta
         now = datetime.utcnow()
         for r in rows:
             last_online = r[5]
-            is_online = False
-            if last_online:
-                is_online = (now - last_online) < timedelta(minutes=5)
-            friends.append({
-                'id': r[0], 'username': r[1], 'avatar': r[2] or '',
-                'rating': r[3], 'city': r[4] or '',
-                'status': 'online' if is_online else 'offline',
-                'user_code': r[6] or ''
-            })
+            is_online = last_online and (now - last_online) < timedelta(minutes=5)
+            friends.append({'id': r[0], 'username': r[1], 'avatar': r[2] or '', 'rating': r[3], 'city': r[4] or '',
+                            'status': 'online' if is_online else 'offline', 'user_code': r[6] or ''})
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'friends': friends})}
 
     if event.get('httpMethod') == 'POST':
@@ -185,24 +180,66 @@ def handler(event: dict, context) -> dict:
                 conn.close()
                 return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'Cannot add yourself'})}
 
-            cur.execute("SELECT id FROM friends WHERE user_id = '%s' AND friend_id = '%s'" % (esc(user_id), esc(friend_id)))
-            if cur.fetchone():
+            cur.execute("SELECT id, status FROM friends WHERE user_id = '%s' AND friend_id = '%s'" % (esc(user_id), esc(friend_id)))
+            existing = cur.fetchone()
+            if existing and existing[1] == 'confirmed':
                 cur.close()
                 conn.close()
                 return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'Already friends'})}
 
-            cur.execute("INSERT INTO friends (user_id, friend_id) VALUES ('%s', '%s')" % (esc(user_id), esc(friend_id)))
-            cur.execute("INSERT INTO friends (user_id, friend_id) VALUES ('%s', '%s') ON CONFLICT DO NOTHING" % (esc(friend_id), esc(user_id)))
+            cur.execute("SELECT id FROM friends WHERE user_id = '%s' AND friend_id = '%s'" % (esc(friend_id), esc(user_id)))
+            reverse_exists = cur.fetchone()
+
+            if reverse_exists:
+                cur.execute("UPDATE friends SET status = 'confirmed' WHERE user_id = '%s' AND friend_id = '%s'" % (esc(friend_id), esc(user_id)))
+                if not existing:
+                    cur.execute("INSERT INTO friends (user_id, friend_id, status) VALUES ('%s', '%s', 'confirmed')" % (esc(user_id), esc(friend_id)))
+                else:
+                    cur.execute("UPDATE friends SET status = 'confirmed' WHERE user_id = '%s' AND friend_id = '%s'" % (esc(user_id), esc(friend_id)))
+                conn.commit()
+                cur.close()
+                conn.close()
+                return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
+                    'status': 'confirmed',
+                    'friend': {'id': friend_row[0], 'username': friend_row[1], 'avatar': friend_row[2] or '',
+                               'rating': friend_row[3], 'city': friend_row[4] or '', 'user_code': friend_row[5]}
+                })}
+            else:
+                if not existing:
+                    cur.execute("INSERT INTO friends (user_id, friend_id, status) VALUES ('%s', '%s', 'pending')" % (esc(user_id), esc(friend_id)))
+                conn.commit()
+                cur.close()
+                conn.close()
+                return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
+                    'status': 'pending',
+                    'friend': {'id': friend_row[0], 'username': friend_row[1], 'avatar': friend_row[2] or '',
+                               'rating': friend_row[3], 'city': friend_row[4] or '', 'user_code': friend_row[5]}
+                })}
+
+        if action == 'accept':
+            friend_id = body.get('friend_id', '')
+            if not friend_id:
+                cur.close()
+                conn.close()
+                return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'friend_id required'})}
+            cur.execute("UPDATE friends SET status = 'confirmed' WHERE user_id = '%s' AND friend_id = '%s'" % (esc(friend_id), esc(user_id)))
+            cur.execute("INSERT INTO friends (user_id, friend_id, status) VALUES ('%s', '%s', 'confirmed') ON CONFLICT (user_id, friend_id) DO UPDATE SET status = 'confirmed'" % (esc(user_id), esc(friend_id)))
             conn.commit()
             cur.close()
             conn.close()
-            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
-                'status': 'added',
-                'friend': {
-                    'id': friend_row[0], 'username': friend_row[1], 'avatar': friend_row[2] or '',
-                    'rating': friend_row[3], 'city': friend_row[4] or '', 'user_code': friend_row[5]
-                }
-            })}
+            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'confirmed'})}
+
+        if action == 'reject':
+            friend_id = body.get('friend_id', '')
+            if not friend_id:
+                cur.close()
+                conn.close()
+                return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'friend_id required'})}
+            cur.execute("DELETE FROM friends WHERE user_id = '%s' AND friend_id = '%s'" % (esc(friend_id), esc(user_id)))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rejected'})}
 
         if action == 'remove':
             friend_id = body.get('friend_id', '')
@@ -210,8 +247,7 @@ def handler(event: dict, context) -> dict:
                 cur.close()
                 conn.close()
                 return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'friend_id required'})}
-            cur.execute("DELETE FROM friends WHERE user_id = '%s' AND friend_id = '%s'" % (esc(user_id), esc(friend_id)))
-            cur.execute("DELETE FROM friends WHERE user_id = '%s' AND friend_id = '%s'" % (esc(friend_id), esc(user_id)))
+            cur.execute("DELETE FROM friends WHERE (user_id = '%s' AND friend_id = '%s') OR (user_id = '%s' AND friend_id = '%s')" % (esc(user_id), esc(friend_id), esc(friend_id), esc(user_id)))
             conn.commit()
             cur.close()
             conn.close()

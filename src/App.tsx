@@ -10,6 +10,7 @@ import Game from "./pages/Game";
 import OnlineGame from "./pages/OnlineGame";
 import Admin from "./pages/Admin";
 import NotFound from "./pages/NotFound";
+import AuthGuard from "./components/AuthGuard";
 
 const DECAY_URL = 'https://functions.poehali.dev/06f73421-41be-448f-a352-17e488dc15ef';
 
@@ -31,8 +32,8 @@ const App = () => (
       <BrowserRouter>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/game" element={<Game />} />
-          <Route path="/online-game" element={<OnlineGame />} />
+          <Route path="/game" element={<AuthGuard><Game /></AuthGuard>} />
+          <Route path="/online-game" element={<AuthGuard><OnlineGame /></AuthGuard>} />
           <Route path="/admin" element={<Admin />} />
           {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
           <Route path="*" element={<NotFound />} />

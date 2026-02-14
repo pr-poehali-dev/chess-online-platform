@@ -18,6 +18,15 @@ interface Friend {
   user_code: string;
 }
 
+interface PendingRequest {
+  id: string;
+  username: string;
+  avatar: string;
+  rating: number;
+  city: string;
+  user_code: string;
+}
+
 interface FriendGame {
   id: number;
   opponent_name: string;
@@ -59,6 +68,7 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
   const [userId, setUserId] = useState('');
   const [userCode, setUserCode] = useState('');
   const [friends, setFriends] = useState<Friend[]>([]);
+  const [pendingRequests, setPendingRequests] = useState<PendingRequest[]>([]);
   const [friendCode, setFriendCode] = useState('');
   const [showAddFriend, setShowAddFriend] = useState(false);
   const [showScanner, setShowScanner] = useState(false);
@@ -87,24 +97,36 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
   }, []);
 
   const fetchMyCode = useCallback(async (uid: string) => {
-    const res = await fetch(`${FRIENDS_URL}?action=my_code&user_id=${encodeURIComponent(uid)}`);
-    const data = await res.json();
-    if (data.code) {
-      setUserCode(data.code);
-      const savedUser = localStorage.getItem('chessUser');
-      if (savedUser) {
-        const user = JSON.parse(savedUser);
-        user.userId = data.code;
-        localStorage.setItem('chessUser', JSON.stringify(user));
+    try {
+      const res = await fetch(`${FRIENDS_URL}?action=my_code&user_id=${encodeURIComponent(uid)}`);
+      const data = await res.json();
+      if (data.code) {
+        setUserCode(data.code);
+        const savedUser = localStorage.getItem('chessUser');
+        if (savedUser) {
+          const user = JSON.parse(savedUser);
+          user.userId = data.code;
+          localStorage.setItem('chessUser', JSON.stringify(user));
+        }
       }
-    }
+    } catch { /* network error */ }
   }, []);
 
   const fetchFriends = useCallback(async (uid: string) => {
-    const res = await fetch(`${FRIENDS_URL}?action=list&user_id=${encodeURIComponent(uid)}`);
-    const data = await res.json();
-    setFriends(data.friends || []);
+    try {
+      const res = await fetch(`${FRIENDS_URL}?action=list&user_id=${encodeURIComponent(uid)}`);
+      const data = await res.json();
+      setFriends(data.friends || []);
+    } catch { /* network error */ }
     setLoading(false);
+  }, []);
+
+  const fetchPending = useCallback(async (uid: string) => {
+    try {
+      const res = await fetch(`${FRIENDS_URL}?action=pending&user_id=${encodeURIComponent(uid)}`);
+      const data = await res.json();
+      setPendingRequests(data.pending || []);
+    } catch { /* network error */ }
   }, []);
 
   const sendHeartbeat = useCallback(async (uid: string) => {
@@ -117,15 +139,16 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
     setUserId(uid);
     fetchMyCode(uid);
     fetchFriends(uid);
+    fetchPending(uid);
     sendHeartbeat(uid);
 
     const heartbeatInterval = setInterval(() => sendHeartbeat(uid), 60000);
-    const refreshInterval = setInterval(() => fetchFriends(uid), 30000);
+    const refreshInterval = setInterval(() => { fetchFriends(uid); fetchPending(uid); }, 15000);
     return () => {
       clearInterval(heartbeatInterval);
       clearInterval(refreshInterval);
     };
-  }, [getUserId, fetchMyCode, fetchFriends, sendHeartbeat]);
+  }, [getUserId, fetchMyCode, fetchFriends, fetchPending, sendHeartbeat]);
 
   useEffect(() => {
     if (pendingInviteCode && userId) {
@@ -146,18 +169,11 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
 
   const copyInviteLink = () => {
     const link = `${SITE_URL}?invite=${userCode}`;
-    const doCopy = () => {
-      setCopied(true);
-      setTimeout(() => setCopied(false), 2000);
-    };
+    const doCopy = () => { setCopied(true); setTimeout(() => setCopied(false), 2000); };
     if (navigator.clipboard && navigator.clipboard.writeText) {
-      navigator.clipboard.writeText(link).then(doCopy).catch(() => {
-        fallbackCopy(link);
-        doCopy();
-      });
+      navigator.clipboard.writeText(link).then(doCopy).catch(() => { fallbackCopy(link); doCopy(); });
     } else {
-      fallbackCopy(link);
-      doCopy();
+      fallbackCopy(link); doCopy();
     }
   };
 
@@ -185,11 +201,15 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
         body: JSON.stringify({ action: 'add', user_id: userId, friend_code: codeToAdd })
       });
       const data = await res.json();
-      if (res.ok && data.status === 'added') {
-        setAddSuccess(`${data.friend.username} добавлен в друзья!`);
+      if (res.ok && (data.status === 'pending' || data.status === 'confirmed')) {
+        const msg = data.status === 'confirmed'
+          ? `${data.friend.username} добавлен в друзья!`
+          : `Заявка отправлена ${data.friend.username}. Ожидайте подтверждения.`;
+        setAddSuccess(msg);
         setFriendCode('');
         fetchFriends(userId);
-        setTimeout(() => { setAddSuccess(''); setShowAddFriend(false); }, 2000);
+        fetchPending(userId);
+        setTimeout(() => { setAddSuccess(''); setShowAddFriend(false); }, 3000);
       } else {
         if (data.error === 'Already friends') setAddError('Уже в списке друзей');
         else if (data.error === 'User not found') setAddError('Пользователь не найден');
@@ -199,6 +219,25 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
     } catch {
       setAddError('Ошибка сети');
     }
+  };
+
+  const acceptRequest = async (friendId: string) => {
+    await fetch(FRIENDS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'accept', user_id: userId, friend_id: friendId })
+    });
+    fetchFriends(userId);
+    fetchPending(userId);
+  };
+
+  const rejectRequest = async (friendId: string) => {
+    await fetch(FRIENDS_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reject', user_id: userId, friend_id: friendId })
+    });
+    fetchPending(userId);
   };
 
   const removeFriend = async (friendId: string) => {
@@ -215,14 +254,12 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
     setLoadingGames(true);
     setSelectedFriend(null);
     setFriendGames([]);
-
     const [profileRes, gamesRes] = await Promise.all([
       fetch(`${FRIENDS_URL}?action=profile&user_id=${userId}&friend_id=${encodeURIComponent(friend.id)}`),
       fetch(`${FRIENDS_URL}?action=friend_games&user_id=${userId}&friend_id=${encodeURIComponent(friend.id)}`)
     ]);
     const profileData = await profileRes.json();
     const gamesData = await gamesRes.json();
-
     setSelectedFriend(profileData.user || null);
     setFriendGames(gamesData.games || []);
     setLoadingGames(false);
@@ -241,11 +278,7 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
           { fps: 10, qrbox: { width: 250, height: 250 } },
           (decodedText: string) => {
             let code = decodedText;
-            try {
-              const url = new URL(decodedText);
-              const invite = url.searchParams.get('invite');
-              if (invite) code = invite;
-            } catch { /* not a URL */ }
+            try { const url = new URL(decodedText); const invite = url.searchParams.get('invite'); if (invite) code = invite; } catch { /* not url */ }
             setFriendCode(code);
             setShowScanner(false);
             setShowAddFriend(true);
@@ -261,9 +294,7 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
   };
 
   const stopScanner = () => {
-    if (html5QrCodeRef.current) {
-      html5QrCodeRef.current.stop().catch(() => {});
-    }
+    if (html5QrCodeRef.current) html5QrCodeRef.current.stop().catch(() => {});
     setShowScanner(false);
   };
 
@@ -273,30 +304,22 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
     return name.substring(0, 2).toUpperCase();
   };
 
-  const qrCodeUrl = userCode
-    ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${SITE_URL}?invite=${userCode}`)}`
-    : '';
+  const qrCodeUrl = userCode ? `https://api.qrserver.com/v1/create-qr-code/?size=150x150&data=${encodeURIComponent(`${SITE_URL}?invite=${userCode}`)}` : '';
 
   const getResultColor = (result: string) => {
     if (result === 'win') return 'text-green-600 dark:text-green-400';
     if (result === 'loss') return 'text-red-600 dark:text-red-400';
     return 'text-gray-600 dark:text-gray-400';
   };
-
   const getResultText = (result: string) => {
     if (result === 'win') return 'Победа';
     if (result === 'loss') return 'Поражение';
     return 'Ничья';
   };
-
   const getEndReasonText = (reason: string) => {
-    const map: Record<string, string> = {
-      checkmate: 'Мат', stalemate: 'Пат', draw: 'Ничья',
-      surrender: 'Сдача', timeout: 'Время'
-    };
+    const map: Record<string, string> = { checkmate: 'Мат', stalemate: 'Пат', draw: 'Ничья', surrender: 'Сдача', timeout: 'Время' };
     return map[reason] || reason;
   };
-
   const formatDate = (dateString: string) => {
     const date = new Date(dateString);
     const now = new Date();
@@ -312,42 +335,23 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
       <div className="space-y-4 animate-fade-in max-w-2xl mx-auto">
         <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
           <CardContent className="p-4 md:p-6">
-            <Button
-              onClick={() => { setSelectedFriend(null); setFriendGames([]); }}
-              variant="ghost"
-              className="mb-4 text-blue-600 dark:text-blue-400"
-            >
-              <Icon name="ChevronLeft" size={18} className="mr-1" />
-              Назад к друзьям
+            <Button onClick={() => { setSelectedFriend(null); setFriendGames([]); }} variant="ghost" className="mb-4 text-blue-600 dark:text-blue-400">
+              <Icon name="ChevronLeft" size={18} className="mr-1" /> Назад к друзьям
             </Button>
-
             <div className="flex items-center gap-4 mb-6">
               <Avatar className="w-16 h-16">
-                {selectedFriend.avatar ? (
-                  <AvatarImage src={selectedFriend.avatar} />
-                ) : (
-                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-xl">
-                    {getInitials(selectedFriend.username)}
-                  </AvatarFallback>
+                {selectedFriend.avatar ? <AvatarImage src={selectedFriend.avatar} /> : (
+                  <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-xl">{getInitials(selectedFriend.username)}</AvatarFallback>
                 )}
               </Avatar>
               <div>
                 <h2 className="text-xl font-bold text-gray-900 dark:text-white">{selectedFriend.username}</h2>
                 <div className="flex items-center gap-3 text-sm text-gray-500 dark:text-gray-400 mt-1">
-                  <span className="flex items-center gap-1">
-                    <Icon name="Trophy" size={14} className="text-amber-500" />
-                    {selectedFriend.rating}
-                  </span>
-                  {selectedFriend.city && (
-                    <span className="flex items-center gap-1">
-                      <Icon name="MapPin" size={14} />
-                      {selectedFriend.city}
-                    </span>
-                  )}
+                  <span className="flex items-center gap-1"><Icon name="Trophy" size={14} className="text-amber-500" />{selectedFriend.rating}</span>
+                  {selectedFriend.city && <span className="flex items-center gap-1"><Icon name="MapPin" size={14} />{selectedFriend.city}</span>}
                 </div>
               </div>
             </div>
-
             <div className="grid grid-cols-4 gap-2 mb-6">
               <div className="text-center p-3 rounded-lg bg-slate-50 dark:bg-slate-800/30">
                 <div className="text-lg font-bold text-gray-900 dark:text-white">{selectedFriend.games_played}</div>
@@ -366,36 +370,23 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
                 <div className="text-[10px] text-gray-500">Ничьих</div>
               </div>
             </div>
-
             <h3 className="text-lg font-bold text-gray-900 dark:text-white mb-3 flex items-center gap-2">
-              <Icon name="History" size={18} className="text-blue-600 dark:text-blue-400" />
-              История игр
+              <Icon name="History" size={18} className="text-blue-600 dark:text-blue-400" /> История игр
             </h3>
-
             {loadingGames ? (
-              <div className="text-center py-8 text-gray-400">
-                <Icon name="Loader2" size={24} className="animate-spin mx-auto mb-2" />
-                Загрузка...
-              </div>
+              <div className="text-center py-8 text-gray-400"><Icon name="Loader2" size={24} className="animate-spin mx-auto mb-2" />Загрузка...</div>
             ) : friendGames.length === 0 ? (
-              <div className="text-center py-8 text-gray-400">
-                <Icon name="GamepadIcon" size={32} className="mx-auto mb-2 opacity-40" />
-                <p className="text-sm">Нет сыгранных партий</p>
-              </div>
+              <div className="text-center py-8 text-gray-400"><Icon name="Gamepad2" size={32} className="mx-auto mb-2 opacity-40" /><p className="text-sm">Нет сыгранных партий</p></div>
             ) : (
               <div className="space-y-2">
                 {friendGames.map((game) => (
                   <div key={game.id} className="flex items-center justify-between p-3 rounded-lg border border-slate-200 dark:border-white/5 bg-slate-50 dark:bg-slate-800/30">
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
-                        <span className={`text-sm font-semibold ${getResultColor(game.result)}`}>
-                          {getResultText(game.result)}
-                        </span>
+                        <span className={`text-sm font-semibold ${getResultColor(game.result)}`}>{getResultText(game.result)}</span>
                         <span className="text-xs text-gray-500">vs {game.opponent_name}</span>
                       </div>
-                      <div className="text-xs text-gray-400 mt-0.5">
-                        {game.time_control} · {getEndReasonText(game.end_reason)} · {game.moves_count} ходов
-                      </div>
+                      <div className="text-xs text-gray-400 mt-0.5">{game.time_control} · {getEndReasonText(game.end_reason)} · {game.moves_count} ходов</div>
                     </div>
                     <div className="text-right flex-shrink-0">
                       <div className={`text-sm font-bold ${game.rating_change > 0 ? 'text-green-500' : game.rating_change < 0 ? 'text-red-500' : 'text-gray-400'}`}>
@@ -417,32 +408,22 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
     <div className="space-y-4 animate-fade-in max-w-2xl mx-auto">
       <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 overflow-hidden">
         <CardContent className="p-4 md:p-6 space-y-5">
+          {/* ID + QR */}
           <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-500/20">
             <div className="flex items-start gap-4">
               <div className="flex-1 min-w-0">
                 <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1.5 flex items-center gap-1.5">
-                  <Icon name="Fingerprint" size={14} />
-                  Ваш уникальный ID
+                  <Icon name="Fingerprint" size={14} /> Ваш уникальный ID
                 </div>
-                <button
-                  onClick={copyInviteLink}
-                  className="group flex items-center gap-2 cursor-pointer"
-                  title="Нажмите, чтобы скопировать ссылку"
-                >
+                <button onClick={copyInviteLink} className="group flex items-center gap-2 cursor-pointer" title="Скопировать ссылку-приглашение">
                   <code className="text-lg md:text-xl font-mono font-bold text-slate-900 dark:text-white bg-white/70 dark:bg-slate-800/70 px-3 py-1.5 rounded-lg tracking-wider group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-active:scale-95 transition-all">
                     {userCode || '...'}
                   </code>
                   <span className={`text-xs transition-all ${copied ? 'text-green-500' : 'text-blue-400 opacity-0 group-hover:opacity-100'}`}>
-                    {copied ? (
-                      <span className="flex items-center gap-1"><Icon name="Check" size={14} /> Скопировано!</span>
-                    ) : (
-                      <Icon name="Copy" size={14} />
-                    )}
+                    {copied ? <span className="flex items-center gap-1"><Icon name="Check" size={14} /> Скопировано!</span> : <Icon name="Copy" size={14} />}
                   </span>
                 </button>
-                <p className="text-[11px] text-blue-500/70 dark:text-blue-400/50 mt-1.5">
-                  Нажмите на ID — скопируется ссылка-приглашение
-                </p>
+                <p className="text-[11px] text-blue-500/70 dark:text-blue-400/50 mt-1.5">Нажмите на ID — скопируется ссылка-приглашение</p>
               </div>
               {qrCodeUrl && (
                 <div className="flex-shrink-0 bg-white rounded-lg p-1.5 shadow-sm">
@@ -452,31 +433,59 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
             </div>
           </div>
 
+          {/* Incoming requests */}
+          {pendingRequests.length > 0 && (
+            <div>
+              <h3 className="text-sm font-bold text-gray-900 dark:text-white mb-2 flex items-center gap-2">
+                <Icon name="UserCheck" size={16} className="text-amber-500" />
+                Входящие заявки
+                <Badge className="bg-amber-100 dark:bg-amber-900/30 text-amber-700 dark:text-amber-400 text-[10px] px-1.5 py-0">{pendingRequests.length}</Badge>
+              </h3>
+              <div className="space-y-2">
+                {pendingRequests.map((req) => (
+                  <div key={req.id} className="flex items-center gap-3 p-3 rounded-xl border bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-500/20">
+                    <Avatar className="w-10 h-10">
+                      {req.avatar ? <AvatarImage src={req.avatar} /> : (
+                        <AvatarFallback className="bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold text-sm">{getInitials(req.username)}</AvatarFallback>
+                      )}
+                    </Avatar>
+                    <div className="flex-1 min-w-0">
+                      <span className="font-semibold text-sm text-gray-900 dark:text-white">{req.username}</span>
+                      <div className="text-xs text-gray-500 flex items-center gap-2">
+                        <span className="flex items-center gap-1"><Icon name="Trophy" size={11} className="text-amber-500" />{req.rating}</span>
+                        {req.city && <span>{req.city}</span>}
+                      </div>
+                    </div>
+                    <div className="flex gap-1">
+                      <Button onClick={() => acceptRequest(req.id)} size="sm" className="bg-green-600 hover:bg-green-700 text-white border-0 h-8 w-8 p-0" title="Принять">
+                        <Icon name="Check" size={16} />
+                      </Button>
+                      <Button onClick={() => rejectRequest(req.id)} size="sm" variant="ghost" className="text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0" title="Отклонить">
+                        <Icon name="X" size={16} />
+                      </Button>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+
+          {/* Friends list */}
           <div>
             <div className="flex items-center justify-between mb-3">
               <h2 className="text-lg font-bold text-gray-900 dark:text-white flex items-center gap-2">
                 <Icon name="Users" size={20} className="text-blue-600 dark:text-blue-400" />
                 Мои друзья
-                {friends.length > 0 && (
-                  <span className="text-sm font-normal text-gray-500 dark:text-gray-400">({friends.length})</span>
-                )}
+                {friends.length > 0 && <span className="text-sm font-normal text-gray-500 dark:text-gray-400">({friends.length})</span>}
               </h2>
             </div>
 
             <div className="flex flex-col sm:flex-row gap-2 mb-4">
-              <Button
-                onClick={() => { setShowAddFriend(!showAddFriend); setShowScanner(false); setAddError(''); setAddSuccess(''); }}
-                className="bg-blue-600 hover:bg-blue-700 text-white border-0 flex-1 sm:flex-none"
-              >
-                <Icon name="UserPlus" size={18} className="mr-2" />
-                Ввести ID друга
+              <Button onClick={() => { setShowAddFriend(!showAddFriend); setShowScanner(false); setAddError(''); setAddSuccess(''); }} className="bg-blue-600 hover:bg-blue-700 text-white border-0 flex-1 sm:flex-none">
+                <Icon name="UserPlus" size={18} className="mr-2" /> Ввести ID друга
               </Button>
               {isMobile && (
-                <Button
-                  onClick={showScanner ? stopScanner : startScanner}
-                  variant="outline"
-                  className="border-blue-300 dark:border-blue-500/40 text-blue-600 dark:text-blue-400 flex-1 sm:flex-none"
-                >
+                <Button onClick={showScanner ? stopScanner : startScanner} variant="outline" className="border-blue-300 dark:border-blue-500/40 text-blue-600 dark:text-blue-400 flex-1 sm:flex-none">
                   <Icon name={showScanner ? 'X' : 'ScanLine'} size={18} className="mr-2" />
                   {showScanner ? 'Закрыть сканер' : 'Сканировать QR'}
                 </Button>
@@ -486,9 +495,7 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
             {showScanner && (
               <div className="mb-4 rounded-xl overflow-hidden border border-slate-200 dark:border-white/10 animate-scale-in">
                 <div id="qr-scanner-region" ref={scannerRef} className="w-full" />
-                <p className="text-center text-xs text-gray-500 dark:text-gray-400 py-2">
-                  Наведите камеру на QR-код друга
-                </p>
+                <p className="text-center text-xs text-gray-500 dark:text-gray-400 py-2">Наведите камеру на QR-код друга</p>
               </div>
             )}
 
@@ -504,32 +511,17 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
                     className="flex-1 px-3 py-2 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400 text-sm"
                     autoFocus
                   />
-                  <Button
-                    onClick={() => handleAddFriendByCode()}
-                    disabled={!friendCode.trim()}
-                    className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white border-0"
-                  >
+                  <Button onClick={() => handleAddFriendByCode()} disabled={!friendCode.trim()} className="bg-green-600 hover:bg-green-700 disabled:bg-gray-300 text-white border-0">
                     <Icon name="Plus" size={18} />
                   </Button>
                 </div>
-                {addError && (
-                  <p className="text-xs text-red-500 mt-2 flex items-center gap-1">
-                    <Icon name="AlertCircle" size={12} /> {addError}
-                  </p>
-                )}
-                {addSuccess && (
-                  <p className="text-xs text-green-500 mt-2 flex items-center gap-1">
-                    <Icon name="Check" size={12} /> {addSuccess}
-                  </p>
-                )}
+                {addError && <p className="text-xs text-red-500 mt-2 flex items-center gap-1"><Icon name="AlertCircle" size={12} /> {addError}</p>}
+                {addSuccess && <p className="text-xs text-green-500 mt-2 flex items-center gap-1"><Icon name="Check" size={12} /> {addSuccess}</p>}
               </div>
             )}
 
             {loading ? (
-              <div className="text-center py-10 text-gray-400">
-                <Icon name="Loader2" size={32} className="animate-spin mx-auto mb-2" />
-                <p className="text-sm">Загрузка...</p>
-              </div>
+              <div className="text-center py-10 text-gray-400"><Icon name="Loader2" size={32} className="animate-spin mx-auto mb-2" /><p className="text-sm">Загрузка...</p></div>
             ) : friends.length === 0 ? (
               <div className="text-center py-10 text-gray-400 dark:text-gray-500">
                 <Icon name="Users" className="mx-auto mb-3 opacity-40" size={44} />
@@ -546,61 +538,35 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
                   >
                     <div className="relative flex-shrink-0">
                       <Avatar className="w-11 h-11">
-                        {friend.avatar ? (
-                          <AvatarImage src={friend.avatar} alt={friend.username} />
-                        ) : (
-                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-sm">
-                            {getInitials(friend.username)}
-                          </AvatarFallback>
+                        {friend.avatar ? <AvatarImage src={friend.avatar} alt={friend.username} /> : (
+                          <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-sm">{getInitials(friend.username)}</AvatarFallback>
                         )}
                       </Avatar>
-                      <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${
-                        friend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'
-                      }`} />
+                      <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${friend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`} />
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center gap-2">
                         <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">{friend.username}</span>
                         <Badge variant={friend.status === 'online' ? 'default' : 'secondary'} className={`text-[10px] px-1.5 py-0 ${
-                          friend.status === 'online'
-                            ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400'
-                            : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
+                          friend.status === 'online' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                         }`}>
                           {friend.status === 'online' ? 'Онлайн' : 'Оффлайн'}
                         </Badge>
                       </div>
                       <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
-                        <span className="flex items-center gap-1">
-                          <Icon name="Trophy" size={11} className="text-amber-500" />
-                          {friend.rating}
-                        </span>
-                        {friend.city && (
-                          <span className="flex items-center gap-1">
-                            <Icon name="MapPin" size={11} />
-                            {friend.city}
-                          </span>
-                        )}
+                        <span className="flex items-center gap-1"><Icon name="Trophy" size={11} className="text-amber-500" />{friend.rating}</span>
+                        {friend.city && <span className="flex items-center gap-1"><Icon name="MapPin" size={11} />{friend.city}</span>}
                       </div>
                     </div>
                     <div className="flex items-center gap-1 flex-shrink-0">
                       {onOpenChat && (
-                        <Button
-                          onClick={(e) => { e.stopPropagation(); onOpenChat(friend.username, friend.rating, friend.id); }}
-                          variant="ghost"
-                          size="sm"
-                          className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 h-8 w-8 p-0"
-                          title="Написать"
-                        >
+                        <Button onClick={(e) => { e.stopPropagation(); onOpenChat(friend.username, friend.rating, friend.id); }} variant="ghost" size="sm"
+                          className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 h-8 w-8 p-0" title="Написать">
                           <Icon name="MessageCircle" size={16} />
                         </Button>
                       )}
-                      <Button
-                        onClick={(e) => { e.stopPropagation(); removeFriend(friend.id); }}
-                        variant="ghost"
-                        size="sm"
-                        className="text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity"
-                        title="Удалить из друзей"
-                      >
+                      <Button onClick={(e) => { e.stopPropagation(); removeFriend(friend.id); }} variant="ghost" size="sm"
+                        className="text-red-400 hover:text-red-500 hover:bg-red-50 dark:hover:bg-red-900/20 h-8 w-8 p-0 opacity-0 group-hover:opacity-100 transition-opacity" title="Удалить из друзей">
                         <Icon name="UserMinus" size={16} />
                       </Button>
                     </div>

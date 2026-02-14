@@ -211,9 +211,11 @@ const Index = () => {
         showGameSettings={showGameSettings}
         setShowGameSettings={setShowGameSettings}
         onStartGame={(difficulty, timeControl, color) => {
+          localStorage.setItem('lastGameSettings', JSON.stringify({ time: timeControl, color }));
           navigate(`/game?difficulty=${difficulty}&time=${encodeURIComponent(timeControl)}&color=${color}`);
         }}
         onStartOnlineGame={(opponentType, timeControl, color) => {
+          localStorage.setItem('lastGameSettings', JSON.stringify({ time: timeControl, color }));
           navigate(`/online-game?opponent=${opponentType}&time=${encodeURIComponent(timeControl)}&color=${color}`);
         }}
       />
