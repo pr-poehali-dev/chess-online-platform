@@ -36,20 +36,20 @@ export const FriendListPanel = ({
           </h3>
           <div className="space-y-2">
             {pendingRequests.map((req) => (
-              <div key={req.id} className="flex items-center gap-3 p-3 rounded-xl border bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-500/20">
-                <Avatar className="w-10 h-10">
+              <div key={req.id} className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border bg-amber-50 dark:bg-amber-900/10 border-amber-200 dark:border-amber-500/20">
+                <Avatar className="w-9 h-9 sm:w-10 sm:h-10 flex-shrink-0">
                   {req.avatar ? <AvatarImage src={req.avatar} /> : (
-                    <AvatarFallback className="bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold text-sm">{getInitials(req.username)}</AvatarFallback>
+                    <AvatarFallback className="bg-gradient-to-br from-amber-500 to-orange-600 text-white font-bold text-xs sm:text-sm">{getInitials(req.username)}</AvatarFallback>
                   )}
                 </Avatar>
                 <div className="flex-1 min-w-0">
-                  <span className="font-semibold text-sm text-gray-900 dark:text-white">{req.username}</span>
-                  <div className="text-xs text-gray-500 flex items-center gap-2">
+                  <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white truncate block">{req.username}</span>
+                  <div className="text-[11px] sm:text-xs text-gray-500 flex items-center gap-2">
                     <span className="flex items-center gap-1"><Icon name="Trophy" size={11} className="text-amber-500" />{req.rating}</span>
-                    {req.city && <span>{req.city}</span>}
+                    {req.city && <span className="truncate">{req.city}</span>}
                   </div>
                 </div>
-                <div className="flex gap-1">
+                <div className="flex gap-1 flex-shrink-0">
                   <Button onClick={() => onAcceptRequest(req.id)} size="sm" className="bg-green-600 hover:bg-green-700 text-white border-0 h-8 w-8 p-0" title="Принять">
                     <Icon name="Check" size={16} />
                   </Button>
@@ -86,31 +86,31 @@ export const FriendListPanel = ({
               <div
                 key={friend.id}
                 onClick={() => onOpenProfile(friend)}
-                className="flex items-center gap-3 p-3 rounded-xl border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all group cursor-pointer"
+                className="flex items-center gap-2 sm:gap-3 p-2.5 sm:p-3 rounded-xl border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5 hover:border-blue-300 dark:hover:border-blue-500/30 transition-all group cursor-pointer"
               >
                 <div className="relative flex-shrink-0">
-                  <Avatar className="w-11 h-11">
+                  <Avatar className="w-10 h-10 sm:w-11 sm:h-11">
                     {friend.avatar ? <AvatarImage src={friend.avatar} alt={friend.username} /> : (
-                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-sm">{getInitials(friend.username)}</AvatarFallback>
+                      <AvatarFallback className="bg-gradient-to-br from-blue-500 to-purple-600 text-white font-bold text-xs sm:text-sm">{getInitials(friend.username)}</AvatarFallback>
                     )}
                   </Avatar>
-                  <div className={`absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${friend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`} />
+                  <div className={`absolute -bottom-0.5 -right-0.5 w-3 h-3 sm:w-3.5 sm:h-3.5 rounded-full border-2 border-white dark:border-slate-900 ${friend.status === 'online' ? 'bg-green-500' : 'bg-gray-400'}`} />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-sm text-gray-900 dark:text-white truncate">{friend.username}</span>
-                    <Badge variant={friend.status === 'online' ? 'default' : 'secondary'} className={`text-[10px] px-1.5 py-0 ${
+                  <div className="flex items-center gap-1.5 sm:gap-2">
+                    <span className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{friend.username}</span>
+                    <Badge variant={friend.status === 'online' ? 'default' : 'secondary'} className={`text-[9px] sm:text-[10px] px-1 sm:px-1.5 py-0 flex-shrink-0 ${
                       friend.status === 'online' ? 'bg-green-100 dark:bg-green-900/30 text-green-700 dark:text-green-400' : 'bg-gray-100 dark:bg-gray-800 text-gray-500'
                     }`}>
                       {friend.status === 'online' ? 'Онлайн' : 'Оффлайн'}
                     </Badge>
                   </div>
-                  <div className="text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
+                  <div className="text-[11px] sm:text-xs text-gray-500 dark:text-gray-400 flex items-center gap-2 mt-0.5">
                     <span className="flex items-center gap-1"><Icon name="Trophy" size={11} className="text-amber-500" />{friend.rating}</span>
-                    {friend.city && <span className="flex items-center gap-1"><Icon name="MapPin" size={11} />{friend.city}</span>}
+                    {friend.city && <span className="flex items-center gap-1 truncate"><Icon name="MapPin" size={11} className="flex-shrink-0" />{friend.city}</span>}
                   </div>
                 </div>
-                <div className="flex items-center gap-1 flex-shrink-0">
+                <div className="flex items-center gap-0.5 sm:gap-1 flex-shrink-0">
                   {onOpenChat && (
                     <Button onClick={(e) => { e.stopPropagation(); onOpenChat(friend.username, friend.rating, friend.id); }} variant="ghost" size="sm"
                       className="text-blue-600 dark:text-blue-400 hover:bg-blue-50 dark:hover:bg-blue-900/20 h-8 w-8 p-0" title="Написать">

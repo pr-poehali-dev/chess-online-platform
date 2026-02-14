@@ -100,36 +100,36 @@ export const FriendInvitePanel = ({
 
   return (
     <>
-      <div className="p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-500/20">
-        <div className="flex items-start gap-4">
-          <div className="flex-1 min-w-0">
+      <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-500/20">
+        <div className="flex items-start gap-3 sm:gap-4">
+          <div className="flex-1 min-w-0 overflow-hidden">
             <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1.5 flex items-center gap-1.5">
               <Icon name="Fingerprint" size={14} /> Ваш уникальный ID
             </div>
-            <button onClick={copyInviteLink} className="group flex items-center gap-2 cursor-pointer" title="Скопировать ссылку-приглашение">
-              <code className="text-lg md:text-xl font-mono font-bold text-slate-900 dark:text-white bg-white/70 dark:bg-slate-800/70 px-3 py-1.5 rounded-lg tracking-wider group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-active:scale-95 transition-all">
+            <button onClick={copyInviteLink} className="group flex items-center gap-2 cursor-pointer max-w-full" title="Скопировать ссылку-приглашение">
+              <code className="text-sm sm:text-lg md:text-xl font-mono font-bold text-slate-900 dark:text-white bg-white/70 dark:bg-slate-800/70 px-2 sm:px-3 py-1.5 rounded-lg tracking-wider group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-active:scale-95 transition-all truncate">
                 {userCode || '...'}
               </code>
-              <span className={`text-xs transition-all ${copied ? 'text-green-500' : 'text-blue-400 opacity-0 group-hover:opacity-100'}`}>
+              <span className={`text-xs transition-all flex-shrink-0 ${copied ? 'text-green-500' : 'text-blue-400 opacity-0 group-hover:opacity-100'}`}>
                 {copied ? <span className="flex items-center gap-1"><Icon name="Check" size={14} /> Скопировано!</span> : <Icon name="Copy" size={14} />}
               </span>
             </button>
             <p className="text-[11px] text-blue-500/70 dark:text-blue-400/50 mt-1.5">Нажмите на ID — скопируется ссылка-приглашение</p>
           </div>
           {qrCodeUrl && (
-            <div className="flex-shrink-0 bg-white rounded-lg p-1.5 shadow-sm">
-              <img src={qrCodeUrl} alt="QR Code" className="w-24 h-24 rounded" />
+            <div className="flex-shrink-0 bg-white rounded-lg p-1 sm:p-1.5 shadow-sm">
+              <img src={qrCodeUrl} alt="QR Code" className="w-16 h-16 sm:w-24 sm:h-24 rounded" />
             </div>
           )}
         </div>
       </div>
 
       <div className="flex flex-col sm:flex-row gap-2">
-        <Button onClick={() => { setShowAddFriend(!showAddFriend); setShowScanner(false); setAddError(''); }} className="bg-blue-600 hover:bg-blue-700 text-white border-0 flex-1 sm:flex-none">
+        <Button onClick={() => { setShowAddFriend(!showAddFriend); setShowScanner(false); setAddError(''); }} className="bg-blue-600 hover:bg-blue-700 text-white border-0 w-full sm:w-auto">
           <Icon name="UserPlus" size={18} className="mr-2" /> Ввести ID друга
         </Button>
         {isMobile && (
-          <Button onClick={showScanner ? stopScanner : startScanner} variant="outline" className="border-blue-300 dark:border-blue-500/40 text-blue-600 dark:text-blue-400 flex-1 sm:flex-none">
+          <Button onClick={showScanner ? stopScanner : startScanner} variant="outline" className="border-blue-300 dark:border-blue-500/40 text-blue-600 dark:text-blue-400 w-full sm:w-auto">
             <Icon name={showScanner ? 'X' : 'ScanLine'} size={18} className="mr-2" />
             {showScanner ? 'Закрыть сканер' : 'Сканировать QR'}
           </Button>

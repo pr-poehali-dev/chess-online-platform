@@ -196,9 +196,9 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
   }
 
   return (
-    <div className="space-y-4 animate-fade-in max-w-2xl mx-auto">
+    <div className="space-y-4 animate-fade-in max-w-2xl mx-auto w-full overflow-hidden">
       <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 overflow-hidden">
-        <CardContent className="p-4 md:p-6 space-y-5">
+        <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5">
           <FriendInvitePanel
             userCode={userCode}
             friendCode={friendCode}
