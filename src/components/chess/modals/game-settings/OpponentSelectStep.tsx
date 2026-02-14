@@ -3,7 +3,8 @@ import Icon from '@/components/ui/icon';
 
 import { useState, useEffect } from 'react';
 
-const SITE_SETTINGS_URL = 'https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286';
+import API from '@/config/api';
+const SITE_SETTINGS_URL = API.siteSettings;
 
 interface LastGameSettings {
   opponent: 'city' | 'region' | 'country' | 'friend' | 'computer';

@@ -1,4 +1,5 @@
-export const FRIENDS_URL = 'https://functions.poehali.dev/5ffb6c1a-2221-4a90-943a-b29a0a4b9700';
+import API from '@/config/api';
+export const FRIENDS_URL = API.friends;
 export const SITE_URL = window.location.origin;
 
 export interface Friend {

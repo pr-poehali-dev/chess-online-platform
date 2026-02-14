@@ -4,7 +4,8 @@ import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 
-const FRIENDS_URL = 'https://functions.poehali.dev/5ffb6c1a-2221-4a90-943a-b29a0a4b9700';
+import API from '@/config/api';
+const FRIENDS_URL = API.friends;
 
 interface RealFriend {
   id: string;

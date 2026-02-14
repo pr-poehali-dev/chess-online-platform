@@ -4,8 +4,9 @@ import Icon from '@/components/ui/icon';
 import { cityRegions } from '@/components/chess/data/cities';
 import { RankingCard } from './RankingCard';
 
-const SITE_SETTINGS_URL = 'https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286';
-const GEO_DETECT_URL = 'https://functions.poehali.dev/32db3d63-2a67-4f5e-b0f2-4f5aab3e8153';
+import API from '@/config/api';
+const SITE_SETTINGS_URL = API.siteSettings;
+const GEO_DETECT_URL = API.geoDetect;
 
 interface SiteSettingsData {
   [key: string]: { value: string; description: string };

@@ -1,28 +1,34 @@
 
-import { useEffect } from "react";
+import { useEffect, lazy, Suspense } from "react";
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
-import Game from "./pages/Game";
-import OnlineGame from "./pages/OnlineGame";
-import Admin from "./pages/Admin";
-import NotFound from "./pages/NotFound";
 import AuthGuard from "./components/AuthGuard";
 import GameInviteNotification from "./components/GameInviteNotification";
+import API from "@/config/api";
 
-const DECAY_URL = 'https://functions.poehali.dev/06f73421-41be-448f-a352-17e488dc15ef';
+const Game = lazy(() => import("./pages/Game"));
+const OnlineGame = lazy(() => import("./pages/OnlineGame"));
+const Admin = lazy(() => import("./pages/Admin"));
+const NotFound = lazy(() => import("./pages/NotFound"));
 
 const queryClient = new QueryClient();
 
 const DailyDecayTrigger = () => {
   useEffect(() => {
-    fetch(DECAY_URL, { method: 'POST' }).catch(() => {});
+    fetch(API.applyDailyDecay, { method: 'POST' }).catch(() => {});
   }, []);
   return null;
 };
+
+const Loading = () => (
+  <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950">
+    <div className="animate-spin w-8 h-8 border-4 border-amber-400 border-t-transparent rounded-full" />
+  </div>
+);
 
 const App = () => (
   <QueryClientProvider client={queryClient}>
@@ -32,14 +38,15 @@ const App = () => (
       <DailyDecayTrigger />
       <BrowserRouter>
         <GameInviteNotification />
-        <Routes>
-          <Route path="/" element={<Index />} />
-          <Route path="/game" element={<AuthGuard><Game /></AuthGuard>} />
-          <Route path="/online-game" element={<AuthGuard><OnlineGame /></AuthGuard>} />
-          <Route path="/admin" element={<Admin />} />
-          {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <Suspense fallback={<Loading />}>
+          <Routes>
+            <Route path="/" element={<Index />} />
+            <Route path="/game" element={<AuthGuard><Game /></AuthGuard>} />
+            <Route path="/online-game" element={<AuthGuard><OnlineGame /></AuthGuard>} />
+            <Route path="/admin" element={<Admin />} />
+            <Route path="*" element={<NotFound />} />
+          </Routes>
+        </Suspense>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

@@ -1,7 +1,8 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
+import API from '@/config/api';
 
-const USER_CHECK_URL = 'https://functions.poehali.dev/3a8fa375-82f7-41f7-823b-3910eafac641';
+const USER_CHECK_URL = API.userCheck;
 
 interface AuthGuardProps {
   children: React.ReactNode;

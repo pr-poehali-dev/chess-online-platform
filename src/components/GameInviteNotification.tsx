@@ -2,8 +2,9 @@ import { useState, useEffect, useCallback, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar';
 import Icon from '@/components/ui/icon';
+import API from '@/config/api';
 
-const INVITE_URL = 'https://functions.poehali.dev/622400c1-79cc-4391-92fa-9995517f5de6';
+const INVITE_URL = API.inviteGame;
 const POLL_INTERVAL = 3000;
 
 interface GameInvite {

@@ -28,4 +28,5 @@ export interface ChatSectionProps {
   initialParticipantRating?: number;
 }
 
-export const CHAT_URL = 'https://functions.poehali.dev/6cee8b5c-e400-4366-b747-7c9f1492f4c4';
+import API from '@/config/api';
+export const CHAT_URL = API.chat;

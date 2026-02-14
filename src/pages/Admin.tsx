@@ -6,11 +6,12 @@ import { RatingSettingsModal } from '@/components/admin/RatingSettingsModal';
 import { ButtonVisibilityModal } from '@/components/admin/ButtonVisibilityModal';
 import { LevelAccessModal } from '@/components/admin/LevelAccessModal';
 
-const API_URL = 'https://functions.poehali.dev/f55f4280-d8ac-4ef1-a044-74594813ca03';
-const SITE_SETTINGS_URL = 'https://functions.poehali.dev/fd185e2b-db38-4c30-9ae1-efb6585bf286';
-const SEND_OTP_URL = 'https://functions.poehali.dev/534f2773-afe5-4714-82c2-4fa8ec20ed39';
-const VERIFY_OTP_URL = 'https://functions.poehali.dev/229812f6-6d4d-477a-b4cb-28b61b43937e';
-const ADMIN_AUTH_URL = 'https://functions.poehali.dev/a6359d67-4dd2-4b8c-9433-fbcebed89cc6';
+import API from '@/config/api';
+const API_URL = API.ratingSettings;
+const SITE_SETTINGS_URL = API.siteSettings;
+const SEND_OTP_URL = API.sendOtp;
+const VERIFY_OTP_URL = API.verifyOtp;
+const ADMIN_AUTH_URL = API.adminAuth;
 
 export interface RatingSettings {
   win_points: { value: string; description: string };

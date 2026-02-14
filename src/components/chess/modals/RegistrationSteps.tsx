@@ -3,8 +3,9 @@ import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { popularCities, allCities, cityRegions } from '@/components/chess/data/cities';
 
-const SEND_OTP_URL = 'https://functions.poehali.dev/534f2773-afe5-4714-82c2-4fa8ec20ed39';
-const VERIFY_OTP_URL = 'https://functions.poehali.dev/229812f6-6d4d-477a-b4cb-28b61b43937e';
+import API from '@/config/api';
+const SEND_OTP_URL = API.sendOtp;
+const VERIFY_OTP_URL = API.verifyOtp;
 
 interface NameStepProps {
   userName: string;

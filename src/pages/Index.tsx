@@ -3,8 +3,9 @@ import { useNavigate } from 'react-router-dom';
 import Navbar from '@/components/chess/Navbar';
 import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, FriendsSection, NotificationsSection, HistorySection, ChatSection } from '@/components/chess/Sections';
 import { AuthModal, GameSettingsModal, OfflineGameModal } from '@/components/chess/Modals';
-const GAME_HISTORY_URL = 'https://functions.poehali.dev/98112cc6-b0e2-4ab4-a9f0-050d3d0c3ba2';
-const USER_CHECK_URL = 'https://functions.poehali.dev/3a8fa375-82f7-41f7-823b-3910eafac641';
+import API from '@/config/api';
+const GAME_HISTORY_URL = API.gameHistory;
+const USER_CHECK_URL = API.userCheck;
 
 const Index = () => {
   const navigate = useNavigate();

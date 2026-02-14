@@ -8,8 +8,9 @@ import OpponentSelectStep from './game-settings/OpponentSelectStep';
 import FriendAndDifficultyStep from './game-settings/FriendAndDifficultyStep';
 import TimeSelectStep from './game-settings/TimeSelectStep';
 
-const INVITE_URL = 'https://functions.poehali.dev/622400c1-79cc-4391-92fa-9995517f5de6';
-const MATCHMAKING_URL = 'https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299';
+import API from '@/config/api';
+const INVITE_URL = API.inviteGame;
+const MATCHMAKING_URL = API.matchmaking;
 
 interface GameSettingsModalProps {
   showGameSettings: boolean;

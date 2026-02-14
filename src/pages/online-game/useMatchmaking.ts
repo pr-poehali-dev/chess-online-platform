@@ -1,8 +1,9 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useSearchParams } from 'react-router-dom';
 import { cityRegions } from '@/components/chess/data/cities';
+import API from '@/config/api';
 
-const MATCHMAKING_URL = 'https://functions.poehali.dev/49a14316-cb91-4aec-85f7-e5f2f6590299';
+const MATCHMAKING_URL = API.matchmaking;
 const POLL_INTERVAL = 2000;
 const STAGE_DURATION = 5000;
 const FINAL_STAGE_DURATION = 5000;

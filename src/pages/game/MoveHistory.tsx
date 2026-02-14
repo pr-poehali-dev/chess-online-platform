@@ -67,7 +67,7 @@ export const MoveHistory = ({
               <div 
                 key={index} 
                 className={`whitespace-nowrap flex-shrink-0 transition-all ${
-                  index === currentMoveIndex 
+                  index === currentMoveIndex - 1
                     ? (theme === 'light' ? 'text-slate-900 font-semibold text-xs' : 'text-white font-semibold text-xs')
                     : (theme === 'light' ? 'text-slate-600 text-[10px]' : 'text-stone-300 text-[10px]')
                 }`}
@@ -82,7 +82,7 @@ export const MoveHistory = ({
 
       <button
         onClick={onNextMove}
-        disabled={currentMoveIndex === moveHistory.length - 1}
+        disabled={currentMoveIndex >= moveHistory.length}
         className={`p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
           theme === 'light'
             ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
