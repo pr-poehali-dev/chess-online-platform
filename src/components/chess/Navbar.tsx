@@ -181,8 +181,9 @@ const Navbar = ({
                 {showMenu && (
                   <>
                     <div 
-                      className="fixed inset-0 z-40" 
+                      className="fixed inset-0 z-40 bg-black/20 cursor-pointer" 
                       onClick={() => setShowMenu(false)}
+                      onTouchStart={() => setShowMenu(false)}
                     />
                     <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-scale-in">
                       <button
