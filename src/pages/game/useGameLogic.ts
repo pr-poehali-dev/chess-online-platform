@@ -38,7 +38,7 @@ export const useGameLogic = (
   const [moveHistory, setMoveHistory] = useState<string[]>(savedState?.moveHistory || []);
   const [boardHistory, setBoardHistory] = useState<Board[]>(savedState?.boardHistory || [initialBoard]);
   const [moveTimes, setMoveTimes] = useState<string[]>(savedState?.moveTimes || []);
-  const [currentMoveIndex, setCurrentMoveIndex] = useState(savedState?.currentMoveIndex || 0);
+  const [currentMoveIndex, setCurrentMoveIndex] = useState(savedState?.boardHistory ? savedState.boardHistory.length - 1 : 0);
   const [displayBoard, setDisplayBoard] = useState<Board>(savedState?.board || initialBoard);
   const [inactivityTimer, setInactivityTimer] = useState(60);
   const [capturedByWhite, setCapturedByWhite] = useState<{type: string; color: string}[]>(savedState?.capturedByWhite || []);
@@ -166,15 +166,14 @@ export const useGameLogic = (
   useEffect(() => {
     if (isOnlineGame) return;
     if (currentPlayer === botColor && gameStatus === 'playing') {
-      setCurrentMoveIndex(boardHistoryRef.current.length - 1);
-      setDisplayBoard(boardRef.current);
+      const idx = boardHistoryRef.current.length - 1;
+      setCurrentMoveIndex(idx);
+      setDisplayBoard(boardHistoryRef.current[idx] || boardRef.current);
       setTimeout(() => makeComputerMove(), 500);
     }
   }, [currentPlayer, gameStatus]);
 
-  useEffect(() => {
-    setDisplayBoard(boardHistory[currentMoveIndex] || initialBoard);
-  }, [currentMoveIndex]);
+  // displayBoard is set explicitly in makeMove, applyMoveFromNotation, and nav handlers
 
   useEffect(() => {
     if (isOnlineGame) return;
@@ -312,7 +311,7 @@ export const useGameLogic = (
     setEnPassantTarget(newEP);
     setMoveHistory(newMH);
     setBoardHistory(newBH);
-    setCurrentMoveIndex(newMH.length - 1);
+    setCurrentMoveIndex(newBH.length - 1);
     setCurrentPlayer(nextPlayer);
     setSelectedSquare(null);
     setPossibleMoves([]);
@@ -553,7 +552,7 @@ export const useGameLogic = (
     setMoveHistory(newMH);
     setBoardHistory(newBH);
     setMoveTimes(newMoveTimes);
-    setCurrentMoveIndex(newMH.length - 1);
+    setCurrentMoveIndex(newBH.length - 1);
     setCurrentPlayer(nextPlayer);
     setSelectedSquare(null);
     setPossibleMoves([]);
@@ -664,13 +663,17 @@ export const useGameLogic = (
 
   const handlePreviousMove = () => {
     if (currentMoveIndex > 0) {
-      setCurrentMoveIndex(currentMoveIndex - 1);
+      const newIdx = currentMoveIndex - 1;
+      setCurrentMoveIndex(newIdx);
+      setDisplayBoard(boardHistoryRef.current[newIdx] || initialBoard);
     }
   };
 
   const handleNextMove = () => {
     if (currentMoveIndex < boardHistoryRef.current.length - 1) {
-      setCurrentMoveIndex(currentMoveIndex + 1);
+      const newIdx = currentMoveIndex + 1;
+      setCurrentMoveIndex(newIdx);
+      setDisplayBoard(boardHistoryRef.current[newIdx] || boardRef.current);
     }
   };
 
