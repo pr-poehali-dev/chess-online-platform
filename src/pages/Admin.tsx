@@ -47,14 +47,16 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
 
   const fetchSettings = async () => {
     setLoading(true);
-    const [ratingRes, siteRes] = await Promise.all([
-      fetch(API_URL),
-      fetch(SITE_SETTINGS_URL)
-    ]);
-    const ratingData = await ratingRes.json();
-    const siteData = await siteRes.json();
-    setSettings(ratingData);
-    setSiteSettings(siteData);
+    try {
+      const [ratingRes, siteRes] = await Promise.all([
+        fetch(API_URL),
+        fetch(SITE_SETTINGS_URL)
+      ]);
+      const ratingData = await ratingRes.json();
+      const siteData = await siteRes.json();
+      setSettings(ratingData);
+      setSiteSettings(siteData);
+    } catch { /* network error */ }
     setLoading(false);
   };
 
