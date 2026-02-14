@@ -67,7 +67,7 @@ const Navbar = ({
     };
 
     checkActiveGame();
-    const interval = setInterval(checkActiveGame, 1000);
+    const interval = setInterval(checkActiveGame, 5000);
     return () => clearInterval(interval);
   }, []);
 

@@ -4,7 +4,6 @@ import psycopg2
 import random
 
 
-
 def esc(val):
     return str(val).replace("'", "''")
 
@@ -66,11 +65,11 @@ def handler(event: dict, context) -> dict:
     cur = conn.cursor()
 
     client_ip = get_client_ip(event)
-    limit = 120 if event.get('httpMethod') == 'GET' else 20
-    if check_rate_limit(cur, conn, client_ip, 'invite-game', limit, 60):
-        cur.close()
-        conn.close()
-        return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
+    if event.get('httpMethod') == 'POST':
+        if check_rate_limit(cur, conn, client_ip, 'invite-game', 20, 60):
+            cur.close()
+            conn.close()
+            return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
 
     try:
         if event.get('httpMethod') == 'GET':

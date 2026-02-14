@@ -5,7 +5,7 @@ import Icon from '@/components/ui/icon';
 import API from '@/config/api';
 
 const INVITE_URL = API.inviteGame;
-const POLL_INTERVAL = 3000;
+const POLL_INTERVAL = 10000;
 
 interface GameInvite {
   id: number;
@@ -66,12 +66,13 @@ const GameInviteNotification = () => {
   }, []);
 
   useEffect(() => {
+    if (isInGame) return;
     poll();
     pollRef.current = setInterval(poll, POLL_INTERVAL);
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [poll]);
+  }, [poll, isInGame]);
 
   const handleDecline = async () => {
     if (!invite) return;

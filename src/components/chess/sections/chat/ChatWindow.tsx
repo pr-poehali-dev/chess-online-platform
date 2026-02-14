@@ -93,7 +93,7 @@ export const ChatWindow = ({
 
   useEffect(() => {
     loadMessages();
-    pollMessagesRef.current = setInterval(loadMessages, 3000);
+    pollMessagesRef.current = setInterval(loadMessages, 8000);
     return () => {
       if (pollMessagesRef.current) clearInterval(pollMessagesRef.current);
     };
@@ -139,7 +139,7 @@ export const ChatWindow = ({
           setInviteId(null);
         }
       } catch { /* network error */ }
-    }, 2000);
+    }, 3000);
   }, [navigate]);
 
   const getLastGameSettings = () => {

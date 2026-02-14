@@ -2,6 +2,7 @@ import json
 import os
 import psycopg2
 
+
 def get_client_ip(event):
     hdrs = event.get('headers') or {}
     ip = hdrs.get('X-Forwarded-For', hdrs.get('x-forwarded-for', ''))

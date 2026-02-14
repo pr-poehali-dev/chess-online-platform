@@ -4,7 +4,6 @@ import psycopg2
 from datetime import datetime
 
 
-
 def esc(val):
     return str(val).replace("'", "''")
 
@@ -58,11 +57,11 @@ def handler(event: dict, context) -> dict:
     cur = conn.cursor()
 
     client_ip = get_client_ip(event)
-    limit = 120 if event.get('httpMethod') == 'GET' else 30
-    if check_rate_limit(cur, conn, client_ip, 'chat', limit, 60):
-        cur.close()
-        conn.close()
-        return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
+    if event.get('httpMethod') == 'POST':
+        if check_rate_limit(cur, conn, client_ip, 'chat', 30, 60):
+            cur.close()
+            conn.close()
+            return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
 
     if event.get('httpMethod') == 'GET':
         qs = event.get('queryStringParameters') or {}

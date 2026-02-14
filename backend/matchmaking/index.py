@@ -3,7 +3,6 @@ import os
 import psycopg2
 import random
 
-
 BOT_NAMES = [
     'Бот Каспаров', 'Бот Карлсен', 'Бот Фишер', 'Бот Таль',
     'Бот Капабланка', 'Бот Алехин', 'Бот Корчной', 'Бот Петросян'
@@ -106,16 +105,16 @@ def handler(event: dict, context) -> dict:
 
     headers = {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}
 
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
     client_ip = get_client_ip(event)
-    limit = 120 if event.get('httpMethod') == 'GET' else 20
-    if check_rate_limit(cur, conn, client_ip, 'matchmaking', limit, 60):
+    if event.get('httpMethod') == 'POST':
+        conn = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur = conn.cursor()
+        if check_rate_limit(cur, conn, client_ip, 'matchmaking', 20, 60):
+            cur.close()
+            conn.close()
+            return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
         cur.close()
         conn.close()
-        return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
-    cur.close()
-    conn.close()
 
     if event.get('httpMethod') == 'DELETE':
         body = json.loads(event.get('body', '{}'))

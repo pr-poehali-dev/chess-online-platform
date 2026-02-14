@@ -4,7 +4,7 @@ import { cityRegions } from '@/components/chess/data/cities';
 import API from '@/config/api';
 
 const MATCHMAKING_URL = API.matchmaking;
-const POLL_INTERVAL = 2000;
+const POLL_INTERVAL = 3000;
 const STAGE_DURATION = 5000;
 const FINAL_STAGE_DURATION = 5000;
 

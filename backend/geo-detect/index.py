@@ -4,7 +4,6 @@ import urllib.request
 import psycopg2
 
 
-
 def get_client_ip(event):
     hdrs = event.get('headers') or {}
     ip = hdrs.get('X-Forwarded-For', hdrs.get('x-forwarded-for', ''))
@@ -179,16 +178,6 @@ def handler(event, context):
         }
 
     headers = {'Access-Control-Allow-Origin': '*', 'Content-Type': 'application/json'}
-
-    conn = psycopg2.connect(os.environ['DATABASE_URL'])
-    cur = conn.cursor()
-    client_ip = get_client_ip(event)
-    if check_rate_limit(cur, conn, client_ip, 'geo-detect', 10, 60):
-        cur.close()
-        conn.close()
-        return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
-    cur.close()
-    conn.close()
 
     hdrs = event.get('headers') or {}
     source_ip = hdrs.get('X-Forwarded-For', hdrs.get('x-forwarded-for', ''))

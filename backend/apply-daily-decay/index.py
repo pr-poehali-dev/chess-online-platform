@@ -3,7 +3,6 @@ import os
 import psycopg2
 from datetime import datetime, timezone, timedelta
 
-
 MSK = timezone(timedelta(hours=3))
 
 

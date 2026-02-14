@@ -65,11 +65,11 @@ def handler(event, context):
     client_ip = get_client_ip(event)
     method = event.get('httpMethod', 'GET')
 
-    limit = 30 if method == 'GET' else 5
-    if check_rate_limit(cur, conn, client_ip, 'admin-stats', limit, 60):
-        cur.close()
-        conn.close()
-        return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
+    if method == 'POST':
+        if check_rate_limit(cur, conn, client_ip, 'admin-stats', 5, 60):
+            cur.close()
+            conn.close()
+            return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
 
     if method == 'GET':
         cur.execute("SELECT COUNT(*) FROM {s}.users".format(s=schema))
@@ -117,6 +117,17 @@ def handler(event, context):
             cur.close()
             conn.close()
             return {'statusCode': 403, 'headers': headers, 'body': json.dumps({'error': 'Access denied'})}
+
+        if action == 'reset_rate_limits':
+            cur.execute("DELETE FROM {s}.rate_limits".format(s=schema))
+            conn.commit()
+            cur.close()
+            conn.close()
+            return {
+                'statusCode': 200,
+                'headers': headers,
+                'body': json.dumps({'success': True, 'message': 'Rate limits cleared'})
+            }
 
         if action == 'wipe_all':
             cur.execute("DELETE FROM {s}.game_history".format(s=schema))

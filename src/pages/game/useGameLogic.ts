@@ -586,7 +586,7 @@ export const useGameLogic = (
     const intervalId = setInterval(() => {
       if (!active) return;
       poll();
-    }, 500);
+    }, 1500);
 
     return () => {
       active = false;

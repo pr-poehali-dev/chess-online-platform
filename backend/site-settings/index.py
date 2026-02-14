@@ -2,6 +2,7 @@ import json
 import os
 import psycopg2
 
+
 def get_client_ip(event):
     hdrs = event.get('headers') or {}
     ip = hdrs.get('X-Forwarded-For', hdrs.get('x-forwarded-for', ''))
@@ -51,11 +52,11 @@ def handler(event: dict, context) -> dict:
     cur = conn.cursor()
 
     client_ip = get_client_ip(event)
-    limit = 30 if event.get('httpMethod') == 'GET' else 10
-    if check_rate_limit(cur, conn, client_ip, 'site-settings', limit, 60):
-        cur.close()
-        conn.close()
-        return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
+    if event.get('httpMethod') == 'PUT':
+        if check_rate_limit(cur, conn, client_ip, 'site-settings', 10, 60):
+            cur.close()
+            conn.close()
+            return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
 
     if event.get('httpMethod') == 'GET':
         cur.execute("SELECT key, value, description FROM site_settings")

@@ -90,8 +90,8 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
     fetchPending(uid);
     sendHeartbeat(uid);
 
-    const heartbeatInterval = setInterval(() => sendHeartbeat(uid), 60000);
-    const refreshInterval = setInterval(() => { fetchFriends(uid); fetchPending(uid); }, 15000);
+    const heartbeatInterval = setInterval(() => sendHeartbeat(uid), 120000);
+    const refreshInterval = setInterval(() => { fetchFriends(uid); fetchPending(uid); }, 30000);
     return () => {
       clearInterval(heartbeatInterval);
       clearInterval(refreshInterval);

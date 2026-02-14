@@ -4,7 +4,6 @@ import psycopg2
 import time as time_module
 
 
-
 def get_client_ip(event):
     hdrs = event.get('headers') or {}
     ip = hdrs.get('X-Forwarded-For', hdrs.get('x-forwarded-for', ''))
@@ -55,11 +54,11 @@ def handler(event: dict, context) -> dict:
     cur = conn.cursor()
 
     client_ip = get_client_ip(event)
-    limit = 200 if event.get('httpMethod') == 'GET' else 60
-    if check_rate_limit(cur, conn, client_ip, 'online-move', limit, 60):
-        cur.close()
-        conn.close()
-        return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
+    if event.get('httpMethod') == 'POST':
+        if check_rate_limit(cur, conn, client_ip, 'online-move', 60, 60):
+            cur.close()
+            conn.close()
+            return {'statusCode': 429, 'headers': headers, 'body': json.dumps({'error': 'Too many requests'})}
 
     if event.get('httpMethod') == 'GET':
         qs = event.get('queryStringParameters') or {}

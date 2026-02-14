@@ -271,7 +271,7 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
   useEffect(() => {
     fetchSettings();
     fetchStats();
-    const interval = setInterval(fetchStats, 10000);
+    const interval = setInterval(fetchStats, 30000);
     return () => clearInterval(interval);
   }, []);
 
