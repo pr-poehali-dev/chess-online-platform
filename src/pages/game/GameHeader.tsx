@@ -19,6 +19,9 @@ interface GameHeaderProps {
   gameStatus?: 'playing' | 'checkmate' | 'stalemate' | 'draw';
   currentPlayer?: 'white' | 'black';
   setShowRematchOffer?: (value: boolean) => void;
+  handleOfferRematch?: () => void;
+  rematchSent?: boolean;
+  rematchDeclinedByOpponent?: boolean;
 }
 
 export const GameHeader = ({
@@ -72,7 +75,10 @@ export const GameControls = ({
   setBoardTheme,
   gameStatus,
   currentPlayer,
-  setShowRematchOffer
+  setShowRematchOffer,
+  handleOfferRematch,
+  rematchSent,
+  rematchDeclinedByOpponent
 }: GameHeaderProps) => {
   const themeKeys: BoardTheme[] = ['classic', 'flat', 'wood'];
   return (
@@ -284,19 +290,29 @@ export const GameControls = ({
               {gameStatus === 'stalemate' && 'Пат'}
               {gameStatus === 'draw' && 'Ничья'}
             </div>
-            <button
-              onClick={() => {
-                if (setShowRematchOffer) {
-                  setTimeout(() => {
-                    setShowRematchOffer(true);
-                  }, 500);
-                }
-              }}
-              className="p-2 rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 ml-2 bg-green-600 hover:bg-green-700 text-white"
-            >
-              <Icon name="RotateCcw" size={18} />
-              <span className="font-semibold text-xs md:text-sm">Реванш</span>
-            </button>
+            {rematchDeclinedByOpponent ? (
+              <div className="p-2 rounded-lg flex items-center gap-1.5 flex-shrink-0 ml-2 bg-red-600/80 text-white">
+                <Icon name="X" size={18} />
+                <span className="font-semibold text-xs md:text-sm">Отклонено</span>
+              </div>
+            ) : rematchSent ? (
+              <div className="p-2 rounded-lg flex items-center gap-1.5 flex-shrink-0 ml-2 bg-yellow-600/80 text-white animate-pulse">
+                <Icon name="Clock" size={18} />
+                <span className="font-semibold text-xs md:text-sm">Ждём...</span>
+              </div>
+            ) : (
+              <button
+                onClick={() => {
+                  if (handleOfferRematch) {
+                    handleOfferRematch();
+                  }
+                }}
+                className="p-2 rounded-lg transition-colors flex items-center gap-1.5 flex-shrink-0 ml-2 bg-green-600 hover:bg-green-700 text-white"
+              >
+                <Icon name="RotateCcw" size={18} />
+                <span className="font-semibold text-xs md:text-sm">Реванш</span>
+              </button>
+            )}
           </div>
         )}
       </div>

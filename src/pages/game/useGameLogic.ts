@@ -357,7 +357,7 @@ export const useGameLogic = (
         if (data.game.white_time !== undefined) setWhiteTime(data.game.white_time);
         if (data.game.black_time !== undefined) setBlackTime(data.game.black_time);
       } catch (e) { console.error(e); }
-    }, 1500);
+    }, 800);
 
     return () => clearInterval(pollInterval);
   }, [isOnlineGame, onlineGameId, gameStatus, currentPlayer, playerColor, applyMoveFromNotation]);
@@ -366,6 +366,35 @@ export const useGameLogic = (
     if (!isOnlineGame) return;
     onlineMoveCountRef.current = moveHistory.length;
   }, [moveHistory.length, isOnlineGame]);
+
+  const [rematchOfferedBy, setRematchOfferedBy] = useState<string | null>(null);
+  const [rematchStatus, setRematchStatus] = useState<string | null>(null);
+  const [rematchGameId, setRematchGameId] = useState<number | null>(null);
+
+  useEffect(() => {
+    if (!isOnlineGame || !onlineGameId) return;
+    if (gameStatus === 'playing') return;
+
+    const rematchPoll = setInterval(async () => {
+      try {
+        const res = await fetch(`${ONLINE_MOVE_URL}?game_id=${onlineGameId}`);
+        const data = await res.json();
+        if (!data.game) return;
+
+        if (data.game.rematch_offered_by) setRematchOfferedBy(data.game.rematch_offered_by);
+        if (data.game.rematch_status) setRematchStatus(data.game.rematch_status);
+        if (data.game.rematch_game_id) {
+          setRematchGameId(data.game.rematch_game_id);
+          clearInterval(rematchPoll);
+        }
+        if (data.game.rematch_status === 'declined') {
+          clearInterval(rematchPoll);
+        }
+      } catch (e) { console.error(e); }
+    }, 1000);
+
+    return () => clearInterval(rematchPoll);
+  }, [isOnlineGame, onlineGameId, gameStatus]);
 
   const submitGameResult = useCallback(async (status: 'checkmate' | 'stalemate' | 'draw', currentPlayerAtEnd: string) => {
     if (gameFinished.current) return;
@@ -674,6 +703,9 @@ export const useGameLogic = (
     newRating,
     userRating,
     historyRef,
+    rematchOfferedBy,
+    rematchStatus,
+    rematchGameId,
     handleSquareClick,
     isSquareSelected,
     isSquarePossibleMove,

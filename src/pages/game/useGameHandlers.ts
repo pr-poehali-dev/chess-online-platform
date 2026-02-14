@@ -1,10 +1,13 @@
-import { useState, useRef } from 'react';
+import { useState, useRef, useCallback } from 'react';
 import { useNavigate } from 'react-router-dom';
+
+const ONLINE_MOVE_URL = 'https://functions.poehali.dev/58a413af-81c4-47bd-b3ce-4552a349ae19';
 
 export const useGameHandlers = (
   gameStatus: 'playing' | 'checkmate' | 'stalemate' | 'draw', 
   setGameStatus: (status: 'playing' | 'checkmate' | 'stalemate' | 'draw') => void,
-  moveCount: number = 0
+  moveCount: number = 0,
+  onlineGameId?: number
 ) => {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
@@ -23,7 +26,19 @@ export const useGameHandlers = (
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
   const [isChatBlocked, setIsChatBlocked] = useState(false);
   const [isChatBlockedByOpponent, setIsChatBlockedByOpponent] = useState(false);
+  const [rematchSent, setRematchSent] = useState(false);
+  const [rematchDeclinedByOpponent, setRematchDeclinedByOpponent] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
+
+  const isOnlineGame = !!onlineGameId;
+
+  const getUserId = useCallback(() => {
+    const saved = localStorage.getItem('chessUser');
+    if (!saved) return '';
+    const userData = JSON.parse(saved);
+    const rawId = userData.email || userData.name || 'anonymous';
+    return 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+  }, []);
 
   const handleMouseDown = (e: React.MouseEvent, historyRef: React.RefObject<HTMLDivElement>) => {
     if (!historyRef.current) return;
@@ -154,14 +169,93 @@ export const useGameHandlers = (
     }
   };
 
-  const handleAcceptRematch = () => {
-    setShowRematchOffer(false);
-    window.location.reload();
-  };
+  const handleOfferRematch = useCallback(async () => {
+    if (!isOnlineGame || !onlineGameId) {
+      window.location.reload();
+      return;
+    }
 
-  const handleDeclineRematch = () => {
+    const userId = getUserId();
+    if (!userId) return;
+
+    try {
+      const res = await fetch(ONLINE_MOVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'offer_rematch',
+          game_id: onlineGameId,
+          user_id: userId
+        })
+      });
+      const data = await res.json();
+      if (data.status === 'rematch_offered') {
+        setRematchSent(true);
+      }
+    } catch (e) {
+      console.error('Failed to offer rematch:', e);
+    }
+  }, [isOnlineGame, onlineGameId, getUserId]);
+
+  const handleAcceptRematch = useCallback(async () => {
+    if (!isOnlineGame || !onlineGameId) {
+      setShowRematchOffer(false);
+      window.location.reload();
+      return;
+    }
+
+    const userId = getUserId();
+    if (!userId) return;
+
+    try {
+      const res = await fetch(ONLINE_MOVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'accept_rematch',
+          game_id: onlineGameId,
+          user_id: userId
+        })
+      });
+      const data = await res.json();
+      if (data.status === 'rematch_accepted' && data.new_game_id) {
+        const newColor = data.player_color || 'white';
+        const searchParams = new URLSearchParams(window.location.search);
+        const opponentName = searchParams.get('opponent_name') || '';
+        const opponentRating = searchParams.get('opponent_rating') || '';
+        const opponentAvatar = searchParams.get('opponent_avatar') || '';
+        const timeControl = searchParams.get('time') || '10+0';
+
+        navigate(`/game?online=true&online_game_id=${data.new_game_id}&color=${newColor}&time=${timeControl}&opponent_name=${opponentName}&opponent_rating=${opponentRating}&opponent_avatar=${opponentAvatar}`);
+        setTimeout(() => window.location.reload(), 100);
+      }
+    } catch (e) {
+      console.error('Failed to accept rematch:', e);
+    }
+  }, [isOnlineGame, onlineGameId, getUserId, navigate]);
+
+  const handleDeclineRematch = useCallback(async () => {
     setShowRematchOffer(false);
-  };
+
+    if (!isOnlineGame || !onlineGameId) return;
+
+    const userId = getUserId();
+    if (!userId) return;
+
+    try {
+      await fetch(ONLINE_MOVE_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'decline_rematch',
+          game_id: onlineGameId,
+          user_id: userId
+        })
+      });
+    } catch (e) {
+      console.error('Failed to decline rematch:', e);
+    }
+  }, [isOnlineGame, onlineGameId, getUserId]);
 
   return {
     isDragging,
@@ -198,7 +292,11 @@ export const useGameHandlers = (
     handleAcceptDraw,
     handleDeclineDraw,
     handleNewGame,
+    handleOfferRematch,
     handleAcceptRematch,
-    handleDeclineRematch
+    handleDeclineRematch,
+    rematchSent,
+    rematchDeclinedByOpponent,
+    setRematchDeclinedByOpponent
   };
 };
