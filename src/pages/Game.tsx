@@ -282,7 +282,7 @@ const Game = () => {
                   setRematchCooldown(true);
                   setRematchError(result.error);
                 }
-              } : undefined}
+              } : () => { window.location.reload(); }}
               rematchSent={rematchSent}
               rematchCooldown={rematchCooldown}
             />
