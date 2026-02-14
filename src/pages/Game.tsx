@@ -173,6 +173,8 @@ const Game = () => {
     params.set('online_game_id', String(rematchGameId));
     params.set('color', newColor);
     params.set('online', 'true');
+    document.documentElement.style.backgroundColor = '#1c1917';
+    document.body.style.backgroundColor = '#1c1917';
     window.location.href = `/game?${params.toString()}`;
   }, [rematchGameId, rematchStatus]);
 
