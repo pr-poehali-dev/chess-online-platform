@@ -183,6 +183,7 @@ const Game = () => {
   }, [rematchStatus]);
 
   const gameResult: GameResult = (() => {
+    if (showRematchOffer) return null;
     if (gameStatus === 'playing') return null;
     if (gameStatus === 'draw' || gameStatus === 'stalemate') return 'draw';
     if (gameStatus === 'checkmate') {
