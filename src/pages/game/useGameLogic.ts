@@ -408,19 +408,22 @@ export const useGameLogic = (
         if (data.move_number !== undefined) {
           serverMoveNumberRef.current = data.move_number;
         }
-      } else if (res.status === 409) {
-        console.warn('Move conflict, will re-sync from server');
-        pendingMoveRef.current = null;
       } else {
-        console.error('Move rejected:', res.status);
+        console.warn('Move rejected/conflict:', res.status, '— resetting to server state');
+        pendingMoveRef.current = null;
+        serverMoveCountRef.current = 0;
       }
-    } catch(e) { console.error('sendMove error', e); }
+    } catch(e) {
+      console.error('sendMove error', e);
+      pendingMoveRef.current = null;
+      serverMoveCountRef.current = 0;
+    }
   }, [isOnlineGame, onlineGameId]);
 
   const applyServerState = useCallback((serverMoves: string[], wTime: number, bTime: number, serverStatus: string, moveNumber?: number, winner?: string, endReason?: string, secondsSinceMove?: number) => {
     if (gameEndProcessedRef.current) return;
     if (pendingMoveRef.current && serverMoves.length < serverMoveCountRef.current) return;
-    if (serverMoves.length === serverMoveCountRef.current && serverStatus !== 'finished') return;
+    if (pendingMoveRef.current && serverMoves.length === serverMoveCountRef.current && serverStatus !== 'finished') return;
     const prevCount = serverMoveCountRef.current;
     serverMoveCountRef.current = serverMoves.length;
 
@@ -519,6 +522,7 @@ export const useGameLogic = (
     const poll = async () => {
       try {
         const res = await fetch(`${ONLINE_MOVE_URL}?game_id=${onlineGameId}`);
+        if (!res.ok) return;
         const data = await res.json();
         if (!active || !data.game) return;
 
