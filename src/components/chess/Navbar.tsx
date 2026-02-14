@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { onBadge } from '@/lib/badgeEvents';
@@ -100,6 +100,27 @@ const Navbar = ({
   }, [isAuthenticated]);
 
   const hasAnyBadge = pendingFriendsCount > 0 || unreadMessagesCount > 0;
+  const menuRef = useRef<HTMLDivElement>(null);
+  const menuBtnRef = useRef<HTMLButtonElement>(null);
+
+  useEffect(() => {
+    if (!showMenu) return;
+    const handleClickOutside = (e: MouseEvent | TouchEvent) => {
+      const target = e.target as Node;
+      if (
+        menuRef.current && !menuRef.current.contains(target) &&
+        menuBtnRef.current && !menuBtnRef.current.contains(target)
+      ) {
+        setShowMenu(false);
+      }
+    };
+    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener('touchstart', handleClickOutside);
+    return () => {
+      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener('touchstart', handleClickOutside);
+    };
+  }, [showMenu]);
 
   const handleReturnToGame = () => {
     if (activeGameUrl) {
@@ -171,6 +192,7 @@ const Navbar = ({
             {isAuthenticated && (
               <div className="relative">
                 <button
+                  ref={menuBtnRef}
                   onClick={() => setShowMenu(!showMenu)}
                   className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-300"
                 >
@@ -179,13 +201,7 @@ const Navbar = ({
                 </button>
 
                 {showMenu && (
-                  <>
-                    <div 
-                      className="fixed inset-0 z-40 bg-black/20 cursor-pointer" 
-                      onClick={() => setShowMenu(false)}
-                      onTouchStart={() => setShowMenu(false)}
-                    />
-                    <div className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-scale-in">
+                    <div ref={menuRef} className="absolute right-0 mt-2 w-56 max-w-[calc(100vw-2rem)] bg-white dark:bg-slate-800 rounded-lg shadow-xl border border-slate-200 dark:border-white/10 overflow-hidden z-50 animate-scale-in">
                       <button
                         onClick={() => {
                           setActiveSection('profile');
@@ -245,7 +261,6 @@ const Navbar = ({
                         <Badge count={unreadMessagesCount} />
                       </button>
                     </div>
-                  </>
                 )}
               </div>
             )}
