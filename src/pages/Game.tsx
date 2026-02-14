@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useSearchParams } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { getDifficultyLabel, formatTime } from './game/gameTypes';
@@ -36,6 +36,26 @@ const Game = () => {
   });
   
   const flipped = playerColor === 'black';
+
+  const wakeLockRef = useRef<WakeLockSentinel | null>(null);
+  useEffect(() => {
+    const requestWakeLock = async () => {
+      try {
+        if ('wakeLock' in navigator) {
+          wakeLockRef.current = await navigator.wakeLock.request('screen');
+        }
+      } catch { /* wake lock not available */ }
+    };
+    requestWakeLock();
+    const onVisibility = () => {
+      if (document.visibilityState === 'visible') requestWakeLock();
+    };
+    document.addEventListener('visibilitychange', onVisibility);
+    return () => {
+      document.removeEventListener('visibilitychange', onVisibility);
+      wakeLockRef.current?.release();
+    };
+  }, []);
 
   const [showOpponentProfile, setShowOpponentProfile] = useState(false);
   const [showMyProfile, setShowMyProfile] = useState(false);
