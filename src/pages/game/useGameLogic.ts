@@ -428,6 +428,7 @@ export const useGameLogic = (
     if (pendingMoveRef.current && serverMoves.length < serverMoveCountRef.current) return;
     if (pendingMoveRef.current && serverMoves.length === serverMoveCountRef.current && serverStatus !== 'finished') return;
     const prevCount = serverMoveCountRef.current;
+    const movesChanged = serverMoves.length !== prevCount;
     serverMoveCountRef.current = serverMoves.length;
 
     if (moveNumber !== undefined) {
@@ -436,86 +437,92 @@ export const useGameLogic = (
 
     const opponentMoved = serverMoves.length > prevCount && prevCount > 0;
 
-    const result = replayMoves(serverMoves);
+    if (movesChanged || serverStatus === 'finished') {
+      const result = replayMoves(serverMoves);
 
-    if (opponentMoved && serverMoves.length > 0) {
-      const lastNotation = serverMoves[serverMoves.length - 1];
-      const parts = lastNotation.split('-');
-      if (parts.length === 2) {
-        const fromCol = parts[0].charCodeAt(0) - 97;
-        const fromRow = 8 - parseInt(parts[0][1]);
-        const toCol = parts[1].charCodeAt(0) - 97;
-        const toRow = 8 - parseInt(parts[1][1]);
-        setLastMove({ from: { row: fromRow, col: fromCol }, to: { row: toRow, col: toCol } });
-      }
-    }
-
-    setBoard(result.board);
-    setBoardHistory(result.boardHistory);
-    setMoveHistory(serverMoves);
-    setCurrentMoveIndex(result.boardHistory.length - 1);
-    setCurrentPlayer(result.currentPlayer);
-    setCastlingRights(result.castlingRights);
-    setEnPassantTarget(result.enPassantTarget);
-    setCapturedByWhite(result.capturedByWhite);
-    setCapturedByBlack(result.capturedByBlack);
-    setKingInCheckPosition(result.kingInCheck);
-    setSelectedSquare(null);
-    setPossibleMoves([]);
-
-    if (serverStatus === 'finished' || result.status !== 'playing') {
-      if (result.status === 'checkmate') setGameStatus('checkmate');
-      else if (result.status === 'stalemate') setGameStatus('stalemate');
-      else if (serverStatus === 'finished') {
-        if (endReason === 'draw' || endReason === 'stalemate') setGameStatus('draw');
-        else setGameStatus('checkmate');
-      }
-
-      if (serverStatus === 'finished') {
-        if (endReason) setEndReason(endReason);
-
-        if (winner) {
-          const saved = localStorage.getItem('chessUser');
-          if (saved) {
-            const uData = JSON.parse(saved);
-            const rawId = uData.email || uData.name || 'anonymous';
-            const myId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-            if (winner === myId) {
-              setCurrentPlayer(playerColor === 'white' ? 'black' : 'white');
-            } else {
-              setCurrentPlayer(playerColor);
-            }
-          }
+      if (opponentMoved && serverMoves.length > 0) {
+        const lastNotation = serverMoves[serverMoves.length - 1];
+        const parts = lastNotation.split('-');
+        if (parts.length === 2) {
+          const fromCol = parts[0].charCodeAt(0) - 97;
+          const fromRow = 8 - parseInt(parts[0][1]);
+          const toCol = parts[1].charCodeAt(0) - 97;
+          const toRow = 8 - parseInt(parts[1][1]);
+          setLastMove({ from: { row: fromRow, col: fromCol }, to: { row: toRow, col: toCol } });
         }
       }
 
-      gameEndProcessedRef.current = true;
+      setBoard(result.board);
+      setBoardHistory(result.boardHistory);
+      setMoveHistory(serverMoves);
+      setCurrentMoveIndex(result.boardHistory.length - 1);
+      setCurrentPlayer(result.currentPlayer);
+      setCastlingRights(result.castlingRights);
+      setEnPassantTarget(result.enPassantTarget);
+      setCapturedByWhite(result.capturedByWhite);
+      setCapturedByBlack(result.capturedByBlack);
+      setKingInCheckPosition(result.kingInCheck);
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+
+      if (serverStatus === 'finished' || result.status !== 'playing') {
+        if (result.status === 'checkmate') setGameStatus('checkmate');
+        else if (result.status === 'stalemate') setGameStatus('stalemate');
+        else if (serverStatus === 'finished') {
+          if (endReason === 'draw' || endReason === 'stalemate') setGameStatus('draw');
+          else setGameStatus('checkmate');
+        }
+
+        if (serverStatus === 'finished') {
+          if (endReason) setEndReason(endReason);
+
+          if (winner) {
+            const saved = localStorage.getItem('chessUser');
+            if (saved) {
+              const uData = JSON.parse(saved);
+              const rawId = uData.email || uData.name || 'anonymous';
+              const myId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+              if (winner === myId) {
+                setCurrentPlayer(playerColor === 'white' ? 'black' : 'white');
+              } else {
+                setCurrentPlayer(playerColor);
+              }
+            }
+          }
+        }
+
+        gameEndProcessedRef.current = true;
+      }
+
+      if (secondsSinceMove !== undefined) {
+        inactivitySyncRef.current = secondsSinceMove;
+        const remaining = Math.max(0, 60 - secondsSinceMove);
+        if (result.currentPlayer === playerColor) {
+          setInactivityTimer(remaining);
+        } else {
+          setOpponentInactivityTimer(remaining);
+        }
+      }
+
+      pendingMoveRef.current = null;
+
+      if (opponentMoved && result.currentPlayer === playerColor) {
+        playMoveSound();
+      }
+
+      setTimeout(() => {
+        if (historyRef.current) {
+          historyRef.current.scrollLeft = historyRef.current.scrollWidth;
+        }
+      }, 10);
+    } else {
+      if (secondsSinceMove !== undefined) {
+        inactivitySyncRef.current = secondsSinceMove;
+      }
     }
 
     setWhiteTime(wTime);
     setBlackTime(bTime);
-
-    if (secondsSinceMove !== undefined) {
-      inactivitySyncRef.current = secondsSinceMove;
-      const remaining = Math.max(0, 60 - secondsSinceMove);
-      if (result.currentPlayer === playerColor) {
-        setInactivityTimer(remaining);
-      } else {
-        setOpponentInactivityTimer(remaining);
-      }
-    }
-
-    pendingMoveRef.current = null;
-
-    if (opponentMoved && result.currentPlayer === playerColor) {
-      playMoveSound();
-    }
-
-    setTimeout(() => {
-      if (historyRef.current) {
-        historyRef.current.scrollLeft = historyRef.current.scrollWidth;
-      }
-    }, 10);
   }, [playerColor, playMoveSound]);
 
   useEffect(() => {
