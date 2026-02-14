@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import { NameStep, EmailStep, OtpStep, CityStep, SEND_OTP_URL, VERIFY_OTP_URL } from './RegistrationSteps';
+import getDeviceToken from '@/lib/deviceToken';
 
 interface AuthModalProps {
   showAuthModal: boolean;
@@ -86,6 +87,7 @@ export const AuthModal = ({
       const payload: Record<string, string> = {
         email: userEmail.trim().toLowerCase(),
         code: otpCode.trim(),
+        device_token: getDeviceToken(),
       };
       if (authMode === 'login') {
         payload.mode = 'login';

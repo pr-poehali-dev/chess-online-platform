@@ -86,6 +86,7 @@ def handler(event, context):
     name = body.get('name', '').strip()
     city = body.get('city', '').strip()
     mode = body.get('mode', 'register')
+    device_token = body.get('device_token', '').strip()
 
     if not email or not code:
         cur.close()
@@ -146,6 +147,12 @@ def handler(event, context):
             conn.close()
             return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'User not found', 'message': 'Аккаунт с этим email не найден. Пожалуйста, зарегистрируйтесь.'})}
 
+        if device_token:
+            cur.execute(
+                "UPDATE {schema}.users SET active_device_token = '{dt}' WHERE id = '{uid}'".format(
+                    schema=schema, dt=device_token.replace("'", "''")[:64], uid=user_id.replace("'", "''")
+                )
+            )
         conn.commit()
         user_data = {
             'id': existing[0],
@@ -172,6 +179,12 @@ def handler(event, context):
                         schema=schema, city=city.replace("'", "''"), uid=user_id.replace("'", "''")
                     )
                 )
+        if device_token:
+            cur.execute(
+                "UPDATE {schema}.users SET active_device_token = '{dt}' WHERE id = '{uid}'".format(
+                    schema=schema, dt=device_token.replace("'", "''")[:64], uid=user_id.replace("'", "''")
+                )
+            )
         conn.commit()
 
         user_data = {
@@ -199,14 +212,16 @@ def handler(event, context):
                 break
             new_code = generate_code()
 
+        dt_val = device_token.replace("'", "''")[:64] if device_token else ''
         cur.execute(
-            "INSERT INTO {schema}.users (id, username, email, city, rating, games_played, wins, losses, draws, user_code) VALUES ('{uid}', '{name}', '{email}', '{city}', 500, 0, 0, 0, 0, '{code}')".format(
+            "INSERT INTO {schema}.users (id, username, email, city, rating, games_played, wins, losses, draws, user_code, active_device_token) VALUES ('{uid}', '{name}', '{email}', '{city}', 500, 0, 0, 0, 0, '{code}', '{dt}')".format(
                 schema=schema,
                 uid=user_id.replace("'", "''"),
                 name=name.replace("'", "''"),
                 email=email.replace("'", "''"),
                 city=city.replace("'", "''"),
-                code=new_code.replace("'", "''")
+                code=new_code.replace("'", "''"),
+                dt=dt_val
             )
         )
         conn.commit()

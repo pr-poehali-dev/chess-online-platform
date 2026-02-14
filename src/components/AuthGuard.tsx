@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import API from '@/config/api';
+import getDeviceToken from '@/lib/deviceToken';
 
 const USER_CHECK_URL = API.userCheck;
 
@@ -24,10 +25,11 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
         const userData = JSON.parse(savedUser);
         const rawId = userData.email || userData.name || 'anonymous';
         const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-        const res = await fetch(`${USER_CHECK_URL}?user_id=${encodeURIComponent(userId)}`);
+        const dt = getDeviceToken();
+        const res = await fetch(`${USER_CHECK_URL}?user_id=${encodeURIComponent(userId)}&device_token=${encodeURIComponent(dt)}`);
         const data = await res.json();
 
-        if (data.exists) {
+        if (data.exists && data.session_valid !== false) {
           setIsAuth(true);
         } else {
           localStorage.removeItem('chessUser');

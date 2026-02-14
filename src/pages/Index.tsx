@@ -5,6 +5,7 @@ import { HomeSection, ProfileSection, LeaderboardSection, TournamentsSection, Fr
 import { AuthModal, GameSettingsModal, OfflineGameModal } from '@/components/chess/Modals';
 import { ConfirmDialog } from '@/pages/game/ConfirmDialog';
 import API from '@/config/api';
+import getDeviceToken from '@/lib/deviceToken';
 const GAME_HISTORY_URL = API.gameHistory;
 const USER_CHECK_URL = API.userCheck;
 
@@ -43,15 +44,20 @@ const Index = () => {
         const userData = JSON.parse(savedUser);
         const rawId = userData.email || userData.name || 'anonymous';
         const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-        const res = await fetch(`${USER_CHECK_URL}?user_id=${encodeURIComponent(userId)}`);
+        const dt = getDeviceToken();
+        const res = await fetch(`${USER_CHECK_URL}?user_id=${encodeURIComponent(userId)}&device_token=${encodeURIComponent(dt)}`);
         const data = await res.json();
 
-        if (data.exists) {
+        if (data.exists && data.session_valid !== false) {
           setIsAuthenticated(true);
           const params = new URLSearchParams(window.location.search);
           if (params.get('invite')) {
             setActiveSection('friends');
           }
+        } else if (data.exists && data.session_valid === false) {
+          localStorage.removeItem('chessUser');
+          setIsAuthenticated(false);
+          setShowAuthModal(true);
         } else {
           localStorage.removeItem('chessUser');
           setIsAuthenticated(false);

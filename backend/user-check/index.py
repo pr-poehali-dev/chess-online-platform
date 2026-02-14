@@ -61,19 +61,23 @@ def handler(event: dict, context) -> dict:
     if event.get('httpMethod') == 'GET':
         qs = event.get('queryStringParameters') or {}
         user_id = qs.get('user_id', '')
+        device_token = qs.get('device_token', '')
         if not user_id:
             cur.close()
             conn.close()
             return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'user_id required'})}
 
         safe_id = user_id.replace("'", "''")
-        cur.execute("SELECT id, username, rating, city FROM users WHERE id = '%s'" % safe_id)
+        cur.execute("SELECT id, username, rating, city, active_device_token FROM users WHERE id = '%s'" % safe_id)
         row = cur.fetchone()
         cur.close()
         conn.close()
         if not row:
             return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'exists': False})}
-        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'exists': True, 'user': {'id': row[0], 'username': row[1], 'rating': row[2], 'city': row[3]}})}
+        session_valid = True
+        if device_token and row[4] and row[4] != device_token:
+            session_valid = False
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'exists': True, 'session_valid': session_valid, 'user': {'id': row[0], 'username': row[1], 'rating': row[2], 'city': row[3]}})}
 
     if event.get('httpMethod') == 'POST':
         body = json.loads(event.get('body', '{}'))
