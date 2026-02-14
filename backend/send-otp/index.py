@@ -118,7 +118,7 @@ def handler(event, context):
     html_body = """
     <div style="font-family: Arial, sans-serif; max-width: 480px; margin: 0 auto; padding: 20px;">
         <div style="text-align: center; padding: 20px 0; border-bottom: 2px solid #f59e0b;">
-            <h1 style="color: #d97706; font-size: 24px; margin: 0;">ЛигаШахмат</h1>
+            <h1 style="color: #d97706; font-size: 24px; margin: 0;">Лига Шахмат</h1>
         </div>
         <div style="padding: 30px 0; text-align: center;">
             <p style="color: #374151; font-size: 16px; margin-bottom: 24px;">Ваш код подтверждения:</p>
@@ -133,7 +133,7 @@ def handler(event, context):
     </div>
     """.format(code=code)
 
-    text_body = "Ваш код подтверждения для ЛигаШахмат: {code}\nКод действителен 10 минут.".format(code=code)
+    text_body = "Ваш код подтверждения для Лига Шахмат: {code}\nКод действителен 10 минут.".format(code=code)
 
     msg.attach(MIMEText(text_body, 'plain', 'utf-8'))
     msg.attach(MIMEText(html_body, 'html', 'utf-8'))
