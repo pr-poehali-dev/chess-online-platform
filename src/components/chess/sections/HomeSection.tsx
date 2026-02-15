@@ -131,7 +131,7 @@ export const HomeSection = ({
     },
     {
       rank: 3,
-      name: "Дмитрий Иванов",
+      name: "Владик Гурин",
       rating: 2356,
       city: "Казань",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Dmitry",

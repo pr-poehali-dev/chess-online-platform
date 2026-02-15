@@ -135,7 +135,7 @@ const Index = () => {
   const leaderboard = [
     { rank: 1, name: "Евгения Малыхина", rating: 2456, avatar: "🏆" },
     { rank: 2, name: "Костя Шапран", rating: 2398, avatar: "👑" },
-    { rank: 3, name: "Дмитрий Иванов", rating: 2356, avatar: "⭐" },
+    { rank: 3, name: "Владик Гурин", rating: 2356, avatar: "⭐" },
     { rank: 4, name: "Жена Севрюгин", rating: 2287, avatar: "💎" },
     { rank: 5, name: "Вы", rating: 1842, avatar: "🎯", highlight: true },
   ];
