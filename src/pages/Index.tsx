@@ -136,7 +136,7 @@ const Index = () => {
     { rank: 1, name: "Александр Петров", rating: 2456, avatar: "🏆" },
     { rank: 2, name: "Мария Смирнова", rating: 2398, avatar: "👑" },
     { rank: 3, name: "Дмитрий Иванов", rating: 2356, avatar: "⭐" },
-    { rank: 4, name: "Елена Козлова", rating: 2287, avatar: "💎" },
+    { rank: 4, name: "Евгений Севрюгин", rating: 2287, avatar: "💎" },
     { rank: 5, name: "Вы", rating: 1842, avatar: "🎯", highlight: true },
   ];
 

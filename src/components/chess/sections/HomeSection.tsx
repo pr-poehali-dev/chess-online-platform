@@ -37,9 +37,27 @@ export const HomeSection = ({
   const [userRating, setUserRating] = useState(0);
   const [lockedMessage, setLockedMessage] = useState<string | null>(null);
   const [realLeaderboard, setRealLeaderboard] = useState<{
-    country: Array<{ rank: number; name: string; rating: number; city: string; avatar: string }>;
-    region: Array<{ rank: number; name: string; rating: number; city: string; avatar: string }>;
-    city: Array<{ rank: number; name: string; rating: number; city: string; avatar: string }>;
+    country: Array<{
+      rank: number;
+      name: string;
+      rating: number;
+      city: string;
+      avatar: string;
+    }>;
+    region: Array<{
+      rank: number;
+      name: string;
+      rating: number;
+      city: string;
+      avatar: string;
+    }>;
+    city: Array<{
+      rank: number;
+      name: string;
+      rating: number;
+      city: string;
+      avatar: string;
+    }>;
   } | null>(null);
 
   useEffect(() => {
@@ -120,7 +138,7 @@ export const HomeSection = ({
     },
     {
       rank: 4,
-      name: "Елена Козлова",
+      name: "Евгений Севрюгин",
       rating: 2287,
       city: "Екатеринбург",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena",
@@ -319,10 +337,15 @@ export const HomeSection = ({
     },
   ];
 
-  const isRealMode = siteSettings?.rankings_mode?.value === "real" && realLeaderboard;
+  const isRealMode =
+    siteSettings?.rankings_mode?.value === "real" && realLeaderboard;
 
-  const activeRussiaRanking = isRealMode ? realLeaderboard.country : fullRussiaRanking;
-  const activeRegionRanking = isRealMode ? realLeaderboard.region : fullRegionRanking;
+  const activeRussiaRanking = isRealMode
+    ? realLeaderboard.country
+    : fullRussiaRanking;
+  const activeRegionRanking = isRealMode
+    ? realLeaderboard.region
+    : fullRegionRanking;
   const activeCityRanking = isRealMode ? realLeaderboard.city : fullCityRanking;
 
   const topRussia = activeRussiaRanking.slice(0, 4);
@@ -444,43 +467,43 @@ export const HomeSection = ({
       </div>
 
       {isButtonVisible("btn_rankings") && (
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
-        <RankingCard
-          title="Лучшие в России"
-          subtitle="Лидеры страны"
-          icon="Globe"
-          iconColor="blue"
-          topPlayers={topRussia}
-          fullRanking={activeRussiaRanking}
-          showModal={showRussiaModal}
-          setShowModal={setShowRussiaModal}
-          animationDelay="0s"
-        />
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-6">
+          <RankingCard
+            title="Лучшие в России"
+            subtitle="Лидеры страны"
+            icon="Globe"
+            iconColor="blue"
+            topPlayers={topRussia}
+            fullRanking={activeRussiaRanking}
+            showModal={showRussiaModal}
+            setShowModal={setShowRussiaModal}
+            animationDelay="0s"
+          />
 
-        <RankingCard
-          title="Первые в регионе"
-          subtitle={userRegion}
-          icon="Map"
-          iconColor="purple"
-          topPlayers={topRegion}
-          fullRanking={activeRegionRanking}
-          showModal={showRegionModal}
-          setShowModal={setShowRegionModal}
-          animationDelay="0.1s"
-        />
+          <RankingCard
+            title="Первые в регионе"
+            subtitle={userRegion}
+            icon="Map"
+            iconColor="purple"
+            topPlayers={topRegion}
+            fullRanking={activeRegionRanking}
+            showModal={showRegionModal}
+            setShowModal={setShowRegionModal}
+            animationDelay="0.1s"
+          />
 
-        <RankingCard
-          title="Победители в городе"
-          subtitle={userCity}
-          icon="Home"
-          iconColor="orange"
-          topPlayers={topCity}
-          fullRanking={activeCityRanking}
-          showModal={showCityModal}
-          setShowModal={setShowCityModal}
-          animationDelay="0.2s"
-        />
-      </div>
+          <RankingCard
+            title="Победители в городе"
+            subtitle={userCity}
+            icon="Home"
+            iconColor="orange"
+            topPlayers={topCity}
+            fullRanking={activeCityRanking}
+            showModal={showCityModal}
+            setShowModal={setShowCityModal}
+            animationDelay="0.2s"
+          />
+        </div>
       )}
     </div>
   );
