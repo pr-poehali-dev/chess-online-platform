@@ -7,6 +7,7 @@ import { RankingCard } from "./RankingCard";
 import API from "@/config/api";
 const SITE_SETTINGS_URL = API.siteSettings;
 const GEO_DETECT_URL = API.geoDetect;
+const LEADERBOARD_URL = API.leaderboard;
 
 interface SiteSettingsData {
   [key: string]: { value: string; description: string };
@@ -35,6 +36,11 @@ export const HomeSection = ({
   );
   const [userRating, setUserRating] = useState(0);
   const [lockedMessage, setLockedMessage] = useState<string | null>(null);
+  const [realLeaderboard, setRealLeaderboard] = useState<{
+    country: Array<{ rank: number; name: string; rating: number; city: string; avatar: string }>;
+    region: Array<{ rank: number; name: string; rating: number; city: string; avatar: string }>;
+    city: Array<{ rank: number; name: string; rating: number; city: string; avatar: string }>;
+  } | null>(null);
 
   useEffect(() => {
     const savedUser = localStorage.getItem("chessUser");
@@ -68,6 +74,15 @@ export const HomeSection = ({
       .then((data) => setSiteSettings(data))
       .catch(() => {});
   }, []);
+
+  useEffect(() => {
+    if (!siteSettings || siteSettings.rankings_mode?.value !== "real") return;
+    const params = new URLSearchParams({ city: userCity, region: userRegion });
+    fetch(`${LEADERBOARD_URL}?${params}`)
+      .then((r) => r.json())
+      .then((data) => setRealLeaderboard(data))
+      .catch(() => {});
+  }, [siteSettings, userCity, userRegion]);
 
   const isButtonVisible = (btnKey: string) => {
     if (!siteSettings) return true;
@@ -304,9 +319,15 @@ export const HomeSection = ({
     },
   ];
 
-  const topRussia = fullRussiaRanking.slice(0, 4);
-  const topRegion = fullRegionRanking.slice(0, 4);
-  const topCity = fullCityRanking.slice(0, 4);
+  const isRealMode = siteSettings?.rankings_mode?.value === "real" && realLeaderboard;
+
+  const activeRussiaRanking = isRealMode ? realLeaderboard.country : fullRussiaRanking;
+  const activeRegionRanking = isRealMode ? realLeaderboard.region : fullRegionRanking;
+  const activeCityRanking = isRealMode ? realLeaderboard.city : fullCityRanking;
+
+  const topRussia = activeRussiaRanking.slice(0, 4);
+  const topRegion = activeRegionRanking.slice(0, 4);
+  const topCity = activeCityRanking.slice(0, 4);
 
   return (
     <div className="space-y-6 sm:space-y-8 animate-fade-in overflow-hidden">
@@ -430,7 +451,7 @@ export const HomeSection = ({
           icon="Globe"
           iconColor="blue"
           topPlayers={topRussia}
-          fullRanking={fullRussiaRanking}
+          fullRanking={activeRussiaRanking}
           showModal={showRussiaModal}
           setShowModal={setShowRussiaModal}
           animationDelay="0s"
@@ -442,7 +463,7 @@ export const HomeSection = ({
           icon="Map"
           iconColor="purple"
           topPlayers={topRegion}
-          fullRanking={fullRegionRanking}
+          fullRanking={activeRegionRanking}
           showModal={showRegionModal}
           setShowModal={setShowRegionModal}
           animationDelay="0.1s"
@@ -454,7 +475,7 @@ export const HomeSection = ({
           icon="Home"
           iconColor="orange"
           topPlayers={topCity}
-          fullRanking={fullCityRanking}
+          fullRanking={activeCityRanking}
           showModal={showCityModal}
           setShowModal={setShowCityModal}
           animationDelay="0.2s"

@@ -18,6 +18,17 @@ const buttons = [
   { key: 'btn_rankings', label: 'Рейтинги на главной', icon: 'BarChart3', color: 'text-orange-400' },
 ];
 
+const modeToggle = {
+  key: 'rankings_mode',
+  label: 'Данные рейтинга',
+  icon: 'Users',
+  color: 'text-cyan-400',
+  options: [
+    { value: 'demo', label: 'Демо (фейковые)' },
+    { value: 'real', label: 'Реальные игроки' },
+  ],
+};
+
 export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
   const [values, setValues] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
@@ -26,6 +37,9 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
     });
     return init;
   });
+  const [rankingsMode, setRankingsMode] = useState<string>(
+    settings[modeToggle.key]?.value || 'demo'
+  );
   const [saving, setSaving] = useState(false);
 
   const toggle = (key: string) => {
@@ -38,6 +52,7 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
     buttons.forEach(b => {
       updated[b.key] = { value: values[b.key] ? 'true' : 'false' };
     });
+    updated[modeToggle.key] = { value: rankingsMode };
     await onSave(updated);
     setSaving(false);
   };
@@ -74,6 +89,30 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
               </div>
             </button>
           ))}
+
+          <div className="pt-2 border-t border-slate-700/50">
+            <div className="p-4 rounded-xl bg-slate-700/40 border border-slate-600/30">
+              <div className="flex items-center gap-3 mb-3">
+                <Icon name={modeToggle.icon} size={20} className={modeToggle.color} />
+                <span className="text-white font-medium">{modeToggle.label}</span>
+              </div>
+              <div className="flex gap-2">
+                {modeToggle.options.map(opt => (
+                  <button
+                    key={opt.value}
+                    onClick={() => setRankingsMode(opt.value)}
+                    className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
+                      rankingsMode === opt.value
+                        ? 'bg-cyan-500 text-white'
+                        : 'bg-slate-600/50 text-slate-300 hover:bg-slate-600'
+                    }`}
+                  >
+                    {opt.label}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
         </div>
 
         <div className="p-5 border-t border-slate-700/50 flex gap-3">

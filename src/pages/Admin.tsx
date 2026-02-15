@@ -100,10 +100,13 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
       { key: 'btn_tournament', label: 'Турнир' },
       { key: 'btn_rankings', label: 'Рейтинги' },
     ];
-    return items.map(i => {
+    const parts = items.map(i => {
       const on = siteSettings[i.key]?.value === 'true';
       return `${i.label}: ${on ? 'вкл' : 'выкл'}`;
-    }).join(' | ');
+    });
+    const mode = siteSettings.rankings_mode?.value === 'real' ? 'реальные' : 'демо';
+    parts.push(`Данные: ${mode}`);
+    return parts.join(' | ');
   };
 
   const getLevelsDescription = () => {

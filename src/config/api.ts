@@ -17,6 +17,7 @@ export const API = {
   finishGame: urls['finish-game'],
   ratingSettings: urls['rating-settings'],
   adminStats: urls['admin-stats'],
+  leaderboard: urls['leaderboard'],
 } as const;
 
 export default API;
