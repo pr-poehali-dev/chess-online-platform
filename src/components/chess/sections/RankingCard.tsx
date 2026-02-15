@@ -86,7 +86,7 @@ export const RankingCard = ({
       <div className="flex gap-3 sm:gap-4 mb-4">
         <div className="flex-1 min-w-0">
           <div className="text-center mb-2">
-            <div className="text-xl sm:text-2xl font-bold text-yellow-400">1 место</div>
+            <div className="text-xl sm:text-2xl font-bold text-yellow-400 animate-glow-text">1 место</div>
           </div>
           <div
             className="relative p-3 sm:p-4 rounded-xl border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 cursor-pointer hover:scale-[1.02] transition-all animate-glow-pulse"
@@ -120,10 +120,10 @@ export const RankingCard = ({
                 <div className="text-xs font-semibold text-gray-500 dark:text-gray-400">{player.rank} место</div>
               </div>
               <div
-                className={`flex items-center gap-2 p-2 rounded-lg border cursor-pointer hover:border-amber-400 transition-colors ${
+                className={`flex items-center gap-2 p-2 rounded-lg cursor-pointer hover:border-amber-400 transition-colors ${
                   player.rank <= 3
-                    ? 'border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
-                    : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
+                    ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
+                    : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
                 }`}
                 onClick={() => setSelectedPlayer(player)}
               >
