@@ -138,7 +138,7 @@ export const HomeSection = ({
     },
     {
       rank: 4,
-      name: "Евгений Севрюгин",
+      name: "Жена Севрюгин",
       rating: 2287,
       city: "Екатеринбург",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Elena",
