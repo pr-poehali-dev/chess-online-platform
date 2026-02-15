@@ -89,15 +89,17 @@ export const RankingCard = ({
             <div className="text-xl sm:text-2xl font-bold text-yellow-400">1 место</div>
           </div>
           <div
-            className="p-3 sm:p-4 rounded-lg border bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 border-yellow-200 dark:border-yellow-500/30 cursor-pointer hover:ring-2 hover:ring-yellow-400 transition-all"
+            className="relative p-3 sm:p-4 rounded-xl border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 cursor-pointer hover:scale-[1.02] transition-all shadow-[0_0_20px_rgba(250,204,21,0.25)] dark:shadow-[0_0_25px_rgba(250,204,21,0.3)]"
             onClick={() => setSelectedPlayer(first)}
           >
-            <div className="flex flex-col items-center text-center gap-2 sm:gap-3">
+            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-yellow-400/10 to-orange-400/10 dark:from-yellow-400/5 dark:to-orange-400/5 pointer-events-none" />
+            <div className="relative flex flex-col items-center text-center gap-2 sm:gap-3">
               <div className="relative">
+                <div className="absolute -inset-2 rounded-full bg-yellow-400/20 dark:bg-yellow-400/15 blur-md animate-pulse" />
                 {first.avatar ? (
-                  <img src={first.avatar} alt={first.name} className="w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-4 ring-yellow-400" />
+                  <img src={first.avatar} alt={first.name} className="relative w-20 h-20 sm:w-28 sm:h-28 rounded-full object-cover ring-[3px] ring-yellow-400 shadow-lg" />
                 ) : (
-                  <div className={`w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center font-bold text-lg sm:text-xl text-white ${colors.bg} ring-4 ring-yellow-400`}>
+                  <div className={`relative w-20 h-20 sm:w-28 sm:h-28 rounded-full flex items-center justify-center font-bold text-xl sm:text-2xl text-white ${colors.bg} ring-[3px] ring-yellow-400 shadow-lg`}>
                     {getInitials(first.name)}
                   </div>
                 )}
@@ -105,7 +107,7 @@ export const RankingCard = ({
               <div className="flex-1 min-w-0">
                 <div className="font-bold text-base sm:text-lg text-gray-900 dark:text-white truncate">{first.name}</div>
                 <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{first.city}</div>
-                <div className={`text-base sm:text-lg font-bold ${colors.text} mt-1`}>{first.rating}</div>
+                <div className={`text-lg sm:text-xl font-bold ${colors.text} mt-1`}>{first.rating}</div>
               </div>
             </div>
           </div>
