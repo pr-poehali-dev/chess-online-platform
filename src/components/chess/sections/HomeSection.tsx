@@ -190,7 +190,7 @@ export const HomeSection = ({
   const fullRegionRanking = [
     {
       rank: 1,
-      name: "Игорь Соколов",
+      name: "Юлька Акапулька",
       rating: 2123,
       city: userCity,
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Igor",
