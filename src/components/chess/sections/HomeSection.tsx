@@ -197,7 +197,7 @@ export const HomeSection = ({
     },
     {
       rank: 2,
-      name: "Анна Волкова",
+      name: "Оля Михалковская",
       rating: 2089,
       city: userCity === "Москва" ? "Подольск" : userCity,
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Anna",
