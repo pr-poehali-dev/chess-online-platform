@@ -124,7 +124,7 @@ export const HomeSection = ({
     },
     {
       rank: 2,
-      name: "Мария Смирнова",
+      name: "Костя Шапран",
       rating: 2398,
       city: "Санкт-Петербург",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Maria",

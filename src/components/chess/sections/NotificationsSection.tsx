@@ -59,7 +59,7 @@ export const NotificationsSection = () => {
           id: "2",
           type: "game",
           title: "Приглашение в игру",
-          message: "Мария Смирнова приглашает вас сыграть партию",
+          message: "Костя Шапран приглашает вас сыграть партию",
           time: "15 минут назад",
           read: false,
         },
