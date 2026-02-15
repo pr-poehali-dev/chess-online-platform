@@ -117,7 +117,7 @@ export const HomeSection = ({
   const fullRussiaRanking = [
     {
       rank: 1,
-      name: "Александр Петров",
+      name: "Евгения Малыхина",
       rating: 2456,
       city: "Москва",
       avatar: "https://api.dicebear.com/7.x/avataaars/svg?seed=Alexander",
