@@ -22,8 +22,9 @@ export const NameStep = ({ userName, setUserName, handleNextStep }: NameStepProp
           name="name"
           placeholder="Введите ваше имя"
           value={userName}
-          onChange={(e) => setUserName(e.target.value)}
+          onChange={(e) => setUserName(e.target.value.slice(0, 16))}
           onKeyPress={(e) => e.key === 'Enter' && handleNextStep()}
+          maxLength={16}
           autoComplete="name"
           autoFocus
           className="w-full px-4 py-3 rounded-lg border border-slate-200 dark:border-white/10 bg-white dark:bg-slate-800/50 text-gray-900 dark:text-white focus:outline-none focus:ring-2 focus:ring-blue-400"
