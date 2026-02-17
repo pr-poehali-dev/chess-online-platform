@@ -119,7 +119,7 @@ export const RankingCard = ({
                 )}
               </div>
               <div className="min-w-0 w-full">
-                <div className="font-bold text-xs sm:text-sm lg:text-base text-gray-900 dark:text-white leading-tight">{clampName(first.name)}</div>
+                <div className="font-bold text-xs sm:text-sm lg:text-base text-gray-900 dark:text-white leading-tight">{splitName(first.name)}</div>
                 <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">{first.city}</div>
                 <div className={`text-sm sm:text-lg lg:text-xl font-bold ${colors.text} mt-0.5`}>{first.rating}</div>
               </div>
@@ -185,7 +185,7 @@ export const RankingCard = ({
             player.highlight 
               ? colors.highlightText
               : 'text-gray-900 dark:text-white'
-          }`}>{clampName(player.name)}</div>
+          }`}>{splitName(player.name)}</div>
           <div className="text-[9px] sm:text-[10px] text-gray-600 dark:text-gray-400 truncate">{player.city}</div>
         </div>
         <div className={`text-[10px] sm:text-xs font-bold ${colors.text} flex-shrink-0`}>{player.rating}</div>
