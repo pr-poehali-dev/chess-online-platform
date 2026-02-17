@@ -29,6 +29,12 @@ interface RankingCardProps {
 const clampName = (name: string, max = 16) =>
   name.length > max ? name.slice(0, max - 1) + '…' : name;
 
+const splitName = (name: string) => {
+  const parts = name.trim().split(/\s+/);
+  if (parts.length >= 2) return <>{parts[0]}<br />{parts.slice(1).join(' ')}</>;
+  return <>{name}</>;
+};
+
 export const RankingCard = ({
   title,
   subtitle,
@@ -141,7 +147,7 @@ export const RankingCard = ({
                     {getInitials(player.name)}
                   </div>
                 )}
-                <div className="font-semibold text-[8px] sm:text-[10px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center break-words" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{player.name}</div>
+                <div className="font-semibold text-[8px] sm:text-[10px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center">{splitName(player.name)}</div>
                 <div className={`text-[8px] sm:text-[10px] lg:text-xs font-bold ${colors.text}`}>{player.rating}</div>
               </div>
             </div>
