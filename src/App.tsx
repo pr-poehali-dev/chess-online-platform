@@ -35,9 +35,10 @@ const LandscapeBlocker = () => {
 
   useEffect(() => {
     const checkOrientation = () => {
-      const isMobile = window.innerWidth <= 1024 && ('ontouchstart' in window || navigator.maxTouchPoints > 0);
+      const isMobileUA = /Android|iPhone|iPod/.test(navigator.userAgent);
+      const isSmallScreen = window.innerWidth <= 768 && window.innerHeight <= 500;
       const landscape = window.innerWidth > window.innerHeight;
-      setIsLandscape(isMobile && landscape);
+      setIsLandscape((isMobileUA || isSmallScreen) && landscape);
     };
 
     checkOrientation();
