@@ -1,7 +1,10 @@
-export async function shareContent(data: { title: string; text: string; url?: string }): Promise<boolean> {
-  const shareUrl = data.url || window.location.href;
+const SITE_URL = 'https://ligachess.ru/';
 
-  if (navigator.share) {
+export async function shareContent(data: { title: string; text: string; url?: string }): Promise<boolean> {
+  const shareUrl = data.url || SITE_URL;
+  const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
+
+  if (isMobile && navigator.share) {
     try {
       await navigator.share({ title: data.title, text: data.text, url: shareUrl });
       return true;
