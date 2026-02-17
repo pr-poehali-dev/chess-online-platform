@@ -158,15 +158,15 @@ export const ChatSection = ({
   }
 
   return (
-    <div className="space-y-6 animate-fade-in">
-      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10">
-        <CardHeader>
+    <div className="animate-fade-in flex flex-col" style={{ maxHeight: 'calc(100vh - 120px)' }}>
+      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 flex flex-col flex-1 min-h-0">
+        <CardHeader className="flex-shrink-0">
           <CardTitle className="flex items-center gap-2 text-gray-900 dark:text-white">
             <Icon name="MessageCircle" className="text-blue-600 dark:text-blue-400" size={24} />
             Сообщения
           </CardTitle>
         </CardHeader>
-        <CardContent>
+        <CardContent className="flex-1 min-h-0 overflow-y-auto">
           <div className="space-y-3">
             {loading ? (
               <div className="text-center py-12 text-gray-400">
