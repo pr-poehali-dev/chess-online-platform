@@ -139,7 +139,7 @@ export const RankingCard = ({
         <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
           {rest.map((player) => (
             <div key={player.rank} className="flex flex-col items-center">
-              <div className={`text-[8px] sm:text-[9px] lg:text-[10px] font-bold ${colors.text} mb-0.5`}>{player.rank} место</div>
+              <div className={`text-[8px] sm:text-[9px] lg:text-[10px] font-bold mb-0.5 ${player.rank <= 3 ? 'text-yellow-400 animate-glow-text' : colors.text}`}>{player.rank} место</div>
               <div
                 className={`flex flex-col items-center justify-center text-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl cursor-pointer hover:border-amber-400 transition-colors w-full flex-1 min-h-[44px] ${
                   player.rank <= 3
