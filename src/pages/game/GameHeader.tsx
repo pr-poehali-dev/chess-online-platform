@@ -1,6 +1,8 @@
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
 import { BoardTheme, boardThemes } from "./gameTypes";
 import type { P2PQuality } from "./usePeerConnection";
+import { shareContent } from "@/lib/share";
 
 interface GameHeaderProps {
   showSettingsMenu: boolean;
@@ -129,6 +131,18 @@ export const GameControls = ({
 }: GameHeaderProps) => {
   const isGameOver = gameStatus && gameStatus !== "playing";
   const themeKeys: BoardTheme[] = ["classic", "flat", "wood"];
+  const [shareOk, setShareOk] = useState(false);
+
+  const handleShareResult = async () => {
+    const resultText = gameStatus === 'checkmate'
+      ? (currentPlayer === playerColor ? 'Поражение' : 'Победа')
+      : 'Ничья';
+    const ok = await shareContent({
+      title: 'Лига Шахмат — Результат партии',
+      text: `${resultText} в Лиге Шахмат!`,
+    });
+    if (ok) { setShareOk(true); setTimeout(() => setShareOk(false), 2000); }
+  };
   return (
     <div className="w-full md:w-auto h-[40px] sm:h-[48px] md:h-[56px]">
       <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 h-full">
@@ -379,33 +393,42 @@ export const GameControls = ({
               {gameStatus === "stalemate" && "Ничья"}
               {gameStatus === "draw" && "Ничья"}
             </div>
-            <button
-              onClick={() => {
-                if (rematchSent || rematchCooldown) return;
-                if (onOfferRematch) {
-                  onOfferRematch();
-                } else if (setShowRematchOffer) {
-                  setTimeout(() => {
-                    setShowRematchOffer(true);
-                  }, 500);
-                }
-              }}
-              disabled={rematchSent || rematchCooldown}
-              className={`p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ml-1 sm:ml-2 text-white ${
-                rematchSent || rematchCooldown
-                  ? "bg-stone-600 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"
-              }`}
-            >
-              <Icon name="RotateCcw" size={16} />
-              <span className="font-semibold text-[10px] sm:text-xs md:text-sm">
-                {rematchCooldown
-                  ? "Недоступно"
-                  : rematchSent
-                    ? "Ожидание..."
-                    : "Реванш"}
-              </span>
-            </button>
+            <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ml-1 sm:ml-2">
+              <button
+                onClick={handleShareResult}
+                className="p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 flex-shrink-0 text-white bg-white/20 hover:bg-white/30"
+                title="Поделиться"
+              >
+                <Icon name={shareOk ? 'Check' : 'Share2'} size={16} />
+              </button>
+              <button
+                onClick={() => {
+                  if (rematchSent || rematchCooldown) return;
+                  if (onOfferRematch) {
+                    onOfferRematch();
+                  } else if (setShowRematchOffer) {
+                    setTimeout(() => {
+                      setShowRematchOffer(true);
+                    }, 500);
+                  }
+                }}
+                disabled={rematchSent || rematchCooldown}
+                className={`p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 sm:gap-1.5 flex-shrink-0 text-white ${
+                  rematchSent || rematchCooldown
+                    ? "bg-stone-600 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700"
+                }`}
+              >
+                <Icon name="RotateCcw" size={16} />
+                <span className="font-semibold text-[10px] sm:text-xs md:text-sm">
+                  {rematchCooldown
+                    ? "Недоступно"
+                    : rematchSent
+                      ? "Ожидание..."
+                      : "Реванш"}
+                </span>
+              </button>
+            </div>
           </div>
         )}
       </div>

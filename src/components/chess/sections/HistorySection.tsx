@@ -4,6 +4,7 @@ import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
 import { cachedGameHistory } from '@/lib/apiCache';
+import { shareContent } from '@/lib/share';
 
 interface Game {
   id: number;
@@ -169,14 +170,30 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                 <Icon name="ChevronLeft" className="text-blue-600 dark:text-blue-400" size={24} />
                 Просмотр партии
               </CardTitle>
-              <Button
-                onClick={() => setSelectedGame(null)}
-                variant="outline"
-                className="border-slate-200 dark:border-white/20"
-              >
-                <Icon name="X" size={18} className="mr-2" />
-                Закрыть
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  onClick={() => {
+                    const res = getResultText(selectedGame.result);
+                    shareContent({
+                      title: 'Лига Шахмат — Партия',
+                      text: `${res} против ${selectedGame.opponent_name} (${selectedGame.rating_change > 0 ? '+' : ''}${selectedGame.rating_change}). ${selectedGame.moves_count} ходов.`,
+                    });
+                  }}
+                  variant="outline"
+                  className="border-slate-200 dark:border-white/20"
+                >
+                  <Icon name="Share2" size={18} className="mr-2" />
+                  <span className="hidden sm:inline">Поделиться</span>
+                </Button>
+                <Button
+                  onClick={() => setSelectedGame(null)}
+                  variant="outline"
+                  className="border-slate-200 dark:border-white/20"
+                >
+                  <Icon name="X" size={18} className="mr-2" />
+                  Закрыть
+                </Button>
+              </div>
             </div>
           </CardHeader>
           <CardContent>
@@ -338,6 +355,21 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                     </div>
                     <div className="text-xs text-gray-400">{game.rating_after}</div>
                   </div>
+
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      const res = getResultText(game.result);
+                      shareContent({
+                        title: 'Лига Шахмат — Партия',
+                        text: `${res} против ${game.opponent_name} (${game.rating_change > 0 ? '+' : ''}${game.rating_change})`,
+                      });
+                    }}
+                    className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+                    title="Поделиться"
+                  >
+                    <Icon name="Share2" size={14} />
+                  </button>
 
                   {onOpenChat && game.opponent_type !== 'bot' && (
                     <Button

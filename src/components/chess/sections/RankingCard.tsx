@@ -3,6 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import Icon from '@/components/ui/icon';
 import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
+import { shareContent } from '@/lib/share';
 
 interface Player {
   rank: number;
@@ -40,6 +41,14 @@ export const RankingCard = ({
   animationDelay
 }: RankingCardProps) => {
   const [selectedPlayer, setSelectedPlayer] = useState<Player | null>(null);
+  const [shared, setShared] = useState(false);
+
+  const handleShare = async () => {
+    const top = topPlayers[0];
+    const text = `${title}: 1 место — ${top.name} (${top.rating})`;
+    const ok = await shareContent({ title: 'Лига Шахмат — Рейтинг', text });
+    if (ok) { setShared(true); setTimeout(() => setShared(false), 2000); }
+  };
 
   const colorClasses = {
     blue: {
@@ -186,22 +195,31 @@ export const RankingCard = ({
   return (
     <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in overflow-hidden" style={{ animationDelay }}>
       <CardHeader className="px-3 pt-3 pb-1.5 sm:px-5 sm:pt-4 sm:pb-2">
-        <CardTitle className={subtitle ? "flex flex-col gap-0.5 text-gray-900 dark:text-white" : "flex items-center gap-2 text-gray-900 dark:text-white"}>
-          {subtitle ? (
-            <>
-              <div className="flex items-center gap-1.5 sm:gap-2">
+        <div className="flex items-start justify-between">
+          <CardTitle className={subtitle ? "flex flex-col gap-0.5 text-gray-900 dark:text-white" : "flex items-center gap-2 text-gray-900 dark:text-white"}>
+            {subtitle ? (
+              <>
+                <div className="flex items-center gap-1.5 sm:gap-2">
+                  <Icon name={icon} className={colors.icon} size={16} />
+                  <span className="text-sm sm:text-base lg:text-lg">{title}</span>
+                </div>
+                <div className="text-[10px] sm:text-xs lg:text-sm font-normal text-gray-600 dark:text-gray-400">{subtitle}</div>
+              </>
+            ) : (
+              <>
                 <Icon name={icon} className={colors.icon} size={16} />
                 <span className="text-sm sm:text-base lg:text-lg">{title}</span>
-              </div>
-              <div className="text-[10px] sm:text-xs lg:text-sm font-normal text-gray-600 dark:text-gray-400">{subtitle}</div>
-            </>
-          ) : (
-            <>
-              <Icon name={icon} className={colors.icon} size={16} />
-              <span className="text-sm sm:text-base lg:text-lg">{title}</span>
-            </>
-          )}
-        </CardTitle>
+              </>
+            )}
+          </CardTitle>
+          <button
+            onClick={handleShare}
+            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
+            title="Поделиться"
+          >
+            <Icon name={shared ? 'Check' : 'Share2'} size={16} />
+          </button>
+        </div>
       </CardHeader>
       <CardContent className="px-3 pb-3 sm:px-5 sm:pb-4 pt-0">
         {renderTop4()}
