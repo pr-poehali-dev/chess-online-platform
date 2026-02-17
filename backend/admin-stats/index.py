@@ -81,7 +81,7 @@ def handler(event, context):
         online_users = cur.fetchone()[0]
 
         cur.execute(
-            "SELECT COUNT(*) FROM {s}.online_games WHERE status = 'playing'".format(s=schema)
+            "SELECT COUNT(*) FROM {s}.online_games WHERE status = 'playing' AND created_at > NOW() - INTERVAL '1 hour'".format(s=schema)
         )
         active_games = cur.fetchone()[0]
 
