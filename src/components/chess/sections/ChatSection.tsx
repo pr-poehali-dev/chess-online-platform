@@ -31,15 +31,22 @@ export const ChatSection = ({
     if (!uid) { setLoading(false); return; }
 
     try {
-      const [convRes, friendsRes] = await Promise.all([
-        fetch(`${CHAT_URL}?action=conversations&user_id=${encodeURIComponent(uid)}`),
-        fetch(`${FRIENDS_URL}?action=list&user_id=${encodeURIComponent(uid)}`)
-      ]);
+      const convRes = await fetch(`${CHAT_URL}?action=conversations&user_id=${encodeURIComponent(uid)}`);
       const convData = await convRes.json();
-      const friendsData = await friendsRes.json();
-
       const conversations = convData.conversations || [];
-      const friends = friendsData.friends || [];
+
+      let friends: { id: string; username: string; avatar: string; rating: number; city: string; status: string }[] = [];
+      const friendsCacheKey = `friends_list_${uid}`;
+      const friendsCached = sessionStorage.getItem(friendsCacheKey);
+      if (friendsCached) {
+        try { const d = JSON.parse(friendsCached); if (Date.now() - d.ts < 30000) friends = d.data; } catch { /* ignore */ }
+      }
+      if (!friends.length) {
+        const friendsRes = await fetch(`${FRIENDS_URL}?action=list&user_id=${encodeURIComponent(uid)}`);
+        const friendsData = await friendsRes.json();
+        friends = friendsData.friends || [];
+        try { sessionStorage.setItem(friendsCacheKey, JSON.stringify({ data: friends, ts: Date.now() })); } catch { /* ignore */ }
+      }
 
       const convPartnerIds = new Set(conversations.map((c: { partner_id: string }) => c.partner_id));
 
