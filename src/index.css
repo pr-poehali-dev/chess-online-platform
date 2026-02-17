@@ -188,6 +188,22 @@
     }
   }
 
+  .animate-expand {
+    animation: expandDown 0.35s ease-out forwards;
+    overflow: hidden;
+  }
+
+  @keyframes expandDown {
+    from {
+      opacity: 0;
+      max-height: 0;
+    }
+    to {
+      opacity: 1;
+      max-height: 600px;
+    }
+  }
+
   @keyframes glowPulse {
     0%,
     100% {

@@ -26,13 +26,13 @@ export const HomeActionButtons = ({
   setLockedMessage,
 }: HomeActionButtonsProps) => {
   return (
-    <div className="text-center pt-2 pb-0">
-      <div className="flex flex-col items-center gap-3 sm:gap-4 mb-6 sm:mb-8 animate-slide-up max-w-md mx-auto px-1">
+    <div className="text-center pt-1 sm:pt-2 pb-0">
+      <div className="flex flex-col items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6 animate-slide-up max-w-md mx-auto px-2 sm:px-1">
         {isButtonVisible("btn_play_online") && (
           <div className="w-full relative">
             <Button
               size="lg"
-              className={`w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-6 sm:px-12 py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed("level_play_online") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
+              className={`w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 text-sm sm:text-base lg:text-lg font-semibold rounded-xl transition-all shadow-lg min-h-[44px] ${!isLevelAllowed("level_play_online") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
               onClick={() => {
                 if (!isLevelAllowed("level_play_online")) {
                   const minR = siteSettings?.level_play_online?.value || "0";
@@ -60,7 +60,7 @@ export const HomeActionButtons = ({
           <div className="w-full relative">
             <Button
               size="lg"
-              className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-6 sm:px-12 py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed("level_play_offline") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
+              className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 text-sm sm:text-base lg:text-lg font-semibold rounded-xl transition-all shadow-lg min-h-[44px] ${!isLevelAllowed("level_play_offline") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
               onClick={() => {
                 if (!isLevelAllowed("level_play_offline")) {
                   const minR = siteSettings?.level_play_offline?.value || "0";
@@ -88,7 +88,7 @@ export const HomeActionButtons = ({
           <div className="w-full relative">
             <Button
               size="lg"
-              className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-6 sm:px-12 py-4 sm:py-6 text-base sm:text-lg font-semibold rounded-xl transition-all shadow-lg ${!isLevelAllowed("level_tournament") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
+              className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 text-sm sm:text-base lg:text-lg font-semibold rounded-xl transition-all shadow-lg min-h-[44px] ${!isLevelAllowed("level_tournament") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
               onClick={() => {
                 if (!isLevelAllowed("level_tournament")) {
                   const minR =
@@ -124,13 +124,13 @@ export const HomeActionButtons = ({
       )}
 
       <h2
-        className="text-3xl sm:text-4xl md:text-5xl font-bold mb-3 sm:mb-4 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up"
+        className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up px-2"
         style={{ animationDelay: "0.1s" }}
       >
         Шахматный мир ждет тебя
       </h2>
       <p
-        className="text-base sm:text-lg md:text-xl text-gray-600 dark:text-gray-400 mb-0 animate-slide-up px-2"
+        className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-400 mb-0 animate-slide-up px-3 sm:px-2"
         style={{ animationDelay: "0.2s" }}
       >
         Играем онлайн с людьми со всей страны. Найдем достойного соперника для
