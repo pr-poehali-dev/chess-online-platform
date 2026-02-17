@@ -115,17 +115,17 @@ export const RankingCard = ({
           {rest.map((player) => (
             <div
               key={player.rank}
-              className={`flex flex-col items-center text-center p-2 sm:p-2.5 rounded-xl cursor-pointer hover:border-amber-400 transition-colors flex-1 justify-center ${
+              className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl cursor-pointer hover:border-amber-400 transition-colors flex-1 ${
                 player.rank <= 3
                   ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
                   : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
               }`}
               onClick={() => setSelectedPlayer(player)}
             >
-              <div className="relative mb-1">
-                <div className={`absolute -top-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] ${colors.bg} text-white z-10`}>
-                  {player.rank}
-                </div>
+              <div className={`w-6 h-6 rounded-full flex items-center justify-center font-bold text-[10px] ${colors.bg} text-white flex-shrink-0`}>
+                {player.rank}
+              </div>
+              <div className="flex-shrink-0">
                 {player.avatar ? (
                   <img src={player.avatar} alt={player.name} className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover" />
                 ) : (
@@ -134,8 +134,8 @@ export const RankingCard = ({
                   </div>
                 )}
               </div>
-              <div className="min-w-0 w-full">
-                <div className="font-semibold text-[11px] sm:text-xs text-gray-900 dark:text-white leading-tight line-clamp-2">{clampName(player.name)}</div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white leading-tight break-words">{clampName(player.name)}</div>
                 <div className={`text-xs sm:text-sm font-bold ${colors.text}`}>{player.rating}</div>
               </div>
             </div>
@@ -206,31 +206,18 @@ export const RankingCard = ({
         <Button
           variant="outline"
           className={`w-full border-slate-300 dark:border-white/10 text-gray-700 dark:text-gray-300 hover:text-gray-900 dark:hover:text-white py-2 text-sm ${colors.hover}`}
-          onClick={() => setShowModal(true)}
+          onClick={() => setShowModal(!showModal)}
         >
-          Полный рейтинг
-          <Icon name="ChevronRight" className="ml-1" size={16} />
+          {showModal ? 'Скрыть' : 'Полный рейтинг'}
+          <Icon name={showModal ? 'ChevronUp' : 'ChevronDown'} className="ml-1" size={16} />
         </Button>
-      </CardContent>
 
-      {showModal && (
-        <div className="fixed inset-0 z-50 bg-black/50 flex items-center justify-center p-3 sm:p-4" onClick={() => setShowModal(false)}>
-          <div className="bg-white dark:bg-slate-900 rounded-2xl max-w-lg w-full max-h-[80vh] overflow-y-auto border border-slate-200 dark:border-white/10" onClick={e => e.stopPropagation()}>
-            <div className="p-4 sm:p-5 border-b border-slate-200 dark:border-white/10 flex items-center justify-between sticky top-0 bg-white dark:bg-slate-900 rounded-t-2xl z-10">
-              <div className="flex items-center gap-2">
-                <Icon name={icon} className={colors.icon} size={20} />
-                <h2 className="text-base sm:text-lg font-bold text-gray-900 dark:text-white">{title}</h2>
-              </div>
-              <button onClick={() => setShowModal(false)} className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors">
-                <Icon name="X" size={20} className="text-gray-500" />
-              </button>
-            </div>
-            <div className="p-3 sm:p-4 space-y-2">
-              {fullRanking.map(renderPlayer)}
-            </div>
+        {showModal && (
+          <div className="mt-3 space-y-2 animate-fade-in">
+            {fullRanking.slice(4).map(renderPlayer)}
           </div>
-        </div>
-      )}
+        )}
+      </CardContent>
 
       {selectedPlayer && (
         <PlayerProfileModal 
