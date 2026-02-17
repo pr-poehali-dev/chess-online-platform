@@ -142,7 +142,9 @@ export const RankingCard = ({
               <div className={`text-[8px] sm:text-[9px] lg:text-[10px] font-bold mb-0.5 ${player.rank <= 3 ? 'text-yellow-400 animate-glow-text' : colors.text}`}>{player.rank} место</div>
               <div
                 className={`flex flex-col items-center justify-center text-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl cursor-pointer hover:border-amber-400 transition-colors w-full flex-1 min-h-[44px] ${
-                  player.rank <= 3
+                  player.rank === 2
+                    ? 'border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50/50 to-orange-50/50 dark:from-yellow-900/15 dark:to-orange-900/15 animate-glow-pulse'
+                    : player.rank <= 3
                     ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
                     : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
                 }`}
