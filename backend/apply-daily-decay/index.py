@@ -96,7 +96,7 @@ def handler(event: dict, context) -> dict:
         WHERE rating > %d
           AND id NOT IN (
             SELECT DISTINCT user_id FROM game_history
-            WHERE created_at >= '%s 00:00:00' AND created_at < '%s 00:00:00' + INTERVAL '1 day'
+            WHERE created_at >= TIMESTAMP '%s 00:00:00' AND created_at < TIMESTAMP '%s 00:00:00' + INTERVAL '1 day'
           )
         RETURNING id"""
         % (decay, min_rating, min_rating, today_msk, today_msk)

@@ -1,5 +1,6 @@
 import Icon from "@/components/ui/icon";
 import { BoardTheme, boardThemes } from "./gameTypes";
+import type { P2PQuality } from "./usePeerConnection";
 
 interface GameHeaderProps {
   showSettingsMenu: boolean;
@@ -23,6 +24,11 @@ interface GameHeaderProps {
   onOfferRematch?: () => void;
   rematchSent?: boolean;
   rematchCooldown?: boolean;
+  isOnline?: boolean;
+  p2pConnected?: boolean;
+  p2pQuality?: P2PQuality;
+  p2pLatency?: number | null;
+  connectionLost?: boolean;
 }
 
 export const GameHeader = ({
@@ -65,6 +71,34 @@ export const GameHeader = ({
   );
 };
 
+const P2PIndicator = ({ isOnline, p2pConnected, p2pQuality, p2pLatency, connectionLost, theme }: {
+  isOnline?: boolean; p2pConnected?: boolean; p2pQuality?: P2PQuality; p2pLatency?: number | null; connectionLost?: boolean; theme?: "light" | "dark";
+}) => {
+  if (!isOnline) return null;
+
+  const getConfig = () => {
+    if (connectionLost) return { color: 'text-red-500', bars: 0, label: 'Нет связи', bg: theme === 'light' ? 'bg-red-50 border-red-200' : 'bg-red-950/40 border-red-800/50' };
+    if (!p2pConnected) return { color: theme === 'light' ? 'text-amber-600' : 'text-amber-400', bars: 1, label: 'Сервер', bg: theme === 'light' ? 'bg-amber-50 border-amber-200' : 'bg-amber-950/40 border-amber-800/50' };
+    if (p2pQuality === 'excellent') return { color: 'text-emerald-500', bars: 3, label: p2pLatency ? `${p2pLatency}ms` : 'P2P', bg: theme === 'light' ? 'bg-emerald-50 border-emerald-200' : 'bg-emerald-950/40 border-emerald-800/50' };
+    if (p2pQuality === 'good') return { color: theme === 'light' ? 'text-green-600' : 'text-green-400', bars: 2, label: p2pLatency ? `${p2pLatency}ms` : 'P2P', bg: theme === 'light' ? 'bg-green-50 border-green-200' : 'bg-green-950/40 border-green-800/50' };
+    return { color: theme === 'light' ? 'text-orange-600' : 'text-orange-400', bars: 1, label: p2pLatency ? `${p2pLatency}ms` : 'P2P', bg: theme === 'light' ? 'bg-orange-50 border-orange-200' : 'bg-orange-950/40 border-orange-800/50' };
+  };
+
+  const { color, bars, label, bg } = getConfig();
+  const barH = [6, 10, 14];
+
+  return (
+    <div className={`flex items-center gap-1.5 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border text-[10px] sm:text-xs font-medium flex-shrink-0 ${bg} ${color}`} title={`Соединение: ${p2pConnected ? 'P2P прямое' : connectionLost ? 'потеряно' : 'через сервер'}${p2pLatency ? ` (${p2pLatency}ms)` : ''}`}>
+      <div className="flex items-end gap-[2px] h-[14px]">
+        {barH.map((h, i) => (
+          <div key={i} className={`w-[3px] rounded-sm transition-all duration-300 ${i < bars ? (connectionLost ? 'bg-red-500' : p2pConnected ? 'bg-current' : 'bg-current') : (theme === 'light' ? 'bg-slate-300' : 'bg-stone-600')}`} style={{ height: `${h}px` }} />
+        ))}
+      </div>
+      <span className="hidden sm:inline">{label}</span>
+    </div>
+  );
+};
+
 export const GameControls = ({
   showSettingsMenu,
   setShowSettingsMenu,
@@ -87,6 +121,11 @@ export const GameControls = ({
   onOfferRematch,
   rematchSent,
   rematchCooldown,
+  isOnline,
+  p2pConnected,
+  p2pQuality,
+  p2pLatency,
+  connectionLost,
 }: GameHeaderProps) => {
   const isGameOver = gameStatus && gameStatus !== "playing";
   const themeKeys: BoardTheme[] = ["classic", "flat", "wood"];
@@ -321,6 +360,7 @@ export const GameControls = ({
             </>
           )}
         </div>
+        <P2PIndicator isOnline={isOnline} p2pConnected={p2pConnected} p2pQuality={p2pQuality} p2pLatency={p2pLatency} connectionLost={connectionLost} theme={theme} />
         {gameStatus !== "playing" && (
           <div
             className={`backdrop-blur-sm rounded-lg p-1.5 sm:p-2 md:p-3 border flex items-center justify-between flex-1 min-w-0 ml-1 md:ml-2 ${

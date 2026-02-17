@@ -264,7 +264,7 @@ export const useGameLogic = (
     }
   }, [moveHistory, playerColor]);
 
-  const { p2pConnected, p2pAttempted, sendPeerMessage, processSignals } = usePeerConnection({
+  const { p2pConnected, p2pAttempted, latency: p2pLatency, quality: p2pQuality, sendPeerMessage, processSignals } = usePeerConnection({
     gameId: onlineGameId || 0,
     userId: myUserId,
     isWhite: playerColor === 'white',
@@ -1001,6 +1001,8 @@ export const useGameLogic = (
     connectionLost,
     connectionRestored,
     p2pConnected,
+    p2pLatency,
+    p2pQuality,
     historyRef,
     handleSquareClick,
     isSquareSelected,

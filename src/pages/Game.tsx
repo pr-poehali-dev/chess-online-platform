@@ -105,6 +105,8 @@ const Game = () => {
     connectionLost,
     connectionRestored,
     p2pConnected,
+    p2pLatency,
+    p2pQuality,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -266,12 +268,7 @@ const Game = () => {
           Связь восстановлена
         </div>
       )}
-      {isOnlineReal && p2pConnected && !connectionLost && gameStatus === 'playing' && (
-        <div className="fixed top-14 right-3 z-[90] bg-emerald-600/90 text-white text-[10px] px-2 py-0.5 rounded-full flex items-center gap-1 shadow-lg">
-          <Icon name="Zap" size={10} />
-          P2P
-        </div>
-      )}
+
 
       <main className="flex-1 flex items-center justify-center p-1 sm:p-2 md:p-3 overflow-hidden min-h-0">
         <div className="w-full h-full flex items-center justify-center">
@@ -307,6 +304,11 @@ const Game = () => {
                 } : () => { window.location.reload(); }}
                 rematchSent={rematchSent}
                 rematchCooldown={rematchCooldown}
+                isOnline={isOnlineReal}
+                p2pConnected={p2pConnected}
+                p2pQuality={p2pQuality}
+                p2pLatency={p2pLatency}
+                connectionLost={connectionLost}
               />
 
               <PlayerInfo

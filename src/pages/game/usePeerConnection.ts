@@ -8,6 +8,8 @@ const ICE_SERVERS = [
   { urls: 'stun:stun1.l.google.com:19302' },
 ];
 
+export type P2PQuality = 'excellent' | 'good' | 'poor' | 'disconnected';
+
 export interface PeerMessage {
   type: 'move' | 'time_sync' | 'resign' | 'draw' | 'timeout' | 'ping' | 'pong';
   data?: unknown;
@@ -25,10 +27,21 @@ interface UsePeerConnectionOptions {
 export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled }: UsePeerConnectionOptions) => {
   const [p2pConnected, setP2pConnected] = useState(false);
   const [p2pAttempted, setP2pAttempted] = useState(false);
+  const [latency, setLatency] = useState<number | null>(null);
+  const [quality, setQuality] = useState<P2PQuality>('disconnected');
   const pcRef = useRef<RTCPeerConnection | null>(null);
   const dcRef = useRef<RTCDataChannel | null>(null);
   const onMessageRef = useRef(onMessage);
+  const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const lastPongRef = useRef<number>(Date.now());
   onMessageRef.current = onMessage;
+
+  const updateQuality = useCallback((ms: number | null) => {
+    if (ms === null) { setQuality('disconnected'); return; }
+    if (ms < 80) setQuality('excellent');
+    else if (ms < 200) setQuality('good');
+    else setQuality('poor');
+  }, []);
 
   const sendSignal = useCallback(async (signalType: string, signalData: string) => {
     try {
@@ -52,10 +65,13 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
     dcRef.current = dc;
     dc.onopen = () => {
       setP2pConnected(true);
+      lastPongRef.current = Date.now();
       console.log('[P2P] DataChannel open');
     };
     dc.onclose = () => {
       setP2pConnected(false);
+      setLatency(null);
+      setQuality('disconnected');
       console.log('[P2P] DataChannel closed');
     };
     dc.onmessage = (e) => {
@@ -65,12 +81,49 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
           dcRef.current?.send(JSON.stringify({ type: 'pong', ts: msg.ts }));
           return;
         }
+        if (msg.type === 'pong' && msg.ts) {
+          const rtt = Date.now() - msg.ts;
+          lastPongRef.current = Date.now();
+          setLatency(rtt);
+          updateQuality(rtt);
+          return;
+        }
+        lastPongRef.current = Date.now();
         onMessageRef.current(msg);
       } catch {
         console.warn('[P2P] Bad message:', e.data);
       }
     };
-  }, []);
+  }, [updateQuality]);
+
+  useEffect(() => {
+    if (!p2pConnected) {
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+      return;
+    }
+
+    const sendPing = () => {
+      if (dcRef.current?.readyState === 'open') {
+        dcRef.current.send(JSON.stringify({ type: 'ping', ts: Date.now() }));
+        if (Date.now() - lastPongRef.current > 8000) {
+          setQuality('poor');
+        }
+      }
+    };
+
+    sendPing();
+    pingIntervalRef.current = setInterval(sendPing, 3000);
+
+    return () => {
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
+    };
+  }, [p2pConnected]);
 
   const processSignals = useCallback(async (signals: { from: string; type: string; data: string }[]) => {
     const pc = pcRef.current;
@@ -113,6 +166,8 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
         setP2pConnected(false);
+        setLatency(null);
+        setQuality('disconnected');
         console.log('[P2P] Connection state:', pc.connectionState);
       }
     };
@@ -143,6 +198,10 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
 
   useEffect(() => {
     return () => {
+      if (pingIntervalRef.current) {
+        clearInterval(pingIntervalRef.current);
+        pingIntervalRef.current = null;
+      }
       if (dcRef.current) {
         dcRef.current.close();
         dcRef.current = null;
@@ -165,6 +224,8 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
   return {
     p2pConnected,
     p2pAttempted,
+    latency,
+    quality,
     sendPeerMessage,
     processSignals,
   };
