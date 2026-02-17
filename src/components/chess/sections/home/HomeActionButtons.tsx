@@ -32,14 +32,8 @@ export const HomeActionButtons = ({
           <div className="w-full relative">
             <Button
               size="lg"
-              className={`w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 text-sm sm:text-base lg:text-lg font-semibold rounded-xl transition-all shadow-lg min-h-[44px] ${!isLevelAllowed("level_play_online") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
+              className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 text-sm sm:text-base lg:text-lg font-semibold rounded-xl transition-all shadow-lg min-h-[44px] hover:scale-105"
               onClick={() => {
-                if (!isLevelAllowed("level_play_online")) {
-                  const minR = siteSettings?.level_play_online?.value || "0";
-                  setLockedMessage(`Доступно с рейтингом выше ${minR}`);
-                  setTimeout(() => setLockedMessage(null), 3000);
-                  return;
-                }
                 if (isAuthenticated) {
                   setShowGameSettings(true);
                 } else {
@@ -49,9 +43,6 @@ export const HomeActionButtons = ({
             >
               <Icon name="Play" className="mr-2" size={24} />
               Играть онлайн
-              {!isLevelAllowed("level_play_online") && (
-                <Icon name="Lock" className="ml-2" size={18} />
-              )}
             </Button>
           </div>
         )}
