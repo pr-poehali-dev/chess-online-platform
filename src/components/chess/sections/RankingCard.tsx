@@ -81,63 +81,62 @@ export const RankingCard = ({
     const rest = topPlayers.slice(1, 4);
 
     return (
-      <div className="flex gap-3 mb-3">
-        <div className="flex-1 min-w-0">
-          <div className="text-center mb-1.5">
+      <div className="flex gap-4 mb-4 items-stretch">
+        <div className="flex-1 min-w-0 flex flex-col">
+          <div className="text-center mb-2">
             <div className="text-lg sm:text-xl font-bold text-yellow-400 animate-glow-text">1 место</div>
           </div>
           <div
-            className="relative p-3 rounded-xl border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 cursor-pointer hover:scale-[1.02] transition-all animate-glow-pulse"
+            className="relative p-4 sm:p-5 rounded-xl border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 cursor-pointer hover:scale-[1.02] transition-all animate-glow-pulse flex-1 flex items-center justify-center"
             onClick={() => setSelectedPlayer(first)}
           >
             <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-yellow-400/10 to-orange-400/10 dark:from-yellow-400/5 dark:to-orange-400/5 pointer-events-none" />
-            <div className="relative flex flex-col items-center text-center gap-2">
+            <div className="relative flex flex-col items-center text-center gap-3">
               <div className="relative">
-                <div className="absolute -inset-1.5 rounded-full bg-yellow-400/20 dark:bg-yellow-400/15 blur-md animate-pulse" />
+                <div className="absolute -inset-2 rounded-full bg-yellow-400/20 dark:bg-yellow-400/15 blur-md animate-pulse" />
                 {first.avatar ? (
-                  <img src={first.avatar} alt={first.name} className="relative w-16 h-16 sm:w-20 sm:h-20 rounded-full object-cover ring-2 ring-yellow-400 shadow-lg" />
+                  <img src={first.avatar} alt={first.name} className="relative w-20 h-20 sm:w-24 sm:h-24 rounded-full object-cover ring-2 ring-yellow-400 shadow-lg" />
                 ) : (
-                  <div className={`relative w-16 h-16 sm:w-20 sm:h-20 rounded-full flex items-center justify-center font-bold text-lg sm:text-xl text-white ${colors.bg} ring-2 ring-yellow-400 shadow-lg`}>
+                  <div className={`relative w-20 h-20 sm:w-24 sm:h-24 rounded-full flex items-center justify-center font-bold text-xl sm:text-2xl text-white ${colors.bg} ring-2 ring-yellow-400 shadow-lg`}>
                     {getInitials(first.name)}
                   </div>
                 )}
               </div>
               <div className="min-w-0 w-full">
                 <div className="font-bold text-sm sm:text-base text-gray-900 dark:text-white leading-tight">{clampName(first.name)}</div>
-                <div className="text-[11px] sm:text-xs text-gray-600 dark:text-gray-400">{first.city}</div>
-                <div className={`text-base sm:text-lg font-bold ${colors.text} mt-0.5`}>{first.rating}</div>
+                <div className="text-xs text-gray-600 dark:text-gray-400">{first.city}</div>
+                <div className={`text-lg sm:text-xl font-bold ${colors.text} mt-0.5`}>{first.rating}</div>
               </div>
             </div>
           </div>
         </div>
 
-        <div className="flex flex-col gap-1.5 min-w-0 flex-1">
+        <div className="flex flex-col gap-2 min-w-0 flex-1">
           {rest.map((player) => (
-            <div key={player.rank} className="flex-1 flex flex-col">
-              <div className="text-center mb-0.5">
-                <div className="text-[10px] sm:text-xs font-semibold text-gray-500 dark:text-gray-400">{player.rank} место</div>
+            <div
+              key={player.rank}
+              className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl cursor-pointer hover:border-amber-400 transition-colors flex-1 ${
+                player.rank <= 3
+                  ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
+                  : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
+              }`}
+              onClick={() => setSelectedPlayer(player)}
+            >
+              <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${colors.bg} text-white flex-shrink-0`}>
+                {player.rank}
               </div>
-              <div
-                className={`flex items-center gap-2 p-1.5 sm:p-2 rounded-lg cursor-pointer hover:border-amber-400 transition-colors flex-1 ${
-                  player.rank <= 3
-                    ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
-                    : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
-                }`}
-                onClick={() => setSelectedPlayer(player)}
-              >
-                <div className="flex-shrink-0">
-                  {player.avatar ? (
-                    <img src={player.avatar} alt={player.name} className="w-9 h-9 sm:w-10 sm:h-10 rounded-full object-cover" />
-                  ) : (
-                    <div className={`w-9 h-9 sm:w-10 sm:h-10 rounded-full flex items-center justify-center font-bold text-xs text-white ${colors.bg}`}>
-                      {getInitials(player.name)}
-                    </div>
-                  )}
-                </div>
-                <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white leading-tight">{clampName(player.name)}</div>
-                  <div className={`text-xs sm:text-sm font-bold ${colors.text}`}>{player.rating}</div>
-                </div>
+              <div className="flex-shrink-0">
+                {player.avatar ? (
+                  <img src={player.avatar} alt={player.name} className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover" />
+                ) : (
+                  <div className={`w-10 h-10 sm:w-11 sm:h-11 rounded-full flex items-center justify-center font-bold text-xs text-white ${colors.bg}`}>
+                    {getInitials(player.name)}
+                  </div>
+                )}
+              </div>
+              <div className="flex-1 min-w-0">
+                <div className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white leading-tight break-words">{clampName(player.name)}</div>
+                <div className={`text-xs sm:text-sm font-bold ${colors.text}`}>{player.rating}</div>
               </div>
             </div>
           ))}
@@ -184,7 +183,7 @@ export const RankingCard = ({
 
   return (
     <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 animate-scale-in" style={{ animationDelay }}>
-      <CardHeader className="px-4 pt-4 pb-2 sm:px-5 sm:pt-5 sm:pb-2">
+      <CardHeader className="px-4 pt-4 pb-2 sm:px-6 sm:pt-5 sm:pb-2">
         <CardTitle className={subtitle ? "flex flex-col gap-0.5 text-gray-900 dark:text-white" : "flex items-center gap-2 text-gray-900 dark:text-white"}>
           {subtitle ? (
             <>
@@ -202,7 +201,7 @@ export const RankingCard = ({
           )}
         </CardTitle>
       </CardHeader>
-      <CardContent className="px-4 pb-4 sm:px-5 sm:pb-5 pt-0">
+      <CardContent className="px-4 pb-4 sm:px-6 sm:pb-5 pt-0">
         {renderTop4()}
         <Button
           variant="outline"
