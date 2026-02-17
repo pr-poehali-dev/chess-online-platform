@@ -51,6 +51,7 @@ export const RankingCard = ({
 
   const handleShare = async () => {
     const top = topPlayers[0];
+    if (!top) return;
     const text = `${title}: 1 место — ${top.name} (${top.rating})`;
     const ok = await shareContent({ title: 'Лига Шахмат — Рейтинг', text });
     if (ok) { setShared(true); setTimeout(() => setShared(false), 2000); }
@@ -92,6 +93,13 @@ export const RankingCard = ({
   };
 
   const renderTop4 = () => {
+    if (!topPlayers.length) {
+      return (
+        <div className="flex items-center justify-center py-8 text-sm text-gray-500 dark:text-gray-400">
+          Пока нет участников
+        </div>
+      );
+    }
     const first = topPlayers[0];
     const rest = topPlayers.slice(1, 4);
 
