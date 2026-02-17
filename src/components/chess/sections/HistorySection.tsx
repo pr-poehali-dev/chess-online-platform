@@ -182,7 +182,7 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                   variant="outline"
                   className="border-slate-200 dark:border-white/20"
                 >
-                  <Icon name="Share2" size={18} className="mr-2" />
+                  <Icon name="CornerUpRight" size={18} className="mr-2" />
                   <span className="hidden sm:inline">Поделиться</span>
                 </Button>
                 <Button
@@ -368,7 +368,7 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                     className="p-1.5 rounded-lg hover:bg-slate-200 dark:hover:bg-slate-700 transition-colors flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
                     title="Поделиться"
                   >
-                    <Icon name="Share2" size={14} />
+                    <Icon name="CornerUpRight" size={14} />
                   </button>
 
                   {onOpenChat && game.opponent_type !== 'bot' && (

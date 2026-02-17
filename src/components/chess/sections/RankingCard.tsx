@@ -217,7 +217,7 @@ export const RankingCard = ({
             className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
             title="Поделиться"
           >
-            <Icon name={shared ? 'Check' : 'Share2'} size={16} />
+            <Icon name={shared ? 'Check' : 'CornerUpRight'} size={16} />
           </button>
         </div>
       </CardHeader>

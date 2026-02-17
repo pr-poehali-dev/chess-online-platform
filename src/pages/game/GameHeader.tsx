@@ -399,7 +399,7 @@ export const GameControls = ({
                 className="p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 flex-shrink-0 text-white bg-white/20 hover:bg-white/30"
                 title="Поделиться"
               >
-                <Icon name={shareOk ? 'Check' : 'Share2'} size={16} />
+                <Icon name={shareOk ? 'Check' : 'CornerUpRight'} size={16} />
               </button>
               <button
                 onClick={() => {
