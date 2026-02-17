@@ -394,13 +394,20 @@ export const GameControls = ({
               {gameStatus === "draw" && "Ничья"}
             </div>
             <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ml-1 sm:ml-2">
-              <button
-                onClick={handleShareResult}
-                className="p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 flex-shrink-0 text-white bg-white/20 hover:bg-white/30"
-                title="Поделиться"
-              >
-                <Icon name={shareOk ? 'Check' : 'CornerUpRight'} size={16} />
-              </button>
+              <div className="relative">
+                <button
+                  onClick={handleShareResult}
+                  className="p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 flex-shrink-0 text-white bg-white/20 hover:bg-white/30 active:scale-90"
+                  title="Поделиться"
+                >
+                  <Icon name={shareOk ? 'Check' : 'Send'} size={21} className={shareOk ? 'text-green-300' : ''} />
+                </button>
+                {shareOk && (
+                  <div className="absolute -bottom-8 right-0 bg-gray-900 text-white text-[10px] sm:text-xs px-2 py-1 rounded-md whitespace-nowrap z-50 animate-fade-in">
+                    Ссылка скопирована!
+                  </div>
+                )}
+              </div>
               <button
                 onClick={() => {
                   if (rematchSent || rematchCooldown) return;

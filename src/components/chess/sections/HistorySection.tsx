@@ -46,6 +46,7 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
   const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
   const [selectedGame, setSelectedGame] = useState<Game | null>(null);
   const [loading, setLoading] = useState(true);
+  const [shareOk, setShareOk] = useState(false);
 
   useEffect(() => {
     fetchHistory();
@@ -171,20 +172,28 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                 Просмотр партии
               </CardTitle>
               <div className="flex items-center gap-2">
-                <Button
-                  onClick={() => {
-                    const res = getResultText(selectedGame.result);
-                    shareContent({
-                      title: 'Лига Шахмат — Партия',
-                      text: `${res} против ${selectedGame.opponent_name} (${selectedGame.rating_change > 0 ? '+' : ''}${selectedGame.rating_change}). ${selectedGame.moves_count} ходов.`,
-                    });
-                  }}
-                  variant="outline"
-                  className="border-slate-200 dark:border-white/20"
-                >
-                  <Icon name="CornerUpRight" size={18} className="mr-2" />
-                  <span className="hidden sm:inline">Поделиться</span>
-                </Button>
+                <div className="relative">
+                  <Button
+                    onClick={async () => {
+                      const res = getResultText(selectedGame.result);
+                      const ok = await shareContent({
+                        title: 'Лига Шахмат — Партия',
+                        text: `${res} против ${selectedGame.opponent_name} (${selectedGame.rating_change > 0 ? '+' : ''}${selectedGame.rating_change}). ${selectedGame.moves_count} ходов.`,
+                      });
+                      if (ok) { setShareOk(true); setTimeout(() => setShareOk(false), 2000); }
+                    }}
+                    variant="outline"
+                    className="border-slate-200 dark:border-white/20 active:scale-95"
+                  >
+                    <Icon name={shareOk ? 'Check' : 'Send'} size={21} className={shareOk ? 'text-green-500 mr-2' : 'mr-2'} />
+                    <span className="hidden sm:inline">{shareOk ? 'Скопировано!' : 'Поделиться'}</span>
+                  </Button>
+                  {shareOk && (
+                    <div className="absolute -bottom-7 left-1/2 -translate-x-1/2 bg-gray-900 dark:bg-gray-700 text-white text-[10px] sm:text-xs px-2 py-1 rounded-md whitespace-nowrap z-50 animate-fade-in sm:hidden">
+                      Ссылка скопирована!
+                    </div>
+                  )}
+                </div>
                 <Button
                   onClick={() => setSelectedGame(null)}
                   variant="outline"

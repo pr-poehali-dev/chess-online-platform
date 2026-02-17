@@ -221,13 +221,20 @@ export const RankingCard = ({
               </>
             )}
           </CardTitle>
-          <button
-            onClick={handleShare}
-            className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0 text-gray-400 hover:text-gray-600 dark:hover:text-gray-300"
-            title="Поделиться"
-          >
-            <Icon name={shared ? 'Check' : 'CornerUpRight'} size={16} />
-          </button>
+          <div className="relative">
+            <button
+              onClick={handleShare}
+              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0 text-gray-400 hover:text-amber-500 dark:hover:text-amber-400 active:scale-90"
+              title="Поделиться"
+            >
+              <Icon name={shared ? 'Check' : 'Send'} size={21} className={shared ? 'text-green-500' : ''} />
+            </button>
+            {shared && (
+              <div className="absolute -bottom-8 right-0 bg-gray-900 dark:bg-gray-700 text-white text-[10px] sm:text-xs px-2 py-1 rounded-md whitespace-nowrap z-50 animate-fade-in">
+                Ссылка скопирована!
+              </div>
+            )}
+          </div>
         </div>
       </CardHeader>
       <CardContent className="px-3 pb-3 sm:px-5 sm:pb-4 pt-0">
