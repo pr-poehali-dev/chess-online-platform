@@ -115,17 +115,17 @@ export const RankingCard = ({
           {rest.map((player) => (
             <div
               key={player.rank}
-              className={`flex items-center gap-2.5 p-2.5 sm:p-3 rounded-xl cursor-pointer hover:border-amber-400 transition-colors flex-1 ${
+              className={`flex flex-col items-center text-center p-2 sm:p-2.5 rounded-xl cursor-pointer hover:border-amber-400 transition-colors flex-1 justify-center ${
                 player.rank <= 3
                   ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
                   : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
               }`}
               onClick={() => setSelectedPlayer(player)}
             >
-              <div className={`w-7 h-7 rounded-full flex items-center justify-center font-bold text-xs ${colors.bg} text-white flex-shrink-0`}>
-                {player.rank}
-              </div>
-              <div className="flex-shrink-0">
+              <div className="relative mb-1">
+                <div className={`absolute -top-1 -left-1 w-5 h-5 rounded-full flex items-center justify-center font-bold text-[10px] ${colors.bg} text-white z-10`}>
+                  {player.rank}
+                </div>
                 {player.avatar ? (
                   <img src={player.avatar} alt={player.name} className="w-10 h-10 sm:w-11 sm:h-11 rounded-full object-cover" />
                 ) : (
@@ -134,8 +134,8 @@ export const RankingCard = ({
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0">
-                <div className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white leading-tight break-words">{clampName(player.name)}</div>
+              <div className="min-w-0 w-full">
+                <div className="font-semibold text-[11px] sm:text-xs text-gray-900 dark:text-white leading-tight line-clamp-2">{clampName(player.name)}</div>
                 <div className={`text-xs sm:text-sm font-bold ${colors.text}`}>{player.rating}</div>
               </div>
             </div>
