@@ -100,24 +100,27 @@ export const FriendInvitePanel = ({
 
   return (
     <>
-      <div className="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-500/20">
+      <div
+        onClick={copyInviteLink}
+        className="p-3 sm:p-4 rounded-xl bg-gradient-to-r from-blue-50 to-indigo-50 dark:from-blue-900/20 dark:to-indigo-900/20 border border-blue-200/60 dark:border-blue-500/20 cursor-pointer hover:border-blue-400 dark:hover:border-blue-400/50 active:scale-[0.99] transition-all"
+      >
         <div className="flex items-start gap-3 sm:gap-4">
           <div className="flex-1 min-w-0 overflow-hidden">
             <div className="text-xs font-medium text-blue-600 dark:text-blue-400 mb-1.5 flex items-center gap-1.5">
               <Icon name="Fingerprint" size={14} /> Ваш уникальный ID
             </div>
-            <button onClick={copyInviteLink} className="group flex items-center gap-2 cursor-pointer max-w-full" title="Скопировать ссылку-приглашение">
-              <code className="text-sm sm:text-lg md:text-xl font-mono font-bold text-slate-900 dark:text-white bg-white/70 dark:bg-slate-800/70 px-2 sm:px-3 py-1.5 rounded-lg tracking-wider group-hover:bg-blue-50 dark:group-hover:bg-blue-900/30 group-active:scale-95 transition-all truncate">
+            <div className="flex items-center gap-2 max-w-full">
+              <code className="text-sm sm:text-lg md:text-xl font-mono font-bold text-slate-900 dark:text-white bg-white/70 dark:bg-slate-800/70 px-2 sm:px-3 py-1.5 rounded-lg tracking-wider truncate">
                 {userCode || '...'}
               </code>
-              <span className={`text-xs transition-all flex-shrink-0 ${copied ? 'text-green-500' : 'text-blue-400 opacity-0 group-hover:opacity-100'}`}>
+              <span className={`text-xs transition-all flex-shrink-0 ${copied ? 'text-green-500' : 'text-blue-400'}`}>
                 {copied ? <span className="flex items-center gap-1"><Icon name="Check" size={14} /> Скопировано!</span> : <Icon name="Copy" size={14} />}
               </span>
-            </button>
-            <p className="text-[11px] text-blue-500/70 dark:text-blue-400/50 mt-1.5">Нажмите на ID — скопируется ссылка-приглашение</p>
+            </div>
+            <p className="text-[11px] text-blue-500/70 dark:text-blue-400/50 mt-1.5">Нажмите в любое место — скопируется ссылка</p>
           </div>
           {qrCodeUrl && (
-            <div className="flex-shrink-0 bg-white rounded-lg p-1 sm:p-1.5 shadow-sm">
+            <div className="flex-shrink-0 bg-white rounded-lg p-1 sm:p-1.5 shadow-sm" onClick={(e) => e.stopPropagation()}>
               <img src={qrCodeUrl} alt="QR Code" className="w-16 h-16 sm:w-24 sm:h-24 rounded" />
             </div>
           )}
