@@ -5,7 +5,7 @@ import Icon from '@/components/ui/icon';
 import API from '@/config/api';
 
 const INVITE_URL = API.inviteGame;
-const POLL_INTERVAL = 10000;
+const POLL_INTERVAL = 12000;
 
 interface GameInvite {
   id: number;

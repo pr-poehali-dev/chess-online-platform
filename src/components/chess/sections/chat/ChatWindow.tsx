@@ -73,6 +73,36 @@ export const ChatWindow = ({
     return date.toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' });
   };
 
+  const chatCacheKey = useCallback(() => {
+    const uid = getUserId();
+    const ids = [uid, selectedChat.participantId].sort().join('_');
+    return `chat_msgs_${ids}`;
+  }, [selectedChat.participantId]);
+
+  useEffect(() => {
+    const now = Date.now();
+    const TTL = 30 * 24 * 60 * 60 * 1000;
+    for (let i = 0; i < localStorage.length; i++) {
+      const key = localStorage.key(i);
+      if (key?.startsWith('chat_msgs_')) {
+        try {
+          const d = JSON.parse(localStorage.getItem(key) || '{}');
+          if (d.ts && now - d.ts > TTL) localStorage.removeItem(key);
+        } catch { localStorage.removeItem(key!); }
+      }
+    }
+  }, []);
+
+  useEffect(() => {
+    const cached = localStorage.getItem(chatCacheKey());
+    if (cached) {
+      try {
+        const d = JSON.parse(cached);
+        if (d.messages) setMessages(d.messages);
+      } catch { /* cache parse error */ }
+    }
+  }, [chatCacheKey]);
+
   const loadMessages = useCallback(async () => {
     const uid = getUserId();
     if (!uid) return;
@@ -88,13 +118,14 @@ export const ChatWindow = ({
         isOwn: m.is_own
       }));
       setMessages(msgs);
+      try { localStorage.setItem(chatCacheKey(), JSON.stringify({ messages: msgs, ts: Date.now() })); } catch { /* cache write error */ }
     } catch { /* network error */ }
     setLoading(false);
-  }, [selectedChat.participantId]);
+  }, [selectedChat.participantId, chatCacheKey]);
 
   useEffect(() => {
     loadMessages();
-    pollMessagesRef.current = setInterval(loadMessages, 8000);
+    pollMessagesRef.current = setInterval(loadMessages, 30000);
     return () => {
       if (pollMessagesRef.current) clearInterval(pollMessagesRef.current);
     };
@@ -165,7 +196,11 @@ export const ChatWindow = ({
       timestamp: new Date().toISOString(),
       isOwn: true
     };
-    setMessages(prev => [...prev, tempMsg]);
+    setMessages(prev => {
+      const updated = [...prev, tempMsg];
+      try { localStorage.setItem(chatCacheKey(), JSON.stringify({ messages: updated, ts: Date.now() })); } catch { /* cache write */ }
+      return updated;
+    });
 
     try {
       await fetch(CHAT_URL, {
