@@ -9,7 +9,7 @@ const ADMIN_AUTH_URL = API.adminAuth;
 
 const AdminLogin = ({ onSuccess }: { onSuccess: (email: string) => void }) => {
   const [step, setStep] = useState<'email' | 'otp'>('email');
-  const [email, setEmail] = useState('');
+  const [email, setEmail] = useState(() => localStorage.getItem('adminEmail') || '');
   const [otpCode, setOtpCode] = useState('');
   const [isSending, setIsSending] = useState(false);
   const [isVerifying, setIsVerifying] = useState(false);
@@ -76,7 +76,8 @@ const AdminLogin = ({ onSuccess }: { onSuccess: (email: string) => void }) => {
       const authData = await authRes.json();
       if (authRes.ok && authData.success) {
         const adminEmail = email.trim().toLowerCase();
-        sessionStorage.setItem('adminAuth', JSON.stringify({ email: adminEmail, ts: Date.now() }));
+        localStorage.setItem('adminAuth', JSON.stringify({ email: adminEmail, ts: Date.now() }));
+        localStorage.setItem('adminEmail', adminEmail);
         onSuccess(adminEmail);
       } else {
         setError(authData.message || 'Нет доступа к админ-панели');

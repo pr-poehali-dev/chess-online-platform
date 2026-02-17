@@ -64,11 +64,17 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
     setLoading(false);
   };
 
+  const [refreshing, setRefreshing] = useState(false);
+
+  const refreshAll = async () => {
+    setRefreshing(true);
+    await Promise.all([fetchSettings(), fetchStats()]);
+    setRefreshing(false);
+  };
+
   useEffect(() => {
     fetchSettings();
     fetchStats();
-    const interval = setInterval(fetchStats, 180000);
-    return () => clearInterval(interval);
   }, []);
 
   const handleRatingSave = async (updated: Record<string, { value: string }>) => {
@@ -174,13 +180,23 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
               <p className="text-sm text-slate-400">{adminEmail}</p>
             </div>
           </div>
-          <button
-            onClick={onLogout}
-            className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition-colors text-sm"
-          >
-            <Icon name="LogOut" size={16} />
-            Выйти
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={refreshAll}
+              disabled={refreshing}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-blue-600/20 hover:bg-blue-600/30 text-blue-400 transition-colors text-sm disabled:opacity-50"
+            >
+              <Icon name="RefreshCw" size={16} className={refreshing ? 'animate-spin' : ''} />
+              Обновить
+            </button>
+            <button
+              onClick={onLogout}
+              className="flex items-center gap-2 px-3 py-2 rounded-lg bg-red-600/20 hover:bg-red-600/30 text-red-400 transition-colors text-sm"
+            >
+              <Icon name="LogOut" size={16} />
+              Выйти
+            </button>
+          </div>
         </div>
       </header>
 
@@ -248,20 +264,20 @@ const Admin = () => {
   const [adminEmail, setAdminEmail] = useState<string | null>(null);
 
   useEffect(() => {
-    const saved = sessionStorage.getItem('adminAuth');
+    const saved = localStorage.getItem('adminAuth');
     if (saved) {
       const data = JSON.parse(saved);
-      const hourAgo = Date.now() - 60 * 60 * 1000;
-      if (data.ts > hourAgo) {
+      const weekAgo = Date.now() - 7 * 24 * 60 * 60 * 1000;
+      if (data.ts > weekAgo) {
         setAdminEmail(data.email);
       } else {
-        sessionStorage.removeItem('adminAuth');
+        localStorage.removeItem('adminAuth');
       }
     }
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem('adminAuth');
+    localStorage.removeItem('adminAuth');
     setAdminEmail(null);
   };
 
