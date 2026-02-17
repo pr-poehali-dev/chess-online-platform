@@ -4,10 +4,8 @@ import Navbar from "@/components/chess/Navbar";
 import MainContent from "@/pages/index/MainContent";
 import IndexModals from "@/pages/index/IndexModals";
 import IndexFooter from "@/pages/index/IndexFooter";
-import API from "@/config/api";
 import getDeviceToken from "@/lib/deviceToken";
-const GAME_HISTORY_URL = API.gameHistory;
-const USER_CHECK_URL = API.userCheck;
+import { cachedUserCheck, cachedGameHistory } from '@/lib/apiCache';
 
 const Index = () => {
   const navigate = useNavigate();
@@ -52,10 +50,7 @@ const Index = () => {
         const userId =
           "u_" + rawId.replace(/[^a-zA-Z0-9@._-]/g, "").substring(0, 60);
         const dt = getDeviceToken();
-        const res = await fetch(
-          `${USER_CHECK_URL}?user_id=${encodeURIComponent(userId)}&device_token=${encodeURIComponent(dt)}`,
-        );
-        const data = await res.json();
+        const data = await cachedUserCheck(userId, dt);
 
         if (data.exists && data.session_valid !== false) {
           setIsAuthenticated(true);
@@ -110,8 +105,7 @@ const Index = () => {
     const userId =
       "u_" + rawId.replace(/[^a-zA-Z0-9@._-]/g, "").substring(0, 60);
 
-    fetch(`${GAME_HISTORY_URL}?user_id=${encodeURIComponent(userId)}`)
-      .then((r) => r.json())
+    cachedGameHistory(userId)
       .then((data) => {
         if (data.user) {
           setStats({

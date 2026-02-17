@@ -14,7 +14,12 @@ const NotFound = lazy(() => import("./pages/NotFound"));
 
 const DailyDecayTrigger = () => {
   useEffect(() => {
-    fetch(API.applyDailyDecay, { method: 'POST' }).catch(() => {});
+    const lastRun = localStorage.getItem('daily_decay_last');
+    const today = new Date().toDateString();
+    if (lastRun === today) return;
+    fetch(API.applyDailyDecay, { method: 'POST' })
+      .then(() => localStorage.setItem('daily_decay_last', today))
+      .catch(() => {});
   }, []);
   return null;
 };

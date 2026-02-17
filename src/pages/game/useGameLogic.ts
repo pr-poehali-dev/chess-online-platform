@@ -4,8 +4,8 @@ import { getPossibleMoves, getBestMove, isCheckmate, isStalemate, getAllLegalMov
 import { usePeerConnection, PeerMessage } from './usePeerConnection';
 import { queueGameResult } from '@/lib/serviceWorker';
 import API from '@/config/api';
+import { cachedGameHistory, invalidateGameHistory } from '@/lib/apiCache';
 const FINISH_GAME_URL = API.finishGame;
-const GAME_HISTORY_URL = API.gameHistory;
 const ONLINE_MOVE_URL = API.onlineMove;
 
 function replayMoves(moves: string[]): {
@@ -282,8 +282,7 @@ export const useGameLogic = (
     const userData = JSON.parse(saved);
     const rawId = userData.email || userData.name || 'anonymous';
     const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-    fetch(`${GAME_HISTORY_URL}?user_id=${encodeURIComponent(userId)}`)
-      .then(r => r.json())
+    cachedGameHistory(userId)
       .then(data => {
         if (data.user?.rating) {
           setUserRating(data.user.rating);
@@ -663,7 +662,7 @@ export const useGameLogic = (
 
     poll();
 
-    const pollInterval = p2pConnected ? 10000 : 1500;
+    const pollInterval = p2pConnected ? 30000 : 1500;
     const intervalId = setInterval(() => {
       if (!active) return;
       poll();
@@ -712,6 +711,7 @@ export const useGameLogic = (
         })
       });
       const data = await res.json();
+      invalidateGameHistory();
       if (data.rating_change !== undefined) {
         setRatingChange(data.rating_change);
         setNewRating(data.rating_after);
@@ -884,9 +884,12 @@ export const useGameLogic = (
           }
         });
         pendingMoveRef.current = null;
+        if (finalGameStatus !== 'playing') {
+          sendMoveToServer(moveNotation, finalGameStatus, winnerId);
+        }
+      } else {
+        sendMoveToServer(moveNotation, finalGameStatus, winnerId);
       }
-
-      sendMoveToServer(moveNotation, finalGameStatus, winnerId);
     }
   };
 

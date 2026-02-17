@@ -1,9 +1,7 @@
 import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import API from '@/config/api';
 import getDeviceToken from '@/lib/deviceToken';
-
-const USER_CHECK_URL = API.userCheck;
+import { cachedUserCheck } from '@/lib/apiCache';
 
 interface AuthGuardProps {
   children: React.ReactNode;
@@ -26,8 +24,7 @@ const AuthGuard = ({ children }: AuthGuardProps) => {
         const rawId = userData.email || userData.name || 'anonymous';
         const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
         const dt = getDeviceToken();
-        const res = await fetch(`${USER_CHECK_URL}?user_id=${encodeURIComponent(userId)}&device_token=${encodeURIComponent(dt)}`);
-        const data = await res.json();
+        const data = await cachedUserCheck(userId, dt);
 
         if (data.exists && data.session_valid !== false) {
           setIsAuth(true);

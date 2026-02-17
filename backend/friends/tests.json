@@ -29,6 +29,14 @@
       "expectedStatus": 200,
       "expectedBody": {"ok": true},
       "bodyMatcher": "partial"
+    },
+    {
+      "name": "Init combined action",
+      "method": "GET",
+      "path": "/?action=init&user_id=test-user-001",
+      "expectedStatus": 200,
+      "expectedBody": {"code": "string", "friends": [], "pending": []},
+      "bodyMatcher": "partial"
     }
   ]
 }

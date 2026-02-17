@@ -88,10 +88,24 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
     const uid = getUserId();
     if (!uid) return;
     setUserId(uid);
-    fetchMyCode(uid);
-    fetchFriends(uid);
-    fetchPending(uid);
-    sendHeartbeat(uid);
+    (async () => {
+      try {
+        const res = await fetch(`${FRIENDS_URL}?action=init&user_id=${encodeURIComponent(uid)}`);
+        const data = await res.json();
+        if (data.code) {
+          setUserCode(data.code);
+          const saved = localStorage.getItem('chessUser');
+          if (saved) {
+            try { const u = JSON.parse(saved); u.userId = data.code; localStorage.setItem('chessUser', JSON.stringify(u)); } catch {}
+          }
+        }
+        setFriends(data.friends || []);
+        const pending = data.pending || [];
+        setPendingRequests(pending);
+        emitBadge({ friends: pending.length });
+      } catch {}
+      setLoading(false);
+    })();
 
     const heartbeatInterval = setInterval(() => sendHeartbeat(uid), 120000);
     const refreshInterval = setInterval(() => { fetchFriends(uid); fetchPending(uid); }, 30000);

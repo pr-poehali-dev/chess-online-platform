@@ -3,8 +3,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import Icon from '@/components/ui/icon';
-import API from '@/config/api';
-const GAME_HISTORY_URL = API.gameHistory;
+import { cachedGameHistory } from '@/lib/apiCache';
 
 interface Game {
   id: number;
@@ -62,8 +61,7 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
     const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
 
     try {
-      const res = await fetch(`${GAME_HISTORY_URL}?user_id=${encodeURIComponent(userId)}`);
-      const data = await res.json();
+      const data = await cachedGameHistory(userId);
       if (data.user) setUserProfile(data.user);
       setGames(data.games || []);
     } catch (e) {

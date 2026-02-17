@@ -55,7 +55,7 @@ def generate_code():
 
 
 def handler(event: dict, context) -> dict:
-    """Управление друзьями: добавление с подтверждением, удаление, список, профиль, история"""
+    """Управление друзьями: добавление с подтверждением, удаление, список, профиль, история, init"""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id, X-Auth-Token, X-Session-Id', 'Access-Control-Max-Age': '86400'}, 'body': ''}
 
@@ -105,6 +105,52 @@ def handler(event: dict, context) -> dict:
             cur.close()
             conn.close()
             return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'ok': True})}
+
+        if action == 'init':
+            cur.execute("UPDATE users SET last_online = NOW() WHERE id = '%s'" % esc(user_id))
+            conn.commit()
+            cur.execute("SELECT user_code FROM users WHERE id = '%s'" % esc(user_id))
+            row = cur.fetchone()
+            code = ''
+            if not row or not row[0]:
+                new_code = generate_code()
+                for _ in range(10):
+                    cur.execute("SELECT id FROM users WHERE user_code = '%s'" % esc(new_code))
+                    if not cur.fetchone():
+                        break
+                    new_code = generate_code()
+                cur.execute("UPDATE users SET user_code = '%s' WHERE id = '%s'" % (esc(new_code), esc(user_id)))
+                conn.commit()
+                code = new_code
+            else:
+                code = row[0]
+            cur.execute(
+                """SELECT u.id, u.username, u.avatar, u.rating, u.city, u.last_online, u.user_code, f.status
+                   FROM friends f
+                   JOIN users u ON u.id = f.friend_id
+                   WHERE f.user_id = '%s' AND f.status = 'confirmed'
+                   ORDER BY u.last_online DESC NULLS LAST""" % esc(user_id))
+            f_rows = cur.fetchall()
+            now = datetime.utcnow()
+            friends = []
+            for r in f_rows:
+                last_online = r[5]
+                is_online = last_online and (now - last_online) < timedelta(minutes=5)
+                friends.append({'id': r[0], 'username': r[1], 'avatar': r[2] or '', 'rating': r[3], 'city': r[4] or '',
+                                'status': 'online' if is_online else 'offline', 'user_code': r[6] or ''})
+            cur.execute(
+                """SELECT u.id, u.username, u.avatar, u.rating, u.city, u.user_code
+                   FROM friends f JOIN users u ON u.id = f.user_id
+                   WHERE f.friend_id = '%s' AND f.status = 'pending'
+                   AND NOT EXISTS (SELECT 1 FROM friends f2 WHERE f2.user_id = '%s' AND f2.friend_id = f.user_id)
+                   ORDER BY f.created_at DESC""" % (esc(user_id), esc(user_id)))
+            p_rows = cur.fetchall()
+            pending = []
+            for r in p_rows:
+                pending.append({'id': r[0], 'username': r[1], 'avatar': r[2] or '', 'rating': r[3], 'city': r[4] or '', 'user_code': r[5] or ''})
+            cur.close()
+            conn.close()
+            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'code': code, 'friends': friends, 'pending': pending})}
 
         if action == 'resolve_code':
             code = qs.get('code', '')
