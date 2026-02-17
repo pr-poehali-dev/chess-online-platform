@@ -114,7 +114,7 @@ export const ChatSection = ({
     loadConversations();
     const interval = setInterval(() => {
       if (!selectedChat) loadConversations();
-    }, 60000);
+    }, 120000);
     return () => clearInterval(interval);
   }, [loadConversations, selectedChat]);
 

@@ -58,7 +58,6 @@ export const ChatWindow = ({
   const [inviteId, setInviteId] = useState<number | null>(null);
   const [loading, setLoading] = useState(true);
   const pollInviteRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const pollMessagesRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const isFirstLoad = useRef(true);
 
@@ -125,10 +124,6 @@ export const ChatWindow = ({
 
   useEffect(() => {
     loadMessages();
-    pollMessagesRef.current = setInterval(loadMessages, 30000);
-    return () => {
-      if (pollMessagesRef.current) clearInterval(pollMessagesRef.current);
-    };
   }, [loadMessages]);
 
   useEffect(() => {

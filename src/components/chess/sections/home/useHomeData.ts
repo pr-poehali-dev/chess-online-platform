@@ -114,10 +114,21 @@ export function useHomeData() {
 
   useEffect(() => {
     if (!siteSettings || siteSettings.rankings_mode?.value !== "real") return;
+    const cacheKey = `leaderboard_${userCity}_${userRegion}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) {
+      try {
+        const d = JSON.parse(cached);
+        if (Date.now() - d.ts < 30 * 60 * 1000) { setRealLeaderboard(d.data); return; }
+      } catch { /* ignore */ }
+    }
     const params = new URLSearchParams({ city: userCity, region: userRegion });
     fetch(`${LEADERBOARD_URL}?${params}`)
       .then((r) => r.json())
-      .then((data) => setRealLeaderboard(data))
+      .then((data) => {
+        setRealLeaderboard(data);
+        try { localStorage.setItem(cacheKey, JSON.stringify({ data, ts: Date.now() })); } catch { /* ignore */ }
+      })
       .catch(() => {});
   }, [siteSettings, userCity, userRegion]);
 

@@ -662,11 +662,14 @@ export const useGameLogic = (
 
     poll();
 
-    const pollInterval = p2pConnected ? 60000 : 1500;
+    if (p2pConnected) {
+      return;
+    }
+
     const intervalId = setInterval(() => {
       if (!active) return;
       poll();
-    }, pollInterval);
+    }, 1500);
 
     return () => {
       active = false;
