@@ -126,17 +126,17 @@ export const RankingCard = ({
           {rest.map((player) => (
             <div
               key={player.rank}
-              className={`flex items-center gap-2 sm:gap-2.5 p-2 sm:p-2.5 rounded-lg sm:rounded-xl cursor-pointer hover:border-amber-400 transition-colors flex-1 min-h-[44px] ${
+              className={`flex flex-col items-center justify-center text-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl cursor-pointer hover:border-amber-400 transition-colors flex-1 min-h-[44px] ${
                 player.rank <= 3
                   ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
                   : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
               }`}
               onClick={() => setSelectedPlayer(player)}
             >
-              <div className={`w-5 h-5 sm:w-6 sm:h-6 rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[10px] ${colors.bg} text-white flex-shrink-0`}>
-                {player.rank}
-              </div>
-              <div className="flex-shrink-0">
+              <div className="relative mb-0.5">
+                <div className={`absolute -top-1 -left-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold text-[8px] sm:text-[9px] ${colors.bg} text-white z-10`}>
+                  {player.rank}
+                </div>
                 {player.avatar ? (
                   <img src={player.avatar} alt={player.name} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full object-cover" />
                 ) : (
@@ -145,10 +145,8 @@ export const RankingCard = ({
                   </div>
                 )}
               </div>
-              <div className="flex-1 min-w-0 overflow-hidden">
-                <div className="font-semibold text-[11px] sm:text-xs lg:text-sm text-gray-900 dark:text-white leading-tight truncate">{clampName(player.name)}</div>
-                <div className={`text-[11px] sm:text-xs lg:text-sm font-bold ${colors.text}`}>{player.rating}</div>
-              </div>
+              <div className="font-semibold text-[10px] sm:text-xs lg:text-sm text-gray-900 dark:text-white leading-tight truncate w-full">{clampName(player.name)}</div>
+              <div className={`text-[10px] sm:text-xs lg:text-sm font-bold ${colors.text}`}>{player.rating}</div>
             </div>
           ))}
         </div>
