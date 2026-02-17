@@ -141,7 +141,7 @@ export const RankingCard = ({
                     {getInitials(player.name)}
                   </div>
                 )}
-                <div className="font-semibold text-[8px] sm:text-[10px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center line-clamp-2">{player.name}</div>
+                <div className="font-semibold text-[8px] sm:text-[10px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center break-words" style={{ display: '-webkit-box', WebkitLineClamp: 2, WebkitBoxOrient: 'vertical', overflow: 'hidden' }}>{player.name}</div>
                 <div className={`text-[8px] sm:text-[10px] lg:text-xs font-bold ${colors.text}`}>{player.rating}</div>
               </div>
             </div>
