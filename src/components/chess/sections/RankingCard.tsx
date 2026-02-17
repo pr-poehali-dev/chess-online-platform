@@ -105,7 +105,7 @@ export const RankingCard = ({
                 )}
               </div>
               <div className="flex-1 min-w-0">
-                <div className="font-bold text-base sm:text-lg text-gray-900 dark:text-white truncate">{first.name}</div>
+                <div className="font-bold text-base sm:text-lg text-gray-900 dark:text-white line-clamp-2 sm:truncate">{first.name}</div>
                 <div className="text-xs sm:text-sm text-gray-600 dark:text-gray-400">{first.city}</div>
                 <div className={`text-lg sm:text-xl font-bold ${colors.text} mt-1`}>{first.rating}</div>
               </div>
@@ -137,7 +137,7 @@ export const RankingCard = ({
                   )}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white truncate">{player.name}</div>
+                  <div className="font-semibold text-xs sm:text-sm text-gray-900 dark:text-white line-clamp-2 sm:truncate leading-tight">{player.name}</div>
                   <div className={`text-xs sm:text-sm font-bold ${colors.text}`}>{player.rating}</div>
                 </div>
               </div>
