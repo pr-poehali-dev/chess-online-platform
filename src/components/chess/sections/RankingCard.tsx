@@ -124,29 +124,26 @@ export const RankingCard = ({
         {/* 2-4 место — правая колонка */}
         <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
           {rest.map((player) => (
-            <div
-              key={player.rank}
-              className={`flex flex-col items-center justify-center text-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl cursor-pointer hover:border-amber-400 transition-colors flex-1 min-h-[44px] ${
-                player.rank <= 3
-                  ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
-                  : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
-              }`}
-              onClick={() => setSelectedPlayer(player)}
-            >
-              <div className="relative mb-0.5">
-                <div className={`absolute -top-1 -left-1 w-4 h-4 sm:w-5 sm:h-5 rounded-full flex items-center justify-center font-bold text-[8px] sm:text-[9px] ${colors.bg} text-white z-10`}>
-                  {player.rank}
-                </div>
+            <div key={player.rank} className="flex flex-col items-center">
+              <div className={`text-[8px] sm:text-[9px] lg:text-[10px] font-bold ${colors.text} mb-0.5`}>{player.rank} место</div>
+              <div
+                className={`flex flex-col items-center justify-center text-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl cursor-pointer hover:border-amber-400 transition-colors w-full flex-1 min-h-[44px] ${
+                  player.rank <= 3
+                    ? 'border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10'
+                    : 'border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
+                }`}
+                onClick={() => setSelectedPlayer(player)}
+              >
                 {player.avatar ? (
-                  <img src={player.avatar} alt={player.name} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full object-cover" />
+                  <img src={player.avatar} alt={player.name} className="w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full object-cover mb-0.5" />
                 ) : (
-                  <div className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs text-white ${colors.bg}`}>
+                  <div className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs text-white ${colors.bg} mb-0.5`}>
                     {getInitials(player.name)}
                   </div>
                 )}
+                <div className="font-semibold text-[8px] sm:text-[10px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center line-clamp-2">{player.name}</div>
+                <div className={`text-[8px] sm:text-[10px] lg:text-xs font-bold ${colors.text}`}>{player.rating}</div>
               </div>
-              <div className="font-semibold text-[10px] sm:text-xs lg:text-sm text-gray-900 dark:text-white leading-tight truncate w-full">{clampName(player.name)}</div>
-              <div className={`text-[10px] sm:text-xs lg:text-sm font-bold ${colors.text}`}>{player.rating}</div>
             </div>
           ))}
         </div>
@@ -165,27 +162,27 @@ export const RankingCard = ({
             : 'bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5'
         }`}
       >
-        <div className={`flex items-center justify-center w-6 h-6 sm:w-7 sm:h-7 rounded-full font-bold text-xs sm:text-sm ${colors.bg} text-white flex-shrink-0`}>
+        <div className={`flex items-center justify-center w-5 h-5 sm:w-6 sm:h-6 rounded-full font-bold text-[10px] sm:text-xs ${colors.bg} text-white flex-shrink-0`}>
           {player.rank}
         </div>
         <div className="flex-shrink-0">
           {player.avatar ? (
-            <img src={player.avatar} alt={player.name} className="w-8 h-8 sm:w-9 sm:h-9 rounded-full object-cover" />
+            <img src={player.avatar} alt={player.name} className="w-7 h-7 sm:w-8 sm:h-8 rounded-full object-cover" />
           ) : (
-            <div className={`w-8 h-8 sm:w-9 sm:h-9 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs text-white ${colors.bg}`}>
+            <div className={`w-7 h-7 sm:w-8 sm:h-8 rounded-full flex items-center justify-center font-bold text-[9px] sm:text-[10px] text-white ${colors.bg}`}>
               {getInitials(player.name)}
             </div>
           )}
         </div>
         <div className="flex-1 min-w-0 overflow-hidden">
-          <div className={`font-semibold text-xs sm:text-sm truncate ${
+          <div className={`font-semibold text-[10px] sm:text-xs truncate ${
             player.highlight 
               ? colors.highlightText
               : 'text-gray-900 dark:text-white'
           }`}>{clampName(player.name)}</div>
-          <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400 truncate">{player.city}</div>
+          <div className="text-[9px] sm:text-[10px] text-gray-600 dark:text-gray-400 truncate">{player.city}</div>
         </div>
-        <div className={`text-xs sm:text-sm font-bold ${colors.text} flex-shrink-0`}>{player.rating}</div>
+        <div className={`text-[10px] sm:text-xs font-bold ${colors.text} flex-shrink-0`}>{player.rating}</div>
       </div>
     );
   };
