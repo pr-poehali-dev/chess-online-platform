@@ -187,8 +187,8 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
   };
 
   const openFriendProfile = async (friend: Friend) => {
+    setSelectedFriend({ id: friend.id, username: friend.username, avatar: friend.avatar || '', rating: friend.rating, city: friend.city || '', games_played: 0, wins: 0, losses: 0, draws: 0 });
     setLoadingGames(true);
-    setSelectedFriend(null);
     setFriendGames([]);
     const [profileRes, gamesRes] = await Promise.all([
       fetch(`${FRIENDS_URL}?action=profile&user_id=${userId}&friend_id=${encodeURIComponent(friend.id)}`),
@@ -213,9 +213,9 @@ export const FriendsSection = ({ onOpenChat, pendingInviteCode, onInviteProcesse
   }
 
   return (
-    <div className="space-y-4 animate-fade-in max-w-2xl mx-auto w-full overflow-hidden">
-      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 overflow-hidden">
-        <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5">
+    <div className="animate-fade-in max-w-2xl mx-auto w-full overflow-hidden flex flex-col" style={{ maxHeight: 'calc(100vh - 120px)' }}>
+      <Card className="bg-white dark:bg-slate-900/50 border-slate-200 dark:border-white/10 overflow-hidden flex flex-col flex-1 min-h-0">
+        <CardContent className="p-3 sm:p-4 md:p-6 space-y-4 sm:space-y-5 flex flex-col flex-1 min-h-0 overflow-y-auto">
           <FriendInvitePanel
             userCode={userCode}
             friendCode={friendCode}
