@@ -1,8 +1,5 @@
-const CACHE_NAME = 'chess-game-v1';
-const GAME_ASSETS = [
-  '/',
-  '/index.html',
-];
+const CACHE_NAME = 'chess-game-v2';
+const GAME_ASSETS = [];
 
 self.addEventListener('install', (event) => {
   event.waitUntil(
