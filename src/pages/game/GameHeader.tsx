@@ -397,10 +397,18 @@ export const GameControls = ({
               <div className="relative">
                 <button
                   onClick={handleShareResult}
-                  className="p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 flex-shrink-0 text-white bg-white/20 hover:bg-white/30 active:scale-90"
+                  className="p-1.5 sm:p-2 rounded-lg transition-colors flex items-center gap-1 flex-shrink-0 bg-white/20 hover:bg-white/30 active:scale-90"
                   title="Поделиться"
                 >
-                  <Icon name={shareOk ? 'Check' : 'Send'} size={21} className={shareOk ? 'text-green-300' : ''} />
+                  {shareOk ? (
+                    <Icon name="Check" size={20} className="text-green-300" />
+                  ) : (
+                    <img
+                      src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/fda3fc12-14e8-4207-b40a-00c3b8683b37.png"
+                      alt="Поделиться"
+                      className="w-5 h-5 invert"
+                    />
+                  )}
                 </button>
                 {shareOk && (
                   <div className="absolute -bottom-8 right-0 bg-gray-900 text-white text-[10px] sm:text-xs px-2 py-1 rounded-md whitespace-nowrap z-50 animate-fade-in">

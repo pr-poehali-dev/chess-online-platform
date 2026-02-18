@@ -185,7 +185,15 @@ export const HistorySection = ({ onOpenChat }: HistorySectionProps) => {
                     variant="outline"
                     className="border-slate-200 dark:border-white/20 active:scale-95"
                   >
-                    <Icon name={shareOk ? 'Check' : 'Send'} size={21} className={shareOk ? 'text-green-500 mr-2' : 'mr-2'} />
+                    {shareOk ? (
+                      <Icon name="Check" size={20} className="text-green-500 mr-2" />
+                    ) : (
+                      <img
+                        src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/fda3fc12-14e8-4207-b40a-00c3b8683b37.png"
+                        alt="Поделиться"
+                        className="w-5 h-5 dark:invert mr-2"
+                      />
+                    )}
                     <span className="hidden sm:inline">{shareOk ? 'Скопировано!' : 'Поделиться'}</span>
                   </Button>
                   {shareOk && (

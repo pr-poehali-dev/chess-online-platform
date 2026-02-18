@@ -320,12 +320,12 @@ export const RankingCard = ({
               title="Поделиться"
             >
               {shared ? (
-                <Icon name="Check" size={32} className="text-green-500" />
+                <Icon name="Check" size={26} className="text-green-500" />
               ) : (
                 <img
                   src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/fda3fc12-14e8-4207-b40a-00c3b8683b37.png"
                   alt="Поделиться"
-                  className="w-8 h-8 dark:invert"
+                  className="w-[26px] h-[26px] dark:invert"
                 />
               )}
             </button>
