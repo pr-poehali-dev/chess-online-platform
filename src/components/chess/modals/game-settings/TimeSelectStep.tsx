@@ -70,8 +70,8 @@ const TimeSelectStep = ({
   isFriendGame,
 }: TimeSelectStepProps) => {
   return (
-    <div className="space-y-2 sm:space-y-4">
-      <div className="space-y-2 sm:space-y-4">
+    <div className="space-y-1.5 sm:space-y-3">
+      <div className="space-y-1.5 sm:space-y-3">
         {timeCategories.map((category) => (
           <div key={category.name}>
             <div className="flex items-center gap-1.5 mb-1 sm:mb-2">
@@ -82,7 +82,7 @@ const TimeSelectStep = ({
               {category.options.map((option) => (
                 <Button
                   key={option.value}
-                  className={`h-8 sm:h-12 text-[11px] sm:text-sm font-medium border px-1 sm:px-3 rounded-md sm:rounded-lg ${
+                  className={`h-8 sm:h-10 text-[11px] sm:text-sm font-medium border px-1 sm:px-3 rounded-md sm:rounded-lg ${
                     selectedTime === option.value
                       ? 'bg-blue-100 dark:bg-blue-900/30 border-blue-400 dark:border-blue-500 text-blue-700 dark:text-blue-300'
                       : 'bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border-slate-200 dark:border-white/10 text-slate-900 dark:text-white'
@@ -98,7 +98,7 @@ const TimeSelectStep = ({
       </div>
 
       <div 
-        className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2.5 sm:p-4 border border-slate-200 dark:border-white/10 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
+        className="bg-slate-50 dark:bg-slate-800/50 rounded-lg p-2 sm:p-3 border border-slate-200 dark:border-white/10 cursor-pointer hover:bg-slate-100 dark:hover:bg-slate-700/50 transition-colors"
         onClick={onCycleColor}
       >
         <div className="flex items-center justify-between">

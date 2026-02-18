@@ -27,12 +27,12 @@ export const HomeActionButtons = ({
 }: HomeActionButtonsProps) => {
   return (
     <div className="text-center pt-1 sm:pt-2 pb-0">
-      <div className="flex flex-col items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6 animate-slide-up max-w-md mx-auto px-2 sm:px-1">
+      <div className="flex flex-col items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6 animate-slide-up max-w-md lg:max-w-xs mx-auto px-2 sm:px-1">
         {isButtonVisible("btn_play_online") && (
           <div className="w-full relative">
             <Button
               size="lg"
-              className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 text-sm sm:text-base lg:text-lg font-semibold rounded-xl transition-all shadow-lg min-h-[44px] hover:scale-105"
+              className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
               onClick={() => {
                 if (isAuthenticated) {
                   setShowGameSettings(true);
@@ -51,7 +51,7 @@ export const HomeActionButtons = ({
           <div className="w-full relative">
             <Button
               size="lg"
-              className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 text-sm sm:text-base lg:text-lg font-semibold rounded-xl transition-all shadow-lg min-h-[44px] ${!isLevelAllowed("level_play_offline") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
+              className={`w-full bg-blue-600 hover:bg-blue-700 dark:bg-blue-600 dark:hover:bg-blue-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] ${!isLevelAllowed("level_play_offline") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
               onClick={() => {
                 if (!isLevelAllowed("level_play_offline")) {
                   const minR = siteSettings?.level_play_offline?.value || "0";
@@ -79,7 +79,7 @@ export const HomeActionButtons = ({
           <div className="w-full relative">
             <Button
               size="lg"
-              className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 text-sm sm:text-base lg:text-lg font-semibold rounded-xl transition-all shadow-lg min-h-[44px] ${!isLevelAllowed("level_tournament") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
+              className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] ${!isLevelAllowed("level_tournament") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
               onClick={() => {
                 if (!isLevelAllowed("level_tournament")) {
                   const minR =

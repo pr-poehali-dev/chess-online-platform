@@ -309,8 +309,8 @@ export const GameSettingsModal = ({
 
   return (
     <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-50 animate-fade-in p-3 sm:p-4" onClick={handleClose}>
-      <Card className="w-full max-w-md bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in" onClick={(e) => e.stopPropagation()}>
-        <CardHeader className="px-4 sm:px-6 py-3 sm:py-6 pb-2 sm:pb-4">
+      <Card className="w-full max-w-md bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in max-h-[95vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
+        <CardHeader className="px-4 sm:px-6 py-2 sm:py-4 pb-1 sm:pb-3">
           <div className="flex items-center justify-between">
             {(step > 1 || inviteSent) && (
               <Button
@@ -340,7 +340,7 @@ export const GameSettingsModal = ({
             </div>
           )}
         </CardHeader>
-        <CardContent className="space-y-3 sm:space-y-6 px-4 sm:px-6 pb-4 sm:pb-6">
+        <CardContent className="space-y-2 sm:space-y-4 px-4 sm:px-6 pb-3 sm:pb-5">
           {inviteSent ? (
             <div className="text-center py-6 sm:py-8 space-y-3 sm:space-y-4">
               <div className="w-14 h-14 sm:w-16 sm:h-16 mx-auto rounded-full bg-amber-100 dark:bg-amber-900/30 flex items-center justify-center">
