@@ -316,7 +316,7 @@ export const RankingCard = ({
           <div className="relative">
             <button
               onClick={handleShare}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0 text-gray-400 hover:text-amber-500 dark:hover:text-amber-400 active:scale-90"
+              className="p-1.5 flex-shrink-0 active:scale-90 transition-transform"
               title="Поделиться"
             >
               {shared ? (
