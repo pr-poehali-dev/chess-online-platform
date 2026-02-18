@@ -48,7 +48,7 @@ export const PlayerInfo = ({
     .filter(type => groupedPieces[type])
     .map(type => groupedPieces[type]);
   return (
-    <div className={`backdrop-blur-sm rounded-lg p-1.5 sm:p-2 md:p-3 border w-full md:w-auto min-h-[44px] sm:min-h-[56px] md:min-h-[68px] ${
+    <div className={`backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-3 border w-full md:w-auto min-h-[36px] sm:min-h-[52px] md:min-h-[68px] ${
       theme === 'light' 
         ? (playerColor === 'black' ? 'bg-stone-700/80 border-stone-600' : 'bg-white/80 border-slate-300')
         : (playerColor === 'black' ? 'bg-stone-900/80 border-stone-700' : 'bg-stone-200/90 border-stone-400')
@@ -62,13 +62,13 @@ export const PlayerInfo = ({
             <img 
               src={avatar} 
               alt={playerName}
-              className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-stone-600 flex-shrink-0"
+              className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-stone-600 flex-shrink-0"
             />
           ) : (
             <div className="text-2xl sm:text-3xl md:text-4xl flex-shrink-0">{icon}</div>
           )}
           <div className="min-w-0 flex-shrink">
-            <div className={`text-[11px] sm:text-xs md:text-sm font-medium truncate ${
+            <div className={`text-[9px] sm:text-xs md:text-sm font-medium truncate ${
               theme === 'light'
                 ? 'text-slate-800'
                 : (playerColor === 'white' ? 'text-stone-800' : 'text-stone-200')
@@ -77,7 +77,7 @@ export const PlayerInfo = ({
             </div>
             <div className="flex items-center gap-2">
               <div
-                className={`text-[10px] sm:text-[11px] md:text-xs whitespace-nowrap ${
+                className={`text-[8px] sm:text-[11px] md:text-xs whitespace-nowrap ${
                   playerColor === 'black' 
                     ? (theme === 'dark' ? 'text-stone-900 font-semibold' : 'text-stone-900 font-semibold')
                     : (theme === 'light' ? 'text-slate-600' : 'text-stone-600')
@@ -91,7 +91,7 @@ export const PlayerInfo = ({
               </div>
               {rating && (
                 <div className="flex items-center gap-1">
-                  <div className={`text-[10px] md:text-xs font-semibold whitespace-nowrap ${
+                  <div className={`text-[8px] sm:text-[10px] md:text-xs font-semibold whitespace-nowrap ${
                     theme === 'light'
                       ? 'text-blue-600'
                       : (playerColor === 'white' ? 'text-blue-600' : 'text-blue-400')
@@ -99,7 +99,7 @@ export const PlayerInfo = ({
                     {rating}
                   </div>
                   {ratingChange != null && ratingChange !== 0 && (
-                    <div className={`text-[10px] md:text-xs font-bold whitespace-nowrap ${
+                    <div className={`text-[8px] sm:text-[10px] md:text-xs font-bold whitespace-nowrap ${
                       ratingChange > 0 ? 'text-green-400' : 'text-red-400'
                     }`}>
                       {ratingChange > 0 ? `+${ratingChange}` : ratingChange}
@@ -118,7 +118,7 @@ export const PlayerInfo = ({
                   key={index}
                   src={pieceImages[piece.color]?.[piece.type]}
                   alt={`${piece.color} ${piece.type}`}
-                  className="w-4 h-4 sm:w-5 sm:h-5 md:w-6 md:h-6"
+                  className="w-3.5 h-3.5 sm:w-5 sm:h-5 md:w-6 md:h-6"
                   style={{ 
                     marginLeft: index > 0 ? '-0.3em' : '0',
                     zIndex: index,
@@ -132,7 +132,7 @@ export const PlayerInfo = ({
         </div>
         <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
           <div className="flex items-center gap-1 sm:gap-2">
-            <div className={`text-base sm:text-lg md:text-xl font-bold whitespace-nowrap ${
+            <div className={`text-sm sm:text-lg md:text-xl font-bold whitespace-nowrap ${
               time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer
                 ? (theme === 'dark' && playerColor === 'white' ? 'text-green-600' : 'text-green-400')
                 : (theme === 'dark' && playerColor === 'white' ? 'text-stone-500' : 'text-stone-400')
@@ -140,7 +140,7 @@ export const PlayerInfo = ({
               {formatTime(time)}
             </div>
             {inactivityTimer !== undefined && inactivityTimer <= 30 && (
-              <div className={`text-xs sm:text-sm md:text-base font-semibold whitespace-nowrap ${
+              <div className={`text-[10px] sm:text-sm md:text-base font-semibold whitespace-nowrap ${
                 inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
               }`}>
                 ({inactivityTimer}с)
@@ -148,7 +148,7 @@ export const PlayerInfo = ({
             )}
           </div>
           {inactivityTimer !== undefined && inactivityTimer <= 30 && (
-            <div className={`text-[9px] sm:text-[10px] md:text-xs text-right whitespace-nowrap ${
+            <div className={`text-[8px] sm:text-[10px] md:text-xs text-right whitespace-nowrap ${
               inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
             }`}>
               {inactivityTimer <= 20 ? 'До поражения' : 'Бездействует...'}
