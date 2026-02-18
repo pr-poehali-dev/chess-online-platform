@@ -270,9 +270,9 @@ const Game = () => {
       )}
 
 
-      <main className="flex-1 flex items-center justify-center px-0 py-0.5 sm:p-2 md:p-3 overflow-hidden min-h-0">
+      <main className="flex-1 flex items-center justify-center px-1 py-0.5 sm:p-2 md:p-3 overflow-hidden min-h-0">
         <div className="w-full h-full flex items-center justify-center">
-          <div className="flex flex-col gap-1 sm:gap-1.5 md:gap-3 w-full px-1 sm:px-0" style={{ maxWidth: 'min(calc(100vw - 4px), min(calc(100dvh - 340px), 700px))' }}>
+          <div className="flex flex-col gap-1.5 sm:gap-2 md:gap-3 w-full" style={{ maxWidth: 'min(calc(100vw - 8px), min(calc(100dvh - 310px), 700px))' }}>
             <div className="flex flex-col gap-1 sm:gap-1.5">
               <GameControls
                 showSettingsMenu={showSettingsMenu}

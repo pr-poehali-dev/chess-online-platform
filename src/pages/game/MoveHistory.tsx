@@ -32,11 +32,11 @@ export const MoveHistory = ({
     }
   }, [moveHistory.length, historyRef]);
   return (
-    <div className="w-full flex items-center gap-1 sm:gap-2">
+    <div className="w-full flex items-center gap-1.5 sm:gap-2">
       <button
         onClick={onPreviousMove}
         disabled={currentMoveIndex === 0}
-        className={`p-1.5 sm:p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
+        className={`p-2 sm:p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
           theme === 'light'
             ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
             : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
@@ -83,7 +83,7 @@ export const MoveHistory = ({
       <button
         onClick={onNextMove}
         disabled={currentMoveIndex >= moveHistory.length}
-        className={`p-1.5 sm:p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
+        className={`p-2 sm:p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
           theme === 'light'
             ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
             : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'

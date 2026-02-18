@@ -46,14 +46,14 @@ export const GameHeader = ({
 }: GameHeaderProps) => {
   return (
     <header
-      className={`backdrop-blur-sm border-b px-4 py-1 sm:py-1.5 md:py-3 flex items-center justify-center flex-shrink-0 ${
+      className={`backdrop-blur-sm border-b px-4 py-1.5 sm:py-2 md:py-3 flex items-center justify-center flex-shrink-0 ${
         theme === "light"
           ? "bg-white/80 border-slate-300"
           : "bg-stone-900/80 border-stone-700/50"
       }`}
     >
       <h1
-        className={`text-base sm:text-xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r tracking-wide ${
+        className={`text-lg sm:text-xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r tracking-wide ${
           theme === "light"
             ? "from-amber-600 via-yellow-500 to-amber-600"
             : "from-amber-200 via-yellow-400 to-amber-200"
@@ -216,10 +216,10 @@ export const GameControls = ({
           </div>
         </div>
       )}
-      <div className="flex items-center gap-1 sm:gap-1.5 md:gap-2 h-[32px] sm:h-[40px] md:h-[48px]">
+      <div className="flex items-center gap-1.5 sm:gap-2 md:gap-2 h-[36px] sm:h-[44px] md:h-[48px]">
         <button
           onClick={handleExitClick}
-          className={`p-1.5 sm:p-2 md:p-2.5 border rounded-lg transition-colors min-w-[32px] min-h-[32px] sm:min-w-[40px] sm:min-h-[40px] flex items-center justify-center flex-shrink-0 ${
+          className={`p-2 sm:p-2.5 md:p-2.5 border rounded-lg transition-colors min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center flex-shrink-0 ${
             theme === "light"
               ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
               : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
@@ -227,31 +227,31 @@ export const GameControls = ({
           title="Выход из игры"
         >
           <div className="rotate-180">
-            <Icon name="LogOut" size={16} />
+            <Icon name="LogOut" size={18} />
           </div>
         </button>
         <button
           onClick={() => setShowChat(true)}
-          className={`p-1.5 sm:p-2 md:p-2.5 border rounded-lg transition-colors min-w-[32px] min-h-[32px] sm:min-w-[40px] sm:min-h-[40px] flex items-center justify-center flex-shrink-0 ${
+          className={`p-2 sm:p-2.5 md:p-2.5 border rounded-lg transition-colors min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center flex-shrink-0 ${
             theme === "light"
               ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
               : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
           }`}
           title="Чат"
         >
-          <Icon name="MessageCircle" size={16} />
+          <Icon name="MessageCircle" size={18} />
         </button>
         <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            className={`p-1.5 sm:p-2 md:p-3 border rounded-lg transition-colors min-w-[32px] min-h-[32px] sm:min-w-[40px] sm:min-h-[40px] flex items-center justify-center ${
+            className={`p-2 sm:p-2.5 md:p-3 border rounded-lg transition-colors min-w-[36px] min-h-[36px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center ${
               theme === "light"
                 ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
                 : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
             }`}
             title="Опции"
           >
-            <Icon name="Settings" size={16} />
+            <Icon name="Settings" size={18} />
           </button>
           {showSettingsMenu && (
             <>
