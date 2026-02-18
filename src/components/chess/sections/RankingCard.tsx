@@ -316,16 +316,16 @@ export const RankingCard = ({
           <div className="relative">
             <button
               onClick={handleShare}
-              className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0 text-gray-400 hover:text-amber-500 dark:hover:text-amber-400 active:scale-90"
+              className="p-1 flex-shrink-0 active:scale-90 transition-transform"
               title="Поделиться"
             >
               {shared ? (
-                <Icon name="Check" size={21} className="text-green-500" />
+                <Icon name="Check" size={32} className="text-green-500" />
               ) : (
                 <img
-                  src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/6b0f21b5-610c-4eeb-aa5c-7c36cb2505a2.png"
+                  src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/fda3fc12-14e8-4207-b40a-00c3b8683b37.png"
                   alt="Поделиться"
-                  className="w-[21px] h-[21px] dark:invert"
+                  className="w-8 h-8 dark:invert"
                 />
               )}
             </button>
