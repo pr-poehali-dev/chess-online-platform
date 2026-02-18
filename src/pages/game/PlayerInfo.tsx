@@ -48,7 +48,7 @@ export const PlayerInfo = ({
     .filter(type => groupedPieces[type])
     .map(type => groupedPieces[type]);
   return (
-    <div className={`backdrop-blur-sm rounded-lg p-1.5 sm:p-2.5 md:p-3 border w-full md:w-auto min-h-[52px] sm:min-h-[64px] md:min-h-[76px] ${
+    <div className={`backdrop-blur-sm rounded-lg p-1 sm:p-2 md:p-3 border w-full md:w-auto min-h-[40px] sm:min-h-[56px] md:min-h-[68px] ${
       theme === 'light' 
         ? (playerColor === 'black' ? 'bg-stone-700/80 border-stone-600' : 'bg-white/80 border-slate-300')
         : (playerColor === 'black' ? 'bg-stone-900/80 border-stone-700' : 'bg-stone-200/90 border-stone-400')
@@ -62,7 +62,7 @@ export const PlayerInfo = ({
             <img 
               src={avatar} 
               alt={playerName}
-              className="w-7 h-7 sm:w-9 sm:h-9 md:w-10 md:h-10 rounded-full object-cover border-2 border-stone-600 flex-shrink-0"
+              className="w-6 h-6 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full object-cover border-2 border-stone-600 flex-shrink-0"
             />
           ) : (
             <div className="text-2xl sm:text-3xl md:text-4xl flex-shrink-0">{icon}</div>
@@ -132,7 +132,7 @@ export const PlayerInfo = ({
         </div>
         <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
           <div className="flex items-center gap-1 sm:gap-2">
-            <div className={`text-base sm:text-lg md:text-xl font-bold whitespace-nowrap ${
+            <div className={`text-sm sm:text-lg md:text-xl font-bold whitespace-nowrap ${
               time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer
                 ? (theme === 'dark' && playerColor === 'white' ? 'text-green-600' : 'text-green-400')
                 : (theme === 'dark' && playerColor === 'white' ? 'text-stone-500' : 'text-stone-400')
