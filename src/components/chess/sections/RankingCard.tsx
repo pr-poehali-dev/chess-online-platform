@@ -119,14 +119,14 @@ export const RankingCard = ({
     return (
       <div className="mb-3 sm:mb-4">
         {/* Надписи "1 место" и "2 место" над колонками */}
-        <div className="flex gap-3 sm:gap-4 mb-1 sm:mb-2">
+        <div className="flex gap-3 sm:gap-4 mb-1 sm:mb-2 items-baseline">
           <div className="flex-1 text-center">
             <div className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-400 animate-glow-text">
               1 место
             </div>
           </div>
           <div className="flex-1 text-center">
-            <div className="text-sm sm:text-base lg:text-lg font-bold text-yellow-400 animate-glow-text">
+            <div className="text-base sm:text-lg lg:text-xl font-bold text-yellow-400 animate-glow-text">
               2 место
             </div>
           </div>
