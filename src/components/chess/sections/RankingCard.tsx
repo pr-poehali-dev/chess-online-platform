@@ -117,96 +117,98 @@ export const RankingCard = ({
     const rest = topPlayers.slice(1, 4);
 
     return (
-      <div className="flex gap-3 sm:gap-4 mb-3 sm:mb-4 items-stretch">
-        {/* 1 место — левая колонка */}
-        <div className="flex-1 min-w-0 flex flex-col">
-          <div className="text-center mb-1 sm:mb-2">
-            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-400 animate-glow-text">
-              1 место
-            </div>
-          </div>
-          <div
-            className="relative p-3 sm:p-4 rounded-xl border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 cursor-pointer hover:scale-[1.02] transition-all animate-glow-pulse flex-1 flex items-center justify-center min-h-[44px]"
-            onClick={() => setSelectedPlayer(first)}
-          >
-            <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-yellow-400/10 to-orange-400/10 dark:from-yellow-400/5 dark:to-orange-400/5 pointer-events-none" />
-            <div className="relative flex flex-col items-center text-center gap-2 sm:gap-3">
-              <div className="relative">
-                <div className="absolute -inset-1.5 sm:-inset-2 rounded-full bg-yellow-400/20 dark:bg-yellow-400/15 blur-md animate-pulse" />
-                {first.avatar ? (
-                  <img
-                    src={first.avatar}
-                    alt={first.name}
-                    className="relative w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full object-cover ring-2 ring-yellow-400 shadow-lg"
-                  />
-                ) : (
-                  <div
-                    className={`relative w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center font-bold text-base sm:text-xl lg:text-2xl text-white ${colors.bg} ring-2 ring-yellow-400 shadow-lg`}
-                  >
-                    {getInitials(first.name)}
-                  </div>
-                )}
-              </div>
-              <div className="min-w-0 w-full">
-                <div className="font-bold text-xs sm:text-sm lg:text-base text-gray-900 dark:text-white leading-tight">
-                  {splitName(first.name)}
-                </div>
-                <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
-                  {first.city}
-                </div>
-                <div
-                  className={`text-sm sm:text-lg lg:text-xl font-bold ${colors.text} mt-0.5`}
-                >
-                  {first.rating}
-                </div>
-              </div>
-            </div>
+      <div className="mb-3 sm:mb-4">
+        <div className="text-center mb-1 sm:mb-2">
+          <div className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-400 animate-glow-text">
+            1 место
           </div>
         </div>
-
-        {/* 2-4 место — правая колонка */}
-        <div className="flex flex-col gap-1 sm:gap-1.5 min-w-0 flex-1">
-          {rest.map((player) => (
-            <div key={player.rank} className="flex flex-col items-center flex-1">
-              <div
-                className={`text-sm sm:text-base lg:text-lg font-bold mb-0.5 ${player.rank <= 3 ? "text-yellow-400 animate-glow-text" : colors.text}`}
-              >
-                {player.rank} место
-              </div>
-              <div
-                className={`flex flex-col items-center justify-center text-center p-1.5 sm:p-2 rounded-lg sm:rounded-xl cursor-pointer hover:border-amber-400 transition-colors w-full flex-1 min-h-[44px] ${
-                  player.rank === 2
-                    ? "border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50/50 to-orange-50/50 dark:from-yellow-900/15 dark:to-orange-900/15 animate-glow-pulse"
-                    : player.rank <= 3
-                      ? "border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10"
-                      : "border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5"
-                }`}
-                onClick={() => setSelectedPlayer(player)}
-              >
-                {player.avatar ? (
-                  <img
-                    src={player.avatar}
-                    alt={player.name}
-                    className="w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full object-cover mb-0.5"
-                  />
-                ) : (
-                  <div
-                    className={`w-8 h-8 sm:w-10 sm:h-10 lg:w-11 lg:h-11 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs text-white ${colors.bg} mb-0.5`}
-                  >
-                    {getInitials(player.name)}
-                  </div>
-                )}
-                <div className="font-semibold text-[8px] sm:text-[10px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center">
-                  {splitName(player.name)}
+        <div className="flex gap-3 sm:gap-4 items-stretch">
+          {/* 1 место — левая колонка (только карточка) */}
+          <div className="flex-1 min-w-0">
+            <div
+              className="relative p-3 sm:p-4 rounded-xl border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50 to-orange-50 dark:from-yellow-900/20 dark:to-orange-900/20 cursor-pointer hover:scale-[1.02] transition-all animate-glow-pulse h-full flex items-center justify-center min-h-[44px]"
+              onClick={() => setSelectedPlayer(first)}
+            >
+              <div className="absolute inset-0 rounded-xl bg-gradient-to-br from-yellow-400/10 to-orange-400/10 dark:from-yellow-400/5 dark:to-orange-400/5 pointer-events-none" />
+              <div className="relative flex flex-col items-center text-center gap-2 sm:gap-3">
+                <div className="relative">
+                  <div className="absolute -inset-1.5 sm:-inset-2 rounded-full bg-yellow-400/20 dark:bg-yellow-400/15 blur-md animate-pulse" />
+                  {first.avatar ? (
+                    <img
+                      src={first.avatar}
+                      alt={first.name}
+                      className="relative w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full object-cover ring-2 ring-yellow-400 shadow-lg"
+                    />
+                  ) : (
+                    <div
+                      className={`relative w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center font-bold text-base sm:text-xl lg:text-2xl text-white ${colors.bg} ring-2 ring-yellow-400 shadow-lg`}
+                    >
+                      {getInitials(first.name)}
+                    </div>
+                  )}
                 </div>
-                <div
-                  className={`text-[8px] sm:text-[10px] lg:text-xs font-bold ${colors.text}`}
-                >
-                  {player.rating}
+                <div className="min-w-0 w-full">
+                  <div className="font-bold text-xs sm:text-sm lg:text-base text-gray-900 dark:text-white leading-tight">
+                    {splitName(first.name)}
+                  </div>
+                  <div className="text-[10px] sm:text-xs text-gray-600 dark:text-gray-400">
+                    {first.city}
+                  </div>
+                  <div
+                    className={`text-sm sm:text-lg lg:text-xl font-bold ${colors.text} mt-0.5`}
+                  >
+                    {first.rating}
+                  </div>
                 </div>
               </div>
             </div>
-          ))}
+          </div>
+
+          {/* 2-4 место — правая колонка (надписи + карточки = высота карточки 1 места) */}
+          <div className="flex flex-col gap-0.5 min-w-0 flex-1">
+            {rest.map((player) => (
+              <div key={player.rank} className="flex flex-col items-center flex-1 min-h-0">
+                <div
+                  className={`text-sm sm:text-base lg:text-lg font-bold leading-tight ${player.rank <= 3 ? "text-yellow-400 animate-glow-text" : colors.text}`}
+                >
+                  {player.rank} место
+                </div>
+                <div
+                  className={`flex flex-col items-center justify-center text-center p-1 sm:p-1.5 rounded-lg sm:rounded-xl cursor-pointer hover:border-amber-400 transition-colors w-full flex-1 min-h-0 ${
+                    player.rank === 2
+                      ? "border-2 border-yellow-400 dark:border-yellow-500 bg-gradient-to-br from-yellow-50/50 to-orange-50/50 dark:from-yellow-900/15 dark:to-orange-900/15 animate-glow-pulse"
+                      : player.rank <= 3
+                        ? "border-2 border-yellow-400/60 dark:border-yellow-500/40 bg-yellow-50/50 dark:bg-yellow-900/10"
+                        : "border bg-slate-50 dark:bg-slate-800/30 border-slate-200 dark:border-white/5"
+                  }`}
+                  onClick={() => setSelectedPlayer(player)}
+                >
+                  {player.avatar ? (
+                    <img
+                      src={player.avatar}
+                      alt={player.name}
+                      className="w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full object-cover mb-0.5"
+                    />
+                  ) : (
+                    <div
+                      className={`w-7 h-7 sm:w-9 sm:h-9 lg:w-10 lg:h-10 rounded-full flex items-center justify-center font-bold text-[10px] sm:text-xs text-white ${colors.bg} mb-0.5`}
+                    >
+                      {getInitials(player.name)}
+                    </div>
+                  )}
+                  <div className="font-semibold text-[8px] sm:text-[10px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center">
+                    {splitName(player.name)}
+                  </div>
+                  <div
+                    className={`text-[8px] sm:text-[10px] lg:text-xs font-bold ${colors.text}`}
+                  >
+                    {player.rating}
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
       </div>
     );
@@ -305,11 +307,15 @@ export const RankingCard = ({
               className="p-1.5 rounded-lg hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors flex-shrink-0 text-gray-400 hover:text-amber-500 dark:hover:text-amber-400 active:scale-90"
               title="Поделиться"
             >
-              <Icon
-                name={shared ? "Check" : "Share2"}
-                size={21}
-                className={shared ? "text-green-500" : ""}
-              />
+              {shared ? (
+                <Icon name="Check" size={21} className="text-green-500" />
+              ) : (
+                <img
+                  src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/6b0f21b5-610c-4eeb-aa5c-7c36cb2505a2.png"
+                  alt="Поделиться"
+                  className="w-[21px] h-[21px] dark:invert"
+                />
+              )}
             </button>
             {shared && (
               <div className="absolute -bottom-8 right-0 bg-gray-900 dark:bg-gray-700 text-white text-[10px] sm:text-xs px-2 py-1 rounded-md whitespace-nowrap z-50 animate-fade-in">
