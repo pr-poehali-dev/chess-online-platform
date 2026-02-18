@@ -152,8 +152,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
           }
         }
       `}</style>
-      <div className="inline-block rounded-sm overflow-hidden shadow-2xl relative w-full md:w-auto" style={{ 
-        boxShadow: `0 0 0 2px ${config.borderColor}, 0 0 0 4px ${config.borderOuterColor}, 0 15px 30px rgba(0,0,0,0.4)`,
+      <div className="block sm:inline-block overflow-hidden relative w-full md:w-auto" style={{ 
         aspectRatio: '1/1',
         ...(config.backgroundImage ? {
           backgroundImage: `url(${config.backgroundImage})`,

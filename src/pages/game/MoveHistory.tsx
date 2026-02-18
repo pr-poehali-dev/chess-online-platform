@@ -32,18 +32,18 @@ export const MoveHistory = ({
     }
   }, [moveHistory.length, historyRef]);
   return (
-    <div className="w-full flex items-center gap-1.5 sm:gap-2">
+    <div className="w-full flex items-center gap-1 sm:gap-2">
       <button
         onClick={onPreviousMove}
         disabled={currentMoveIndex === 0}
-        className={`p-2 sm:p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
+        className={`p-1 sm:p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-md sm:rounded-lg transition-colors flex-shrink-0 ${
           theme === 'light'
             ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
             : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
         }`}
         title="Предыдущий ход"
       >
-        <Icon name="ChevronLeft" size={18} />
+        <Icon name="ChevronLeft" size={14} />
       </button>
       
       <div className="relative flex-1 min-w-0 max-w-full overflow-hidden">
@@ -52,7 +52,7 @@ export const MoveHistory = ({
         }`}></div>
         <div 
           ref={historyRef} 
-          className={`overflow-x-auto hide-scrollbar backdrop-blur-sm rounded-lg border p-1 sm:p-1.5 ${
+          className={`overflow-x-auto hide-scrollbar backdrop-blur-sm rounded-md sm:rounded-lg border p-0.5 sm:p-1.5 ${
             theme === 'light' 
               ? 'bg-white/80 border-slate-300' 
               : 'bg-stone-800/50 border-stone-700/30'
@@ -62,7 +62,7 @@ export const MoveHistory = ({
           onMouseUp={onMouseUpOrLeave}
           onMouseLeave={onMouseUpOrLeave}
         >
-          <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} min-h-[20px] justify-end`}>
+          <div className={`flex gap-2 select-none ${isDragging ? 'cursor-grabbing' : 'cursor-grab'} min-h-[16px] sm:min-h-[20px] justify-end`}>
             {moveHistory.map((move, index) => (
               <div 
                 key={index} 
@@ -83,14 +83,14 @@ export const MoveHistory = ({
       <button
         onClick={onNextMove}
         disabled={currentMoveIndex >= moveHistory.length}
-        className={`p-2 sm:p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-lg transition-colors flex-shrink-0 ${
+        className={`p-1 sm:p-2 disabled:opacity-30 disabled:cursor-not-allowed border rounded-md sm:rounded-lg transition-colors flex-shrink-0 ${
           theme === 'light'
             ? 'bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900'
             : 'bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100'
         }`}
         title="Следующий ход"
       >
-        <Icon name="ChevronRight" size={18} />
+        <Icon name="ChevronRight" size={14} />
       </button>
     </div>
   );
