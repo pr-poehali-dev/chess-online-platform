@@ -121,7 +121,7 @@ export const RankingCard = ({
         {/* 1 место — левая колонка */}
         <div className="flex-1 min-w-0 flex flex-col">
           <div className="text-center mb-1 sm:mb-2">
-            <div className="text-base sm:text-lg font-bold text-yellow-400 animate-glow-text">
+            <div className="text-lg sm:text-xl lg:text-2xl font-bold text-yellow-400 animate-glow-text">
               1 место
             </div>
           </div>
@@ -165,11 +165,11 @@ export const RankingCard = ({
         </div>
 
         {/* 2-4 место — правая колонка */}
-        <div className="flex flex-col gap-1.5 sm:gap-2 min-w-0 flex-1">
+        <div className="flex flex-col gap-1 sm:gap-1.5 min-w-0 flex-1">
           {rest.map((player) => (
-            <div key={player.rank} className="flex flex-col items-center">
+            <div key={player.rank} className="flex flex-col items-center flex-1">
               <div
-                className={`text-[8px] sm:text-[9px] lg:text-[10px] font-bold mb-0.5 ${player.rank <= 3 ? "text-yellow-400 animate-glow-text" : colors.text}`}
+                className={`text-sm sm:text-base lg:text-lg font-bold mb-0.5 ${player.rank <= 3 ? "text-yellow-400 animate-glow-text" : colors.text}`}
               >
                 {player.rank} место
               </div>
@@ -306,7 +306,7 @@ export const RankingCard = ({
               title="Поделиться"
             >
               <Icon
-                name={shared ? "Check" : "Send"}
+                name={shared ? "Check" : "Share2"}
                 size={21}
                 className={shared ? "text-green-500" : ""}
               />

@@ -43,7 +43,7 @@ const MainContent = ({
   setPendingInviteCode,
 }: MainContentProps) => {
   return (
-    <main className="container mx-auto px-3 sm:px-4 py-6 sm:py-8">
+    <main className="container mx-auto px-3 sm:px-4 pt-6 sm:pt-8 pb-0">
       {activeSection === "home" && (
         <HomeSection
           isAuthenticated={isAuthenticated}
