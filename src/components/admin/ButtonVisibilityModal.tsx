@@ -1,5 +1,5 @@
-import { useState } from 'react';
-import Icon from '@/components/ui/icon';
+import { useState } from "react";
+import Icon from "@/components/ui/icon";
 
 interface SiteSettings {
   [key: string]: { value: string; description: string };
@@ -12,45 +12,65 @@ interface Props {
 }
 
 const buttons = [
-  { key: 'btn_play_online', label: 'Играть онлайн', icon: 'Play', color: 'text-green-400' },
-  { key: 'btn_play_offline', label: 'Играть офлайн', icon: 'Gamepad2', color: 'text-blue-400' },
-  { key: 'btn_tournament', label: 'Участвовать в турнире', icon: 'Trophy', color: 'text-purple-400' },
-  { key: 'btn_rankings', label: 'Рейтинги на главной', icon: 'BarChart3', color: 'text-orange-400' },
+  {
+    key: "btn_play_online",
+    label: "Играть онлайн",
+    icon: "Play",
+    color: "text-green-400",
+  },
+  {
+    key: "btn_play_offline",
+    label: "Играть офлайн",
+    icon: "Gamepad2",
+    color: "text-blue-400",
+  },
+  {
+    key: "btn_tournament",
+    label: "Опнлайн турнир",
+    icon: "Trophy",
+    color: "text-purple-400",
+  },
+  {
+    key: "btn_rankings",
+    label: "Рейтинги на главной",
+    icon: "BarChart3",
+    color: "text-orange-400",
+  },
 ];
 
 const modeToggle = {
-  key: 'rankings_mode',
-  label: 'Данные рейтинга',
-  icon: 'Users',
-  color: 'text-cyan-400',
+  key: "rankings_mode",
+  label: "Данные рейтинга",
+  icon: "Users",
+  color: "text-cyan-400",
   options: [
-    { value: 'demo', label: 'Демо (фейковые)' },
-    { value: 'real', label: 'Реальные игроки' },
+    { value: "demo", label: "Демо (фейковые)" },
+    { value: "real", label: "Реальные игроки" },
   ],
 };
 
 export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
   const [values, setValues] = useState<Record<string, boolean>>(() => {
     const init: Record<string, boolean> = {};
-    buttons.forEach(b => {
-      init[b.key] = settings[b.key]?.value === 'true';
+    buttons.forEach((b) => {
+      init[b.key] = settings[b.key]?.value === "true";
     });
     return init;
   });
   const [rankingsMode, setRankingsMode] = useState<string>(
-    settings[modeToggle.key]?.value || 'demo'
+    settings[modeToggle.key]?.value || "demo",
   );
   const [saving, setSaving] = useState(false);
 
   const toggle = (key: string) => {
-    setValues(prev => ({ ...prev, [key]: !prev[key] }));
+    setValues((prev) => ({ ...prev, [key]: !prev[key] }));
   };
 
   const handleSave = async () => {
     setSaving(true);
     const updated: Record<string, { value: string }> = {};
-    buttons.forEach(b => {
-      updated[b.key] = { value: values[b.key] ? 'true' : 'false' };
+    buttons.forEach((b) => {
+      updated[b.key] = { value: values[b.key] ? "true" : "false" };
     });
     updated[modeToggle.key] = { value: rankingsMode };
     await onSave(updated);
@@ -59,7 +79,10 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4">
-      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" onClick={onClose} />
+      <div
+        className="absolute inset-0 bg-black/60 backdrop-blur-sm"
+        onClick={onClose}
+      />
       <div className="relative w-full max-w-md max-h-[90vh] overflow-y-auto bg-slate-800 rounded-2xl border border-slate-700/50 shadow-2xl">
         <div className="flex items-center justify-between p-5 border-b border-slate-700/50">
           <div className="flex items-center gap-3">
@@ -68,13 +91,16 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
             </div>
             <h2 className="text-lg font-bold text-white">Видимость кнопок</h2>
           </div>
-          <button onClick={onClose} className="p-2 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors">
+          <button
+            onClick={onClose}
+            className="p-2 rounded-lg hover:bg-slate-700/50 text-slate-400 hover:text-white transition-colors"
+          >
             <Icon name="X" size={20} />
           </button>
         </div>
 
         <div className="p-5 space-y-3">
-          {buttons.map(b => (
+          {buttons.map((b) => (
             <button
               key={b.key}
               onClick={() => toggle(b.key)}
@@ -84,8 +110,12 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
                 <Icon name={b.icon} size={20} className={b.color} />
                 <span className="text-white font-medium">{b.label}</span>
               </div>
-              <div className={`w-12 h-7 rounded-full transition-colors flex items-center px-1 ${values[b.key] ? 'bg-emerald-500' : 'bg-slate-600'}`}>
-                <div className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${values[b.key] ? 'translate-x-5' : 'translate-x-0'}`} />
+              <div
+                className={`w-12 h-7 rounded-full transition-colors flex items-center px-1 ${values[b.key] ? "bg-emerald-500" : "bg-slate-600"}`}
+              >
+                <div
+                  className={`w-5 h-5 rounded-full bg-white shadow transition-transform ${values[b.key] ? "translate-x-5" : "translate-x-0"}`}
+                />
               </div>
             </button>
           ))}
@@ -93,18 +123,24 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
           <div className="pt-2 border-t border-slate-700/50">
             <div className="p-4 rounded-xl bg-slate-700/40 border border-slate-600/30">
               <div className="flex items-center gap-3 mb-3">
-                <Icon name={modeToggle.icon} size={20} className={modeToggle.color} />
-                <span className="text-white font-medium">{modeToggle.label}</span>
+                <Icon
+                  name={modeToggle.icon}
+                  size={20}
+                  className={modeToggle.color}
+                />
+                <span className="text-white font-medium">
+                  {modeToggle.label}
+                </span>
               </div>
               <div className="flex gap-2">
-                {modeToggle.options.map(opt => (
+                {modeToggle.options.map((opt) => (
                   <button
                     key={opt.value}
                     onClick={() => setRankingsMode(opt.value)}
                     className={`flex-1 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                       rankingsMode === opt.value
-                        ? 'bg-cyan-500 text-white'
-                        : 'bg-slate-600/50 text-slate-300 hover:bg-slate-600'
+                        ? "bg-cyan-500 text-white"
+                        : "bg-slate-600/50 text-slate-300 hover:bg-slate-600"
                     }`}
                   >
                     {opt.label}
@@ -127,7 +163,7 @@ export const ButtonVisibilityModal = ({ settings, onSave, onClose }: Props) => {
             disabled={saving}
             className="flex-1 py-3 rounded-xl bg-amber-500 text-black hover:bg-amber-400 transition-colors font-bold disabled:opacity-50"
           >
-            {saving ? 'Сохранение...' : 'Сохранить'}
+            {saving ? "Сохранение..." : "Сохранить"}
           </button>
         </div>
       </div>

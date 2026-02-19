@@ -82,8 +82,7 @@ export const HomeActionButtons = ({
               className={`w-full bg-purple-600 hover:bg-purple-700 dark:bg-purple-600 dark:hover:bg-purple-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] ${!isLevelAllowed("level_tournament") ? "opacity-60 cursor-not-allowed hover:scale-100" : "hover:scale-105"}`}
               onClick={() => {
                 if (!isLevelAllowed("level_tournament")) {
-                  const minR =
-                    siteSettings?.level_tournament?.value || "1000";
+                  const minR = siteSettings?.level_tournament?.value || "1000";
                   setLockedMessage(`Доступно с рейтингом выше ${minR}`);
                   setTimeout(() => setLockedMessage(null), 3000);
                   return;
@@ -96,7 +95,7 @@ export const HomeActionButtons = ({
               }}
             >
               <Icon name="Trophy" className="mr-2" size={24} />
-              Участвовать в турнире
+              Онлайн турнир
               {!isLevelAllowed("level_tournament") && (
                 <Icon name="Lock" className="ml-2" size={18} />
               )}

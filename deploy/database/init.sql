@@ -184,10 +184,10 @@ ON CONFLICT DO NOTHING;
 INSERT INTO site_settings (key, value, description) VALUES
     ('btn_play_online', 'true', 'Видимость кнопки Играть онлайн'),
     ('btn_play_offline', 'true', 'Видимость кнопки Играть офлайн'),
-    ('btn_tournament', 'true', 'Видимость кнопки Участвовать в турнире'),
+    ('btn_tournament', 'true', 'Видимость кнопки Онлайн турнир),
     ('level_play_online', '00', 'Минимальный рейтинг для Играть онлайн'),
     ('level_play_offline', '500', 'Минимальный рейтинг для Играть офлайн'),
-    ('level_tournament', '1000', 'Минимальный рейтинг для Участвовать в турнире'),
+    ('level_tournament', '1000', 'Минимальный рейтинг для Оплайн турнир'),
     ('level_online_city', '500', 'Минимальный рейтинг для онлайн-игры по городу'),
     ('level_online_region', '500', 'Минимальный рейтинг для онлайн-игры по региону'),
     ('level_online_country', '1200', 'Минимальный рейтинг для онлайн-игры по стране')
