@@ -270,9 +270,9 @@ const Game = () => {
       )}
 
 
-      <main className="flex-1 flex flex-col items-center justify-center py-1 sm:px-3 md:px-4 overflow-hidden min-h-0">
-          <div className="flex flex-col gap-0.5 sm:gap-1 md:gap-1.5 w-full max-w-[700px] min-h-0 flex-shrink">
-            <div className="flex flex-col gap-0.5 sm:gap-1 px-1 sm:px-0 flex-shrink-0">
+      <main className="flex-1 flex flex-col items-center justify-center py-0.5 sm:px-3 md:px-4 overflow-hidden min-h-0">
+          <div className="flex flex-col gap-0.5 sm:gap-1 md:gap-2 w-full" style={{ maxWidth: 'min(700px, min(100vw, calc(100dvh - 230px)))' }}>
+            <div className="flex flex-col gap-0.5 sm:gap-1 px-1 sm:px-0">
               <GameControls
                 showSettingsMenu={showSettingsMenu}
                 setShowSettingsMenu={setShowSettingsMenu}
@@ -327,8 +327,7 @@ const Game = () => {
               />
             </div>
 
-            <div className="flex-1 min-h-0 flex items-center justify-center" style={{ aspectRatio: '1/1', maxHeight: 'min(100vw, 700px)' }}>
-              <div style={{ width: '100%', height: '100%' }}>
+            <div style={{ width: '100%', maxWidth: 'min(100vw, min(calc(100dvh - 200px), 700px))', margin: '0 auto' }}>
               <GameBoard
                 board={displayBoard}
                 onSquareClick={handleSquareClick}
@@ -342,10 +341,9 @@ const Game = () => {
                 gameResult={gameResult}
                 onResultClick={() => setResultDismissed(true)}
               />
-              </div>
             </div>
 
-            <div className="flex flex-col gap-0.5 sm:gap-1 px-1 sm:px-0 flex-shrink-0">
+            <div className="flex flex-col gap-0.5 sm:gap-1 px-1 sm:px-0">
               <PlayerInfo
                 playerName="Вы"
                 playerColor={playerColor}
