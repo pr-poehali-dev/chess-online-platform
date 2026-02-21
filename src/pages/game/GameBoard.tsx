@@ -152,7 +152,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
           }
         }
       `}</style>
-      <div className="block sm:inline-block overflow-hidden relative w-full md:w-auto" style={{ 
+      <div className="block overflow-hidden relative w-full" style={{ 
         aspectRatio: '1/1',
         ...(config.backgroundImage ? {
           backgroundImage: `url(${config.backgroundImage})`,
