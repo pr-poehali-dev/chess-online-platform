@@ -138,7 +138,7 @@ const Navbar = ({
             onClick={() => setActiveSection('home')}
             className="relative flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0"
           >
-            <div className="flex-shrink-0 w-[40px] h-[40px] sm:w-[56px] sm:h-[56px]">
+            <div className="flex-shrink-0 w-[83px] h-[83px] sm:w-[110px] sm:h-[110px]">
               <img
                 src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png"
                 alt="Лига Шахмат"
