@@ -133,31 +133,27 @@ const Navbar = ({
   return (
     <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in">
       <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
-        <div className="relative flex items-center justify-between gap-2">
-          <div className="flex-1" />
-
-          <div className="absolute left-1/2 -translate-x-1/2">
-            <button 
-              onClick={() => setActiveSection('home')}
-              className="relative flex items-center hover:opacity-80 transition-opacity"
-            >
-              <div className="absolute right-full mr-2 flex-shrink-0 w-[83px] h-[83px] sm:w-[110px] sm:h-[110px]">
-                <img
-                  src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png"
-                  alt="Лига Шахмат"
-                  className="hidden dark:block w-full h-full object-contain"
-                />
-                <img
-                  src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/1aaab56e-153d-441a-9b6c-d026cf31f655.png"
-                  alt="Лига Шахмат"
-                  className="block dark:hidden w-full h-full object-contain"
-                />
-              </div>
-              <h1 className="text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
-                Лига Шахмат
-              </h1>
-            </button>
-          </div>
+        <div className="flex items-center justify-between gap-2">
+          <button 
+            onClick={() => setActiveSection('home')}
+            className="relative flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0"
+          >
+            <div className="flex-shrink-0 w-[40px] h-[40px] sm:w-[56px] sm:h-[56px]">
+              <img
+                src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png"
+                alt="Лига Шахмат"
+                className="hidden dark:block w-full h-full object-contain"
+              />
+              <img
+                src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/1aaab56e-153d-441a-9b6c-d026cf31f655.png"
+                alt="Лига Шахмат"
+                className="block dark:hidden w-full h-full object-contain"
+              />
+            </div>
+            <h1 className="text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              Лига Шахмат
+            </h1>
+          </button>
 
           <div className="flex items-center gap-2 sm:gap-3 flex-shrink-0">
             {isAuthenticated && (
