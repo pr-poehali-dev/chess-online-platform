@@ -79,8 +79,8 @@ const IndexFooter = () => {
   return (
     <footer className="mt-auto shrink-0">
       <div className="border-t border-slate-200 dark:border-white/10">
-      <div className="container mx-auto px-4 py-2 text-gray-600 dark:text-gray-400">
-        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4">
+      <div className="container mx-auto px-4 py-2 text-gray-600 dark:text-gray-400 flex items-center">
+        <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-1 sm:gap-4 w-full">
           <p className="text-sm">&copy; 2026 Лига Шахмат. Все права защищены.</p>
           <div className="flex gap-6">
             <button
