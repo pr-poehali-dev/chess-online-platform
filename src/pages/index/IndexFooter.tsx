@@ -77,7 +77,7 @@ const IndexFooter = () => {
   }, [showRules, showSupport]);
 
   return (
-    <footer className="border-t border-slate-200 dark:border-white/10 mt-0 py-8">
+    <footer className="border-t border-slate-200 dark:border-white/10 mt-0 py-3 sm:py-4">
       <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
         <p>&copy; 2026 Лига Шахмат. Все права защищены.</p>
         <div className="flex justify-center gap-6 mt-4">
