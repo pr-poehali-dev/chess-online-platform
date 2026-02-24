@@ -141,7 +141,7 @@ const Navbar = ({
               onClick={() => setActiveSection('home')}
               className="relative flex items-center hover:opacity-80 transition-opacity"
             >
-              <div className="absolute right-full mr-1 sm:mr-2 flex-shrink-0 w-[60px] h-[60px] xs:w-[83px] xs:h-[83px] sm:w-[110px] sm:h-[110px]">
+              <div className="absolute right-full mr-2 flex-shrink-0 w-[83px] h-[83px] sm:w-[110px] sm:h-[110px]">
                 <img
                   src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png"
                   alt="Лига Шахмат"
@@ -153,7 +153,7 @@ const Navbar = ({
                   className="block dark:hidden w-full h-full object-contain"
                 />
               </div>
-              <h1 className="hidden min-[360px]:block text-base sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+              <h1 className="text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
                 Лига Шахмат
               </h1>
             </button>
@@ -187,6 +187,17 @@ const Navbar = ({
                 <span className="text-white text-xs sm:text-sm font-medium hidden sm:inline max-w-[120px] truncate">{activeGameLabel || 'К игре'}</span>
               </button>
             )}
+
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+            >
+              {isDarkMode ? (
+                <Icon name="Moon" size={22} className="text-blue-400" />
+              ) : (
+                <Icon name="Sun" size={22} className="text-yellow-500" />
+              )}
+            </button>
 
             {isAuthenticated && (
               <div className="relative">
@@ -263,17 +274,6 @@ const Navbar = ({
                 )}
               </div>
             )}
-
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex-shrink-0"
-            >
-              {isDarkMode ? (
-                <Icon name="Moon" size={22} className="text-blue-400" />
-              ) : (
-                <Icon name="Sun" size={22} className="text-yellow-500" />
-              )}
-            </button>
           </div>
         </div>
       </div>
