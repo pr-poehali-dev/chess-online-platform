@@ -327,7 +327,7 @@ const Game = () => {
               />
             </div>
 
-            <div style={{ width: '100%', maxWidth: 'min(100vw, 700px)', margin: '0 auto' }}>
+            <div style={{ width: '100%', maxWidth: 'min(100vw, 700px, 60vh)', margin: '0 auto' }}>
               <GameBoard
                 board={displayBoard}
                 onSquareClick={handleSquareClick}
