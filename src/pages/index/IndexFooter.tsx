@@ -77,7 +77,7 @@ const IndexFooter = () => {
   }, [showRules, showSupport]);
 
   return (
-    <footer className="mt-8 flex flex-col justify-end" style={{ minHeight: '118px' }}>
+    <footer className="mt-8 flex flex-col justify-end" style={{ minHeight: '59px' }}>
       <div className="border-t border-slate-200 dark:border-white/10 py-3 sm:py-4">
       <div className="container mx-auto px-4 text-gray-600 dark:text-gray-400">
         <div className="flex items-center justify-between gap-4">
