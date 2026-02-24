@@ -447,62 +447,71 @@ export const isPathBlockedForBoard = (testBoard: Board, from: Position, to: Posi
   return false;
 };
 
-export const getBestMove = (board: Board, moves: { from: Position; to: Position }[], isDifficult: boolean): { from: Position; to: Position } => {
+const minimax = (
+  board: Board,
+  depth: number,
+  alpha: number,
+  beta: number,
+  isMaximizing: boolean,
+  botColor: 'white' | 'black'
+): number => {
+  const playerColor = botColor === 'black' ? 'white' : 'black';
+
+  if (depth === 0) return evaluatePosition(board, botColor);
+
+  const color = isMaximizing ? botColor : playerColor;
+  const moves = getAllLegalMoves(board, color);
+
+  if (moves.length === 0) {
+    if (isInCheck(board, color)) return isMaximizing ? -900000 : 900000;
+    return 0;
+  }
+
+  if (isMaximizing) {
+    let maxScore = -Infinity;
+    for (const move of moves) {
+      const next = simulateMove(board, move.from, move.to);
+      const score = minimax(next, depth - 1, alpha, beta, false, botColor);
+      maxScore = Math.max(maxScore, score);
+      alpha = Math.max(alpha, score);
+      if (beta <= alpha) break;
+    }
+    return maxScore;
+  } else {
+    let minScore = Infinity;
+    for (const move of moves) {
+      const next = simulateMove(board, move.from, move.to);
+      const score = minimax(next, depth - 1, alpha, beta, true, botColor);
+      minScore = Math.min(minScore, score);
+      beta = Math.min(beta, score);
+      if (beta <= alpha) break;
+    }
+    return minScore;
+  }
+};
+
+export const getBestMove = (
+  board: Board,
+  moves: { from: Position; to: Position }[],
+  difficulty: 'hard' | 'master',
+  botColor: 'white' | 'black' = 'black'
+): { from: Position; to: Position } => {
+  const depth = difficulty === 'master' ? 4 : 2;
+  const noise = difficulty === 'master' ? 2 : 20;
+
   let bestMove = moves[0];
   let bestScore = -Infinity;
 
-  moves.forEach(move => {
+  for (const move of moves) {
     const testBoard = simulateMove(board, move.from, move.to);
-    let score = evaluatePosition(testBoard, 'black');
-
-    // Приоритет мата: если ход дает мат - выбираем его
-    if (isCheckmate(testBoard, 'white')) {
-      score = 1000000;
-    }
-    // Бонус за шах (создает давление)
-    else if (isInCheck(testBoard, 'white')) {
-      score += 5000;
-    }
-    // Штраф, если мы оставляем короля под шахом
-    else if (isInCheck(testBoard, 'black')) {
-      score -= 10000;
-    }
-
-    // Бонус за ограничение подвижности противника
-    const opponentMoves = getAllLegalMoves(testBoard, 'white');
-    score -= opponentMoves.length * 10;
-
-    if (isDifficult) {
-      // На высоком уровне просчитываем ответы противника
-      if (opponentMoves.length > 0) {
-        let worstResponse = Infinity;
-        opponentMoves.slice(0, 8).forEach(oppMove => {
-          const testBoard2 = simulateMove(testBoard, oppMove.from, oppMove.to);
-          let oppScore = evaluatePosition(testBoard2, 'black');
-          
-          // Избегаем ходов, где противник может дать нам мат
-          if (isCheckmate(testBoard2, 'black')) {
-            oppScore = -1000000;
-          }
-          // Защита от шаха
-          else if (isInCheck(testBoard2, 'black')) {
-            oppScore -= 5000;
-          }
-          
-          worstResponse = Math.min(worstResponse, oppScore);
-        });
-        score = worstResponse;
-      }
-      score += Math.random() * 3; // Минимальная случайность для разнообразия
-    } else {
-      score += Math.random() * 30; // Больше случайности на легких уровнях
-    }
+    let score = minimax(testBoard, depth - 1, -Infinity, Infinity, false, botColor);
+    score += Math.random() * noise;
 
     if (score > bestScore) {
       bestScore = score;
       bestMove = move;
     }
-  });
+  }
 
   return bestMove;
 };

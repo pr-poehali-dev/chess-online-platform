@@ -434,7 +434,7 @@ export const useGameLogic = (
     if (isOnlineGame) return;
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
-      setTimeout(() => makeComputerMove(), 7000);
+      setTimeout(() => makeComputerMove(), difficulty === 'easy' ? 7000 : 2000);
     }
   }, [currentPlayer, gameStatus]);
 
@@ -906,10 +906,20 @@ export const useGameLogic = (
     }
     let selectedMove;
     switch (difficulty) {
-      case 'easy': selectedMove = moves[Math.floor(Math.random() * moves.length)]; break;
-      case 'medium': selectedMove = moves[Math.floor(Math.random() * Math.min(3, moves.length))]; break;
-      case 'hard': selectedMove = getBestMove(board, moves, false); break;
-      case 'master': selectedMove = getBestMove(board, moves, true); break;
+      case 'easy':
+        selectedMove = moves[Math.floor(Math.random() * moves.length)];
+        break;
+      case 'medium': {
+        const shuffled = [...moves].sort(() => Math.random() - 0.5).slice(0, Math.ceil(moves.length * 0.5));
+        selectedMove = getBestMove(board, shuffled, 'hard', botColor);
+        break;
+      }
+      case 'hard':
+        selectedMove = getBestMove(board, moves, 'hard', botColor);
+        break;
+      case 'master':
+        selectedMove = getBestMove(board, moves, 'master', botColor);
+        break;
       default: selectedMove = moves[0];
     }
     makeMove(selectedMove.from, selectedMove.to);
