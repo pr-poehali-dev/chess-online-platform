@@ -138,8 +138,14 @@ const Navbar = ({
 
           <button 
             onClick={() => setActiveSection('home')}
-            className="absolute left-1/2 -translate-x-1/2 hover:opacity-80 transition-opacity"
+            className="absolute left-1/2 -translate-x-1/2 hover:opacity-80 transition-opacity flex items-center gap-2"
           >
+            <img
+              src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png"
+              alt="Лига Шахмат"
+              className="hidden dark:block object-contain flex-shrink-0"
+              style={{ height: '1.3em', width: 'auto' }}
+            />
             <h1 className="text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
               Лига Шахмат
             </h1>
