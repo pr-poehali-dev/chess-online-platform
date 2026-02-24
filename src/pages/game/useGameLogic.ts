@@ -434,7 +434,7 @@ export const useGameLogic = (
     if (isOnlineGame) return;
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
-      setTimeout(() => makeComputerMove(), 4000);
+      setTimeout(() => makeComputerMove(), 7000);
     }
   }, [currentPlayer, gameStatus]);
 
