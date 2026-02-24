@@ -1,8 +1,18 @@
+User-agent: *
+Allow: /
+Disallow: /admin
+
 User-agent: Googlebot
 Allow: /
+Disallow: /admin
+
+User-agent: YandexBot
+Allow: /
+Disallow: /admin
 
 User-agent: Bingbot
 Allow: /
+Disallow: /admin
 
 User-agent: Twitterbot
 Allow: /
@@ -10,5 +20,4 @@ Allow: /
 User-agent: facebookexternalhit
 Allow: /
 
-User-agent: *
-Allow: /
+Sitemap: https://ligachess.ru/sitemap.xml
