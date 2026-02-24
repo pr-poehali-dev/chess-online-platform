@@ -434,7 +434,8 @@ export const useGameLogic = (
     if (isOnlineGame) return;
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
-      setTimeout(() => makeComputerMove(), difficulty === 'easy' ? 7000 : 2000);
+      const delay = difficulty === 'easy' ? 7000 : difficulty === 'medium' ? 5000 : difficulty === 'hard' ? 4000 : 2000;
+      setTimeout(() => makeComputerMove(), delay);
     }
   }, [currentPlayer, gameStatus]);
 

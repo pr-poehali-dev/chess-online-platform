@@ -216,70 +216,94 @@ export const evaluatePosition = (testBoard: Board, color: 'white' | 'black'): nu
   };
 
   const pawnTable = [
-    [0,  0,  0,  0,  0,  0,  0,  0],
-    [50, 50, 50, 50, 50, 50, 50, 50],
-    [10, 10, 20, 30, 30, 20, 10, 10],
-    [5,  5, 10, 25, 25, 10,  5,  5],
-    [0,  0,  0, 20, 20,  0,  0,  0],
-    [5, -5,-10,  0,  0,-10, -5,  5],
-    [5, 10, 10,-20,-20, 10, 10,  5],
-    [0,  0,  0,  0,  0,  0,  0,  0]
+    [ 0,  0,  0,  0,  0,  0,  0,  0],
+    [80, 80, 80, 80, 80, 80, 80, 80],
+    [20, 20, 30, 45, 45, 30, 20, 20],
+    [ 5,  5, 15, 35, 35, 15,  5,  5],
+    [ 0,  0, 10, 30, 30, 10,  0,  0],
+    [ 5, -5,-10,  0,  0,-10, -5,  5],
+    [ 5, 10, 10,-25,-25, 10, 10,  5],
+    [ 0,  0,  0,  0,  0,  0,  0,  0]
   ];
 
   const knightTable = [
     [-50,-40,-30,-30,-30,-30,-40,-50],
-    [-40,-20,  0,  0,  0,  0,-20,-40],
-    [-30,  0, 10, 15, 15, 10,  0,-30],
-    [-30,  5, 15, 20, 20, 15,  5,-30],
-    [-30,  0, 15, 20, 20, 15,  0,-30],
-    [-30,  5, 10, 15, 15, 10,  5,-30],
+    [-40,-20,  0,  5,  5,  0,-20,-40],
+    [-30,  5, 20, 25, 25, 20,  5,-30],
+    [-30,  5, 25, 30, 30, 25,  5,-30],
+    [-30,  5, 25, 30, 30, 25,  5,-30],
+    [-30,  5, 20, 25, 25, 20,  5,-30],
     [-40,-20,  0,  5,  5,  0,-20,-40],
     [-50,-40,-30,-30,-30,-30,-40,-50]
   ];
 
   const bishopTable = [
     [-20,-10,-10,-10,-10,-10,-10,-20],
-    [-10,  0,  0,  0,  0,  0,  0,-10],
-    [-10,  0,  5, 10, 10,  5,  0,-10],
-    [-10,  5,  5, 10, 10,  5,  5,-10],
+    [-10,  5,  0,  0,  0,  0,  5,-10],
+    [-10, 10, 15, 15, 15, 15, 10,-10],
+    [-10,  0, 15, 20, 20, 15,  0,-10],
+    [-10,  5, 10, 20, 20, 10,  5,-10],
     [-10,  0, 10, 10, 10, 10,  0,-10],
-    [-10, 10, 10, 10, 10, 10, 10,-10],
     [-10,  5,  0,  0,  0,  0,  5,-10],
     [-20,-10,-10,-10,-10,-10,-10,-20]
   ];
 
   const rookTable = [
-    [0,  0,  0,  0,  0,  0,  0,  0],
-    [5, 10, 10, 10, 10, 10, 10,  5],
+    [ 0,  0,  0,  5,  5,  0,  0,  0],
+    [ 5, 10, 10, 10, 10, 10, 10,  5],
     [-5,  0,  0,  0,  0,  0,  0, -5],
     [-5,  0,  0,  0,  0,  0,  0, -5],
     [-5,  0,  0,  0,  0,  0,  0, -5],
     [-5,  0,  0,  0,  0,  0,  0, -5],
     [-5,  0,  0,  0,  0,  0,  0, -5],
-    [0,  0,  0,  5,  5,  0,  0,  0]
+    [ 0,  0,  0,  5,  5,  0,  0,  0]
   ];
 
   const queenTable = [
     [-20,-10,-10, -5, -5,-10,-10,-20],
-    [-10,  0,  0,  0,  0,  0,  0,-10],
-    [-10,  0,  5,  5,  5,  5,  0,-10],
-    [-5,  0,  5,  5,  5,  5,  0, -5],
-    [0,  0,  5,  5,  5,  5,  0, -5],
-    [-10,  5,  5,  5,  5,  5,  0,-10],
     [-10,  0,  5,  0,  0,  0,  0,-10],
+    [-10,  5,  5,  5,  5,  5,  0,-10],
+    [ -5,  0,  5,  5,  5,  5,  0, -5],
+    [ -5,  0,  5,  5,  5,  5,  0, -5],
+    [-10,  0,  5,  5,  5,  5,  0,-10],
+    [-10,  0,  0,  0,  0,  0,  0,-10],
     [-20,-10,-10, -5, -5,-10,-10,-20]
   ];
 
-  const kingTable = [
+  const kingMidTable = [
     [-30,-40,-40,-50,-50,-40,-40,-30],
     [-30,-40,-40,-50,-50,-40,-40,-30],
     [-30,-40,-40,-50,-50,-40,-40,-30],
     [-30,-40,-40,-50,-50,-40,-40,-30],
     [-20,-30,-30,-40,-40,-30,-30,-20],
-    [-10,-20,-20,-20,-20,-20,-20,-10],
-    [20, 20,  0,  0,  0,  0, 20, 20],
-    [20, 30, 10,  0,  0, 10, 30, 20]
+    [-10,-20,-20,-30,-30,-20,-20,-10],
+    [ 20, 20,  0,-10,-10,  0, 20, 20],
+    [ 20, 30, 10,-10,-10, 10, 30, 20]
   ];
+
+  const kingEndTable = [
+    [-50,-40,-30,-20,-20,-30,-40,-50],
+    [-30,-20,-10,  0,  0,-10,-20,-30],
+    [-30,-10, 20, 30, 30, 20,-10,-30],
+    [-30,-10, 30, 40, 40, 30,-10,-30],
+    [-30,-10, 30, 40, 40, 30,-10,-30],
+    [-30,-10, 20, 30, 30, 20,-10,-30],
+    [-30,-30,  0,  0,  0,  0,-30,-30],
+    [-50,-30,-30,-30,-30,-30,-30,-50]
+  ];
+
+  let whiteMaterial = 0;
+  let blackMaterial = 0;
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = testBoard[r][c];
+      if (!p || p.type === 'king') continue;
+      if (p.color === 'white') whiteMaterial += pieceValues[p.type];
+      else blackMaterial += pieceValues[p.type];
+    }
+  }
+  const totalMaterial = whiteMaterial + blackMaterial;
+  const isEndgame = totalMaterial < 2800;
 
   let score = 0;
 
@@ -290,27 +314,18 @@ export const evaluatePosition = (testBoard: Board, color: 'white' | 'black'): nu
 
       const pieceScore = pieceValues[piece.type];
       let positionScore = 0;
-
       const adjustedRow = piece.color === 'white' ? 7 - row : row;
 
       switch (piece.type) {
-        case 'pawn':
-          positionScore = pawnTable[adjustedRow][col];
-          break;
-        case 'knight':
-          positionScore = knightTable[adjustedRow][col];
-          break;
-        case 'bishop':
-          positionScore = bishopTable[adjustedRow][col];
-          break;
-        case 'rook':
-          positionScore = rookTable[adjustedRow][col];
-          break;
-        case 'queen':
-          positionScore = queenTable[adjustedRow][col];
-          break;
+        case 'pawn':   positionScore = pawnTable[adjustedRow][col]; break;
+        case 'knight': positionScore = knightTable[adjustedRow][col]; break;
+        case 'bishop': positionScore = bishopTable[adjustedRow][col]; break;
+        case 'rook':   positionScore = rookTable[adjustedRow][col]; break;
+        case 'queen':  positionScore = queenTable[adjustedRow][col]; break;
         case 'king':
-          positionScore = kingTable[adjustedRow][col];
+          positionScore = isEndgame
+            ? kingEndTable[adjustedRow][col]
+            : kingMidTable[adjustedRow][col];
           break;
       }
 
@@ -321,6 +336,27 @@ export const evaluatePosition = (testBoard: Board, color: 'white' | 'black'): nu
       }
     }
   }
+
+  const opponent = color === 'white' ? 'black' : 'white';
+
+  // Мобильность: больше ходов = лучше
+  const myMoves = getAllLegalMoves(testBoard, color);
+  const oppMoves = getAllLegalMoves(testBoard, opponent);
+  score += (myMoves.length - oppMoves.length) * 8;
+
+  // Бонус за два слона
+  const myBishops = [];
+  const oppBishops = [];
+  for (let r = 0; r < 8; r++) {
+    for (let c = 0; c < 8; c++) {
+      const p = testBoard[r][c];
+      if (!p || p.type !== 'bishop') continue;
+      if (p.color === color) myBishops.push(p);
+      else oppBishops.push(p);
+    }
+  }
+  if (myBishops.length >= 2) score += 30;
+  if (oppBishops.length >= 2) score -= 30;
 
   return score;
 };
@@ -447,6 +483,23 @@ export const isPathBlockedForBoard = (testBoard: Board, from: Position, to: Posi
   return false;
 };
 
+const PIECE_VALUES: Record<string, number> = {
+  pawn: 100, knight: 320, bishop: 330, rook: 500, queen: 900, king: 20000
+};
+
+const sortMoves = (
+  board: Board,
+  moves: { from: Position; to: Position }[]
+): { from: Position; to: Position }[] => {
+  return [...moves].sort((a, b) => {
+    const captureA = board[a.to.row][a.to.col];
+    const captureB = board[b.to.row][b.to.col];
+    const scoreA = captureA ? PIECE_VALUES[captureA.type] : 0;
+    const scoreB = captureB ? PIECE_VALUES[captureB.type] : 0;
+    return scoreB - scoreA;
+  });
+};
+
 const minimax = (
   board: Board,
   depth: number,
@@ -460,7 +513,8 @@ const minimax = (
   if (depth === 0) return evaluatePosition(board, botColor);
 
   const color = isMaximizing ? botColor : playerColor;
-  const moves = getAllLegalMoves(board, color);
+  const rawMoves = getAllLegalMoves(board, color);
+  const moves = sortMoves(board, rawMoves);
 
   if (moves.length === 0) {
     if (isInCheck(board, color)) return isMaximizing ? -900000 : 900000;
@@ -496,13 +550,14 @@ export const getBestMove = (
   difficulty: 'hard' | 'master',
   botColor: 'white' | 'black' = 'black'
 ): { from: Position; to: Position } => {
-  const depth = difficulty === 'master' ? 4 : 2;
-  const noise = difficulty === 'master' ? 2 : 20;
+  const depth = difficulty === 'master' ? 4 : 3;
+  const noise = difficulty === 'master' ? 0 : 10;
 
-  let bestMove = moves[0];
+  const sorted = sortMoves(board, moves);
+  let bestMove = sorted[0];
   let bestScore = -Infinity;
 
-  for (const move of moves) {
+  for (const move of sorted) {
     const testBoard = simulateMove(board, move.from, move.to);
     let score = minimax(testBoard, depth - 1, -Infinity, Infinity, false, botColor);
     score += Math.random() * noise;
