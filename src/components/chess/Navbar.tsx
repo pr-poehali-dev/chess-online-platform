@@ -150,7 +150,7 @@ const Navbar = ({
                 className="block dark:hidden w-full h-full object-contain"
               />
             </div>
-            <h1 className="text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
+            <h1 className="hidden min-[360px]:block text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
               Лига Шахмат
             </h1>
           </button>
