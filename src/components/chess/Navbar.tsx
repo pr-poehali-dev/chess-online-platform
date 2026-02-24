@@ -140,12 +140,18 @@ const Navbar = ({
             onClick={() => setActiveSection('home')}
             className="absolute left-1/2 -translate-x-1/2 hover:opacity-80 transition-opacity flex items-center gap-2"
           >
-            <img
-              src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png"
-              alt="Лига Шахмат"
-              className="hidden dark:block object-contain flex-shrink-0"
-              style={{ height: '1.3em', width: 'auto' }}
-            />
+            <div className="flex-shrink-0" style={{ height: '1.95em', width: '1.95em' }}>
+              <img
+                src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png"
+                alt="Лига Шахмат"
+                className="hidden dark:block w-full h-full object-contain"
+              />
+              <img
+                src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/1aaab56e-153d-441a-9b6c-d026cf31f655.png"
+                alt="Лига Шахмат"
+                className="block dark:hidden w-full h-full object-contain"
+              />
+            </div>
             <h1 className="text-lg sm:text-2xl font-bold tracking-wide text-slate-900 dark:text-white whitespace-nowrap" style={{ fontFamily: 'Montserrat, sans-serif' }}>
               Лига Шахмат
             </h1>
