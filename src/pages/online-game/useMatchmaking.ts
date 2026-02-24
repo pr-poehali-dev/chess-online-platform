@@ -5,6 +5,7 @@ import API from '@/config/api';
 
 const MATCHMAKING_URL = API.matchmaking;
 const POLL_INTERVAL = 3000;
+const HEARTBEAT_INTERVAL = 4000;
 const STAGE_DURATION = 5000;
 const FINAL_STAGE_DURATION = 5000;
 
@@ -38,6 +39,7 @@ const useMatchmaking = () => {
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const searchTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const stageTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
+  const heartbeatRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const abortedRef = useRef(false);
   const matchFoundRef = useRef(false);
   const currentStageRef = useRef<SearchStage>('city');
@@ -57,6 +59,7 @@ const useMatchmaking = () => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     if (searchTimerRef.current) { clearInterval(searchTimerRef.current); searchTimerRef.current = null; }
     if (stageTimerRef.current) { clearTimeout(stageTimerRef.current); stageTimerRef.current = null; }
+    if (heartbeatRef.current) { clearInterval(heartbeatRef.current); heartbeatRef.current = null; }
   }, []);
 
   const cancelSearch = useCallback(async () => {
@@ -175,6 +178,27 @@ const useMatchmaking = () => {
     pollRef.current = setInterval(() => doSearch(user, initialStage), POLL_INTERVAL);
 
     stageTimerRef.current = setTimeout(() => advanceToNextStage(user), STAGE_DURATION);
+
+    // Heartbeat: сообщаем серверу что пользователь онлайн каждые 4 сек
+    heartbeatRef.current = setInterval(() => {
+      if (abortedRef.current || matchFoundRef.current) return;
+      fetch(MATCHMAKING_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'search',
+          user_id: user.id,
+          username: user.name || 'Player',
+          avatar: user.avatar || '',
+          rating: user.rating || 1200,
+          opponent_type: opponentType || 'country',
+          time_control: timeControl,
+          city: user.city || '',
+          region: user.region || '',
+          search_stage: currentStageRef.current
+        })
+      }).catch(() => {});
+    }, HEARTBEAT_INTERVAL);
 
     return () => {
       cleanup();

@@ -198,10 +198,12 @@ def handler(event: dict, context) -> dict:
     match = None
     matched_stage = None
 
+    HEARTBEAT_FILTER = "AND last_heartbeat > NOW() - INTERVAL '10 seconds'"
+
     if search_stage == 'city' and city:
         cur.execute(
-            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND city = '%s' ORDER BY ABS(rating - %d) LIMIT 1"
-            % (esc(user_id), esc(time_control), esc(city), user_rating)
+            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND city = '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
+            % (esc(user_id), esc(time_control), esc(city), HEARTBEAT_FILTER, user_rating)
         )
         match = cur.fetchone()
         if match:
@@ -209,8 +211,8 @@ def handler(event: dict, context) -> dict:
 
     if not match and search_stage in ('city', 'region') and region:
         cur.execute(
-            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND region = '%s' ORDER BY ABS(rating - %d) LIMIT 1"
-            % (esc(user_id), esc(time_control), esc(region), user_rating)
+            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND region = '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
+            % (esc(user_id), esc(time_control), esc(region), HEARTBEAT_FILTER, user_rating)
         )
         match = cur.fetchone()
         if match:
@@ -220,8 +222,8 @@ def handler(event: dict, context) -> dict:
         rating_min = user_rating - 50
         rating_max = user_rating + 50
         cur.execute(
-            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND rating >= %d AND rating <= %d ORDER BY ABS(rating - %d) LIMIT 1"
-            % (esc(user_id), esc(time_control), rating_min, rating_max, user_rating)
+            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND rating >= %d AND rating <= %d %s ORDER BY ABS(rating - %d) LIMIT 1"
+            % (esc(user_id), esc(time_control), rating_min, rating_max, HEARTBEAT_FILTER, user_rating)
         )
         match = cur.fetchone()
         if match:
@@ -229,12 +231,16 @@ def handler(event: dict, context) -> dict:
 
     if not match and search_stage == 'any':
         cur.execute(
-            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' ORDER BY ABS(rating - %d) LIMIT 1"
-            % (esc(user_id), user_rating)
+            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
+            % (esc(user_id), HEARTBEAT_FILTER, user_rating)
         )
         match = cur.fetchone()
         if match:
             matched_stage = 'any'
+
+    # Чистим «мертвые» записи старше 15 сек
+    cur.execute("DELETE FROM matchmaking_queue WHERE last_heartbeat < NOW() - INTERVAL '15 seconds'")
+    conn.commit()
 
     if match:
         matched_uid, matched_name, matched_avatar, matched_rating, matched_tc = match
@@ -253,11 +259,14 @@ def handler(event: dict, context) -> dict:
 
     if not already_in:
         cur.execute(
-            "INSERT INTO matchmaking_queue (user_id, username, avatar, rating, opponent_type, time_control, city, region) VALUES ('%s', '%s', '%s', %d, '%s', '%s', '%s', '%s') ON CONFLICT (user_id) DO UPDATE SET rating = %d, opponent_type = '%s', time_control = '%s', city = '%s', region = '%s', created_at = NOW()"
+            "INSERT INTO matchmaking_queue (user_id, username, avatar, rating, opponent_type, time_control, city, region, last_heartbeat) VALUES ('%s', '%s', '%s', %d, '%s', '%s', '%s', '%s', NOW()) ON CONFLICT (user_id) DO UPDATE SET rating = %d, opponent_type = '%s', time_control = '%s', city = '%s', region = '%s', created_at = NOW(), last_heartbeat = NOW()"
             % (esc(user_id), esc(username), esc(avatar), user_rating,
                esc(opponent_type), esc(time_control), esc(city), esc(region),
                user_rating, esc(opponent_type), esc(time_control), esc(city), esc(region))
         )
+        conn.commit()
+    else:
+        cur.execute("UPDATE matchmaking_queue SET last_heartbeat = NOW() WHERE user_id = '%s'" % esc(user_id))
         conn.commit()
 
     cur.execute("SELECT COUNT(*) FROM matchmaking_queue WHERE time_control = '%s'" % esc(time_control))
