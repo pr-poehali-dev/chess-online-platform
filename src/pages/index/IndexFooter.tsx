@@ -77,7 +77,8 @@ const IndexFooter = () => {
   }, [showRules, showSupport]);
 
   return (
-    <footer className="border-t border-slate-200 dark:border-white/10 mt-8 flex items-center" style={{ minHeight: '107px' }}>
+    <footer className="mt-8 flex flex-col justify-end" style={{ minHeight: '118px' }}>
+      <div className="border-t border-slate-200 dark:border-white/10 py-3 sm:py-4">
       <div className="container mx-auto px-4 text-gray-600 dark:text-gray-400">
         <div className="flex items-center justify-between gap-4">
           <p className="text-sm">&copy; 2026 Лига Шахмат. Все права защищены.</p>
@@ -143,6 +144,7 @@ const IndexFooter = () => {
             )}
           </div>
         )}
+      </div>
       </div>
     </footer>
   );
