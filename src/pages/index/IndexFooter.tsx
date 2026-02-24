@@ -78,27 +78,29 @@ const IndexFooter = () => {
 
   return (
     <footer className="border-t border-slate-200 dark:border-white/10 mt-0 py-3 sm:py-4">
-      <div className="container mx-auto px-4 text-center text-gray-600 dark:text-gray-400">
-        <p>&copy; 2026 Лига Шахмат. Все права защищены.</p>
-        <div className="flex justify-center gap-6 mt-4">
-          <button
-            onClick={() => {
-              setShowRules(!showRules);
-              setShowSupport(false);
-            }}
-            className="hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            Правила
-          </button>
-          <button
-            onClick={() => {
-              setShowSupport(!showSupport);
-              setShowRules(false);
-            }}
-            className="hover:text-gray-900 dark:hover:text-white transition-colors"
-          >
-            Поддержка
-          </button>
+      <div className="container mx-auto px-4 text-gray-600 dark:text-gray-400">
+        <div className="flex items-center justify-between gap-4">
+          <p className="text-sm">&copy; 2026 Лига Шахмат. Все права защищены.</p>
+          <div className="flex gap-6">
+            <button
+              onClick={() => {
+                setShowRules(!showRules);
+                setShowSupport(false);
+              }}
+              className="text-sm hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              Правила
+            </button>
+            <button
+              onClick={() => {
+                setShowSupport(!showSupport);
+                setShowRules(false);
+              }}
+              className="text-sm hover:text-gray-900 dark:hover:text-white transition-colors"
+            >
+              Поддержка
+            </button>
+          </div>
         </div>
 
         {showRules && (
