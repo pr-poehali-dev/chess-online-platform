@@ -188,17 +188,6 @@ const Navbar = ({
               </button>
             )}
 
-            <button
-              onClick={() => setIsDarkMode(!isDarkMode)}
-              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
-            >
-              {isDarkMode ? (
-                <Icon name="Moon" size={22} className="text-blue-400" />
-              ) : (
-                <Icon name="Sun" size={22} className="text-yellow-500" />
-              )}
-            </button>
-
             {isAuthenticated && (
               <div className="relative">
                 <button
@@ -274,6 +263,17 @@ const Navbar = ({
                 )}
               </div>
             )}
+
+            <button
+              onClick={() => setIsDarkMode(!isDarkMode)}
+              className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors flex-shrink-0"
+            >
+              {isDarkMode ? (
+                <Icon name="Moon" size={22} className="text-blue-400" />
+              ) : (
+                <Icon name="Sun" size={22} className="text-yellow-500" />
+              )}
+            </button>
           </div>
         </div>
       </div>
