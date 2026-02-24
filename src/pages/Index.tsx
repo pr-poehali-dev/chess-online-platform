@@ -164,7 +164,7 @@ const Index = () => {
   const [offlineRegMsg, setOfflineRegMsg] = useState<string | null>(null);
 
   return (
-    <div className="min-h-screen bg-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:bg-gradient-to-br transition-colors duration-300 overflow-x-hidden">
+    <div className="min-h-screen flex flex-col bg-white dark:from-slate-900 dark:via-slate-800 dark:to-slate-900 dark:bg-gradient-to-br transition-colors duration-300 overflow-x-hidden">
       <Navbar
         activeSection={activeSection}
         setActiveSection={setActiveSection}
