@@ -105,6 +105,8 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
     if (!siteSettings) return loadError ? 'Нажмите, чтобы повторить загрузку' : 'Загрузка...';
     const items = [
       { key: 'btn_play_online', label: 'Онлайн' },
+      { key: 'btn_play_friend', label: 'С другом' },
+      { key: 'btn_play_computer', label: 'Компьютер' },
       { key: 'btn_play_offline', label: 'Офлайн' },
       { key: 'btn_tournament', label: 'Турнир' },
       { key: 'btn_rankings', label: 'Рейтинги' },

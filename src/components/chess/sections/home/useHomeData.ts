@@ -294,7 +294,7 @@ export function useHomeData() {
 
   useEffect(() => {
     const CACHE_KEY = "site_settings_cache";
-    const CACHE_TTL = 60_000;
+    const CACHE_TTL = 5_000;
     try {
       const raw = sessionStorage.getItem(CACHE_KEY);
       if (raw) {
