@@ -435,7 +435,11 @@ export const useGameLogic = (
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
       const delay = difficulty === 'easy' ? 7000 : difficulty === 'medium' ? 5000 : difficulty === 'hard' ? 4000 : 2000;
-      setTimeout(() => makeComputerMove(), delay);
+      const timer = setTimeout(() => makeComputerMove(), delay);
+      return () => {
+        clearTimeout(timer);
+        if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
+      };
     }
   }, [currentPlayer, gameStatus]);
 
@@ -897,6 +901,8 @@ export const useGameLogic = (
     }
   };
 
+  const workerRef = useRef<Worker | null>(null);
+
   const makeComputerMove = () => {
     const moves = getAllLegalMoves(board, botColor, castlingRights, enPassantTarget);
     if (moves.length === 0) {
@@ -907,25 +913,34 @@ export const useGameLogic = (
       }
       return;
     }
-    let selectedMove;
-    switch (difficulty) {
-      case 'easy':
-        selectedMove = moves[Math.floor(Math.random() * moves.length)];
-        break;
-      case 'medium': {
-        const shuffled = [...moves].sort(() => Math.random() - 0.5).slice(0, Math.ceil(moves.length * 0.5));
-        selectedMove = getBestMove(board, shuffled, 'hard', botColor);
-        break;
-      }
-      case 'hard':
-        selectedMove = getBestMove(board, moves, 'hard', botColor);
-        break;
-      case 'master':
-        selectedMove = getBestMove(board, moves, 'master', botColor);
-        break;
-      default: selectedMove = moves[0];
+
+    if (difficulty === 'easy') {
+      const easyMove = moves[Math.floor(Math.random() * moves.length)];
+      makeMove(easyMove.from, easyMove.to);
+      return;
     }
-    makeMove(selectedMove.from, selectedMove.to);
+
+    const workerMoves = difficulty === 'medium'
+      ? [...moves].sort(() => Math.random() - 0.5).slice(0, Math.ceil(moves.length * 0.5))
+      : moves;
+    const workerDiff = difficulty === 'medium' ? 'hard' : difficulty as 'hard' | 'master';
+
+    if (workerRef.current) workerRef.current.terminate();
+    const worker = new Worker(new URL('./chessWorker.ts', import.meta.url), { type: 'module' });
+    workerRef.current = worker;
+    worker.postMessage({ board, moves: workerMoves, difficulty: workerDiff, botColor });
+    worker.onmessage = (e) => {
+      const selectedMove = e.data as { from: { row: number; col: number }; to: { row: number; col: number } };
+      makeMove(selectedMove.from, selectedMove.to);
+      worker.terminate();
+      workerRef.current = null;
+    };
+    worker.onerror = () => {
+      const fallback = getBestMove(board, workerMoves, workerDiff, botColor);
+      makeMove(fallback.from, fallback.to);
+      worker.terminate();
+      workerRef.current = null;
+    };
   };
 
   const handleSquareClick = (row: number, col: number) => {
