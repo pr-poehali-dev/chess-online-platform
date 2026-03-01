@@ -200,15 +200,7 @@ const Navbar = ({
                 <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{stats.rating}</span>
               </div>
             )}
-            {!isAuthenticated && (
-              <button
-                onClick={() => setShowAuthModal(true)}
-                className="px-3 sm:px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors text-white text-sm font-medium flex items-center gap-1.5 sm:gap-2"
-              >
-                <Icon name="LogIn" size={18} />
-                <span className="hidden sm:inline">Войти</span>
-              </button>
-            )}
+
 
             {hasActiveGame && location.pathname !== '/game' && (
               <button
