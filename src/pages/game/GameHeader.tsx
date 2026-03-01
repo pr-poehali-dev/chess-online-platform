@@ -86,17 +86,16 @@ const P2PIndicator = ({ isOnline, p2pConnected, p2pQuality, p2pLatency, connecti
     return { color: theme === 'light' ? 'text-orange-600' : 'text-orange-400', bars: 1, label: p2pLatency ? `${p2pLatency}ms` : 'P2P', bg: theme === 'light' ? 'bg-orange-50 border-orange-200' : 'bg-orange-950/40 border-orange-800/50' };
   };
 
-  const { color, bars, label, bg } = getConfig();
-  const barH = [6, 10, 14];
+  const { color, bars, bg } = getConfig();
+  const barH = [8, 13, 18];
 
   return (
-    <div className={`flex items-center gap-1.5 px-2 py-1 sm:px-2.5 sm:py-1.5 rounded-lg border text-[10px] sm:text-xs font-medium flex-shrink-0 ${bg} ${color}`} title={`Соединение: ${p2pConnected ? 'P2P прямое' : connectionLost ? 'потеряно' : 'через сервер'}${p2pLatency ? ` (${p2pLatency}ms)` : ''}`}>
-      <div className="flex items-end gap-[2px] h-[14px]">
+    <div className={`flex items-center justify-center w-[36px] h-[36px] sm:w-[48px] sm:h-[48px] rounded-lg border flex-shrink-0 ${bg} ${color}`} title={`Соединение: ${p2pConnected ? 'P2P прямое' : connectionLost ? 'потеряно' : 'через сервер'}${p2pLatency ? ` (${p2pLatency}ms)` : ''}`}>
+      <div className="flex items-end gap-[3px]" style={{ height: '18px' }}>
         {barH.map((h, i) => (
-          <div key={i} className={`w-[3px] rounded-sm transition-all duration-300 ${i < bars ? (connectionLost ? 'bg-red-500' : p2pConnected ? 'bg-current' : 'bg-current') : (theme === 'light' ? 'bg-slate-300' : 'bg-stone-600')}`} style={{ height: `${h}px` }} />
+          <div key={i} className={`w-[4px] rounded-sm transition-all duration-300 ${i < bars ? (connectionLost ? 'bg-red-500' : 'bg-current') : (theme === 'light' ? 'bg-slate-300' : 'bg-stone-600')}`} style={{ height: `${h}px` }} />
         ))}
       </div>
-      <span className="hidden sm:inline">{label}</span>
     </div>
   );
 };
@@ -216,10 +215,10 @@ export const GameControls = ({
           </div>
         </div>
       )}
-      <div className="flex items-center gap-1 sm:gap-2 md:gap-2 h-[28px] sm:h-[44px] md:h-[48px]">
+      <div className="flex items-center gap-1.5 sm:gap-2 h-[36px] sm:h-[52px]">
         <button
           onClick={handleExitClick}
-          className={`p-1.5 sm:p-2.5 md:p-2.5 border rounded-md sm:rounded-lg transition-colors min-w-[28px] min-h-[28px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center flex-shrink-0 ${
+          className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[52px] sm:h-[52px] flex items-center justify-center flex-shrink-0 ${
             theme === "light"
               ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
               : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
@@ -227,31 +226,31 @@ export const GameControls = ({
           title="Выход из игры"
         >
           <div className="rotate-180">
-            <Icon name="LogOut" size={14} />
+            <Icon name="LogOut" size={18} />
           </div>
         </button>
         <button
           onClick={() => setShowChat(true)}
-          className={`p-1.5 sm:p-2.5 md:p-2.5 border rounded-md sm:rounded-lg transition-colors min-w-[28px] min-h-[28px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center flex-shrink-0 ${
+          className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[52px] sm:h-[52px] flex items-center justify-center flex-shrink-0 ${
             theme === "light"
               ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
               : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
           }`}
           title="Чат"
         >
-          <Icon name="MessageCircle" size={14} />
+          <Icon name="MessageCircle" size={18} />
         </button>
         <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            className={`p-1.5 sm:p-2.5 md:p-3 border rounded-md sm:rounded-lg transition-colors min-w-[28px] min-h-[28px] sm:min-w-[44px] sm:min-h-[44px] flex items-center justify-center ${
+            className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[52px] sm:h-[52px] flex items-center justify-center ${
               theme === "light"
                 ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
                 : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
             }`}
             title="Опции"
           >
-            <Icon name="Settings" size={14} />
+            <Icon name="Settings" size={18} />
           </button>
           {showSettingsMenu && (
             <>
