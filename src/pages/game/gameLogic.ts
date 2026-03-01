@@ -494,8 +494,21 @@ const sortMoves = (
   return [...moves].sort((a, b) => {
     const captureA = board[a.to.row][a.to.col];
     const captureB = board[b.to.row][b.to.col];
-    const scoreA = captureA ? PIECE_VALUES[captureA.type] : 0;
-    const scoreB = captureB ? PIECE_VALUES[captureB.type] : 0;
+    let scoreA = captureA ? PIECE_VALUES[captureA.type] : 0;
+    let scoreB = captureB ? PIECE_VALUES[captureB.type] : 0;
+    // Приоритет ходам дающим шах
+    const pieceA = board[a.from.row][a.from.col];
+    const pieceB = board[b.from.row][b.from.col];
+    if (pieceA) {
+      const nextA = simulateMove(board, a.from, a.to);
+      const oppColor = pieceA.color === 'white' ? 'black' : 'white';
+      if (isInCheck(nextA, oppColor)) scoreA += 500;
+    }
+    if (pieceB) {
+      const nextB = simulateMove(board, b.from, b.to);
+      const oppColor = pieceB.color === 'white' ? 'black' : 'white';
+      if (isInCheck(nextB, oppColor)) scoreB += 500;
+    }
     return scoreB - scoreA;
   });
 };
@@ -517,7 +530,7 @@ const minimax = (
   const moves = sortMoves(board, rawMoves);
 
   if (moves.length === 0) {
-    if (isInCheck(board, color)) return isMaximizing ? -900000 : 900000;
+    if (isInCheck(board, color)) return isMaximizing ? (-900000 - depth * 1000) : (900000 + depth * 1000);
     return 0;
   }
 
