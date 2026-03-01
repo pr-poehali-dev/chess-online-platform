@@ -11,7 +11,7 @@ const ICE_SERVERS = [
 export type P2PQuality = 'excellent' | 'good' | 'poor' | 'disconnected';
 
 export interface PeerMessage {
-  type: 'move' | 'time_sync' | 'resign' | 'draw' | 'timeout' | 'ping' | 'pong';
+  type: 'move' | 'time_sync' | 'resign' | 'draw' | 'timeout' | 'ping' | 'pong' | 'chat';
   data?: unknown;
   ts?: number;
 }

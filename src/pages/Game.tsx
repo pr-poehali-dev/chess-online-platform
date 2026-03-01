@@ -109,6 +109,7 @@ const Game = () => {
     p2pLatency,
     p2pQuality,
     sendPeerMessage,
+    onChatMessageRef,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -184,7 +185,7 @@ const Game = () => {
     confirmDialog,
     handleConfirmDialogConfirm,
     handleConfirmDialogCancel
-  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined, isOnlineReal ? sendPeerMessage : undefined);
+  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined, isOnlineReal ? sendPeerMessage : undefined, isOnlineReal ? onChatMessageRef : undefined);
 
   const [rematchSent, setRematchSent] = useState(false);
   const [rematchCooldown, setRematchCooldown] = useState(false);

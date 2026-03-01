@@ -1,4 +1,5 @@
-import { useState, useRef, useCallback } from 'react';
+import { useState, useRef, useCallback, useEffect } from 'react';
+import type React from 'react';
 import { useNavigate } from 'react-router-dom';
 
 export interface ConfirmState {
@@ -17,7 +18,8 @@ export const useGameHandlers = (
   setCurrentPlayer?: (player: 'white' | 'black') => void,
   onlineGameId?: number,
   onlineMoveUrl?: string,
-  sendPeerMessage?: (msg: { type: string; data?: unknown }) => boolean
+  sendPeerMessage?: (msg: { type: string; data?: unknown }) => boolean,
+  onChatMessageRef?: React.MutableRefObject<((text: string) => void) | null>
 ) => {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
@@ -40,6 +42,24 @@ export const useGameHandlers = (
 
   const [confirmDialog, setConfirmDialog] = useState<ConfirmState>({ open: false, message: '' });
   const pendingActionRef = useRef<(() => void) | null>(null);
+
+  // Подключаем получение чат-сообщений от соперника через P2P
+  useEffect(() => {
+    if (!onChatMessageRef) return;
+    onChatMessageRef.current = (text: string) => {
+      const msg = {
+        id: Date.now().toString(),
+        text,
+        isOwn: false,
+        time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
+      };
+      setChatMessages(prev => [...prev, msg]);
+      setTimeout(() => {
+        if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
+      }, 100);
+    };
+    return () => { onChatMessageRef.current = null; };
+  }, [onChatMessageRef]);
 
   const showConfirm = useCallback((message: string, onConfirm: () => void, opts?: { title?: string; variant?: 'danger' | 'info' }) => {
     pendingActionRef.current = onConfirm;
@@ -149,15 +169,21 @@ export const useGameHandlers = (
   const handleSendMessage = () => {
     if (!chatMessage.trim()) return;
 
+    const text = chatMessage.trim();
     const newMessage = {
       id: Date.now().toString(),
-      text: chatMessage,
+      text,
       isOwn: true,
       time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
     };
 
-    setChatMessages([...chatMessages, newMessage]);
+    setChatMessages(prev => [...prev, newMessage]);
     setChatMessage('');
+
+    // Отправляем через P2P соперника
+    if (sendPeerMessage) {
+      sendPeerMessage({ type: 'chat', data: { text } });
+    }
 
     setTimeout(() => {
       if (chatEndRef.current) {

@@ -194,6 +194,7 @@ export const useGameLogic = (
   const pollFailCountRef = useRef(0);
 
   const historyRef = useRef<HTMLDivElement>(null);
+  const onChatMessageRef = useRef<((text: string) => void) | null>(null);
   const hasPlayedWarning = useRef(false);
   const gameFinished = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
@@ -262,6 +263,9 @@ export const useGameLogic = (
       const sync = msg.data as { whiteTime: number; blackTime: number };
       setWhiteTime(sync.whiteTime);
       setBlackTime(sync.blackTime);
+    } else if (msg.type === 'chat' && msg.data) {
+      const chatData = msg.data as { text: string };
+      if (onChatMessageRef.current) onChatMessageRef.current(chatData.text);
     }
   }, [moveHistory, playerColor]);
 
@@ -1050,6 +1054,7 @@ export const useGameLogic = (
     p2pLatency,
     p2pQuality,
     sendPeerMessage,
+    onChatMessageRef,
     historyRef,
     handleSquareClick,
     isSquareSelected,
