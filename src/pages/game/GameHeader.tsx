@@ -75,7 +75,7 @@ const P2PIndicator = ({ isOnline, p2pConnected, p2pQuality, p2pLatency, connecti
   const barH = [8, 13, 18];
 
   return (
-    <div className={`flex items-center justify-center w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] rounded-lg border flex-shrink-0 ${bg} ${color}`} title={`Соединение: ${p2pConnected ? 'P2P прямое' : connectionLost ? 'потеряно' : 'через сервер'}${p2pLatency ? ` (${p2pLatency}ms)` : ''}`}>
+    <div className={`flex items-center justify-center w-[32px] h-[32px] sm:w-[38px] sm:h-[38px] rounded-lg border flex-shrink-0 ${bg} ${color}`} title={`Соединение: ${p2pConnected ? 'P2P прямое' : connectionLost ? 'потеряно' : 'через сервер'}${p2pLatency ? ` (${p2pLatency}ms)` : ''}`}>
       <div className="flex items-end gap-[3px]" style={{ height: '18px' }}>
         {barH.map((h, i) => (
           <div key={i} className={`w-[4px] rounded-sm transition-all duration-300 ${i < bars ? (connectionLost ? 'bg-red-500' : 'bg-current') : (theme === 'light' ? 'bg-slate-300' : 'bg-stone-600')}`} style={{ height: `${h}px` }} />
@@ -141,44 +141,28 @@ export const GameControls = ({
       : "bg-stone-600/90 border-stone-500 text-white"
     : "";
 
+  const btnCls = `border rounded-lg transition-colors w-[32px] h-[32px] sm:w-[38px] sm:h-[38px] flex items-center justify-center flex-shrink-0 ${
+    theme === "light"
+      ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
+      : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
+  }`;
+
   return (
     <div className="w-full md:w-auto">
-      <div className="flex items-center gap-1.5 sm:gap-2 h-[36px] sm:h-[40px]">
-        <button
-          onClick={handleExitClick}
-          className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
-            theme === "light"
-              ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
-              : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
-          }`}
-          title="Выход из игры"
-        >
-          <div className="rotate-180">
-            <Icon name="LogOut" size={18} />
-          </div>
+      <div className="flex items-center gap-1 sm:gap-1.5 h-[32px] sm:h-[38px]">
+        <button onClick={handleExitClick} className={btnCls} title="Выход из игры">
+          <div className="rotate-180"><Icon name="LogOut" size={16} /></div>
         </button>
-        <button
-          onClick={() => setShowChat(true)}
-          className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
-            theme === "light"
-              ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
-              : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
-          }`}
-          title="Чат"
-        >
-          <Icon name="MessageCircle" size={18} />
+        <button onClick={() => setShowChat(true)} className={btnCls} title="Чат">
+          <Icon name="MessageCircle" size={16} />
         </button>
         <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center ${
-              theme === "light"
-                ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
-                : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
-            }`}
+            className={btnCls}
             title="Опции"
           >
-            <Icon name="Settings" size={18} />
+            <Icon name="Settings" size={16} />
           </button>
           {showSettingsMenu && (
             <>
@@ -372,29 +356,21 @@ export const GameControls = ({
         </div>
         <P2PIndicator isOnline={isOnline} p2pConnected={p2pConnected} p2pQuality={p2pQuality} p2pLatency={p2pLatency} connectionLost={connectionLost} theme={theme} />
         {isGameOver && (
-          <div className={`flex items-center gap-1 px-2 h-full rounded-lg border text-[10px] sm:text-xs font-bold flex-shrink-0 ${resultColor}`}>
+          <div className={`flex items-center gap-1 px-1.5 sm:px-2 h-full rounded-lg border text-[9px] sm:text-[11px] font-bold flex-shrink-0 whitespace-nowrap ${resultColor}`}>
             {resultLabel}
           </div>
         )}
         {isGameOver && (
           <>
             <div className="relative flex-shrink-0">
-              <button
-                onClick={handleShareResult}
-                className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
-                  theme === "light"
-                    ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700"
-                    : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300"
-                }`}
-                title="Поделиться"
-              >
+              <button onClick={handleShareResult} className={btnCls} title="Поделиться">
                 {shareOk ? (
-                  <Icon name="Check" size={16} className="text-green-400" />
+                  <Icon name="Check" size={15} className="text-green-400" />
                 ) : (
                   <img
                     src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/fda3fc12-14e8-4207-b40a-00c3b8683b37.png"
                     alt="Поделиться"
-                    className="w-4 h-4 sm:w-[18px] sm:h-[18px] opacity-70"
+                    className="w-3.5 h-3.5 sm:w-4 sm:h-4 opacity-70"
                     style={{ filter: theme === 'light' ? 'invert(0.4)' : 'invert(0.7)' }}
                   />
                 )}
@@ -408,21 +384,18 @@ export const GameControls = ({
             <button
               onClick={() => {
                 if (rematchSent || rematchCooldown) return;
-                if (onOfferRematch) {
-                  onOfferRematch();
-                } else if (setShowRematchOffer) {
-                  setTimeout(() => { setShowRematchOffer(true); }, 500);
-                }
+                if (onOfferRematch) { onOfferRematch(); }
+                else if (setShowRematchOffer) { setTimeout(() => { setShowRematchOffer(true); }, 500); }
               }}
               disabled={rematchSent || rematchCooldown}
-              className={`border rounded-lg transition-colors h-[36px] sm:h-[40px] px-2 sm:px-3 flex items-center gap-1 flex-shrink-0 text-white text-[10px] sm:text-xs font-semibold ${
+              className={`border rounded-lg transition-colors w-[32px] h-[32px] sm:w-[38px] sm:h-[38px] flex items-center justify-center flex-shrink-0 ${
                 rematchSent || rematchCooldown
-                  ? "bg-stone-600/50 border-stone-600 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 border-green-700"
+                  ? "bg-stone-600/50 border-stone-600 text-stone-400 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700 border-green-700 text-white"
               }`}
+              title={rematchCooldown ? "Недоступно" : rematchSent ? "Ожидание..." : "Реванш"}
             >
-              <Icon name="RotateCcw" size={14} />
-              <span className="hidden sm:inline">{rematchCooldown ? "Недоступно" : rematchSent ? "Ожидание..." : "Реванш"}</span>
+              <Icon name="RotateCcw" size={15} />
             </button>
           </>
         )}
