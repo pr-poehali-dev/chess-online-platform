@@ -19,6 +19,7 @@ interface IndexModalsProps {
   onOfflineRegister: (data: { day: string; time: string; district?: string }) => void;
   offlineRegMsg: string | null;
   setOfflineRegMsg: (msg: string | null) => void;
+  initialOpponent?: 'friend' | 'computer' | null;
 }
 
 const IndexModals = ({
@@ -35,6 +36,7 @@ const IndexModals = ({
   onOfflineRegister,
   offlineRegMsg,
   setOfflineRegMsg,
+  initialOpponent,
 }: IndexModalsProps) => {
   return (
     <>
@@ -50,6 +52,7 @@ const IndexModals = ({
         setShowGameSettings={setShowGameSettings}
         onStartGame={onStartGame}
         onStartOnlineGame={onStartOnlineGame}
+        initialOpponent={initialOpponent}
       />
 
       <OfflineGameModal

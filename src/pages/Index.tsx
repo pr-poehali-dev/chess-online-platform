@@ -24,6 +24,7 @@ const Index = () => {
   const [showAuthModal, setShowAuthModal] = useState(false);
   const [showGameSettings, setShowGameSettings] = useState(false);
   const [showOfflineGameModal, setShowOfflineGameModal] = useState(false);
+  const [initialOpponent, setInitialOpponent] = useState<'friend' | 'computer' | null>(null);
   const [chatParams, setChatParams] = useState<{
     name: string;
     rating: number;
@@ -184,6 +185,7 @@ const Index = () => {
         setShowGameSettings={setShowGameSettings}
         setShowAuthModal={setShowAuthModal}
         setShowOfflineGameModal={setShowOfflineGameModal}
+        setInitialOpponent={setInitialOpponent}
         stats={stats}
         leaderboard={leaderboard}
         upcomingTournaments={upcomingTournaments}
@@ -200,6 +202,7 @@ const Index = () => {
         pendingInviteCode={pendingInviteCode}
         setShowGameSettings={setShowGameSettings}
         showGameSettings={showGameSettings}
+        initialOpponent={initialOpponent}
         onStartGame={(difficulty, timeControl, color) => {
           localStorage.setItem(
             "lastGameSettings",

@@ -17,6 +17,7 @@ interface GameSettingsModalProps {
   setShowGameSettings: (value: boolean) => void;
   onStartGame: (difficulty: 'easy' | 'medium' | 'hard' | 'master', timeControl: string, color: 'white' | 'black' | 'random') => void;
   onStartOnlineGame?: (opponentType: 'city' | 'region' | 'country', timeControl: string, color: 'white' | 'black' | 'random') => void;
+  initialOpponent?: 'city' | 'region' | 'country' | 'friend' | 'computer' | null;
 }
 
 const getOpponentLabel = (type: string) => {
@@ -66,7 +67,8 @@ export const GameSettingsModal = ({
   showGameSettings, 
   setShowGameSettings,
   onStartGame,
-  onStartOnlineGame
+  onStartOnlineGame,
+  initialOpponent
 }: GameSettingsModalProps) => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
@@ -103,7 +105,15 @@ export const GameSettingsModal = ({
     if (savedSettings) {
       setLastGameSettings(JSON.parse(savedSettings));
     }
-  }, [showGameSettings]);
+
+    if (showGameSettings && initialOpponent) {
+      setSelectedOpponent(initialOpponent);
+      setStep(2);
+    } else if (showGameSettings) {
+      setStep(1);
+      setSelectedOpponent(null);
+    }
+  }, [showGameSettings, initialOpponent]);
 
   useEffect(() => {
     return () => {

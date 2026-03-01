@@ -7,6 +7,7 @@ interface HomeSectionProps {
   setShowGameSettings: (value: boolean) => void;
   setShowAuthModal: (value: boolean) => void;
   setShowOfflineGameModal: (value: boolean) => void;
+  setInitialOpponent: (value: 'friend' | 'computer' | null) => void;
 }
 
 export const HomeSection = ({
@@ -14,6 +15,7 @@ export const HomeSection = ({
   setShowGameSettings,
   setShowAuthModal,
   setShowOfflineGameModal,
+  setInitialOpponent,
 }: HomeSectionProps) => {
   const {
     userCity,
@@ -44,6 +46,7 @@ export const HomeSection = ({
         setShowGameSettings={setShowGameSettings}
         setShowAuthModal={setShowAuthModal}
         setShowOfflineGameModal={setShowOfflineGameModal}
+        setInitialOpponent={setInitialOpponent}
         siteSettings={siteSettings}
         isButtonVisible={isButtonVisible}
         isLevelAllowed={isLevelAllowed}

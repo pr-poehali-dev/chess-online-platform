@@ -17,6 +17,7 @@ interface MainContentProps {
   setShowGameSettings: (value: boolean) => void;
   setShowAuthModal: (value: boolean) => void;
   setShowOfflineGameModal: (value: boolean) => void;
+  setInitialOpponent: (value: 'friend' | 'computer' | null) => void;
   stats: { games: number; wins: number; rating: number; tournaments: number };
   leaderboard: Array<{ rank: number; name: string; rating: number; avatar: string; highlight?: boolean }>;
   upcomingTournaments: Array<{ id: number; name: string; date: string; prize: string; participants: number; format: string }>;
@@ -34,6 +35,7 @@ const MainContent = ({
   setShowGameSettings,
   setShowAuthModal,
   setShowOfflineGameModal,
+  setInitialOpponent,
   stats,
   leaderboard,
   upcomingTournaments,
@@ -50,6 +52,7 @@ const MainContent = ({
           setShowGameSettings={setShowGameSettings}
           setShowAuthModal={setShowAuthModal}
           setShowOfflineGameModal={setShowOfflineGameModal}
+          setInitialOpponent={setInitialOpponent}
         />
       )}
 
@@ -113,6 +116,7 @@ const MainContent = ({
             setShowGameSettings={setShowGameSettings}
             setShowAuthModal={setShowAuthModal}
             setShowOfflineGameModal={setShowOfflineGameModal}
+            setInitialOpponent={setInitialOpponent}
           />
         )}
     </main>

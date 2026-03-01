@@ -7,6 +7,7 @@ interface HomeActionButtonsProps {
   setShowGameSettings: (value: boolean) => void;
   setShowAuthModal: (value: boolean) => void;
   setShowOfflineGameModal: (value: boolean) => void;
+  setInitialOpponent: (value: 'friend' | 'computer' | null) => void;
   siteSettings: SiteSettingsData | null;
   isButtonVisible: (btnKey: string) => boolean;
   isLevelAllowed: (levelKey: string) => boolean;
@@ -19,12 +20,22 @@ export const HomeActionButtons = ({
   setShowGameSettings,
   setShowAuthModal,
   setShowOfflineGameModal,
+  setInitialOpponent,
   siteSettings,
   isButtonVisible,
   isLevelAllowed,
   lockedMessage,
   setLockedMessage,
 }: HomeActionButtonsProps) => {
+  const handleOpenGame = (opponent: 'friend' | 'computer' | null = null) => {
+    if (isAuthenticated) {
+      setInitialOpponent(opponent);
+      setShowGameSettings(true);
+    } else {
+      setShowAuthModal(true);
+    }
+  };
+
   return (
     <div className="text-center pt-1 sm:pt-2 pb-0">
       <div className="flex flex-col items-center gap-2.5 sm:gap-3 mb-4 sm:mb-6 animate-slide-up max-w-md lg:max-w-xs mx-auto px-2 sm:px-1">
@@ -33,19 +44,35 @@ export const HomeActionButtons = ({
             <Button
               size="lg"
               className="w-full bg-green-600 hover:bg-green-700 dark:bg-green-600 dark:hover:bg-green-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
-              onClick={() => {
-                if (isAuthenticated) {
-                  setShowGameSettings(true);
-                } else {
-                  setShowAuthModal(true);
-                }
-              }}
+              onClick={() => handleOpenGame(null)}
             >
               <Icon name="Play" className="mr-2" size={24} />
               Играть онлайн
             </Button>
           </div>
         )}
+
+        <div className="w-full relative">
+          <Button
+            size="lg"
+            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
+            onClick={() => handleOpenGame('friend')}
+          >
+            <Icon name="Users" className="mr-2" size={24} />
+            Играть с другом
+          </Button>
+        </div>
+
+        <div className="w-full relative">
+          <Button
+            size="lg"
+            className="w-full bg-slate-600 hover:bg-slate-700 dark:bg-slate-600 dark:hover:bg-slate-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
+            onClick={() => handleOpenGame('computer')}
+          >
+            <Icon name="Bot" className="mr-2" size={24} />
+            Играть с компьютером
+          </Button>
+        </div>
 
         {isButtonVisible("btn_play_offline") && (
           <div className="w-full relative">
@@ -95,7 +122,7 @@ export const HomeActionButtons = ({
               }}
             >
               <Icon name="Trophy" className="mr-2" size={24} />
-              Онлайн турнир
+              Турнир онлайн
               {!isLevelAllowed("level_tournament") && (
                 <Icon name="Lock" className="ml-2" size={18} />
               )}
