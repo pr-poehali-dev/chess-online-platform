@@ -52,27 +52,31 @@ export const HomeActionButtons = ({
           </div>
         )}
 
-        <div className="w-full relative">
-          <Button
-            size="lg"
-            className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
-            onClick={() => handleOpenGame('friend')}
-          >
-            <Icon name="Users" className="mr-2" size={24} />
-            Играть с другом
-          </Button>
-        </div>
+        {isButtonVisible("btn_play_friend") && (
+          <div className="w-full relative">
+            <Button
+              size="lg"
+              className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
+              onClick={() => handleOpenGame('friend')}
+            >
+              <Icon name="Users" className="mr-2" size={24} />
+              Играть с другом
+            </Button>
+          </div>
+        )}
 
-        <div className="w-full relative">
-          <Button
-            size="lg"
-            className="w-full bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
-            onClick={() => handleOpenGame('computer')}
-          >
-            <Icon name="Bot" className="mr-2" size={24} />
-            Играть с компьютером
-          </Button>
-        </div>
+        {isButtonVisible("btn_play_computer") && (
+          <div className="w-full relative">
+            <Button
+              size="lg"
+              className="w-full bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
+              onClick={() => handleOpenGame('computer')}
+            >
+              <Icon name="Bot" className="mr-2" size={24} />
+              Играть с компьютером
+            </Button>
+          </div>
+        )}
 
         {isButtonVisible("btn_play_offline") && (
           <div className="w-full relative">

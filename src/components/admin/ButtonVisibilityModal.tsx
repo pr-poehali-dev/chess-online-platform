@@ -19,6 +19,18 @@ const buttons = [
     color: "text-green-400",
   },
   {
+    key: "btn_play_friend",
+    label: "Играть с другом",
+    icon: "Users",
+    color: "text-blue-400",
+  },
+  {
+    key: "btn_play_computer",
+    label: "Играть с компьютером",
+    icon: "Bot",
+    color: "text-orange-400",
+  },
+  {
     key: "btn_play_offline",
     label: "Играть офлайн",
     icon: "Gamepad2",
@@ -26,7 +38,7 @@ const buttons = [
   },
   {
     key: "btn_tournament",
-    label: "Опнлайн турнир",
+    label: "Турнир онлайн",
     icon: "Trophy",
     color: "text-purple-400",
   },
@@ -34,7 +46,7 @@ const buttons = [
     key: "btn_rankings",
     label: "Рейтинги на главной",
     icon: "BarChart3",
-    color: "text-orange-400",
+    color: "text-yellow-400",
   },
 ];
 
