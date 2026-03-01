@@ -127,46 +127,54 @@ export const GameControls = ({
     });
     if (ok) { setShareOk(true); setTimeout(() => setShareOk(false), 2000); }
   };
+  const resultLabel = isGameOver
+    ? gameStatus === "checkmate"
+      ? currentPlayer !== playerColor ? "🏆 Победа" : "😞 Поражение"
+      : "🤝 Ничья"
+    : null;
+
+  const resultColor = isGameOver
+    ? gameStatus === "checkmate"
+      ? currentPlayer !== playerColor
+        ? "bg-green-600/90 border-green-700 text-white"
+        : "bg-red-600/90 border-red-700 text-white"
+      : "bg-stone-600/90 border-stone-500 text-white"
+    : "";
+
   return (
-    <div className="w-full md:w-auto flex flex-col gap-1">
-      {gameStatus !== "playing" && (
-        <div
-          className={`backdrop-blur-sm rounded-md sm:rounded-lg p-1 sm:p-2 border flex items-center justify-between w-full ${
-            theme === "light"
-              ? "bg-blue-500/90 border-blue-600"
-              : "bg-blue-600/90 border-blue-700"
-          }`}
-        >
-          <div className="text-[8px] sm:text-xs md:text-sm font-bold text-white truncate">
-            {gameStatus === "checkmate" &&
-              currentPlayer === playerColor &&
-              "Поражение"}
-            {gameStatus === "checkmate" &&
-              currentPlayer !== playerColor &&
-              "Победа"}
-            {gameStatus === "stalemate" && "Ничья"}
-            {gameStatus === "draw" && "Ничья"}
+    <div className="w-full md:w-auto">
+      <div className="flex items-center gap-1.5 sm:gap-2 h-[36px] sm:h-[40px]">
+        {isGameOver && (
+          <div className={`flex items-center gap-1 px-2 h-full rounded-lg border text-[10px] sm:text-xs font-bold flex-shrink-0 ${resultColor}`}>
+            {resultLabel}
           </div>
-          <div className="flex items-center gap-1 sm:gap-1.5 flex-shrink-0 ml-1 sm:ml-2">
+        )}
+        {isGameOver && (
+          <div className="flex items-center gap-1 flex-shrink-0">
             <div className="relative">
               <button
                 onClick={handleShareResult}
-                className="p-1 sm:p-2 rounded-md sm:rounded-lg transition-colors flex items-center gap-1 flex-shrink-0 bg-white/20 hover:bg-white/30 active:scale-90"
+                className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
+                  theme === "light"
+                    ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700"
+                    : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300"
+                }`}
                 title="Поделиться"
               >
                 {shareOk ? (
-                  <Icon name="Check" size={14} className="text-green-300" />
+                  <Icon name="Check" size={16} className="text-green-400" />
                 ) : (
                   <img
                     src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/fda3fc12-14e8-4207-b40a-00c3b8683b37.png"
                     alt="Поделиться"
-                    className="w-3.5 h-3.5 sm:w-[18px] sm:h-[18px] invert"
+                    className="w-4 h-4 sm:w-[18px] sm:h-[18px] opacity-70"
+                    style={{ filter: theme === 'light' ? 'invert(0.4)' : 'invert(0.7)' }}
                   />
                 )}
               </button>
               {shareOk && (
-                <div className="absolute -bottom-8 right-0 bg-gray-900 text-white text-[10px] sm:text-xs px-2 py-1 rounded-md whitespace-nowrap z-50 animate-fade-in">
-                  Ссылка скопирована!
+                <div className="absolute -bottom-8 right-0 bg-gray-900 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap z-50">
+                  Скопировано!
                 </div>
               )}
             </div>
@@ -176,31 +184,21 @@ export const GameControls = ({
                 if (onOfferRematch) {
                   onOfferRematch();
                 } else if (setShowRematchOffer) {
-                  setTimeout(() => {
-                    setShowRematchOffer(true);
-                  }, 500);
+                  setTimeout(() => { setShowRematchOffer(true); }, 500);
                 }
               }}
               disabled={rematchSent || rematchCooldown}
-              className={`p-1 sm:p-2 rounded-md sm:rounded-lg transition-colors flex items-center gap-1 sm:gap-1.5 flex-shrink-0 text-white ${
+              className={`border rounded-lg transition-colors h-[36px] sm:h-[40px] px-2 sm:px-3 flex items-center gap-1 flex-shrink-0 text-white text-[10px] sm:text-xs font-semibold ${
                 rematchSent || rematchCooldown
-                  ? "bg-stone-600 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700"
+                  ? "bg-stone-600/50 border-stone-600 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700 border-green-700"
               }`}
             >
-              <Icon name="RotateCcw" size={12} />
-              <span className="font-semibold text-[8px] sm:text-xs">
-                {rematchCooldown
-                  ? "Недоступно"
-                  : rematchSent
-                    ? "Ожидание..."
-                    : "Реванш"}
-              </span>
+              <Icon name="RotateCcw" size={14} />
+              <span className="hidden sm:inline">{rematchCooldown ? "Недоступно" : rematchSent ? "Ожидание..." : "Реванш"}</span>
             </button>
           </div>
-        </div>
-      )}
-      <div className="flex items-center gap-1.5 sm:gap-2 h-[36px] sm:h-[40px]">
+        )}
         <button
           onClick={handleExitClick}
           className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
