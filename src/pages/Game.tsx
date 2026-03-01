@@ -272,7 +272,7 @@ const Game = () => {
 
 
       <main className="flex-1 flex flex-col items-center justify-center py-0.5 px-1 sm:px-2 overflow-hidden min-h-0">
-          <div className="flex flex-col gap-0.5 sm:gap-1 w-full" style={{ maxWidth: 'min(100%, min(100vw - 8px, 100dvh - 200px))' }}>
+          <div className="flex flex-col gap-0.5 sm:gap-1 w-full" style={{ maxWidth: 'min(100%, min(100vw - 8px, 100dvh - 56px))', height: 'min(100dvh - 56px, 100vw - 8px)', maxHeight: '100%' }}>
             <div className="flex flex-col gap-0.5 sm:gap-1">
               <GameControls
                 showSettingsMenu={showSettingsMenu}
@@ -328,20 +328,22 @@ const Game = () => {
               />
             </div>
 
-            <div style={{ width: '100%', margin: '0 auto' }}>
-              <GameBoard
-                board={displayBoard}
-                onSquareClick={handleSquareClick}
-                isSquareSelected={isSquareSelected}
-                isSquarePossibleMove={isSquarePossibleMove}
-                kingInCheckPosition={kingInCheckPosition}
-                showPossibleMoves={showPossibleMoves}
-                flipped={flipped}
-                boardTheme={boardTheme}
-                lastMove={lastMove}
-                gameResult={gameResult}
-                onResultClick={() => setResultDismissed(true)}
-              />
+            <div style={{ width: '100%', margin: '0 auto', flex: '1 1 0', minHeight: 0, display: 'flex', alignItems: 'center', justifyContent: 'center' }}>
+              <div style={{ width: 'min(100%, calc(100dvh - 220px))', aspectRatio: '1/1', position: 'relative' }}>
+                <GameBoard
+                  board={displayBoard}
+                  onSquareClick={handleSquareClick}
+                  isSquareSelected={isSquareSelected}
+                  isSquarePossibleMove={isSquarePossibleMove}
+                  kingInCheckPosition={kingInCheckPosition}
+                  showPossibleMoves={showPossibleMoves}
+                  flipped={flipped}
+                  boardTheme={boardTheme}
+                  lastMove={lastMove}
+                  gameResult={gameResult}
+                  onResultClick={() => setResultDismissed(true)}
+                />
+              </div>
             </div>
 
             <div className="flex flex-col gap-0.5 sm:gap-1">
