@@ -171,12 +171,12 @@ export const GameControls = ({
                 onClick={() => setShowSettingsMenu(false)}
               />
               <div
-                className={`absolute right-0 mt-2 w-64 rounded-lg shadow-xl border z-50 animate-in fade-in slide-in-from-top-2 duration-150 overflow-y-auto ${
+                className={`absolute left-0 mt-2 w-64 rounded-lg shadow-xl border z-50 animate-in fade-in slide-in-from-top-2 duration-150 overflow-y-auto ${
                   theme === "light"
                     ? "bg-white border-slate-300"
                     : "bg-stone-800 border-stone-700/50"
                 }`}
-                style={{ maxHeight: 'min(80vh, calc(100dvh - 120px))' }}
+                style={{ maxHeight: 'min(80vh, calc(100dvh - 120px))', maxWidth: 'calc(100vw - 16px)' }}
               >
                 <button
                   onClick={() => {
