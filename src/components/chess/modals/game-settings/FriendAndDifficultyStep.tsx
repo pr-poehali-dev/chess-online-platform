@@ -30,10 +30,10 @@ interface FriendAndDifficultyStepProps {
 }
 
 const difficulties = [
-  { key: 'easy' as const, emoji: '🟢', label: 'Легкий', desc: 'Рейтинг: 800-1000 • Для начинающих' },
-  { key: 'medium' as const, emoji: '🟡', label: 'Средний', desc: 'Рейтинг: 1200-1500 • Любители' },
-  { key: 'hard' as const, emoji: '🟠', label: 'Сложный', desc: 'Рейтинг: 1800-2000 • Опытные' },
-  { key: 'master' as const, emoji: '🔴', label: 'Мастер', desc: 'Рейтинг: 2200+ • Для профессионалов' },
+  { key: 'easy' as const, emoji: '🟢', label: 'Легкий', desc: 'Для начинающих' },
+  { key: 'medium' as const, emoji: '🟡', label: 'Средний', desc: 'Для любителей' },
+  { key: 'hard' as const, emoji: '🟠', label: 'Сложный', desc: 'Для опытных' },
+  { key: 'master' as const, emoji: '🔴', label: 'Мастер', desc: 'Для профессионалов' },
 ];
 
 const FriendAndDifficultyStep = ({
