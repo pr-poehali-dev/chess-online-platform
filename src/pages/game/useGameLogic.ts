@@ -1015,6 +1015,7 @@ export const useGameLogic = (
     p2pConnected,
     p2pLatency,
     p2pQuality,
+    sendPeerMessage,
     historyRef,
     handleSquareClick,
     isSquareSelected,

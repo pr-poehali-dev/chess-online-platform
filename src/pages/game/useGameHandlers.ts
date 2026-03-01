@@ -16,7 +16,8 @@ export const useGameHandlers = (
   playerColor: 'white' | 'black' = 'white',
   setCurrentPlayer?: (player: 'white' | 'black') => void,
   onlineGameId?: number,
-  onlineMoveUrl?: string
+  onlineMoveUrl?: string,
+  sendPeerMessage?: (msg: { type: string; data?: unknown }) => boolean
 ) => {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
@@ -108,6 +109,10 @@ export const useGameHandlers = (
     } else {
       if (setCurrentPlayer) setCurrentPlayer(playerColor);
       setGameStatus('checkmate');
+      // Уведомляем соперника по P2P о сдаче
+      if (sendPeerMessage) {
+        sendPeerMessage({ type: 'resign' });
+      }
       if (onlineGameId && onlineMoveUrl) {
         const saved = localStorage.getItem('chessUser');
         if (saved) {

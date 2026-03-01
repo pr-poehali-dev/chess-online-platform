@@ -107,6 +107,7 @@ const Game = () => {
     p2pConnected,
     p2pLatency,
     p2pQuality,
+    sendPeerMessage,
     historyRef,
     handleSquareClick,
     isSquareSelected,
@@ -181,7 +182,7 @@ const Game = () => {
     confirmDialog,
     handleConfirmDialogConfirm,
     handleConfirmDialogCancel
-  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined);
+  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined, isOnlineReal ? sendPeerMessage : undefined);
 
   const [rematchSent, setRematchSent] = useState(false);
   const [rematchCooldown, setRematchCooldown] = useState(false);
