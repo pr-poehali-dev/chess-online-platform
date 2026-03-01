@@ -928,7 +928,7 @@ export const useGameLogic = (
 
   const handleSquareClick = (row: number, col: number) => {
     if (!onlineReady && isOnlineGame) return;
-    if (currentPlayer !== playerColor || gameStatus !== 'playing') return;
+    if (gameStatus !== 'playing') return;
     if (isOnlineGame && pendingMoveRef.current) return;
 
     if (currentMoveIndex < boardHistory.length - 1) {
@@ -939,6 +939,19 @@ export const useGameLogic = (
     }
 
     const piece = board[row][col];
+    const isMyTurn = currentPlayer === playerColor;
+
+    if (!isMyTurn) {
+      // Во время хода соперника — только выбор/снятие своей фигуры
+      if (piece && piece.color === playerColor) {
+        setSelectedSquare({ row, col });
+        setPossibleMoves(getPossibleMoves(board, { row, col }, castlingRights, enPassantTarget));
+      } else {
+        setSelectedSquare(null);
+        setPossibleMoves([]);
+      }
+      return;
+    }
 
     if (selectedSquare) {
       const isValidTarget = possibleMoves.some(m => m.row === row && m.col === col);
