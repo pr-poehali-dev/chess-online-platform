@@ -93,6 +93,7 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(updated)
     });
+    try { sessionStorage.removeItem('site_settings_cache'); } catch { /* ignore */ }
     await fetchSettings();
     setShowButtonsModal(false);
     setShowLevelsModal(false);
