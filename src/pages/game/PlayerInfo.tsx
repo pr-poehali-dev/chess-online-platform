@@ -48,27 +48,27 @@ export const PlayerInfo = ({
     .filter(type => groupedPieces[type])
     .map(type => groupedPieces[type]);
   return (
-    <div className={`backdrop-blur-sm rounded-md sm:rounded-lg p-0.5 sm:p-2 md:p-3 border w-full md:w-auto ${
+    <div className={`backdrop-blur-sm rounded-md sm:rounded-lg p-0.5 sm:p-2 border w-full md:w-auto ${
       theme === 'light' 
         ? (playerColor === 'black' ? 'bg-stone-700/80 border-stone-600' : 'bg-white/80 border-slate-300')
         : (playerColor === 'black' ? 'bg-stone-900/80 border-stone-700' : 'bg-stone-200/90 border-stone-400')
     }`}>
       <div className="flex items-center justify-between h-full">
         <div
-          className={`flex items-center gap-1.5 sm:gap-2 md:gap-3 min-w-0 flex-shrink ${onClickProfile ? 'cursor-pointer hover:opacity-80 active:scale-95 transition-all' : ''}`}
+          className={`flex items-center gap-1.5 sm:gap-2 min-w-0 flex-shrink ${onClickProfile ? 'cursor-pointer hover:opacity-80 active:scale-95 transition-all' : ''}`}
           onClick={onClickProfile}
         >
           {avatar ? (
             <img 
               src={avatar} 
               alt={playerName}
-              className="w-5 h-5 sm:w-8 sm:h-8 md:w-10 md:h-10 rounded-full object-cover border sm:border-2 border-stone-600 flex-shrink-0"
+              className="w-5 h-5 sm:w-8 sm:h-8 rounded-full object-cover border sm:border-2 border-stone-600 flex-shrink-0"
             />
           ) : (
-            <div className="text-2xl sm:text-3xl md:text-4xl flex-shrink-0">{icon}</div>
+            <div className="text-2xl sm:text-3xl flex-shrink-0">{icon}</div>
           )}
           <div className="min-w-0 flex-shrink">
-            <div className={`text-[9px] sm:text-xs md:text-sm font-medium truncate ${
+            <div className={`text-[9px] sm:text-xs font-medium truncate ${
               theme === 'light'
                 ? 'text-slate-800'
                 : (playerColor === 'white' ? 'text-stone-800' : 'text-stone-200')
@@ -77,7 +77,7 @@ export const PlayerInfo = ({
             </div>
             <div className="flex items-center gap-2">
               <div
-                className={`text-[8px] sm:text-[11px] md:text-xs whitespace-nowrap ${
+                className={`text-[8px] sm:text-[11px] whitespace-nowrap ${
                   playerColor === 'black' 
                     ? (theme === 'dark' ? 'text-stone-900 font-semibold' : 'text-stone-900 font-semibold')
                     : (theme === 'light' ? 'text-slate-600' : 'text-stone-600')
@@ -91,7 +91,7 @@ export const PlayerInfo = ({
               </div>
               {rating && (
                 <div className="flex items-center gap-1">
-                  <div className={`text-[8px] sm:text-[10px] md:text-xs font-semibold whitespace-nowrap ${
+                  <div className={`text-[8px] sm:text-[10px] font-semibold whitespace-nowrap ${
                     theme === 'light'
                       ? 'text-blue-600'
                       : (playerColor === 'white' ? 'text-blue-600' : 'text-blue-400')
@@ -99,7 +99,7 @@ export const PlayerInfo = ({
                     {rating}
                   </div>
                   {ratingChange != null && ratingChange !== 0 && (
-                    <div className={`text-[8px] sm:text-[10px] md:text-xs font-bold whitespace-nowrap ${
+                    <div className={`text-[8px] sm:text-[10px] font-bold whitespace-nowrap ${
                       ratingChange > 0 ? 'text-green-400' : 'text-red-400'
                     }`}>
                       {ratingChange > 0 ? `+${ratingChange}` : ratingChange}
