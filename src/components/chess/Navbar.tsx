@@ -1,7 +1,12 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { onBadge } from '@/lib/badgeEvents';
+
+interface BeforeInstallPromptEvent extends Event {
+  prompt(): Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+}
 
 interface NavbarProps {
   activeSection: string;
@@ -43,6 +48,38 @@ const Navbar = ({
   stats 
 }: NavbarProps) => {
   const [showMenu, setShowMenu] = useState(false);
+  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
+  const [isInstalled, setIsInstalled] = useState(false);
+
+  useEffect(() => {
+    const handler = (e: Event) => {
+      e.preventDefault();
+      setDeferredPrompt(e);
+    };
+    window.addEventListener('beforeinstallprompt', handler);
+    window.addEventListener('appinstalled', () => setIsInstalled(true));
+    if (window.matchMedia('(display-mode: standalone)').matches) setIsInstalled(true);
+    return () => window.removeEventListener('beforeinstallprompt', handler);
+  }, []);
+
+  const handleInstall = useCallback(async () => {
+    if (deferredPrompt) {
+      (deferredPrompt as BeforeInstallPromptEvent).prompt();
+      const { outcome } = await (deferredPrompt as BeforeInstallPromptEvent).userChoice;
+      if (outcome === 'accepted') setIsInstalled(true);
+      setDeferredPrompt(null);
+    } else {
+      const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
+      const isIOS = /iPhone|iPad/i.test(navigator.userAgent);
+      if (isIOS) {
+        alert('Чтобы установить приложение: нажми кнопку «Поделиться» (□↑) внизу Safari, затем «На экран Домой».');
+      } else if (isMobile) {
+        alert('Чтобы установить: откройте меню браузера (⋮) и выберите «Добавить на главный экран».');
+      } else {
+        alert('Чтобы установить ярлык: в адресной строке браузера нажмите на иконку установки (⊕) или откройте меню и выберите «Установить приложение».');
+      }
+    }
+  }, [deferredPrompt]);
   const [hasActiveGame, setHasActiveGame] = useState(false);
   const [activeGameUrl, setActiveGameUrl] = useState('');
   const [activeGameLabel, setActiveGameLabel] = useState('');
@@ -181,6 +218,16 @@ const Navbar = ({
               >
                 <Icon name="Gamepad2" size={18} className="text-white" />
                 <span className="text-white text-xs sm:text-sm font-medium hidden sm:inline max-w-[120px] truncate">{activeGameLabel || 'К игре'}</span>
+              </button>
+            )}
+
+            {!isInstalled && (
+              <button
+                onClick={handleInstall}
+                className="p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors"
+                title="Установить приложение"
+              >
+                <Icon name="Download" size={22} className="text-slate-600 dark:text-slate-300" />
               </button>
             )}
 
