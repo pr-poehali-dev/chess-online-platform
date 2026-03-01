@@ -132,13 +132,13 @@ const Navbar = ({
 
   return (
     <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in">
-      <div className="container mx-auto px-3 sm:px-4 py-0">
+      <div className="container mx-auto px-3 sm:px-4 py-3 sm:py-4">
         <div className="flex items-center justify-between gap-2">
           <button 
             onClick={() => setActiveSection('home')}
             className="relative flex items-center gap-2 hover:opacity-80 transition-opacity flex-shrink-0"
           >
-            <div className="flex-shrink-0 w-10 h-10 sm:w-12 sm:h-12">
+            <div className="flex-shrink-0 w-[83px] h-[83px] sm:w-[110px] sm:h-[110px]">
               <img
                 src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png"
                 alt="Лига Шахмат"
