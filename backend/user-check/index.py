@@ -68,15 +68,25 @@ def handler(event: dict, context) -> dict:
             return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'user_id required'})}
 
         safe_id = user_id.replace("'", "''")
-        cur.execute("SELECT id, username, rating, city, active_device_token FROM users WHERE id = '%s'" % safe_id)
+        schema = os.environ.get('MAIN_DB_SCHEMA', 'public')
+        cur.execute("SELECT id, username, rating, city, active_device_token, session_expires_at FROM {schema}.users WHERE id = '{uid}'".format(schema=schema, uid=safe_id))
         row = cur.fetchone()
         cur.close()
         conn.close()
         if not row:
             return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'exists': False})}
         session_valid = True
+        # Проверка device_token
         if device_token and row[4] and row[4] != device_token:
             session_valid = False
+        # Проверка срока сессии
+        if row[5] is not None:
+            from datetime import datetime, timezone
+            expires_at = row[5]
+            if expires_at.tzinfo is None:
+                expires_at = expires_at.replace(tzinfo=timezone.utc)
+            if datetime.now(timezone.utc) > expires_at:
+                session_valid = False
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'exists': True, 'session_valid': session_valid, 'user': {'id': row[0], 'username': row[1], 'rating': row[2], 'city': row[3]}})}
 
     if event.get('httpMethod') == 'POST':

@@ -149,7 +149,7 @@ def handler(event, context):
 
         if device_token:
             cur.execute(
-                "UPDATE {schema}.users SET active_device_token = '{dt}' WHERE id = '{uid}'".format(
+                "UPDATE {schema}.users SET active_device_token = '{dt}', session_expires_at = NOW() + INTERVAL '30 days' WHERE id = '{uid}'".format(
                     schema=schema, dt=device_token.replace("'", "''")[:64], uid=user_id.replace("'", "''")
                 )
             )
@@ -181,7 +181,7 @@ def handler(event, context):
                 )
         if device_token:
             cur.execute(
-                "UPDATE {schema}.users SET active_device_token = '{dt}' WHERE id = '{uid}'".format(
+                "UPDATE {schema}.users SET active_device_token = '{dt}', session_expires_at = NOW() + INTERVAL '30 days' WHERE id = '{uid}'".format(
                     schema=schema, dt=device_token.replace("'", "''")[:64], uid=user_id.replace("'", "''")
                 )
             )
@@ -214,7 +214,7 @@ def handler(event, context):
 
         dt_val = device_token.replace("'", "''")[:64] if device_token else ''
         cur.execute(
-            "INSERT INTO {schema}.users (id, username, email, city, rating, games_played, wins, losses, draws, user_code, active_device_token) VALUES ('{uid}', '{name}', '{email}', '{city}', 500, 0, 0, 0, 0, '{code}', '{dt}')".format(
+            "INSERT INTO {schema}.users (id, username, email, city, rating, games_played, wins, losses, draws, user_code, active_device_token, session_expires_at) VALUES ('{uid}', '{name}', '{email}', '{city}', 500, 0, 0, 0, 0, '{code}', '{dt}', NOW() + INTERVAL '30 days')".format(
                 schema=schema,
                 uid=user_id.replace("'", "''"),
                 name=name.replace("'", "''"),
