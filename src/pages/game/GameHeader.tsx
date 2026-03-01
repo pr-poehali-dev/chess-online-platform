@@ -144,61 +144,6 @@ export const GameControls = ({
   return (
     <div className="w-full md:w-auto">
       <div className="flex items-center gap-1.5 sm:gap-2 h-[36px] sm:h-[40px]">
-        {isGameOver && (
-          <div className={`flex items-center gap-1 px-2 h-full rounded-lg border text-[10px] sm:text-xs font-bold flex-shrink-0 ${resultColor}`}>
-            {resultLabel}
-          </div>
-        )}
-        {isGameOver && (
-          <div className="flex items-center gap-1 flex-shrink-0">
-            <div className="relative">
-              <button
-                onClick={handleShareResult}
-                className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
-                  theme === "light"
-                    ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700"
-                    : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300"
-                }`}
-                title="Поделиться"
-              >
-                {shareOk ? (
-                  <Icon name="Check" size={16} className="text-green-400" />
-                ) : (
-                  <img
-                    src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/fda3fc12-14e8-4207-b40a-00c3b8683b37.png"
-                    alt="Поделиться"
-                    className="w-4 h-4 sm:w-[18px] sm:h-[18px] opacity-70"
-                    style={{ filter: theme === 'light' ? 'invert(0.4)' : 'invert(0.7)' }}
-                  />
-                )}
-              </button>
-              {shareOk && (
-                <div className="absolute -bottom-8 right-0 bg-gray-900 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap z-50">
-                  Скопировано!
-                </div>
-              )}
-            </div>
-            <button
-              onClick={() => {
-                if (rematchSent || rematchCooldown) return;
-                if (onOfferRematch) {
-                  onOfferRematch();
-                } else if (setShowRematchOffer) {
-                  setTimeout(() => { setShowRematchOffer(true); }, 500);
-                }
-              }}
-              disabled={rematchSent || rematchCooldown}
-              className={`border rounded-lg transition-colors h-[36px] sm:h-[40px] px-2 sm:px-3 flex items-center gap-1 flex-shrink-0 text-white text-[10px] sm:text-xs font-semibold ${
-                rematchSent || rematchCooldown
-                  ? "bg-stone-600/50 border-stone-600 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 border-green-700"
-              }`}
-            >
-              <Icon name="RotateCcw" size={14} />
-              <span className="hidden sm:inline">{rematchCooldown ? "Недоступно" : rematchSent ? "Ожидание..." : "Реванш"}</span>
-            </button>
-          </div>
-        )}
         <button
           onClick={handleExitClick}
           className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
@@ -426,6 +371,61 @@ export const GameControls = ({
           )}
         </div>
         <P2PIndicator isOnline={isOnline} p2pConnected={p2pConnected} p2pQuality={p2pQuality} p2pLatency={p2pLatency} connectionLost={connectionLost} theme={theme} />
+        {isGameOver && (
+          <div className={`flex items-center gap-1 px-2 h-full rounded-lg border text-[10px] sm:text-xs font-bold flex-shrink-0 ${resultColor}`}>
+            {resultLabel}
+          </div>
+        )}
+        {isGameOver && (
+          <>
+            <div className="relative flex-shrink-0">
+              <button
+                onClick={handleShareResult}
+                className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
+                  theme === "light"
+                    ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700"
+                    : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300"
+                }`}
+                title="Поделиться"
+              >
+                {shareOk ? (
+                  <Icon name="Check" size={16} className="text-green-400" />
+                ) : (
+                  <img
+                    src="https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/fda3fc12-14e8-4207-b40a-00c3b8683b37.png"
+                    alt="Поделиться"
+                    className="w-4 h-4 sm:w-[18px] sm:h-[18px] opacity-70"
+                    style={{ filter: theme === 'light' ? 'invert(0.4)' : 'invert(0.7)' }}
+                  />
+                )}
+              </button>
+              {shareOk && (
+                <div className="absolute -bottom-8 right-0 bg-gray-900 text-white text-[10px] px-2 py-1 rounded-md whitespace-nowrap z-50">
+                  Скопировано!
+                </div>
+              )}
+            </div>
+            <button
+              onClick={() => {
+                if (rematchSent || rematchCooldown) return;
+                if (onOfferRematch) {
+                  onOfferRematch();
+                } else if (setShowRematchOffer) {
+                  setTimeout(() => { setShowRematchOffer(true); }, 500);
+                }
+              }}
+              disabled={rematchSent || rematchCooldown}
+              className={`border rounded-lg transition-colors h-[36px] sm:h-[40px] px-2 sm:px-3 flex items-center gap-1 flex-shrink-0 text-white text-[10px] sm:text-xs font-semibold ${
+                rematchSent || rematchCooldown
+                  ? "bg-stone-600/50 border-stone-600 cursor-not-allowed"
+                  : "bg-green-600 hover:bg-green-700 border-green-700"
+              }`}
+            >
+              <Icon name="RotateCcw" size={14} />
+              <span className="hidden sm:inline">{rematchCooldown ? "Недоступно" : rematchSent ? "Ожидание..." : "Реванш"}</span>
+            </button>
+          </>
+        )}
       </div>
     </div>
   );
