@@ -87,7 +87,7 @@ const useMatchmaking = () => {
     setSearchStatus('found');
     setTimeout(() => {
       if (!abortedRef.current) setSearchStatus('starting');
-    }, 2000);
+    }, 4000);
   }, [cleanup]);
 
   const checkActiveGame = useCallback(async (userId: string) => {
