@@ -66,7 +66,7 @@ export const HomeActionButtons = ({
         <div className="w-full relative">
           <Button
             size="lg"
-            className="w-full bg-slate-600 hover:bg-slate-700 dark:bg-slate-600 dark:hover:bg-slate-700 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
+            className="w-full bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
             onClick={() => handleOpenGame('computer')}
           >
             <Icon name="Bot" className="mr-2" size={24} />
