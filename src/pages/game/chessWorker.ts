@@ -193,7 +193,7 @@ self.onmessage = (e: MessageEvent) => {
     botColor: 'white' | 'black';
   };
 
-  const depth = difficulty === 'master' ? 5 : 3;
+  const depth = difficulty === 'master' ? 4 : 3;
   const noise = difficulty === 'master' ? 0 : 10;
 
   const sorted = sortMovesW(board, moves);
