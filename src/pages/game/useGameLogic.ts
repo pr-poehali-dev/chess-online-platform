@@ -180,6 +180,7 @@ export const useGameLogic = (
   const [rematchOfferedBy, setRematchOfferedBy] = useState<string | null>(null);
   const [rematchStatus, setRematchStatus] = useState<string | null>(null);
   const [rematchGameId, setRematchGameId] = useState<number | null>(null);
+  const [drawOfferedBy, setDrawOfferedBy] = useState<string | null>(null);
   const [ratingChange, setRatingChange] = useState<number | null>(null);
   const [newRating, setNewRating] = useState<number | null>(null);
   const [userRating, setUserRating] = useState<number | null>(() => {
@@ -653,6 +654,7 @@ export const useGameLogic = (
         if (data.game.rematch_offered_by) setRematchOfferedBy(data.game.rematch_offered_by);
         if (data.game.rematch_status) setRematchStatus(data.game.rematch_status);
         if (data.game.rematch_game_id) setRematchGameId(data.game.rematch_game_id);
+        setDrawOfferedBy(data.game.draw_offered_by || null);
 
         if (!onlineReadyRef.current) {
           onlineReadyRef.current = true;
@@ -1030,6 +1032,8 @@ export const useGameLogic = (
     rematchOfferedBy,
     rematchStatus,
     rematchGameId,
+    drawOfferedBy,
+    setDrawOfferedBy,
     setCurrentPlayer,
     showPossibleMoves,
     setShowPossibleMoves,

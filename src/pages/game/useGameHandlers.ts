@@ -190,18 +190,59 @@ export const useGameHandlers = (
     }
     
     setDrawOffersCount(drawOffersCount + 1);
-    setTimeout(() => {
-      setShowDrawOffer(true);
-    }, 500);
+
+    if (onlineGameId && onlineMoveUrl) {
+      const saved = localStorage.getItem('chessUser');
+      if (saved) {
+        const uData = JSON.parse(saved);
+        const rawId = uData.email || uData.name || 'anonymous';
+        const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+        fetch(onlineMoveUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'draw_offer', game_id: onlineGameId, user_id: userId })
+        }).catch(() => {});
+      }
+      showAlert('Предложение ничьей отправлено сопернику.', { title: 'Ничья', variant: 'info' });
+    } else {
+      // Оффлайн/бот — сразу показываем модал
+      setTimeout(() => setShowDrawOffer(true), 500);
+    }
   };
 
   const handleAcceptDraw = () => {
     setShowDrawOffer(false);
     setGameStatus('draw');
+    if (onlineGameId && onlineMoveUrl) {
+      const saved = localStorage.getItem('chessUser');
+      if (saved) {
+        const uData = JSON.parse(saved);
+        const rawId = uData.email || uData.name || 'anonymous';
+        const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+        fetch(onlineMoveUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'draw', game_id: onlineGameId, user_id: userId })
+        }).catch(() => {});
+      }
+    }
   };
 
   const handleDeclineDraw = () => {
     setShowDrawOffer(false);
+    if (onlineGameId && onlineMoveUrl) {
+      const saved = localStorage.getItem('chessUser');
+      if (saved) {
+        const uData = JSON.parse(saved);
+        const rawId = uData.email || uData.name || 'anonymous';
+        const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+        fetch(onlineMoveUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'draw_decline', game_id: onlineGameId, user_id: userId })
+        }).catch(() => {});
+      }
+    }
   };
 
   const handleNewGame = () => {
@@ -297,6 +338,7 @@ export const useGameHandlers = (
     showSettingsMenu,
     setShowSettingsMenu,
     showDrawOffer,
+    setShowDrawOffer,
     showNotifications,
     setShowNotifications,
     showRematchOffer,

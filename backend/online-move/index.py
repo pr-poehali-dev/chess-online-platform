@@ -76,7 +76,8 @@ def handler(event: dict, context) -> dict:
                       winner, end_reason,
                       EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move,
                       move_number,
-                      rematch_offered_by, rematch_status, rematch_game_id
+                      rematch_offered_by, rematch_status, rematch_game_id,
+                      draw_offered_by
             FROM online_games WHERE id = %d""" % int(game_id)
         )
         row = cur.fetchone()
@@ -129,7 +130,8 @@ def handler(event: dict, context) -> dict:
                 'winner': row[17], 'end_reason': row[18],
                 'move_number': move_number,
                 'seconds_since_move': seconds_since_move,
-                'rematch_offered_by': row[21], 'rematch_status': row[22], 'rematch_game_id': row[23]
+                'rematch_offered_by': row[21], 'rematch_status': row[22], 'rematch_game_id': row[23],
+                'draw_offered_by': row[24]
             },
             'signals': signals
         })}
@@ -262,6 +264,25 @@ def handler(event: dict, context) -> dict:
             'old_black': ob_uid
         })}
 
+    if action == 'draw_offer':
+        cur.execute(
+            "UPDATE online_games SET draw_offered_by = '%s', updated_at = NOW() WHERE id = %d AND status = 'playing'"
+            % (user_id.replace("'", "''"), g_id)
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'draw_offered'})}
+
+    if action == 'draw_decline':
+        cur.execute(
+            "UPDATE online_games SET draw_offered_by = NULL, updated_at = NOW() WHERE id = %d" % g_id
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'draw_declined'})}
+
     if action == 'resign':
         winner = black_uid if player_color == 'white' else white_uid
         cur.execute(
@@ -275,7 +296,7 @@ def handler(event: dict, context) -> dict:
 
     if action == 'draw':
         cur.execute(
-            "UPDATE online_games SET status = 'finished', end_reason = 'draw', updated_at = NOW() WHERE id = %d" % g_id
+            "UPDATE online_games SET status = 'finished', end_reason = 'draw', draw_offered_by = NULL, updated_at = NOW() WHERE id = %d" % g_id
         )
         conn.commit()
         cur.close()

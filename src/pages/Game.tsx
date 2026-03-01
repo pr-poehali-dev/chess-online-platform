@@ -92,6 +92,7 @@ const Game = () => {
     rematchOfferedBy,
     rematchStatus,
     rematchGameId,
+    drawOfferedBy,
     setCurrentPlayer,
     showPossibleMoves,
     setShowPossibleMoves,
@@ -149,6 +150,7 @@ const Game = () => {
     showSettingsMenu,
     setShowSettingsMenu,
     showDrawOffer,
+    setShowDrawOffer,
     showNotifications,
     setShowNotifications,
     showRematchOffer,
@@ -194,6 +196,12 @@ const Game = () => {
     if (rematchOfferedBy === myUserId) return;
     setShowRematchOffer(true);
   }, [rematchOfferedBy, rematchStatus]);
+
+  useEffect(() => {
+    if (!isOnlineReal || !drawOfferedBy) return;
+    if (drawOfferedBy === myUserId) return;
+    setShowDrawOffer(true);
+  }, [drawOfferedBy]);
 
   useEffect(() => {
     if (!isOnlineReal || !rematchGameId || rematchStatus !== 'accepted') return;
