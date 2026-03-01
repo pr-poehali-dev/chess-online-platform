@@ -155,21 +155,6 @@ const OpponentSelectStep = ({
 
       <Button 
         className="w-full h-14 sm:h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
-        onClick={() => onSelect('friend')}
-      >
-        <div className="flex items-center gap-2 sm:gap-3">
-          <Icon name="Users" size={20} className="text-slate-700 dark:text-white flex-shrink-0 sm:hidden" />
-          <Icon name="Users" size={24} className="text-slate-700 dark:text-white flex-shrink-0 hidden sm:block" />
-          <div className="text-left">
-            <div className="text-xs sm:text-sm font-medium text-slate-900 dark:text-white">Играть с другом</div>
-            <div className="text-[10px] sm:text-xs text-slate-500 dark:text-gray-400">Нерейтинговая игра</div>
-          </div>
-        </div>
-        <Icon name="ChevronRight" size={18} className="text-slate-400 flex-shrink-0" />
-      </Button>
-
-      <Button 
-        className="w-full h-14 sm:h-16 flex items-center justify-between bg-slate-50 dark:bg-slate-800/50 hover:bg-slate-100 dark:hover:bg-slate-700/50 border border-slate-200 dark:border-white/10"
         onClick={() => onSelect('computer')}
       >
         <div className="flex items-center gap-2 sm:gap-3">
