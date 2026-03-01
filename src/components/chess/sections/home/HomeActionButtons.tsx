@@ -28,7 +28,7 @@ export const HomeActionButtons = ({
   setLockedMessage,
 }: HomeActionButtonsProps) => {
   const handleOpenGame = (opponent: 'friend' | 'computer' | null = null) => {
-    if (isAuthenticated) {
+    if (isAuthenticated || opponent === 'computer') {
       setInitialOpponent(opponent);
       setShowGameSettings(true);
     } else {
