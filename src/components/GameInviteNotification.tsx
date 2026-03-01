@@ -66,7 +66,6 @@ const GameInviteNotification = () => {
   }, []);
 
   useEffect(() => {
-    if (isInGame) return;
     const uid = getUserId();
     if (!uid) return;
     poll();
@@ -74,7 +73,7 @@ const GameInviteNotification = () => {
     return () => {
       if (pollRef.current) clearInterval(pollRef.current);
     };
-  }, [poll, isInGame]);
+  }, [poll]);
 
   const handleDecline = async () => {
     if (!invite) return;
@@ -93,12 +92,10 @@ const GameInviteNotification = () => {
   };
 
   const handleAccept = async () => {
-    if (isInGame) {
-      const gameFinished = localStorage.getItem('currentGameFinished') === '1';
-      if (!gameFinished) {
-        setShowSurrenderConfirm(true);
-        return;
-      }
+    const gameFinished = localStorage.getItem('currentGameFinished') === '1';
+    if (isInGame && !gameFinished) {
+      setShowSurrenderConfirm(true);
+      return;
     }
     doAccept();
   };
@@ -108,8 +105,26 @@ const GameInviteNotification = () => {
     setAccepting(true);
     const uid = getUserId();
 
+    // Если в активной игре — сдаёмся на сервере и чистим локальные данные
     if (isInGame) {
+      const gameFinished = localStorage.getItem('currentGameFinished') === '1';
+      if (!gameFinished) {
+        const savedOnline = localStorage.getItem('activeOnlineGame');
+        if (savedOnline) {
+          try {
+            const onlineState = JSON.parse(savedOnline);
+            if (onlineState.gameId) {
+              fetch(API.onlineMove, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ action: 'resign', game_id: Number(onlineState.gameId), user_id: uid })
+              }).catch(() => {});
+            }
+          } catch { /* ignore */ }
+        }
+      }
       localStorage.removeItem('activeGame');
+      localStorage.removeItem('activeOnlineGame');
     }
 
     try {
