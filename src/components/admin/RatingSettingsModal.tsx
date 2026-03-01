@@ -197,6 +197,16 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
             </div>
           ))}
 
+          <div className="rounded-xl border border-slate-500/30 bg-slate-600/20 p-4">
+            <div className="flex items-center gap-2 mb-2 font-semibold text-sm text-slate-300">
+              <Icon name="Wifi" size={15} />
+              Когда рейтинг начисляется
+            </div>
+            <p className="text-slate-300 text-sm leading-relaxed">
+              Рейтинг меняется <span className="text-white font-semibold">только в онлайн-играх</span> — когда игрок находит соперника через поиск или матчмейкинг. Партии в режимах <span className="text-slate-400">«Играть с другом»</span> и <span className="text-slate-400">«Играть с компьютером»</span> на рейтинг не влияют — они считаются тренировочными.
+            </p>
+          </div>
+
           <div className="rounded-xl border border-slate-600/30 bg-slate-700/20 p-4">
             <div className="flex items-center gap-2 mb-2 font-semibold text-sm text-slate-400">
               <Icon name="Info" size={15} />
