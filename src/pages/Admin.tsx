@@ -20,7 +20,7 @@ export interface RatingSettings {
   daily_decay: { value: string; description: string };
   initial_rating: { value: string; description: string };
   min_rating: { value: string; description: string };
-  rating_principles: { value: string; description: string };
+  rating_principles?: { value: string; description: string };
 }
 
 export interface SiteSettings {
