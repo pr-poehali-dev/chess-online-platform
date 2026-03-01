@@ -154,10 +154,8 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
         }
 
       `}</style>
-      <div className="block overflow-hidden relative" style={{ 
+      <div className="block overflow-hidden relative w-full" style={{ 
         aspectRatio: '1/1',
-        width: '100%',
-        maxWidth: '100%',
         ...(config.backgroundImage ? {
           backgroundImage: `url(${config.backgroundImage})`,
           backgroundSize: 'cover',
