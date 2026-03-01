@@ -158,7 +158,7 @@ def handler(event: dict, context) -> dict:
             in_queue = cur.fetchone()
             # Проверяем, не была ли уже создана игра для этого пользователя (второй игрок)
             cur.execute(
-                "SELECT id, white_user_id, black_user_id, time_control, is_bot_game, white_username, black_username, white_avatar, black_avatar, white_rating, black_rating FROM online_games WHERE (white_user_id = '%s' OR black_user_id = '%s') AND status = 'active' ORDER BY created_at DESC LIMIT 1"
+                "SELECT id, white_user_id, black_user_id, time_control, is_bot_game, white_username, black_username, white_avatar, black_avatar, white_rating, black_rating FROM online_games WHERE (white_user_id = '%s' OR black_user_id = '%s') AND status = 'playing' AND created_at > NOW() - INTERVAL '30 seconds' ORDER BY created_at DESC LIMIT 1"
                 % (esc(user_id), esc(user_id))
             )
             game_row = cur.fetchone()
