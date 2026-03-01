@@ -109,9 +109,15 @@ export const GameSettingsModal = ({
     if (showGameSettings && initialOpponent) {
       setSelectedOpponent(initialOpponent);
       setStep(2);
-    } else if (showGameSettings) {
-      setStep(1);
-      setSelectedOpponent(null);
+    } else if (showGameSettings && !initialOpponent) {
+      setSelectedOpponent('country');
+      setStep(2);
+      const saved = localStorage.getItem('lastGameSettings');
+      if (saved) {
+        const s = JSON.parse(saved);
+        if (s.time) setSelectedTime(s.time);
+        if (s.color) setSelectedColor(s.color);
+      }
     }
   }, [showGameSettings, initialOpponent]);
 
@@ -312,6 +318,7 @@ export const GameSettingsModal = ({
     if (step === 1) return 'Выбор противника';
     if (step === 2 && selectedOpponent === 'friend') return 'Выбор друга';
     if (step === 2 && selectedOpponent === 'computer') return 'Уровень сложности';
+    if ((step === 2 || step === 3) && !initialOpponent && selectedOpponent === 'country') return 'Настройки партии';
     if ((step === 2 || step === 3) && selectedOpponent !== 'friend' && selectedOpponent !== 'computer') return 'Время';
     if (step === 3) return 'Время';
     return '';
@@ -322,7 +329,7 @@ export const GameSettingsModal = ({
       <Card className="w-full max-w-md bg-white dark:bg-slate-900 border-slate-200 dark:border-white/10 animate-scale-in max-h-[95vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
         <CardHeader className="px-4 sm:px-6 py-2 sm:py-4 pb-1 sm:pb-3">
           <div className="flex items-center justify-between">
-            {(step > 1 || inviteSent) && (
+            {(step > 1 || inviteSent) && !(!initialOpponent && selectedOpponent === 'country') && (
               <Button
                 variant="ghost"
                 size="icon"
@@ -335,9 +342,9 @@ export const GameSettingsModal = ({
             <CardTitle className="flex-1 text-center text-sm sm:text-base text-gray-900 dark:text-white">
               {getTitle()}
             </CardTitle>
-            {(step > 1 || inviteSent) && <div className="w-7 sm:w-10" />}
+            {(step > 1 || inviteSent) && !(!initialOpponent && selectedOpponent === 'country') && <div className="w-7 sm:w-10" />}
           </div>
-          {!inviteSent && (
+          {!inviteSent && !(!initialOpponent && selectedOpponent === 'country') && (
             <div className="flex justify-center gap-1.5 sm:gap-2 mt-2 sm:mt-4">
               {Array.from({ length: getStepCount() }).map((_, i) => (
                 <div 
@@ -421,6 +428,7 @@ export const GameSettingsModal = ({
                   onCycleColor={cycleColor}
                   onStartGame={handleStartGame}
                   isFriendGame={selectedOpponent === 'friend'}
+                  startLabel={!initialOpponent && selectedOpponent === 'country' ? 'Начать партию' : undefined}
                 />
               )}
             </>
