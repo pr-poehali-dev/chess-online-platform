@@ -271,9 +271,9 @@ const Game = () => {
       )}
 
 
-      <main className="flex-1 flex flex-col items-center justify-center py-0.5 sm:px-3 md:px-4 overflow-hidden min-h-0">
-          <div className="flex flex-col gap-0.5 sm:gap-1 md:gap-2 w-full max-w-[700px]">
-            <div className="flex flex-col gap-0.5 sm:gap-1 px-1 sm:px-0">
+      <main className="flex-1 flex flex-col items-center justify-center py-0.5 px-1 sm:px-2 overflow-hidden min-h-0">
+          <div className="flex flex-col gap-0.5 sm:gap-1 w-full max-w-[520px]">
+            <div className="flex flex-col gap-0.5 sm:gap-1">
               <GameControls
                 showSettingsMenu={showSettingsMenu}
                 setShowSettingsMenu={setShowSettingsMenu}
@@ -328,7 +328,7 @@ const Game = () => {
               />
             </div>
 
-            <div style={{ width: '100%', maxWidth: 'min(100vw, 700px, 60vh)', margin: '0 auto' }}>
+            <div style={{ width: '100%', margin: '0 auto' }}>
               <GameBoard
                 board={displayBoard}
                 onSquareClick={handleSquareClick}
@@ -344,7 +344,7 @@ const Game = () => {
               />
             </div>
 
-            <div className="flex flex-col gap-0.5 sm:gap-1 px-1 sm:px-0">
+            <div className="flex flex-col gap-0.5 sm:gap-1">
               <PlayerInfo
                 playerName="Вы"
                 playerColor={playerColor}
