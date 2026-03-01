@@ -182,6 +182,14 @@ def handler(event: dict, context) -> dict:
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor()
 
+    # Читаем настройки матчмейкинга из БД
+    cur.execute("SELECT key, value FROM site_settings WHERE key LIKE 'mm_%'")
+    mm_rows = cur.fetchall()
+    mm_cfg = {r[0]: r[1] for r in mm_rows}
+    HEARTBEAT_TIMEOUT = int(mm_cfg.get('mm_heartbeat_timeout', '10'))
+    DEAD_RECORD_TTL = int(mm_cfg.get('mm_dead_record_ttl', '15'))
+    RATING_RANGE = int(mm_cfg.get('mm_rating_range', '50'))
+
     if action == 'play_bot':
         cur.execute("DELETE FROM matchmaking_queue WHERE user_id = '%s'" % esc(user_id))
         bot_name = random.choice(BOT_NAMES)
@@ -198,7 +206,7 @@ def handler(event: dict, context) -> dict:
     match = None
     matched_stage = None
 
-    HEARTBEAT_FILTER = "AND last_heartbeat > NOW() - INTERVAL '10 seconds'"
+    HEARTBEAT_FILTER = "AND last_heartbeat > NOW() - INTERVAL '%d seconds'" % HEARTBEAT_TIMEOUT
 
     if search_stage == 'city' and city:
         cur.execute(
@@ -219,8 +227,8 @@ def handler(event: dict, context) -> dict:
             matched_stage = 'region'
 
     if not match and search_stage in ('city', 'region', 'rating', 'any'):
-        rating_min = user_rating - 50
-        rating_max = user_rating + 50
+        rating_min = user_rating - RATING_RANGE
+        rating_max = user_rating + RATING_RANGE
         cur.execute(
             "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND rating >= %d AND rating <= %d %s ORDER BY ABS(rating - %d) LIMIT 1"
             % (esc(user_id), esc(time_control), rating_min, rating_max, HEARTBEAT_FILTER, user_rating)
@@ -238,8 +246,8 @@ def handler(event: dict, context) -> dict:
         if match:
             matched_stage = 'any'
 
-    # Чистим «мертвые» записи старше 15 сек
-    cur.execute("DELETE FROM matchmaking_queue WHERE last_heartbeat < NOW() - INTERVAL '15 seconds'")
+    # Чистим «мертвые» записи
+    cur.execute("DELETE FROM matchmaking_queue WHERE last_heartbeat < NOW() - INTERVAL '%d seconds'" % DEAD_RECORD_TTL)
     conn.commit()
 
     if match:
