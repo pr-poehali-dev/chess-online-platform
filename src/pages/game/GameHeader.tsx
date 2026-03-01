@@ -34,38 +34,23 @@ interface GameHeaderProps {
 }
 
 export const GameHeader = ({
-  showSettingsMenu,
-  setShowSettingsMenu,
-  setShowChat,
-  handleExitClick,
-  handleOfferDraw,
-  handleSurrender,
-  handleNewGame,
-  setShowNotifications,
   theme,
 }: GameHeaderProps) => {
   return (
     <header
-      className={`backdrop-blur-sm border-b px-4 py-0.5 sm:py-2 md:py-3 flex items-center justify-center flex-shrink-0 ${
+      className={`backdrop-blur-sm border-b px-4 py-1 flex items-center justify-center flex-shrink-0 ${
         theme === "light"
           ? "bg-white/80 border-slate-300"
           : "bg-stone-900/80 border-stone-700/50"
       }`}
     >
       <h1
-        className={`text-sm sm:text-xl md:text-3xl font-bold text-transparent bg-clip-text bg-gradient-to-r tracking-wide ${
+        className={`text-xs sm:text-sm font-bold text-transparent bg-clip-text bg-gradient-to-r tracking-wide ${
           theme === "light"
             ? "from-amber-600 via-yellow-500 to-amber-600"
             : "from-amber-200 via-yellow-400 to-amber-200"
         }`}
-        style={{
-          fontFamily: "Montserrat, sans-serif",
-          textShadow:
-            theme === "light"
-              ? "0 2px 10px rgba(217, 119, 6, 0.2), 0 0 30px rgba(217, 119, 6, 0.1)"
-              : "0 2px 10px rgba(251, 191, 36, 0.3), 0 0 30px rgba(251, 191, 36, 0.2)",
-          letterSpacing: "0.05em",
-        }}
+        style={{ fontFamily: "Montserrat, sans-serif", letterSpacing: "0.08em" }}
       >
         Лига Шахмат
       </h1>
@@ -90,7 +75,7 @@ const P2PIndicator = ({ isOnline, p2pConnected, p2pQuality, p2pLatency, connecti
   const barH = [8, 13, 18];
 
   return (
-    <div className={`flex items-center justify-center w-[36px] h-[36px] sm:w-[48px] sm:h-[48px] rounded-lg border flex-shrink-0 ${bg} ${color}`} title={`Соединение: ${p2pConnected ? 'P2P прямое' : connectionLost ? 'потеряно' : 'через сервер'}${p2pLatency ? ` (${p2pLatency}ms)` : ''}`}>
+    <div className={`flex items-center justify-center w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] rounded-lg border flex-shrink-0 ${bg} ${color}`} title={`Соединение: ${p2pConnected ? 'P2P прямое' : connectionLost ? 'потеряно' : 'через сервер'}${p2pLatency ? ` (${p2pLatency}ms)` : ''}`}>
       <div className="flex items-end gap-[3px]" style={{ height: '18px' }}>
         {barH.map((h, i) => (
           <div key={i} className={`w-[4px] rounded-sm transition-all duration-300 ${i < bars ? (connectionLost ? 'bg-red-500' : 'bg-current') : (theme === 'light' ? 'bg-slate-300' : 'bg-stone-600')}`} style={{ height: `${h}px` }} />
@@ -215,10 +200,10 @@ export const GameControls = ({
           </div>
         </div>
       )}
-      <div className="flex items-center gap-1.5 sm:gap-2 h-[36px] sm:h-[52px]">
+      <div className="flex items-center gap-1.5 sm:gap-2 h-[36px] sm:h-[40px]">
         <button
           onClick={handleExitClick}
-          className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[52px] sm:h-[52px] flex items-center justify-center flex-shrink-0 ${
+          className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
             theme === "light"
               ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
               : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
@@ -231,7 +216,7 @@ export const GameControls = ({
         </button>
         <button
           onClick={() => setShowChat(true)}
-          className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[52px] sm:h-[52px] flex items-center justify-center flex-shrink-0 ${
+          className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center flex-shrink-0 ${
             theme === "light"
               ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
               : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
@@ -243,7 +228,7 @@ export const GameControls = ({
         <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
-            className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[52px] sm:h-[52px] flex items-center justify-center ${
+            className={`border rounded-lg transition-colors w-[36px] h-[36px] sm:w-[40px] sm:h-[40px] flex items-center justify-center ${
               theme === "light"
                 ? "bg-white/80 hover:bg-slate-100 border-slate-300 text-slate-700 hover:text-slate-900"
                 : "bg-stone-800/50 hover:bg-stone-700/50 border-stone-700/30 text-stone-300 hover:text-stone-100"
@@ -255,19 +240,17 @@ export const GameControls = ({
           {showSettingsMenu && (
             <>
               <div
-                className={`fixed inset-0 z-40 md:bg-transparent ${
-                  theme === "light" ? "bg-black/30" : "bg-black/50"
-                }`}
+                className="fixed inset-0 z-40"
                 onClick={() => setShowSettingsMenu(false)}
               />
               <div
-                className={`fixed md:absolute inset-x-0 bottom-0 md:inset-x-auto md:bottom-auto md:right-0 md:mt-2 md:w-56 md:rounded-lg rounded-t-2xl shadow-xl border overflow-hidden z-50 md:animate-scale-in animate-in slide-in-from-bottom duration-200 max-h-[80vh] overflow-y-auto ${
+                className={`absolute right-0 mt-2 w-64 rounded-lg shadow-xl border z-50 animate-in fade-in slide-in-from-top-2 duration-150 overflow-y-auto ${
                   theme === "light"
                     ? "bg-white border-slate-300"
                     : "bg-stone-800 border-stone-700/50"
                 }`}
+                style={{ maxHeight: 'min(80vh, calc(100dvh - 120px))' }}
               >
-                <div className="md:hidden w-10 h-1 rounded-full bg-slate-300 dark:bg-stone-600 mx-auto mt-2 mb-1" />
                 <button
                   onClick={() => {
                     if (setTheme) {
