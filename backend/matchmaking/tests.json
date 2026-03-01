@@ -43,6 +43,14 @@
       "bodyMatcher": "partial"
     },
     {
+      "name": "Check active game for user",
+      "method": "GET",
+      "path": "/?user_id=test-match-002",
+      "expectedStatus": 200,
+      "expectedBody": {"in_queue": false},
+      "bodyMatcher": "partial"
+    },
+    {
       "name": "Play with bot",
       "method": "POST",
       "path": "/",

@@ -90,6 +90,26 @@ const useMatchmaking = () => {
     }, 2000);
   }, [cleanup]);
 
+  const checkActiveGame = useCallback(async (userId: string) => {
+    if (abortedRef.current || matchFoundRef.current) return;
+    try {
+      const res = await fetch(`${MATCHMAKING_URL}?user_id=${encodeURIComponent(userId)}`);
+      if (!res.ok) return;
+      const data = await res.json();
+      if (data.active_game && !matchFoundRef.current) {
+        handleMatchFound({
+          opponent_name: data.active_game.opponent_name,
+          opponent_rating: data.active_game.opponent_rating,
+          opponent_avatar: data.active_game.opponent_avatar,
+          player_color: data.active_game.player_color,
+          game_id: data.active_game.game_id
+        }, data.active_game.is_bot_game);
+      }
+    } catch {
+      // Network error
+    }
+  }, [handleMatchFound]);
+
   const doSearch = useCallback(async (user: { id: string; name?: string; avatar?: string; rating?: number; city?: string; region?: string }, stage: SearchStage) => {
     if (abortedRef.current || matchFoundRef.current) return;
 
@@ -117,11 +137,14 @@ const useMatchmaking = () => {
 
       if (data.status === 'matched') {
         handleMatchFound(data);
+      } else {
+        // Второй игрок: проверяем, не создана ли уже игра для нас
+        await checkActiveGame(user.id);
       }
     } catch {
       // Network error, will retry on next poll
     }
-  }, [opponentType, timeControl, handleMatchFound]);
+  }, [opponentType, timeControl, handleMatchFound, checkActiveGame]);
 
   const advanceToNextStage = useCallback((user: { id: string; name?: string; avatar?: string; rating?: number; city?: string; region?: string }) => {
     if (abortedRef.current || matchFoundRef.current) return;

@@ -156,9 +156,32 @@ def handler(event: dict, context) -> dict:
             cur = conn.cursor()
             cur.execute("SELECT id FROM matchmaking_queue WHERE user_id = '%s'" % esc(user_id))
             in_queue = cur.fetchone()
+            # Проверяем, не была ли уже создана игра для этого пользователя (второй игрок)
+            cur.execute(
+                "SELECT id, white_user_id, black_user_id, time_control, is_bot_game, white_username, black_username, white_avatar, black_avatar, white_rating, black_rating FROM online_games WHERE (white_user_id = '%s' OR black_user_id = '%s') AND status = 'active' ORDER BY created_at DESC LIMIT 1"
+                % (esc(user_id), esc(user_id))
+            )
+            game_row = cur.fetchone()
             cur.close()
             conn.close()
-            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'in_queue': bool(in_queue)})}
+            result = {'in_queue': bool(in_queue)}
+            if game_row:
+                game_id = game_row[0]
+                is_white = game_row[1] == user_id
+                player_color = 'white' if is_white else 'black'
+                opp_name = game_row[6] if is_white else game_row[5]
+                opp_avatar = game_row[8] if is_white else game_row[7]
+                opp_rating = game_row[10] if is_white else game_row[9]
+                result['active_game'] = {
+                    'game_id': game_id,
+                    'player_color': player_color,
+                    'opponent_name': opp_name,
+                    'opponent_rating': opp_rating,
+                    'opponent_avatar': opp_avatar or '',
+                    'time_control': game_row[3],
+                    'is_bot_game': game_row[4]
+                }
+            return {'statusCode': 200, 'headers': headers, 'body': json.dumps(result)}
         return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'game_id or user_id required'})}
 
     if event.get('httpMethod') != 'POST':
