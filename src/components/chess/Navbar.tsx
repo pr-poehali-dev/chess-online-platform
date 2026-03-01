@@ -131,8 +131,8 @@ const Navbar = ({
   };
 
   return (
-    <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in">
-      <div className="container mx-auto px-3 sm:px-4 py-0 overflow-hidden">
+    <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in h-[66px] sm:h-[88px] overflow-hidden">
+      <div className="container mx-auto px-3 sm:px-4 h-full">
         <div className="flex items-center justify-between gap-2">
           <button 
             onClick={() => setActiveSection('home')}
