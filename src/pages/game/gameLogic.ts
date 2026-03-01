@@ -550,7 +550,7 @@ export const getBestMove = (
   difficulty: 'hard' | 'master',
   botColor: 'white' | 'black' = 'black'
 ): { from: Position; to: Position } => {
-  const depth = difficulty === 'master' ? 4 : 3;
+  const depth = difficulty === 'master' ? 5 : 3;
   const noise = difficulty === 'master' ? 0 : 10;
 
   const sorted = sortMoves(board, moves);

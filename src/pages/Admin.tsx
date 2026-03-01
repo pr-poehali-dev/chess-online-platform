@@ -4,6 +4,7 @@ import Icon from '@/components/ui/icon';
 import { RatingSettingsModal } from '@/components/admin/RatingSettingsModal';
 import { ButtonVisibilityModal } from '@/components/admin/ButtonVisibilityModal';
 import { LevelAccessModal } from '@/components/admin/LevelAccessModal';
+import { BotDifficultyModal } from '@/components/admin/BotDifficultyModal';
 import AdminLogin from '@/pages/admin/AdminLogin';
 import AdminStatsCards from '@/pages/admin/AdminStatsCards';
 import AdminWipeSection from '@/pages/admin/AdminWipeSection';
@@ -32,6 +33,7 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
   const [showRatingModal, setShowRatingModal] = useState(false);
   const [showButtonsModal, setShowButtonsModal] = useState(false);
   const [showLevelsModal, setShowLevelsModal] = useState(false);
+  const [showBotDiffModal, setShowBotDiffModal] = useState(false);
   const [settings, setSettings] = useState<RatingSettings | null>(null);
   const [siteSettings, setSiteSettings] = useState<SiteSettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -162,6 +164,13 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
       title: 'Видимость кнопок на сайте',
       description: getButtonsDescription(),
       onClick: () => openWithRetry(() => setShowButtonsModal(true))
+    },
+    {
+      id: 'bot',
+      icon: 'Bot',
+      title: 'Уровни сложности бота',
+      description: 'Лёгкий • Средний • Сложный • Мастер — навыки и алгоритм каждого уровня',
+      onClick: () => setShowBotDiffModal(true)
     }
   ];
 
@@ -256,6 +265,10 @@ const AdminPanel = ({ adminEmail, onLogout }: { adminEmail: string; onLogout: ()
           onSave={handleSiteSave}
           onClose={() => setShowLevelsModal(false)}
         />
+      )}
+
+      {showBotDiffModal && (
+        <BotDifficultyModal onClose={() => setShowBotDiffModal(false)} />
       )}
     </div>
   );
