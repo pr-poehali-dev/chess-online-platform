@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { Board, Position, pieceImages, pieceSymbols, BoardTheme, boardThemes } from './gameTypes';
 
 export type GameResult = 'win' | 'loss' | 'draw' | 'opponent_resigned' | null;
@@ -31,7 +31,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
     piece: { type: string; color: string };
     from: Position;
     to: Position;
-    progress: 'sliding' | 'done';
+    animated: boolean;
   } | null>(null);
 
   const prevLastMoveRef = useRef<{ from: Position; to: Position } | null>(null);
@@ -51,14 +51,24 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
     const piece = board[lastMove.to.row]?.[lastMove.to.col];
     if (!piece) return;
 
-    setAnimatingMove({ piece, from: lastMove.from, to: lastMove.to, progress: 'sliding' });
+    // Сначала рендерим на начальной позиции (без transform)
+    setAnimatingMove({ piece, from: lastMove.from, to: lastMove.to, animated: false });
 
     const timer = setTimeout(() => {
       setAnimatingMove(null);
-    }, 500);
+    }, 400);
 
     return () => clearTimeout(timer);
   }, [lastMove, board]);
+
+  // После первого рендера на from — запускаем анимацию к to
+  useLayoutEffect(() => {
+    if (!animatingMove || animatingMove.animated) return;
+    const raf = requestAnimationFrame(() => {
+      setAnimatingMove(prev => prev ? { ...prev, animated: true } : null);
+    });
+    return () => cancelAnimationFrame(raf);
+  }, [animatingMove?.from, animatingMove?.to]);
 
   const toViewPos = (pos: Position) => ({
     row: flipped ? 7 - pos.row : pos.row,
@@ -66,16 +76,19 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
   });
 
   const isHiddenByAnimation = (rowIndex: number, colIndex: number) => {
-    if (!animatingMove || animatingMove.progress !== 'sliding') return false;
+    if (!animatingMove) return false;
     return rowIndex === animatingMove.to.row && colIndex === animatingMove.to.col;
   };
 
   const renderOverlayPiece = () => {
-    if (!animatingMove || animatingMove.progress !== 'sliding') return null;
+    if (!animatingMove) return null;
 
     const fromView = toViewPos(animatingMove.from);
     const toView = toViewPos(animatingMove.to);
     const p = animatingMove.piece;
+
+    const dx = animatingMove.animated ? (toView.col - fromView.col) * 100 : 0;
+    const dy = animatingMove.animated ? (toView.row - fromView.row) * 100 : 0;
 
     const overlayStyle: React.CSSProperties = {
       position: 'absolute',
@@ -88,12 +101,10 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
       display: 'flex',
       alignItems: 'center',
       justifyContent: 'center',
-      animation: 'pieceOverlaySlide 0.5s ease-out forwards',
-      '--target-left': `${toView.col * 12.5}%`,
-      '--target-top': `${toView.row * 12.5}%`,
-      '--start-left': `${fromView.col * 12.5}%`,
-      '--start-top': `${fromView.row * 12.5}%`,
-    } as React.CSSProperties;
+      transform: `translate(${dx}%, ${dy}%)`,
+      transition: animatingMove.animated ? 'transform 0.22s cubic-bezier(0.4, 0, 0.2, 1)' : 'none',
+      willChange: 'transform',
+    };
 
     if (useImages) {
       return (
@@ -141,16 +152,7 @@ export const GameBoard = ({ board, onSquareClick, isSquareSelected, isSquarePoss
           from { opacity: 0; transform: scale(0.3); }
           to { opacity: 1; transform: scale(1); }
         }
-        @keyframes pieceOverlaySlide {
-          from {
-            left: var(--start-left);
-            top: var(--start-top);
-          }
-          to {
-            left: var(--target-left);
-            top: var(--target-top);
-          }
-        }
+
       `}</style>
       <div className="block overflow-hidden relative w-full" style={{ 
         aspectRatio: '1/1',
