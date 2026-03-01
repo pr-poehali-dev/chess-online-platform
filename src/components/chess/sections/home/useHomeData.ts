@@ -293,10 +293,23 @@ export function useHomeData() {
   }, []);
 
   useEffect(() => {
+    const CACHE_KEY = "site_settings_cache";
+    const CACHE_TTL = 60_000;
+    try {
+      const raw = sessionStorage.getItem(CACHE_KEY);
+      if (raw) {
+        const cached = JSON.parse(raw);
+        if (Date.now() - cached.ts < CACHE_TTL) {
+          setSiteSettings(cached.data);
+          return;
+        }
+      }
+    } catch { /* ignore */ }
     fetch(SITE_SETTINGS_URL)
       .then((r) => r.json())
       .then((data) => {
         setSiteSettings(data);
+        try { sessionStorage.setItem(CACHE_KEY, JSON.stringify({ data, ts: Date.now() })); } catch { /* ignore */ }
       })
       .catch(() => {});
   }, []);

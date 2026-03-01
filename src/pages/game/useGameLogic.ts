@@ -663,7 +663,9 @@ export const useGameLogic = (
 
     poll();
 
-    const interval = p2pConnected ? 30000 : 1500;
+    // P2P активен → редкий poll только для синхронизации рематча/сигналов
+    // P2P нет → poll каждые 2s вместо 1.5s (экономия 25%)
+    const interval = p2pConnected ? 30000 : 2000;
 
     const intervalId = setInterval(() => {
       if (!active) return;
