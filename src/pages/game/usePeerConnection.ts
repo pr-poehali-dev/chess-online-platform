@@ -183,12 +183,29 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
       }
     };
 
+    pc.onicegatheringstatechange = () => {
+      console.log('[P2P] ICE gathering:', pc.iceGatheringState);
+    };
+
+    pc.oniceconnectionstatechange = () => {
+      console.log('[P2P] ICE connection:', pc.iceConnectionState);
+      if (pc.iceConnectionState === 'failed') {
+        console.warn('[P2P] ICE failed, restarting ICE...');
+        pc.restartIce();
+      }
+    };
+
     pc.onconnectionstatechange = () => {
       if (pc.connectionState === 'failed' || pc.connectionState === 'disconnected') {
         setP2pConnected(false);
         setLatency(null);
         setQuality('disconnected');
-        console.log('[P2P] Connection state:', pc.connectionState);
+        // Закрываем и очищаем — чтобы initConnection мог переподключиться
+        try { pc.close(); } catch { /* ignore */ }
+        pcRef.current = null;
+        dcRef.current = null;
+        // Переподключение через 3 секунды
+        setTimeout(() => { initConnection(); }, 3000);
       }
     };
 

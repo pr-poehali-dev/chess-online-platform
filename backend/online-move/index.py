@@ -68,6 +68,26 @@ def handler(event: dict, context) -> dict:
             conn.close()
             return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'game_id required'})}
 
+        # Быстрый режим — только сигналы, без состояния игры
+        if qs.get('signals_only') == '1':
+            req_user_id = qs.get('user_id', '')
+            signals = []
+            if req_user_id:
+                safe_uid = req_user_id.replace("'", "''")
+                cur.execute(
+                    "SELECT id, from_user_id, signal_type, signal_data FROM webrtc_signals WHERE game_id = %d AND to_user_id = '%s' AND consumed = FALSE ORDER BY id ASC LIMIT 20"
+                    % (int(game_id), safe_uid)
+                )
+                sig_rows = cur.fetchall()
+                if sig_rows:
+                    sig_ids = ','.join(str(r[0]) for r in sig_rows)
+                    cur.execute("UPDATE webrtc_signals SET consumed = TRUE WHERE id IN (%s)" % sig_ids)
+                    conn.commit()
+                    signals = [{'from': r[1], 'type': r[2], 'data': r[3]} for r in sig_rows]
+            cur.close()
+            conn.close()
+            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'signals': signals})}
+
         cur.execute(
             """SELECT id, white_user_id, white_username, white_avatar, white_rating,
                       black_user_id, black_username, black_avatar, black_rating,
