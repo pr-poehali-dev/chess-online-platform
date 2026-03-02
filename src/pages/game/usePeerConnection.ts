@@ -53,8 +53,8 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
 
   const updateQuality = useCallback((ms: number | null) => {
     if (ms === null) { setQuality('disconnected'); return; }
-    if (ms < 80) setQuality('excellent');
-    else if (ms < 200) setQuality('good');
+    if (ms < 100) setQuality('excellent');
+    else if (ms < 400) setQuality('good');
     else setQuality('poor');
   }, []);
 
@@ -123,14 +123,19 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
     const sendPing = () => {
       if (dcRef.current?.readyState === 'open') {
         dcRef.current.send(JSON.stringify({ type: 'ping', ts: Date.now() }));
-        if (Date.now() - lastPongRef.current > 8000) {
+        const silence = Date.now() - lastPongRef.current;
+        if (silence > 20000) {
+          setP2pConnected(false);
+          setLatency(null);
+          setQuality('disconnected');
+        } else if (silence > 12000) {
           setQuality('poor');
         }
       }
     };
 
     sendPing();
-    pingIntervalRef.current = setInterval(sendPing, 3000);
+    pingIntervalRef.current = setInterval(sendPing, 5000);
 
     return () => {
       if (pingIntervalRef.current) {
