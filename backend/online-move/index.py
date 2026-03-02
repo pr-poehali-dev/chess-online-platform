@@ -101,7 +101,13 @@ def handler(event: dict, context) -> dict:
                 black_time = max(0, black_time - seconds_since_move)
 
         signals = []
+        chat_messages = []
         req_user_id = qs.get('user_id', '')
+        last_chat_id = qs.get('last_chat_id', '0')
+        try:
+            last_chat_id = int(last_chat_id)
+        except Exception:
+            last_chat_id = 0
         if req_user_id:
             safe_uid = req_user_id.replace("'", "''")
             cur.execute(
@@ -114,6 +120,13 @@ def handler(event: dict, context) -> dict:
                 cur.execute("UPDATE webrtc_signals SET consumed = TRUE WHERE id IN (%s)" % sig_ids)
                 conn.commit()
                 signals = [{'from': r[1], 'type': r[2], 'data': r[3]} for r in sig_rows]
+
+            cur.execute(
+                "SELECT id, sender_id, text FROM game_chat_messages WHERE game_id = %d AND id > %d AND sender_id != '%s' ORDER BY id ASC LIMIT 20"
+                % (int(game_id), last_chat_id, safe_uid)
+            )
+            chat_rows = cur.fetchall()
+            chat_messages = [{'id': r[0], 'sender_id': r[1], 'text': r[2]} for r in chat_rows]
 
         cur.close()
         conn.close()
@@ -133,7 +146,8 @@ def handler(event: dict, context) -> dict:
                 'rematch_offered_by': row[21], 'rematch_status': row[22], 'rematch_game_id': row[23],
                 'draw_offered_by': row[24]
             },
-            'signals': signals
+            'signals': signals,
+            'chat_messages': chat_messages
         })}
 
     if event.get('httpMethod') != 'POST':
@@ -314,6 +328,21 @@ def handler(event: dict, context) -> dict:
         cur.close()
         conn.close()
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'finished', 'winner': winner, 'end_reason': 'timeout'})}
+
+    if action == 'chat':
+        text = body.get('text', '').strip()
+        if not text:
+            cur.close()
+            conn.close()
+            return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'text required'})}
+        cur.execute(
+            "INSERT INTO game_chat_messages (game_id, sender_id, text) VALUES (%d, '%s', '%s')"
+            % (g_id, esc(user_id), esc(text[:500]))
+        )
+        conn.commit()
+        cur.close()
+        conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'sent'})}
 
     if status != 'playing':
         cur.close()

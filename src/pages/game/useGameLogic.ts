@@ -195,6 +195,7 @@ export const useGameLogic = (
 
   const historyRef = useRef<HTMLDivElement>(null);
   const onChatMessageRef = useRef<((text: string) => void) | null>(null);
+  const lastChatIdRef = useRef<number>(0);
   const hasPlayedWarning = useRef(false);
   const gameFinished = useRef(false);
   const gameStartTime = useRef(savedState?.gameStartTime || Date.now());
@@ -613,7 +614,7 @@ export const useGameLogic = (
     const poll = async () => {
       try {
         let url = `${ONLINE_MOVE_URL}?game_id=${onlineGameId}`;
-        if (myUserId) url += `&user_id=${encodeURIComponent(myUserId)}`;
+        if (myUserId) url += `&user_id=${encodeURIComponent(myUserId)}&last_chat_id=${lastChatIdRef.current}`;
         const res = await fetch(url);
         if (!res.ok) {
           pollFailCountRef.current++;
@@ -632,6 +633,13 @@ export const useGameLogic = (
 
         if (data.signals && data.signals.length > 0) {
           processSignals(data.signals);
+        }
+
+        if (data.chat_messages && data.chat_messages.length > 0) {
+          for (const cm of data.chat_messages) {
+            if (onChatMessageRef.current) onChatMessageRef.current(cm.text);
+            if (cm.id > lastChatIdRef.current) lastChatIdRef.current = cm.id;
+          }
         }
 
         if (!p2pConnected) {
