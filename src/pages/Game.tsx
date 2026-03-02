@@ -282,7 +282,7 @@ const Game = () => {
           Связь восстановлена
         </div>
       )}
-      {isOnlineReal && opponentReconnecting && !connectionLost && (
+      {isOnlineReal && opponentReconnecting && !connectionLost && gameStatus === 'playing' && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-white text-center text-sm py-2 font-semibold animate-pulse">
           <Icon name="RefreshCw" size={16} className="inline mr-2 -mt-0.5" />
           Соперник переподключается...
