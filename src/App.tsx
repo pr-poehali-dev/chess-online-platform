@@ -37,7 +37,7 @@ const App = () => (
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<Index />} />
-          <Route path="/game" element={<AuthGuard><Game /></AuthGuard>} />
+          <Route path="/game" element={<Game />} />
           <Route path="/online-game" element={<AuthGuard><OnlineGame /></AuthGuard>} />
           <Route path="/admin" element={<Admin />} />
           <Route path="*" element={<NotFound />} />
