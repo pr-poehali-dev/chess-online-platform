@@ -189,12 +189,12 @@ self.onmessage = (e: MessageEvent) => {
   const { board, moves, difficulty, botColor } = e.data as {
     board: Board;
     moves: { from: Position; to: Position }[];
-    difficulty: 'hard' | 'master';
+    difficulty: 'medium' | 'hard' | 'master';
     botColor: 'white' | 'black';
   };
 
-  const depth = difficulty === 'master' ? 4 : 3;
-  const noise = difficulty === 'master' ? 0 : 10;
+  const depth = difficulty === 'master' ? 4 : difficulty === 'hard' ? 3 : 2;
+  const noise = difficulty === 'master' ? 0 : difficulty === 'hard' ? 15 : 60;
 
   const sorted = sortMovesW(board, moves);
   let bestMove = sorted[0];

@@ -441,7 +441,7 @@ export const useGameLogic = (
     if (isOnlineGame) return;
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
-      const delay = difficulty === 'easy' ? 7000 : difficulty === 'medium' ? 5000 : difficulty === 'hard' ? 4000 : 2000;
+      const delay = difficulty === 'easy' ? 1500 : difficulty === 'medium' ? 2500 : difficulty === 'hard' ? 2000 : 1000;
       const timer = setTimeout(() => makeComputerMove(), delay);
       return () => {
         clearTimeout(timer);
@@ -963,10 +963,8 @@ export const useGameLogic = (
       return;
     }
 
-    const workerMoves = difficulty === 'medium'
-      ? [...moves].sort(() => Math.random() - 0.5).slice(0, Math.ceil(moves.length * 0.5))
-      : moves;
-    const workerDiff = difficulty === 'medium' ? 'hard' : difficulty as 'hard' | 'master';
+    const workerMoves = moves;
+    const workerDiff = difficulty as 'medium' | 'hard' | 'master';
 
     if (workerRef.current) workerRef.current.terminate();
     const worker = new Worker(new URL('./chessWorker.ts', import.meta.url), { type: 'module' });

@@ -27,6 +27,7 @@ interface GameHeaderProps {
   onOfferRematch?: () => void;
   rematchSent?: boolean;
   rematchCooldown?: boolean;
+  rematchTimeoutLeft?: number | null;
   isOnline?: boolean;
   p2pConnected?: boolean;
   p2pQuality?: P2PQuality;
@@ -109,6 +110,7 @@ export const GameControls = ({
   onOfferRematch,
   rematchSent,
   rematchCooldown,
+  rematchTimeoutLeft,
   isOnline,
   p2pConnected,
   p2pQuality,
@@ -406,7 +408,9 @@ export const GameControls = ({
             >
               <Icon name={rematchSent ? "Loader2" : "RotateCcw"} size={14} className={rematchSent ? "animate-spin" : ""} />
               <span className="hidden sm:inline whitespace-nowrap">
-                {rematchSent ? "Ожидание..." : "Реванш"}
+                {rematchSent
+                  ? `Ожидание${rematchTimeoutLeft ? ` (${rematchTimeoutLeft}с)` : "..."}`
+                  : "Реванш"}
               </span>
             </button>
           </>

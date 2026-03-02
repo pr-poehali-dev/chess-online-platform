@@ -123,7 +123,7 @@ const Game = () => {
     isOnlineReal ? opponentUserId : undefined,
   );
 
-  const { rematchSent, rematchCooldown, rematchError, setRematchError, offerRematch } = useRematch({
+  const { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch } = useRematch({
     isOnline: isOnlineReal,
     opponentUserId,
     timeControl,
@@ -275,6 +275,7 @@ const Game = () => {
               onOfferRematch={offerRematch}
               rematchSent={rematchSent}
               rematchCooldown={rematchCooldown}
+              rematchTimeoutLeft={rematchTimeoutLeft}
               isOnline={isOnlineReal}
               p2pConnected={p2pConnected}
               p2pQuality={p2pQuality}
