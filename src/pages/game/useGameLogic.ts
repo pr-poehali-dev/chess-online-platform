@@ -192,6 +192,7 @@ export const useGameLogic = (
   const [connectionLost, setConnectionLost] = useState(false);
   const [connectionRestored, setConnectionRestored] = useState(false);
   const [opponentReconnecting, setOpponentReconnecting] = useState(false);
+  const [opponentUserId, setOpponentUserId] = useState<string>('');
   const pollFailCountRef = useRef(0);
 
   const historyRef = useRef<HTMLDivElement>(null);
@@ -688,6 +689,12 @@ export const useGameLogic = (
         if (data.game.rematch_game_id) setRematchGameId(data.game.rematch_game_id);
         setDrawOfferedBy(data.game.draw_offered_by || null);
 
+        // Определяем ID соперника для синхронизации чата
+        if (data.game.white_user_id && data.game.black_user_id && myUserId) {
+          const oppId = playerColor === 'white' ? data.game.black_user_id : data.game.white_user_id;
+          if (oppId) setOpponentUserId(oppId);
+        }
+
         if (!onlineReadyRef.current) {
           onlineReadyRef.current = true;
           setOnlineReady(true);
@@ -1081,6 +1088,7 @@ export const useGameLogic = (
     connectionLost,
     connectionRestored,
     opponentReconnecting,
+    opponentUserId,
     p2pConnected,
     p2pLatency,
     p2pQuality,

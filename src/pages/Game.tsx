@@ -106,6 +106,7 @@ const Game = () => {
     connectionLost,
     connectionRestored,
     opponentReconnecting,
+    opponentUserId,
     p2pConnected,
     p2pLatency,
     p2pQuality,
@@ -188,7 +189,7 @@ const Game = () => {
     handleConfirmDialogCancel,
     openChat,
     unreadChatCount,
-  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined, isOnlineReal ? sendPeerMessage : undefined, isOnlineReal ? onChatMessageRef : undefined);
+  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined, isOnlineReal ? sendPeerMessage : undefined, isOnlineReal ? onChatMessageRef : undefined, isOnlineReal ? opponentUserId : undefined);
 
   const [rematchSent, setRematchSent] = useState(false);
   const [rematchCooldown, setRematchCooldown] = useState(false);

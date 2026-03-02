@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
 import type React from 'react';
 import { useNavigate } from 'react-router-dom';
+import API from '@/config/api';
 
 export interface ConfirmState {
   open: boolean;
@@ -19,7 +20,8 @@ export const useGameHandlers = (
   onlineGameId?: number,
   onlineMoveUrl?: string,
   sendPeerMessage?: (msg: { type: string; data?: unknown }) => boolean,
-  onChatMessageRef?: React.MutableRefObject<((text: string) => void) | null>
+  onChatMessageRef?: React.MutableRefObject<((text: string) => void) | null>,
+  opponentUserId?: string
 ) => {
   const navigate = useNavigate();
   const [isDragging, setIsDragging] = useState(false);
@@ -59,9 +61,24 @@ export const useGameHandlers = (
       setTimeout(() => {
         if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
       }, 100);
+
+      // Сохраняем входящее сообщение в переписку с другом
+      if (opponentUserId) {
+        const saved = localStorage.getItem('chessUser');
+        if (saved) {
+          const u = JSON.parse(saved);
+          const uid = 'u_' + (u.email || u.name || 'anonymous').replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+          // Сохраняем как сообщение от соперника к нам
+          fetch(API.chat, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ action: 'send', from_user_id: opponentUserId, to_user_id: uid, text })
+          }).catch(() => {});
+        }
+      }
     };
     return () => { onChatMessageRef.current = null; };
-  }, [onChatMessageRef]);
+  }, [onChatMessageRef, opponentUserId]);
 
   const showConfirm = useCallback((message: string, onConfirm: () => void, opts?: { title?: string; variant?: 'danger' | 'info' }) => {
     pendingActionRef.current = onConfirm;
@@ -193,6 +210,20 @@ export const useGameHandlers = (
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
           body: JSON.stringify({ action: 'chat', game_id: onlineGameId, user_id: uid, text })
+        }).catch(() => {});
+      }
+    }
+
+    // Сохраняем в переписку с другом (чат вне партии)
+    if (opponentUserId) {
+      const saved = localStorage.getItem('chessUser');
+      if (saved) {
+        const u = JSON.parse(saved);
+        const uid = 'u_' + (u.email || u.name || 'anonymous').replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+        fetch(API.chat, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'send', from_user_id: uid, to_user_id: opponentUserId, text })
         }).catch(() => {});
       }
     }

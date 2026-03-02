@@ -152,11 +152,11 @@ const Navbar = ({
       } catch { /* ignore */ }
     };
     fetchUnread();
-    const interval = setInterval(fetchUnread, 30000);
+    const interval = setInterval(fetchUnread, 15000);
     return () => clearInterval(interval);
   }, [isAuthenticated]);
 
-  const hasAnyBadge = pendingFriendsCount > 0 || unreadMessagesCount > 0;
+  const friendsTotalBadge = pendingFriendsCount + unreadMessagesCount;
   const menuRef = useRef<HTMLDivElement>(null);
   const menuBtnRef = useRef<HTMLButtonElement>(null);
 
@@ -262,7 +262,7 @@ const Navbar = ({
                   className="relative p-2 rounded-lg hover:bg-slate-100 dark:hover:bg-white/10 transition-colors text-slate-700 dark:text-slate-300"
                 >
                   <Icon name="Menu" size={24} />
-                  {hasAnyBadge && <Dot />}
+                  {friendsTotalBadge > 0 && <Dot />}
                 </button>
 
                 {showMenu && (
@@ -286,10 +286,10 @@ const Navbar = ({
                       >
                         <div className="relative">
                           <Icon name="Users" size={20} />
-                          {pendingFriendsCount > 0 && <Dot />}
+                          {friendsTotalBadge > 0 && <Dot />}
                         </div>
                         <span className="flex-1">Друзья</span>
-                        <Badge count={pendingFriendsCount} />
+                        {friendsTotalBadge > 0 && <Badge count={friendsTotalBadge} />}
                       </button>
                       <button
                         onClick={() => {
