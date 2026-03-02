@@ -49,6 +49,8 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
   const onMessageRef = useRef(onMessage);
   const pingIntervalRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const lastPongRef = useRef<number>(Date.now());
+  const iceCandidateQueueRef = useRef<RTCIceCandidateInit[]>([]);
+  const remoteDescSetRef = useRef(false);
   onMessageRef.current = onMessage;
 
   const updateQuality = useCallback((ms: number | null) => {
@@ -145,6 +147,17 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
     };
   }, [p2pConnected]);
 
+  const drainIceQueue = useCallback(async (pc: RTCPeerConnection) => {
+    while (iceCandidateQueueRef.current.length > 0) {
+      const candidate = iceCandidateQueueRef.current.shift()!;
+      try {
+        await pc.addIceCandidate(new RTCIceCandidate(candidate));
+      } catch (e) {
+        console.warn('[P2P] ICE queue drain error:', e);
+      }
+    }
+  }, []);
+
   const processSignals = useCallback(async (signals: { from: string; type: string; data: string }[]) => {
     const pc = pcRef.current;
     if (!pc) return;
@@ -154,25 +167,35 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
         if (sig.type === 'offer') {
           const offer = JSON.parse(sig.data);
           await pc.setRemoteDescription(new RTCSessionDescription(offer));
+          remoteDescSetRef.current = true;
+          await drainIceQueue(pc);
           const answer = await pc.createAnswer();
           await pc.setLocalDescription(answer);
           await sendSignal('answer', JSON.stringify(answer));
         } else if (sig.type === 'answer') {
           const answer = JSON.parse(sig.data);
           await pc.setRemoteDescription(new RTCSessionDescription(answer));
+          remoteDescSetRef.current = true;
+          await drainIceQueue(pc);
         } else if (sig.type === 'ice') {
           const candidate = JSON.parse(sig.data);
-          await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          if (remoteDescSetRef.current) {
+            await pc.addIceCandidate(new RTCIceCandidate(candidate));
+          } else {
+            iceCandidateQueueRef.current.push(candidate);
+          }
         }
       } catch (e) {
         console.warn('[P2P] Signal processing error:', e);
       }
     }
-  }, [sendSignal]);
+  }, [sendSignal, drainIceQueue]);
 
   const initConnection = useCallback(async () => {
     if (pcRef.current) return;
     setP2pAttempted(true);
+    iceCandidateQueueRef.current = [];
+    remoteDescSetRef.current = false;
 
     const pc = new RTCPeerConnection({ iceServers: ICE_SERVERS });
     pcRef.current = pc;
