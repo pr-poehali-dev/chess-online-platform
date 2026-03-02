@@ -178,6 +178,21 @@ def handler(event: dict, context) -> dict:
     def esc(val):
         return str(val).replace("'", "''")
 
+    if action == 'chat':
+        text = body.get('text', '').strip()[:500]
+        if not text:
+            cur.close(); conn.close()
+            return {'statusCode': 400, 'headers': headers, 'body': json.dumps({'error': 'text required'})}
+        to_user = black_uid if user_id == white_uid else white_uid
+        import json as _json
+        cur.execute(
+            "INSERT INTO webrtc_signals (game_id, from_user_id, to_user_id, signal_type, signal_data) VALUES (%d, '%s', '%s', 'chat', '%s')"
+            % (g_id, esc(user_id), esc(to_user), esc(_json.dumps({'text': text})))
+        )
+        conn.commit()
+        cur.close(); conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'sent'})}
+
     if action == 'signal':
         signal_type = body.get('signal_type', '')
         signal_data = body.get('signal_data', '')

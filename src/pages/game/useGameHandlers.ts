@@ -182,9 +182,19 @@ export const useGameHandlers = (
     setChatMessages(prev => [...prev, newMessage]);
     setChatMessage('');
 
-    // Отправляем через P2P
-    if (sendPeerMessage) {
-      sendPeerMessage({ type: 'chat', data: { text } });
+    // Отправляем через P2P, при неудаче — через сервер (эфемерно, без хранения)
+    const sent = sendPeerMessage ? sendPeerMessage({ type: 'chat', data: { text } }) : false;
+    if (!sent && onlineGameId && onlineMoveUrl) {
+      const saved = localStorage.getItem('chessUser');
+      if (saved) {
+        const u = JSON.parse(saved);
+        const uid = 'u_' + (u.email || u.name || 'anonymous').replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+        fetch(onlineMoveUrl, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ action: 'chat', game_id: onlineGameId, user_id: uid, text })
+        }).catch(() => {});
+      }
     }
 
     setTimeout(() => {

@@ -631,7 +631,15 @@ export const useGameLogic = (
         setConnectionLost(false);
 
         if (data.signals && data.signals.length > 0) {
-          processSignals(data.signals);
+          const chatSignals = data.signals.filter((s: { type: string }) => s.type === 'chat');
+          const rtcSignals = data.signals.filter((s: { type: string }) => s.type !== 'chat');
+          for (const s of chatSignals) {
+            try {
+              const payload = JSON.parse(s.data);
+              if (payload.text && onChatMessageRef.current) onChatMessageRef.current(payload.text);
+            } catch { /* ignore */ }
+          }
+          if (rtcSignals.length > 0) processSignals(rtcSignals);
         }
 
         if (!p2pConnected) {
