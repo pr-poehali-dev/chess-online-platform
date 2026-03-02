@@ -191,6 +191,7 @@ export const useGameLogic = (
   const onlineReadyRef = useRef(!isOnlineGame);
   const [connectionLost, setConnectionLost] = useState(false);
   const [connectionRestored, setConnectionRestored] = useState(false);
+  const [opponentReconnecting, setOpponentReconnecting] = useState(false);
   const pollFailCountRef = useRef(0);
 
   const historyRef = useRef<HTMLDivElement>(null);
@@ -580,8 +581,17 @@ export const useGameLogic = (
         const remaining = Math.max(0, 60 - secondsSinceMove);
         if (result.currentPlayer === playerColor) {
           setInactivityTimer(remaining);
+          setOpponentReconnecting(false);
         } else {
-          setOpponentInactivityTimer(remaining);
+          // Если соперник долго не ходит — показываем баннер "переподключается"
+          // и даём ему увеличенный лимит (90 сек)
+          const extendedRemaining = Math.max(0, 90 - secondsSinceMove);
+          setOpponentInactivityTimer(extendedRemaining);
+          if (secondsSinceMove > 10 && secondsSinceMove < 80) {
+            setOpponentReconnecting(true);
+          } else {
+            setOpponentReconnecting(false);
+          }
         }
       }
 
@@ -605,6 +615,16 @@ export const useGameLogic = (
     setWhiteTime(wTime);
     setBlackTime(bTime);
   }, [playerColor, playMoveSound]);
+
+  // Отправляем reconnect при старте — сбрасываем таймер бездействия на сервере
+  useEffect(() => {
+    if (!isOnlineGame || !onlineGameId || !myUserId) return;
+    fetch(ONLINE_MOVE_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ action: 'reconnect', game_id: onlineGameId, user_id: myUserId })
+    }).catch(() => {});
+  }, [isOnlineGame, onlineGameId, myUserId]);
 
   useEffect(() => {
     if (!isOnlineGame || !onlineGameId) return;
@@ -1060,6 +1080,7 @@ export const useGameLogic = (
     userRating,
     connectionLost,
     connectionRestored,
+    opponentReconnecting,
     p2pConnected,
     p2pLatency,
     p2pQuality,

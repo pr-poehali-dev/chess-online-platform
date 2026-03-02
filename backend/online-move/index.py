@@ -213,6 +213,16 @@ def handler(event: dict, context) -> dict:
         cur.close(); conn.close()
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'sent'})}
 
+    if action == 'reconnect':
+        # Сбрасываем last_move_at только если сейчас ход соперника (не наш)
+        # Это предотвращает срабатывание таймера бездействия у ожидающего
+        if status == 'playing' and player_color != current_player:
+            cur.execute("UPDATE online_games SET last_move_at = NOW() WHERE id = %d" % g_id)
+            conn.commit()
+        cur.close(); conn.close()
+        return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'ok'})}
+
+
     if action == 'signal':
         signal_type = body.get('signal_type', '')
         signal_data = body.get('signal_data', '')
