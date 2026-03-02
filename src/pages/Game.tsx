@@ -14,9 +14,13 @@ import { OpponentLeftModal } from './game/OpponentLeftModal';
 import { GameHeader, GameControls } from './game/GameHeader';
 import { ConfirmDialog } from './game/ConfirmDialog';
 import { useGameLogic } from './game/useGameLogic';
-import API from '@/config/api';
 import { useGameHandlers } from './game/useGameHandlers';
+import { useRematch } from './game/useRematch';
+import API from '@/config/api';
 import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
+
+const BOT_AVATAR = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
+const GUEST_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=Opponent';
 
 const Game = () => {
   const [searchParams] = useSearchParams();
@@ -30,28 +34,43 @@ const Game = () => {
   const paramOpponentName = searchParams.get('opponent_name') ? decodeURIComponent(searchParams.get('opponent_name')!) : '';
   const paramOpponentRating = searchParams.get('opponent_rating') ? Number(searchParams.get('opponent_rating')) : 0;
   const paramOpponentAvatar = searchParams.get('opponent_avatar') ? decodeURIComponent(searchParams.get('opponent_avatar')!) : '';
-  
+
   const [playerColor] = useState<'white' | 'black'>(() => {
     if (colorParam === 'white') return 'white';
     if (colorParam === 'black') return 'black';
     return Math.random() < 0.5 ? 'white' : 'black';
   });
-  
-  const flipped = playerColor === 'black';
 
+  const flipped = playerColor === 'black';
+  const isPlayingWithBot = (!opponentType || opponentType === 'random') && !isOnlineReal;
+
+  const savedUser = localStorage.getItem('chessUser');
+  const userData = savedUser ? JSON.parse(savedUser) : null;
+  const userAvatar = userData?.avatar || '';
+  const myUserId = userData
+    ? 'u_' + (userData.email || userData.name || 'anonymous').replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60)
+    : '';
+
+  const opponentAvatar = isOnlineReal
+    ? (paramOpponentAvatar || '')
+    : (isPlayingWithBot || isBotFromMatchmaking) ? BOT_AVATAR : GUEST_AVATAR;
+  const opponentName = isOnlineReal
+    ? (paramOpponentName || 'Соперник')
+    : (isPlayingWithBot || isBotFromMatchmaking) ? (paramOpponentName || 'Бот') : 'Соперник';
+  const opponentRating = isOnlineReal
+    ? (paramOpponentRating || undefined)
+    : (isPlayingWithBot ? undefined : paramOpponentRating || undefined);
+
+  // Wake lock — экран не гаснет во время партии
   const wakeLockRef = useRef<WakeLockSentinel | null>(null);
   useEffect(() => {
-    const requestWakeLock = async () => {
+    const request = async () => {
       try {
-        if ('wakeLock' in navigator) {
-          wakeLockRef.current = await navigator.wakeLock.request('screen');
-        }
-      } catch { /* wake lock not available */ }
+        if ('wakeLock' in navigator) wakeLockRef.current = await navigator.wakeLock.request('screen');
+      } catch { /* не поддерживается */ }
     };
-    requestWakeLock();
-    const onVisibility = () => {
-      if (document.visibilityState === 'visible') requestWakeLock();
-    };
+    request();
+    const onVisibility = () => { if (document.visibilityState === 'visible') request(); };
     document.addEventListener('visibilitychange', onVisibility);
     return () => {
       document.removeEventListener('visibilitychange', onVisibility);
@@ -59,67 +78,64 @@ const Game = () => {
     };
   }, []);
 
-  const [showOpponentProfile, setShowOpponentProfile] = useState(false);
-  const [showMyProfile, setShowMyProfile] = useState(false);
-  
-  const savedUser = localStorage.getItem('chessUser');
-  const userData = savedUser ? JSON.parse(savedUser) : null;
-  const userAvatar = userData?.avatar || '';
-  const myUserId = userData ? 'u_' + (userData.email || userData.name || 'anonymous').replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60) : '';
-  const isPlayingWithBot = (!opponentType || opponentType === 'random') && !isOnlineReal;
-  
-  const botAvatar = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
-  const opponentAvatar = isOnlineReal ? (paramOpponentAvatar || '') : (isPlayingWithBot || isBotFromMatchmaking) ? botAvatar : 'https://api.dicebear.com/7.x/avataaars/svg?seed=Opponent';
-  const opponentName = isOnlineReal ? (paramOpponentName || 'Соперник') : (isPlayingWithBot || isBotFromMatchmaking) ? (paramOpponentName || 'Бот') : 'Соперник';
-  const opponentRating = isOnlineReal ? (paramOpponentRating || undefined) : (isPlayingWithBot ? undefined : paramOpponentRating || undefined);
-
   const {
-    displayBoard,
-    currentPlayer,
-    whiteTime,
-    blackTime,
-    gameStatus,
-    setGameStatus,
-    moveHistory,
-    currentMoveIndex,
-    inactivityTimer,
-    opponentInactivityTimer,
-    capturedByWhite,
-    capturedByBlack,
-    kingInCheckPosition,
-    lastMove,
+    displayBoard, currentPlayer, whiteTime, blackTime,
+    gameStatus, setGameStatus, moveHistory, currentMoveIndex,
+    inactivityTimer, opponentInactivityTimer,
+    capturedByWhite, capturedByBlack,
+    kingInCheckPosition, lastMove,
     endReason: serverEndReason,
-    rematchOfferedBy,
-    rematchStatus,
-    rematchGameId,
-    drawOfferedBy,
-    setCurrentPlayer,
-    showPossibleMoves,
-    setShowPossibleMoves,
-    theme,
-    setTheme,
-    boardTheme,
-    setBoardTheme,
-    ratingChange,
-    newRating,
-    userRating,
-    connectionLost,
-    connectionRestored,
-    opponentReconnecting,
-    opponentUserId,
-    p2pConnected,
-    p2pLatency,
-    p2pQuality,
-    sendPeerMessage,
-    onChatMessageRef,
-    historyRef,
-    handleSquareClick,
-    isSquareSelected,
-    isSquarePossibleMove,
-    handlePreviousMove,
-    handleNextMove
+    rematchOfferedBy, rematchStatus, rematchGameId, drawOfferedBy,
+    setCurrentPlayer, showPossibleMoves, setShowPossibleMoves,
+    theme, setTheme, boardTheme, setBoardTheme,
+    ratingChange, newRating, userRating,
+    connectionLost, connectionRestored, opponentReconnecting,
+    opponentUserId, p2pConnected, p2pLatency, p2pQuality,
+    sendPeerMessage, onChatMessageRef, historyRef,
+    handleSquareClick, isSquareSelected, isSquarePossibleMove,
+    handlePreviousMove, handleNextMove,
   } = useGameLogic(difficulty, timeControl, playerColor, isOnlineReal ? Number(onlineGameId) : undefined);
 
+  const {
+    isDragging, showExitDialog, showChat, setShowChat,
+    showSettingsMenu, setShowSettingsMenu,
+    showDrawOffer, setShowDrawOffer,
+    showNotifications, setShowNotifications,
+    showRematchOffer, setShowRematchOffer,
+    showOpponentLeft, setShowOpponentLeft, opponentLeftReason,
+    chatMessage, setChatMessage, chatMessages, chatEndRef,
+    handleMouseDown, handleMouseMove, handleMouseUpOrLeave,
+    handleExitClick, handleSurrender, handleContinue,
+    handleSendMessage, handleChatKeyPress,
+    handleBlockOpponent, handleUnblockOpponent,
+    isChatBlocked, isChatBlockedByOpponent,
+    handleOfferDraw, handleAcceptDraw, handleDeclineDraw,
+    handleNewGame, handleAcceptRematch, handleDeclineRematch,
+    handleOfferRematch,
+    confirmDialog, handleConfirmDialogConfirm, handleConfirmDialogCancel,
+    openChat, unreadChatCount,
+  } = useGameHandlers(
+    gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer,
+    isOnlineReal ? Number(onlineGameId) : undefined,
+    isOnlineReal ? API.onlineMove : undefined,
+    isOnlineReal ? sendPeerMessage : undefined,
+    isOnlineReal ? onChatMessageRef : undefined,
+    isOnlineReal ? opponentUserId : undefined,
+  );
+
+  const { rematchSent, rematchCooldown, rematchError, setRematchError, offerRematch } = useRematch({
+    isOnline: isOnlineReal,
+    opponentUserId,
+    timeControl,
+    playerColor,
+    opponentName,
+    opponentRating,
+    opponentAvatar,
+    myUserId,
+    handleOfferRematch,
+  });
+
+  // Синхронизация состояния партии в localStorage
   useEffect(() => {
     localStorage.setItem('currentGameFinished', gameStatus !== 'playing' ? '1' : '');
   }, [gameStatus]);
@@ -127,12 +143,9 @@ const Game = () => {
   useEffect(() => {
     if (isOnlineReal && onlineGameId && gameStatus === 'playing') {
       localStorage.setItem('activeOnlineGame', JSON.stringify({
-        gameId: onlineGameId,
-        color: playerColor,
-        opponentName,
-        opponentAvatar,
-        opponentRating,
-        url: window.location.pathname + window.location.search
+        gameId: onlineGameId, color: playerColor,
+        opponentName, opponentAvatar, opponentRating,
+        url: window.location.pathname + window.location.search,
       }));
     } else if (isOnlineReal && gameStatus !== 'playing') {
       localStorage.removeItem('activeOnlineGame');
@@ -140,76 +153,23 @@ const Game = () => {
   }, [gameStatus, isOnlineReal, onlineGameId]);
 
   useEffect(() => {
-    return () => {
-      localStorage.removeItem('currentGameFinished');
-      if (rematchPollRef.current) clearInterval(rematchPollRef.current);
-    };
+    return () => { localStorage.removeItem('currentGameFinished'); };
   }, []);
 
-  const {
-    isDragging,
-    showExitDialog,
-    showChat,
-    setShowChat,
-    showSettingsMenu,
-    setShowSettingsMenu,
-    showDrawOffer,
-    setShowDrawOffer,
-    showNotifications,
-    setShowNotifications,
-    showRematchOffer,
-    setShowRematchOffer,
-    showOpponentLeft,
-    setShowOpponentLeft,
-    opponentLeftReason,
-    chatMessage,
-    setChatMessage,
-    chatMessages,
-    chatEndRef,
-    handleMouseDown,
-    handleMouseMove,
-    handleMouseUpOrLeave,
-    handleExitClick,
-    handleSurrender,
-    handleContinue,
-    handleSendMessage,
-    handleChatKeyPress,
-    handleBlockOpponent,
-    handleUnblockOpponent,
-    isChatBlocked,
-    isChatBlockedByOpponent,
-    handleOfferDraw,
-    handleAcceptDraw,
-    handleDeclineDraw,
-    handleNewGame,
-    handleAcceptRematch,
-    handleDeclineRematch,
-    handleOfferRematch,
-    confirmDialog,
-    handleConfirmDialogConfirm,
-    handleConfirmDialogCancel,
-    openChat,
-    unreadChatCount,
-  } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined, isOnlineReal ? sendPeerMessage : undefined, isOnlineReal ? onChatMessageRef : undefined, isOnlineReal ? opponentUserId : undefined);
-
-  const [rematchSent, setRematchSent] = useState(false);
-  const [rematchCooldown, setRematchCooldown] = useState(false);
-  const [resultDismissed, setResultDismissed] = useState(false);
-  const [rematchError, setRematchError] = useState<string | null>(null);
-  const rematchPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
-
+  // Показываем модалку реванша когда соперник предлагает
   useEffect(() => {
     if (!isOnlineReal || !rematchOfferedBy || rematchStatus !== 'pending') return;
     if (rematchOfferedBy === myUserId) return;
     setShowRematchOffer(true);
   }, [rematchOfferedBy, rematchStatus]);
 
+  // Показываем модалку ничьей
   useEffect(() => {
-    if (!isOnlineReal || !drawOfferedBy) return;
-    if (drawOfferedBy === myUserId) return;
+    if (!isOnlineReal || !drawOfferedBy || drawOfferedBy === myUserId) return;
     setShowDrawOffer(true);
   }, [drawOfferedBy]);
 
+  // Переход в новую партию реванша (старый механизм через polling игры)
   useEffect(() => {
     if (!isOnlineReal || !rematchGameId || rematchStatus !== 'accepted') return;
     const newColor = playerColor === 'white' ? 'black' : 'white';
@@ -220,22 +180,15 @@ const Game = () => {
     window.location.href = `/game?${params.toString()}`;
   }, [rematchGameId, rematchStatus]);
 
-  useEffect(() => {
-    if ((rematchStatus === 'declined' || rematchStatus === 'expired') && rematchSent) {
-      setRematchSent(false);
-    }
-  }, [rematchStatus]);
-
   const isViewingHistory = currentMoveIndex < moveHistory.length;
 
+  const [resultDismissed, setResultDismissed] = useState(false);
   useEffect(() => {
-    if (isViewingHistory) setResultDismissed(true);
-    else setResultDismissed(false);
+    setResultDismissed(isViewingHistory);
   }, [isViewingHistory]);
 
   const gameResult: GameResult = (() => {
-    if (showRematchOffer || resultDismissed) return null;
-    if (gameStatus === 'playing') return null;
+    if (showRematchOffer || resultDismissed || gameStatus === 'playing') return null;
     if (gameStatus === 'draw' || gameStatus === 'stalemate') return 'draw';
     if (gameStatus === 'checkmate') {
       const iWon = currentPlayer !== playerColor;
@@ -245,16 +198,18 @@ const Game = () => {
     return null;
   })();
 
-  const dismissResult = () => {
-    if (gameResult) setResultDismissed(true);
-  };
+  const [showOpponentProfile, setShowOpponentProfile] = useState(false);
+  const [showMyProfile, setShowMyProfile] = useState(false);
 
   return (
-    <div onClick={dismissResult} className={`h-[100dvh] flex flex-col transition-colors overflow-hidden ${
-      theme === 'light' 
-        ? 'bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300' 
-        : 'bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950'
-    }`}>
+    <div
+      onClick={() => { if (gameResult) setResultDismissed(true); }}
+      className={`h-[100dvh] flex flex-col transition-colors overflow-hidden ${
+        theme === 'light'
+          ? 'bg-gradient-to-br from-slate-100 via-slate-200 to-slate-300'
+          : 'bg-gradient-to-br from-stone-800 via-stone-900 to-stone-950'
+      }`}
+    >
       <GameHeader
         showSettingsMenu={showSettingsMenu}
         setShowSettingsMenu={setShowSettingsMenu}
@@ -272,6 +227,7 @@ const Game = () => {
         setBoardTheme={setBoardTheme}
       />
 
+      {/* Сетевые баннеры */}
       {isOnlineReal && connectionLost && (
         <div className="fixed top-0 left-0 right-0 z-[100] bg-red-600 text-white text-center text-sm py-2 font-semibold animate-pulse">
           <Icon name="WifiOff" size={16} className="inline mr-2 -mt-0.5" />
@@ -291,138 +247,110 @@ const Game = () => {
         </div>
       )}
 
-
       <main className="flex-1 flex flex-col items-center justify-center py-0.5 px-1 sm:px-2 overflow-visible min-h-0">
-          <div className="flex flex-col gap-0.5 sm:gap-1 w-full" style={{ maxWidth: 'min(100%, min(100vw - 8px, 100dvh - 250px))' }}>
-            <div className="flex flex-col gap-0.5 sm:gap-1">
-              <GameControls
-                showSettingsMenu={showSettingsMenu}
-                setShowSettingsMenu={setShowSettingsMenu}
-                setShowChat={openChat}
-                unreadChatCount={unreadChatCount}
-                handleExitClick={handleExitClick}
-                handleOfferDraw={handleOfferDraw}
-                handleSurrender={handleSurrender}
-                handleNewGame={handleNewGame}
-                setShowNotifications={setShowNotifications}
-                showPossibleMoves={showPossibleMoves}
-                setShowPossibleMoves={setShowPossibleMoves}
-                theme={theme}
-                setTheme={setTheme}
-                boardTheme={boardTheme}
-                setBoardTheme={setBoardTheme}
-                gameStatus={gameStatus}
-                currentPlayer={currentPlayer}
-                playerColor={playerColor}
-                setShowRematchOffer={setShowRematchOffer}
-                onOfferRematch={isOnlineReal ? async () => {
-                  setRematchSent(true);
-                  const result = await handleOfferRematch(opponentUserId, timeControl);
-                  if (result.error) {
-                    setRematchSent(false);
-                    setRematchCooldown(true);
-                    setRematchError(result.error);
-                  } else if (result.inviteId) {
-                    // Опрашиваем принятие приглашения
-                    if (rematchPollRef.current) clearInterval(rematchPollRef.current);
-                    rematchPollRef.current = setInterval(async () => {
-                      try {
-                        const res = await fetch(`${API.inviteGame}?action=check_accepted&invite_id=${result.inviteId}&user_id=${encodeURIComponent(myUserId)}`);
-                        const data = await res.json();
-                        if (data.status === 'accepted' && data.game_id) {
-                          if (rematchPollRef.current) clearInterval(rematchPollRef.current);
-                          const newColor = playerColor === 'white' ? 'black' : 'white';
-                          window.location.href = `/game?time=${encodeURIComponent(timeControl)}&color=${newColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(opponentName)}&opponent_rating=${opponentRating || 0}&opponent_avatar=${encodeURIComponent(opponentAvatar)}`;
-                        } else if (data.status === 'declined') {
-                          if (rematchPollRef.current) clearInterval(rematchPollRef.current);
-                          setRematchSent(false);
-                          setRematchError('Соперник отклонил реванш');
-                        }
-                      } catch { /* ignore */ }
-                    }, 2000);
-                  }
-                } : () => { window.location.reload(); }}
-                rematchSent={rematchSent}
-                rematchCooldown={rematchCooldown}
-                isOnline={isOnlineReal}
-                p2pConnected={p2pConnected}
-                p2pQuality={p2pQuality}
-                p2pLatency={p2pLatency}
-                connectionLost={connectionLost}
-              />
+        <div className="flex flex-col gap-0.5 sm:gap-1 w-full" style={{ maxWidth: 'min(100%, min(100vw - 8px, 100dvh - 250px))' }}>
 
-              <PlayerInfo
-                playerName={opponentName}
-                playerColor={playerColor === 'white' ? 'black' : 'white'}
-                icon={playerColor === 'white' ? '♚' : '♔'}
-                time={playerColor === 'white' ? blackTime : whiteTime}
-                isCurrentPlayer={currentPlayer !== playerColor}
-                formatTime={formatTime}
-                difficulty={(isPlayingWithBot || isBotFromMatchmaking) ? getDifficultyLabel(difficulty) : undefined}
-                rating={opponentRating}
-                avatar={opponentAvatar}
-                inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}
-                capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
-                theme={theme}
-                onClickProfile={() => setShowOpponentProfile(true)}
-              />
-            </div>
-
-            <div style={{ width: '100%', margin: '0 auto' }}>
-              <GameBoard
-                board={displayBoard}
-                onSquareClick={handleSquareClick}
-                isSquareSelected={isSquareSelected}
-                isSquarePossibleMove={isSquarePossibleMove}
-                kingInCheckPosition={kingInCheckPosition}
-                showPossibleMoves={showPossibleMoves}
-                flipped={flipped}
-                boardTheme={boardTheme}
-                lastMove={lastMove}
-                gameResult={gameResult}
-                onResultClick={() => setResultDismissed(true)}
-              />
-            </div>
-
-            <div className="flex flex-col gap-0.5 sm:gap-1">
-              <PlayerInfo
-                playerName="Вы"
-                playerColor={playerColor}
-                icon={playerColor === 'white' ? '♔' : '♚'}
-                time={playerColor === 'white' ? whiteTime : blackTime}
-                isCurrentPlayer={currentPlayer === playerColor}
-                formatTime={formatTime}
-                rating={newRating || userRating || undefined}
-                ratingChange={ratingChange}
-                avatar={userAvatar}
-                inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
-                capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}
-                theme={theme}
-                onClickProfile={() => setShowMyProfile(true)}
-              />
-
-              <MoveHistory
-                moveHistory={moveHistory}
-                currentMoveIndex={currentMoveIndex}
-                isDragging={isDragging}
-                onMouseDown={(e) => handleMouseDown(e, historyRef)}
-                onMouseMove={(e) => handleMouseMove(e, historyRef)}
-                onMouseUpOrLeave={handleMouseUpOrLeave}
-                onPreviousMove={handlePreviousMove}
-                onNextMove={handleNextMove}
-                historyRef={historyRef}
-                theme={theme}
-              />
-            </div>
+          {/* Верхняя панель + противник */}
+          <div className="flex flex-col gap-0.5 sm:gap-1">
+            <GameControls
+              showSettingsMenu={showSettingsMenu}
+              setShowSettingsMenu={setShowSettingsMenu}
+              setShowChat={openChat}
+              unreadChatCount={unreadChatCount}
+              handleExitClick={handleExitClick}
+              handleOfferDraw={handleOfferDraw}
+              handleSurrender={handleSurrender}
+              handleNewGame={handleNewGame}
+              setShowNotifications={setShowNotifications}
+              showPossibleMoves={showPossibleMoves}
+              setShowPossibleMoves={setShowPossibleMoves}
+              theme={theme}
+              setTheme={setTheme}
+              boardTheme={boardTheme}
+              setBoardTheme={setBoardTheme}
+              gameStatus={gameStatus}
+              currentPlayer={currentPlayer}
+              playerColor={playerColor}
+              setShowRematchOffer={setShowRematchOffer}
+              onOfferRematch={offerRematch}
+              rematchSent={rematchSent}
+              rematchCooldown={rematchCooldown}
+              isOnline={isOnlineReal}
+              p2pConnected={p2pConnected}
+              p2pQuality={p2pQuality}
+              p2pLatency={p2pLatency}
+              connectionLost={connectionLost}
+            />
+            <PlayerInfo
+              playerName={opponentName}
+              playerColor={playerColor === 'white' ? 'black' : 'white'}
+              icon={playerColor === 'white' ? '♚' : '♔'}
+              time={playerColor === 'white' ? blackTime : whiteTime}
+              isCurrentPlayer={currentPlayer !== playerColor}
+              formatTime={formatTime}
+              difficulty={(isPlayingWithBot || isBotFromMatchmaking) ? getDifficultyLabel(difficulty) : undefined}
+              rating={opponentRating}
+              avatar={opponentAvatar}
+              inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}
+              capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
+              theme={theme}
+              onClickProfile={() => setShowOpponentProfile(true)}
+            />
           </div>
+
+          {/* Доска */}
+          <div style={{ width: '100%', margin: '0 auto' }}>
+            <GameBoard
+              board={displayBoard}
+              onSquareClick={handleSquareClick}
+              isSquareSelected={isSquareSelected}
+              isSquarePossibleMove={isSquarePossibleMove}
+              kingInCheckPosition={kingInCheckPosition}
+              showPossibleMoves={showPossibleMoves}
+              flipped={flipped}
+              boardTheme={boardTheme}
+              lastMove={lastMove}
+              gameResult={gameResult}
+              onResultClick={() => setResultDismissed(true)}
+            />
+          </div>
+
+          {/* Нижняя панель + игрок */}
+          <div className="flex flex-col gap-0.5 sm:gap-1">
+            <PlayerInfo
+              playerName="Вы"
+              playerColor={playerColor}
+              icon={playerColor === 'white' ? '♔' : '♚'}
+              time={playerColor === 'white' ? whiteTime : blackTime}
+              isCurrentPlayer={currentPlayer === playerColor}
+              formatTime={formatTime}
+              rating={newRating || userRating || undefined}
+              ratingChange={ratingChange}
+              avatar={userAvatar}
+              inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
+              capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}
+              theme={theme}
+              onClickProfile={() => setShowMyProfile(true)}
+            />
+            <MoveHistory
+              moveHistory={moveHistory}
+              currentMoveIndex={currentMoveIndex}
+              isDragging={isDragging}
+              onMouseDown={(e) => handleMouseDown(e, historyRef)}
+              onMouseMove={(e) => handleMouseMove(e, historyRef)}
+              onMouseUpOrLeave={handleMouseUpOrLeave}
+              onPreviousMove={handlePreviousMove}
+              onNextMove={handleNextMove}
+              historyRef={historyRef}
+              theme={theme}
+            />
+          </div>
+
+        </div>
       </main>
 
-      {showExitDialog && (
-        <ExitDialog
-          onContinue={handleContinue}
-          onSurrender={handleSurrender}
-        />
-      )}
+      {/* Модалки */}
+      {showExitDialog && <ExitDialog onContinue={handleContinue} onSurrender={handleSurrender} />}
 
       {showChat && (
         <GameChatModal
@@ -444,22 +372,11 @@ const Game = () => {
         />
       )}
 
-      <DrawOfferModal
-        showModal={showDrawOffer}
-        onAccept={handleAcceptDraw}
-        onDecline={handleDeclineDraw}
-      />
+      <DrawOfferModal showModal={showDrawOffer} onAccept={handleAcceptDraw} onDecline={handleDeclineDraw} />
 
-      <NotificationsModal
-        showModal={showNotifications}
-        onClose={() => setShowNotifications(false)}
-      />
+      <NotificationsModal showModal={showNotifications} onClose={() => setShowNotifications(false)} />
 
-      <RematchModal
-        showModal={showRematchOffer}
-        onAccept={handleAcceptRematch}
-        onDecline={handleDeclineRematch}
-      />
+      <RematchModal showModal={showRematchOffer} onAccept={handleAcceptRematch} onDecline={handleDeclineRematch} />
 
       <OpponentLeftModal
         showModal={showOpponentLeft}

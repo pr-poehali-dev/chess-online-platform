@@ -395,14 +395,19 @@ export const GameControls = ({
                 else if (setShowRematchOffer) { setTimeout(() => { setShowRematchOffer(true); }, 500); }
               }}
               disabled={rematchSent || rematchCooldown}
-              className={`border rounded-lg transition-colors w-[32px] h-[32px] sm:w-[38px] sm:h-[38px] flex items-center justify-center flex-shrink-0 ${
-                rematchSent || rematchCooldown
+              className={`border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold ${
+                rematchSent
+                  ? "bg-amber-500/20 border-amber-500/50 text-amber-400 cursor-not-allowed"
+                  : rematchCooldown
                   ? "bg-stone-600/50 border-stone-600 text-stone-400 cursor-not-allowed"
                   : "bg-green-600 hover:bg-green-700 border-green-700 text-white"
               }`}
-              title={rematchCooldown ? "Недоступно" : rematchSent ? "Ожидание..." : "Реванш"}
+              title={rematchCooldown ? "Недоступно" : rematchSent ? "Ожидание ответа..." : "Реванш"}
             >
-              <Icon name="RotateCcw" size={15} />
+              <Icon name={rematchSent ? "Loader2" : "RotateCcw"} size={14} className={rematchSent ? "animate-spin" : ""} />
+              <span className="hidden sm:inline whitespace-nowrap">
+                {rematchSent ? "Ожидание..." : "Реванш"}
+              </span>
             </button>
           </>
         )}
