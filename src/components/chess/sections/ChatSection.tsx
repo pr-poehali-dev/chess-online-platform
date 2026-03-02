@@ -120,10 +120,10 @@ export const ChatSection = ({
   useEffect(() => {
     loadConversations();
     const interval = setInterval(() => {
-      if (!selectedChat) loadConversations();
-    }, 120000);
+      loadConversations();
+    }, 30000);
     return () => clearInterval(interval);
-  }, [loadConversations, selectedChat]);
+  }, [loadConversations]);
 
   const formatChatTime = (dateString: string) => {
     const date = new Date(dateString);

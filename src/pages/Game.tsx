@@ -184,7 +184,9 @@ const Game = () => {
     handleOfferRematch,
     confirmDialog,
     handleConfirmDialogConfirm,
-    handleConfirmDialogCancel
+    handleConfirmDialogCancel,
+    openChat,
+    unreadChatCount,
   } = useGameHandlers(gameStatus, setGameStatus, moveHistory.length, playerColor, setCurrentPlayer, isOnlineReal ? Number(onlineGameId) : undefined, isOnlineReal ? API.onlineMove : undefined, isOnlineReal ? sendPeerMessage : undefined, isOnlineReal ? onChatMessageRef : undefined);
 
   const [rematchSent, setRematchSent] = useState(false);
@@ -286,7 +288,8 @@ const Game = () => {
               <GameControls
                 showSettingsMenu={showSettingsMenu}
                 setShowSettingsMenu={setShowSettingsMenu}
-                setShowChat={setShowChat}
+                setShowChat={openChat}
+                unreadChatCount={unreadChatCount}
                 handleExitClick={handleExitClick}
                 handleOfferDraw={handleOfferDraw}
                 handleSurrender={handleSurrender}

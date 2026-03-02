@@ -36,6 +36,7 @@ export const useGameHandlers = (
   const [drawOffersCount, setDrawOffersCount] = useState(0);
   const [chatMessage, setChatMessage] = useState('');
   const [chatMessages, setChatMessages] = useState<Array<{ id: string; text: string; isOwn: boolean; time: string }>>([]);
+  const [unreadChatCount, setUnreadChatCount] = useState(0);
   const [isChatBlocked, setIsChatBlocked] = useState(false);
   const [isChatBlockedByOpponent, setIsChatBlockedByOpponent] = useState(false);
   const chatEndRef = useRef<HTMLDivElement>(null);
@@ -54,6 +55,7 @@ export const useGameHandlers = (
         time: new Date().toLocaleTimeString('ru-RU', { hour: '2-digit', minute: '2-digit' })
       };
       setChatMessages(prev => [...prev, msg]);
+      setUnreadChatCount(prev => prev + 1);
       setTimeout(() => {
         if (chatEndRef.current) chatEndRef.current.scrollIntoView({ behavior: 'smooth' });
       }, 100);
@@ -356,11 +358,18 @@ export const useGameHandlers = (
     return {};
   };
 
+  const openChat = () => {
+    setShowChat(true);
+    setUnreadChatCount(0);
+  };
+
   return {
     isDragging,
     showExitDialog,
     showChat,
     setShowChat,
+    openChat,
+    unreadChatCount,
     showSettingsMenu,
     setShowSettingsMenu,
     showDrawOffer,

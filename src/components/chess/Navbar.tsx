@@ -1,7 +1,8 @@
 import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
-import { onBadge } from '@/lib/badgeEvents';
+import { onBadge, emitBadge } from '@/lib/badgeEvents';
+import API from '@/config/api';
 
 interface BeforeInstallPromptEvent extends Event {
   prompt(): Promise<void>;
@@ -134,6 +135,25 @@ const Navbar = ({
       if (detail.friends !== undefined) setPendingFriendsCount(detail.friends);
       if (detail.messages !== undefined) setUnreadMessagesCount(detail.messages);
     });
+  }, [isAuthenticated]);
+
+  useEffect(() => {
+    if (!isAuthenticated) return;
+    const fetchUnread = async () => {
+      const saved = localStorage.getItem('chessUser');
+      if (!saved) return;
+      const u = JSON.parse(saved);
+      const uid = 'u_' + (u.email || u.name || 'anonymous').replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+      try {
+        const res = await fetch(`${API.chat}?action=conversations&user_id=${encodeURIComponent(uid)}`);
+        const data = await res.json();
+        const total = (data.conversations || []).reduce((sum: number, c: { unread: number }) => sum + (c.unread || 0), 0);
+        emitBadge({ messages: total });
+      } catch { /* ignore */ }
+    };
+    fetchUnread();
+    const interval = setInterval(fetchUnread, 30000);
+    return () => clearInterval(interval);
   }, [isAuthenticated]);
 
   const hasAnyBadge = pendingFriendsCount > 0 || unreadMessagesCount > 0;
