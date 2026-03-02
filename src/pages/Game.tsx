@@ -156,6 +156,25 @@ const Game = () => {
     return () => { localStorage.removeItem('currentGameFinished'); };
   }, []);
 
+  // Для офлайн-игр (компьютер / друг локально) — обогащаем activeGame данными об оппоненте
+  useEffect(() => {
+    if (isOnlineReal) return;
+    if (gameStatus !== 'playing') return;
+    const saved = localStorage.getItem('activeGame');
+    if (!saved) return;
+    try {
+      const state = JSON.parse(saved);
+      const enriched = {
+        ...state,
+        playerColor,
+        opponentName,
+        opponentAvatar,
+        opponentType: isPlayingWithBot || isBotFromMatchmaking ? 'bot' : 'friend',
+      };
+      localStorage.setItem('activeGame', JSON.stringify(enriched));
+    } catch { /* ignore */ }
+  }, [gameStatus, isOnlineReal, playerColor, opponentName, opponentAvatar]);
+
   // Показываем модалку реванша когда соперник предлагает
   useEffect(() => {
     if (!isOnlineReal || !rematchOfferedBy || rematchStatus !== 'pending') return;

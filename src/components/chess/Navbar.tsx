@@ -97,8 +97,17 @@ const Navbar = ({
           const gameState = JSON.parse(savedBot);
           if (gameState.gameStatus === 'playing') {
             setHasActiveGame(true);
-            setActiveGameUrl(`/game?difficulty=${gameState.difficulty}&time=${gameState.timeControl}`);
-            setActiveGameLabel('Вернуться к игре');
+            const params = new URLSearchParams();
+            if (gameState.difficulty) params.set('difficulty', gameState.difficulty);
+            if (gameState.timeControl) params.set('time', gameState.timeControl);
+            if (gameState.playerColor) params.set('color', gameState.playerColor);
+            if (gameState.opponentName) params.set('opponent_name', encodeURIComponent(gameState.opponentName));
+            if (gameState.opponentAvatar) params.set('opponent_avatar', encodeURIComponent(gameState.opponentAvatar));
+            setActiveGameUrl(`/game?${params.toString()}`);
+            const label = gameState.opponentName && gameState.opponentType !== 'bot'
+              ? `Игра vs ${gameState.opponentName}`
+              : 'Вернуться к игре';
+            setActiveGameLabel(label);
             return;
           }
         } catch { /* ignore */ }

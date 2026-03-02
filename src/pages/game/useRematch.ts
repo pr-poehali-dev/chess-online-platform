@@ -1,7 +1,7 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
 import API from '@/config/api';
 
-const REMATCH_TIMEOUT_MS = 60_000;
+const REMATCH_TIMEOUT_MS = 20_000;
 const POLL_INTERVAL_MS = 2_000;
 
 interface UseRematchOptions {
