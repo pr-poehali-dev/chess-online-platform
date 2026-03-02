@@ -200,12 +200,6 @@ export const usePeerConnection = ({ gameId, userId, isWhite, onMessage, enabled 
         setP2pConnected(false);
         setLatency(null);
         setQuality('disconnected');
-        // Закрываем и очищаем — чтобы initConnection мог переподключиться
-        try { pc.close(); } catch { /* ignore */ }
-        pcRef.current = null;
-        dcRef.current = null;
-        // Переподключение через 3 секунды
-        setTimeout(() => { initConnection(); }, 3000);
       }
     };
 

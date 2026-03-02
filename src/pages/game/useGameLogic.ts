@@ -696,29 +696,7 @@ export const useGameLogic = (
     };
   }, [isOnlineGame, onlineGameId, timeControl, applyServerState, myUserId, p2pConnected, processSignals]);
 
-  // Быстрый сигналинг в первые 30 секунд — пока P2P не установился
-  useEffect(() => {
-    if (!isOnlineGame || !onlineGameId || p2pConnected) return;
-    let active = true;
-    const fastPoll = async () => {
-      if (!active) return;
-      try {
-        let url = `${ONLINE_MOVE_URL}?game_id=${onlineGameId}&signals_only=1`;
-        if (myUserId) url += `&user_id=${encodeURIComponent(myUserId)}`;
-        const res = await fetch(url);
-        if (res.ok) {
-          const data = await res.json();
-          if (data.signals && data.signals.length > 0) {
-            const rtcSignals = data.signals.filter((s: { type: string }) => s.type !== 'chat');
-            if (rtcSignals.length > 0) processSignals(rtcSignals);
-          }
-        }
-      } catch { /* ignore */ }
-    };
-    const id = setInterval(fastPoll, 800);
-    const stop = setTimeout(() => { active = false; clearInterval(id); }, 30000);
-    return () => { active = false; clearInterval(id); clearTimeout(stop); };
-  }, [isOnlineGame, onlineGameId, myUserId, p2pConnected, processSignals]);
+
 
   const submitGameResult = useCallback(async (status: 'checkmate' | 'stalemate' | 'draw', currentPlayerAtEnd: string) => {
     if (gameFinished.current) return;
