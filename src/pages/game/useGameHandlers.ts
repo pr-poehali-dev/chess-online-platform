@@ -377,26 +377,31 @@ export const useGameHandlers = (
     }
   };
 
-  const handleOfferRematch = async (): Promise<{ error?: string }> => {
-    if (onlineGameId && onlineMoveUrl) {
-      const saved = localStorage.getItem('chessUser');
-      if (!saved) return {};
-      const uData = JSON.parse(saved);
-      const rawId = uData.email || uData.name || 'anonymous';
-      const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
-      try {
-        const res = await fetch(onlineMoveUrl, {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ action: 'rematch_offer', game_id: onlineGameId, user_id: userId })
-        });
-        if (res.status === 429) {
-          const data = await res.json();
-          return { error: data.message || 'Реванш недоступен' };
-        }
-      } catch { /* ignore */ }
+  const handleOfferRematch = async (toUserId?: string, timeControl?: string): Promise<{ error?: string; inviteId?: number }> => {
+    if (!toUserId) return { error: 'Нет данных о сопернике' };
+    const saved = localStorage.getItem('chessUser');
+    if (!saved) return {};
+    const uData = JSON.parse(saved);
+    const rawId = uData.email || uData.name || 'anonymous';
+    const userId = 'u_' + rawId.replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60);
+    try {
+      const res = await fetch(API.inviteGame, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'send',
+          from_user_id: userId,
+          to_user_id: toUserId,
+          time_control: timeControl || '10+0',
+          color_choice: 'random'
+        })
+      });
+      const data = await res.json();
+      if (data.invite_id) return { inviteId: data.invite_id };
+      return { error: data.message || 'Реванш недоступен' };
+    } catch {
+      return { error: 'Ошибка сети' };
     }
-    return {};
   };
 
   const openChat = () => {

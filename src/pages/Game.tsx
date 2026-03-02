@@ -142,6 +142,7 @@ const Game = () => {
   useEffect(() => {
     return () => {
       localStorage.removeItem('currentGameFinished');
+      if (rematchPollRef.current) clearInterval(rematchPollRef.current);
     };
   }, []);
 
@@ -195,6 +196,7 @@ const Game = () => {
   const [rematchCooldown, setRematchCooldown] = useState(false);
   const [resultDismissed, setResultDismissed] = useState(false);
   const [rematchError, setRematchError] = useState<string | null>(null);
+  const rematchPollRef = useRef<ReturnType<typeof setInterval> | null>(null);
 
   useEffect(() => {
     if (!isOnlineReal || !rematchOfferedBy || rematchStatus !== 'pending') return;
@@ -315,11 +317,29 @@ const Game = () => {
                 setShowRematchOffer={setShowRematchOffer}
                 onOfferRematch={isOnlineReal ? async () => {
                   setRematchSent(true);
-                  const result = await handleOfferRematch();
+                  const result = await handleOfferRematch(opponentUserId, timeControl);
                   if (result.error) {
                     setRematchSent(false);
                     setRematchCooldown(true);
                     setRematchError(result.error);
+                  } else if (result.inviteId) {
+                    // Опрашиваем принятие приглашения
+                    if (rematchPollRef.current) clearInterval(rematchPollRef.current);
+                    rematchPollRef.current = setInterval(async () => {
+                      try {
+                        const res = await fetch(`${API.inviteGame}?action=check_accepted&invite_id=${result.inviteId}&user_id=${encodeURIComponent(myUserId)}`);
+                        const data = await res.json();
+                        if (data.status === 'accepted' && data.game_id) {
+                          if (rematchPollRef.current) clearInterval(rematchPollRef.current);
+                          const newColor = playerColor === 'white' ? 'black' : 'white';
+                          window.location.href = `/game?time=${encodeURIComponent(timeControl)}&color=${newColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(opponentName)}&opponent_rating=${opponentRating || 0}&opponent_avatar=${encodeURIComponent(opponentAvatar)}`;
+                        } else if (data.status === 'declined') {
+                          if (rematchPollRef.current) clearInterval(rematchPollRef.current);
+                          setRematchSent(false);
+                          setRematchError('Соперник отклонил реванш');
+                        }
+                      } catch { /* ignore */ }
+                    }, 2000);
                   }
                 } : () => { window.location.reload(); }}
                 rematchSent={rematchSent}
