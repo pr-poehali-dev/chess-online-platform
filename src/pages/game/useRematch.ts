@@ -1,4 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import API from '@/config/api';
 
 const REMATCH_TIMEOUT_MS = 20_000;
@@ -27,6 +28,7 @@ export const useRematch = ({
   myUserId,
   handleOfferRematch,
 }: UseRematchOptions) => {
+  const navigate = useNavigate();
   const [rematchSent, setRematchSent] = useState(false);
   const [rematchCooldown, setRematchCooldown] = useState(false);
   const [rematchError, setRematchError] = useState<string | null>(null);
@@ -71,7 +73,7 @@ export const useRematch = ({
         if (data.status === 'accepted' && data.game_id) {
           stopAll();
           const newColor = playerColor === 'white' ? 'black' : 'white';
-          window.location.href = `/game?time=${encodeURIComponent(timeControl)}&color=${newColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(opponentName)}&opponent_rating=${opponentRating || 0}&opponent_avatar=${encodeURIComponent(opponentAvatar)}`;
+          navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${newColor}&online_game_id=${data.game_id}&online=true&opponent_name=${encodeURIComponent(opponentName)}&opponent_rating=${opponentRating || 0}&opponent_avatar=${encodeURIComponent(opponentAvatar)}`);
         } else if (data.status === 'declined') {
           stopAll();
           setRematchSent(false);
@@ -89,7 +91,7 @@ export const useRematch = ({
       botTimerRef.current = setTimeout(() => {
         setBotRematchPending(false);
         if (accepted) {
-          window.location.reload();
+          navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${playerColor === 'white' ? 'black' : 'white'}&opponent_name=${encodeURIComponent(opponentName)}&opponent_avatar=${encodeURIComponent(opponentAvatar)}`);
         } else {
           setRematchError('Соперник отклонил реванш');
         }

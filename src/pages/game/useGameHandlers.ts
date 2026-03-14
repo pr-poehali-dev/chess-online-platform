@@ -353,11 +353,11 @@ export const useGameHandlers = (
           params.set('online_game_id', String(data.new_game_id));
           params.set('color', newColor);
           params.set('online', 'true');
-          window.location.href = `/game?${params.toString()}`;
+          navigate(`/game?${params.toString()}`);
         }
       } catch { /* ignore */ }
     } else {
-      window.location.reload();
+      navigate(window.location.pathname + window.location.search);
     }
   };
 
