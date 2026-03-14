@@ -162,12 +162,7 @@ export const GameControls = ({
   }`;
 
   return (
-    <div className="w-full md:w-auto flex flex-col gap-0.5">
-      {isGameOver && (
-        <div className={`flex items-center justify-center gap-1 px-2 py-0.5 rounded-lg border text-xs sm:text-sm font-bold whitespace-nowrap ${resultColor}`}>
-          {resultLabel}
-        </div>
-      )}
+    <div className="w-full md:w-auto">
       <div className="flex items-center gap-1 sm:gap-1.5 h-[32px] sm:h-[38px]">
         <button onClick={handleExitClick} className={btnCls} title="Выход из игры">
           <div className="rotate-180"><Icon name="LogOut" size={16} /></div>
@@ -381,6 +376,9 @@ export const GameControls = ({
         <P2PIndicator isOnline={isOnline} p2pConnected={p2pConnected} p2pQuality={p2pQuality} p2pLatency={p2pLatency} connectionLost={connectionLost} theme={theme} />
         {isGameOver && (
           <>
+            <div className={`flex items-center gap-1 px-2 sm:px-3 h-[32px] sm:h-[38px] rounded-lg border text-[11px] sm:text-xs font-bold whitespace-nowrap flex-shrink-0 ${resultColor}`}>
+              {resultLabel}
+            </div>
             <div className="relative flex-shrink-0">
               <button onClick={handleShareResult} className={btnCls} title="Поделиться">
                 {shareOk ? (
@@ -402,10 +400,10 @@ export const GameControls = ({
             </div>
             <button
               onClick={() => onNewOnlineGame ? onNewOnlineGame() : window.location.reload()}
-              className="border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white"
+              className="border rounded-lg transition-colors flex items-center gap-1.5 px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white"
             >
               <Icon name="Search" size={14} />
-              <span className="hidden sm:inline whitespace-nowrap">Новая игра</span>
+              <span className="whitespace-nowrap">Новая игра</span>
             </button>
             {!rematchCooldown && !rematchExpired && (
               <button
