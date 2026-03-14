@@ -29,6 +29,7 @@ interface GameHeaderProps {
   rematchCooldown?: boolean;
   rematchTimeoutLeft?: number | null;
   isOnline?: boolean;
+  onNewOnlineGame?: () => void;
   p2pConnected?: boolean;
   p2pQuality?: P2PQuality;
   p2pLatency?: number | null;
@@ -112,6 +113,7 @@ export const GameControls = ({
   rematchCooldown,
   rematchTimeoutLeft,
   isOnline,
+  onNewOnlineGame,
   p2pConnected,
   p2pQuality,
   p2pLatency,
@@ -390,29 +392,37 @@ export const GameControls = ({
                 </div>
               )}
             </div>
-            <button
-              onClick={() => {
-                if (rematchSent || rematchCooldown) return;
-                if (onOfferRematch) { onOfferRematch(); }
-                else if (setShowRematchOffer) { setTimeout(() => { setShowRematchOffer(true); }, 500); }
-              }}
-              disabled={rematchSent || rematchCooldown}
-              className={`border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold ${
-                rematchSent
-                  ? "bg-amber-500/20 border-amber-500/50 text-amber-400 cursor-not-allowed"
-                  : rematchCooldown
-                  ? "bg-stone-600/50 border-stone-600 text-stone-400 cursor-not-allowed"
-                  : "bg-green-600 hover:bg-green-700 border-green-700 text-white"
-              }`}
-              title={rematchCooldown ? "Недоступно" : rematchSent ? "Ожидание ответа..." : "Реванш"}
-            >
-              <Icon name={rematchSent ? "Loader2" : "RotateCcw"} size={14} className={rematchSent ? "animate-spin" : ""} />
-              <span className="hidden sm:inline whitespace-nowrap">
-                {rematchSent
-                  ? `Ожидание${rematchTimeoutLeft ? ` (${rematchTimeoutLeft}с)` : "..."}`
-                  : "Реванш"}
-              </span>
-            </button>
+            {rematchCooldown && isOnline ? (
+              <button
+                onClick={() => onNewOnlineGame?.()}
+                className="border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white"
+              >
+                <Icon name="Search" size={14} />
+                <span className="hidden sm:inline whitespace-nowrap">Новая игра</span>
+              </button>
+            ) : (
+              <button
+                onClick={() => {
+                  if (rematchSent || rematchCooldown) return;
+                  if (onOfferRematch) { onOfferRematch(); }
+                  else if (setShowRematchOffer) { setTimeout(() => { setShowRematchOffer(true); }, 500); }
+                }}
+                disabled={rematchSent || rematchCooldown}
+                className={`border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold ${
+                  rematchSent
+                    ? "bg-amber-500/20 border-amber-500/50 text-amber-400 cursor-not-allowed"
+                    : "bg-green-600 hover:bg-green-700 border-green-700 text-white"
+                }`}
+                title={rematchSent ? "Ожидание ответа..." : "Реванш"}
+              >
+                <Icon name={rematchSent ? "Loader2" : "RotateCcw"} size={14} className={rematchSent ? "animate-spin" : ""} />
+                <span className="hidden sm:inline whitespace-nowrap">
+                  {rematchSent
+                    ? `Ожидание${rematchTimeoutLeft ? ` (${rematchTimeoutLeft}с)` : "..."}`
+                    : "Реванш"}
+                </span>
+              </button>
+            )}
           </>
         )}
       </div>

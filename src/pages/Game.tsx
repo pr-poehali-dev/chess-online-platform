@@ -1,5 +1,5 @@
 import { useState, useEffect, useRef } from 'react';
-import { useSearchParams } from 'react-router-dom';
+import { useSearchParams, useNavigate } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { getDifficultyLabel, formatTime } from './game/gameTypes';
 import { GameBoard, GameResult } from './game/GameBoard';
@@ -24,6 +24,7 @@ const GUEST_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=Opponent';
 
 const Game = () => {
   const [searchParams] = useSearchParams();
+  const navigate = useNavigate();
   const difficulty = (searchParams.get('difficulty') || 'medium') as 'easy' | 'medium' | 'hard' | 'master';
   const timeControl = searchParams.get('time') || '10+0';
   const opponentType = searchParams.get('opponent');
@@ -296,6 +297,7 @@ const Game = () => {
               rematchCooldown={rematchCooldown}
               rematchTimeoutLeft={rematchTimeoutLeft}
               isOnline={isOnlineReal}
+              onNewOnlineGame={() => navigate(`/online-game?opponent=country&time=${encodeURIComponent(timeControl)}&color=random`)}
               p2pConnected={p2pConnected}
               p2pQuality={p2pQuality}
               p2pLatency={p2pLatency}
