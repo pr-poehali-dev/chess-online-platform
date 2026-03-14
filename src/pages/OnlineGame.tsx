@@ -53,7 +53,7 @@ const OnlineGame = () => {
             />
           )}
 
-          {(searchStatus === 'found' || searchStatus === 'starting') && opponent && (
+          {(searchStatus === 'found' || (searchStatus === 'starting' && !opponent?.isBotGame)) && opponent && (
             <MatchFoundScreen
               opponent={opponent}
               playerColor={playerColor}

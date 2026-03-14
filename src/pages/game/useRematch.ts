@@ -84,7 +84,6 @@ export const useRematch = ({
   const offerRematch = useCallback(async () => {
     if (!isOnline) {
       setBotRematchPending(true);
-      setBotRematchAccepted(false);
       const delay = 3000 + Math.random() * 4000;
       const accepted = Math.random() < 0.5;
       botTimerRef.current = setTimeout(() => {
