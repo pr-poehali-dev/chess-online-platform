@@ -18,6 +18,7 @@ export const API = {
   ratingSettings: urls['rating-settings'],
   adminStats: urls['admin-stats'],
   leaderboard: urls['leaderboard'],
+  adminBots: urls['admin-bots'],
 } as const;
 
 export default API;

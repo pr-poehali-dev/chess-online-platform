@@ -1,0 +1,17 @@
+{
+  "tests": [
+    {
+      "name": "Get all bots",
+      "method": "GET",
+      "path": "/",
+      "expectedStatus": 200
+    },
+    {
+      "name": "Update bot without id",
+      "method": "PUT",
+      "path": "/",
+      "body": {"name": "Test"},
+      "expectedStatus": 400
+    }
+  ]
+}

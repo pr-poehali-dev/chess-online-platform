@@ -5,40 +5,10 @@ import time as time_module
 import random
 import chess
 
-BASE_CDN = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files'
-BOTS = [
-    {'id': 'bot_anna',      'strength': 810},
-    {'id': 'bot_artem',     'strength': 840},
-    {'id': 'bot_daria',     'strength': 890},
-    {'id': 'bot_timur',     'strength': 930},
-    {'id': 'bot_sofia',     'strength': 980},
-    {'id': 'bot_roman',     'strength': 1010},
-    {'id': 'bot_marina',    'strength': 1060},
-    {'id': 'bot_kostya',    'strength': 1090},
-    {'id': 'bot_olga',      'strength': 1120},
-    {'id': 'bot_alexey',    'strength': 1150},
-    {'id': 'bot_irina',     'strength': 1180},
-    {'id': 'bot_pavel',     'strength': 1210},
-    {'id': 'bot_elena',     'strength': 1240},
-    {'id': 'bot_dmitry',    'strength': 1270},
-    {'id': 'bot_yulia',     'strength': 1310},
-    {'id': 'bot_oleg',      'strength': 1350},
-    {'id': 'bot_tatiana',   'strength': 1390},
-    {'id': 'bot_andrey',    'strength': 1420},
-    {'id': 'bot_nastya',    'strength': 1460},
-    {'id': 'bot_igor',      'strength': 1500},
-    {'id': 'bot_vera',      'strength': 1540},
-    {'id': 'bot_sergey',    'strength': 1580},
-    {'id': 'bot_natalia',   'strength': 1640},
-    {'id': 'bot_vladimir',  'strength': 1700},
-    {'id': 'bot_ekaterina', 'strength': 1750},
-    {'id': 'bot_nikolay',   'strength': 1800},
-    {'id': 'bot_svetlana',  'strength': 1870},
-    {'id': 'bot_maxim',     'strength': 1940},
-    {'id': 'bot_anastasia', 'strength': 2030},
-    {'id': 'bot_viktor',    'strength': 2120},
-    {'id': 'bot_evgenia',   'strength': 2250},
-]
+def get_bot_strength(cur, bot_uid: str) -> int:
+    cur.execute("SELECT strength FROM bots WHERE id = '%s'" % bot_uid.replace("'", "''"))
+    row = cur.fetchone()
+    return row[0] if row else 1200
 
 
 def moves_to_board(move_history_str: str) -> chess.Board:
@@ -705,7 +675,6 @@ def handler(event: dict, context) -> dict:
         # Рейтинг бота в БД = 500, но для уровня движка используем strength
         # Определяем strength по id бота (white/black uid начинается с bot_)
         bot_uid = white_uid if bot_is_white else black_uid
-        bot_strength = next((b['strength'] for b in BOTS if b['id'] == bot_uid), 1200)
 
         # Восстанавливаем доску — нужна ДО задержки, чтобы проверить сдачу
         board = moves_to_board(new_move_hist)
@@ -713,6 +682,7 @@ def handler(event: dict, context) -> dict:
 
         conn2 = psycopg2.connect(os.environ['DATABASE_URL'])
         cur2 = conn2.cursor()
+        bot_strength = get_bot_strength(cur2, bot_uid)
 
         # Проверяем: должен ли бот сдаться
         if board.turn == bot_chess_color and should_bot_resign(board, bot_chess_color, new_move_number):
