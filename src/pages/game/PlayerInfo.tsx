@@ -68,23 +68,23 @@ export const PlayerInfo = ({
             <div className="text-2xl sm:text-3xl flex-shrink-0">{icon}</div>
           )}
           <div className="min-w-0 flex-shrink">
-            <div className={`text-[9px] sm:text-xs font-medium truncate ${
-              theme === 'light'
-                ? 'text-slate-800'
-                : 'text-white'
-            }`}>
-              {playerName}{difficulty && ` (${difficulty})`}
-            </div>
-            <div className="flex items-center gap-2">
+            <div className="flex items-center gap-1.5 flex-wrap">
+              <div className={`text-xs sm:text-sm font-semibold truncate ${
+                theme === 'light'
+                  ? (playerColor === 'black' ? 'text-white' : 'text-slate-800')
+                  : 'text-white'
+              }`}>
+                {playerName}{difficulty && ` (${difficulty})`}
+              </div>
               {rating && (
-                <div className="flex items-center gap-1">
-                  <div className={`text-[8px] sm:text-[10px] font-semibold whitespace-nowrap ${
+                <div className="flex items-center gap-1 flex-shrink-0">
+                  <div className={`text-xs sm:text-sm font-bold whitespace-nowrap ${
                     theme === 'light' ? 'text-orange-600' : 'text-orange-400'
                   }`}>
                     {rating}
                   </div>
                   {ratingChange != null && ratingChange !== 0 && (
-                    <div className={`text-[8px] sm:text-[10px] font-bold whitespace-nowrap ${
+                    <div className={`text-xs sm:text-sm font-bold whitespace-nowrap ${
                       ratingChange > 0 ? 'text-green-400' : 'text-red-400'
                     }`}>
                       {ratingChange > 0 ? `+${ratingChange}` : ratingChange}
