@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Icon from "@/components/ui/icon";
 import { BoardTheme, boardThemes } from "./gameTypes";
 import type { P2PQuality } from "./usePeerConnection";
@@ -122,6 +122,14 @@ export const GameControls = ({
   const isGameOver = gameStatus && gameStatus !== "playing";
   const themeKeys: BoardTheme[] = ["classic", "flat", "wood"];
   const [shareOk, setShareOk] = useState(false);
+  const [rematchExpired, setRematchExpired] = useState(false);
+
+  useEffect(() => {
+    if (!isGameOver || rematchSent || rematchCooldown) return;
+    setRematchExpired(false);
+    const t = setTimeout(() => setRematchExpired(true), 15000);
+    return () => clearTimeout(t);
+  }, [isGameOver, rematchSent, rematchCooldown]);
 
   const handleShareResult = async () => {
     const resultText = gameStatus === 'checkmate'
@@ -392,15 +400,14 @@ export const GameControls = ({
                 </div>
               )}
             </div>
-            {rematchCooldown ? (
-              <button
-                onClick={() => onNewOnlineGame ? onNewOnlineGame() : window.location.reload()}
-                className="border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white"
-              >
-                <Icon name="Search" size={14} />
-                <span className="hidden sm:inline whitespace-nowrap">Новая игра</span>
-              </button>
-            ) : (
+            <button
+              onClick={() => onNewOnlineGame ? onNewOnlineGame() : window.location.reload()}
+              className="border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white"
+            >
+              <Icon name="Search" size={14} />
+              <span className="hidden sm:inline whitespace-nowrap">Новая игра</span>
+            </button>
+            {!rematchCooldown && !rematchExpired && (
               <button
                 onClick={() => {
                   if (rematchSent) return;
