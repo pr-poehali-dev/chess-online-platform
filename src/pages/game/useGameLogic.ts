@@ -8,6 +8,93 @@ import { cachedGameHistory, invalidateGameHistory } from '@/lib/apiCache';
 const FINISH_GAME_URL = API.finishGame;
 const ONLINE_MOVE_URL = API.onlineMove;
 
+function calcBotDelay(opts: {
+  difficulty: 'easy' | 'medium' | 'hard' | 'master';
+  board: Board;
+  botColor: 'white' | 'black';
+  moveCount: number;
+  botTime: number;
+  totalTime: number;
+  castlingRights: CastlingRights;
+  enPassantTarget: Position | null;
+}): number {
+  const { difficulty, board, botColor, moveCount, botTime, totalTime, castlingRights, enPassantTarget } = opts;
+  const playerColor = botColor === 'white' ? 'black' : 'white';
+
+  const rand = (min: number, max: number) => Math.floor(Math.random() * (max - min + 1) + min) * 1000;
+
+  const timeRatio = totalTime > 0 ? botTime / totalTime : 1;
+  const isTimeRunningOut = botTime < 30;
+  const isBullet = totalTime <= 60;
+
+  if (isTimeRunningOut || isBullet) return rand(2, 3);
+
+  const isOpening = moveCount < 10;
+  const pieces = board.flat().filter(Boolean);
+  const totalPieces = pieces.length;
+  const isEndgame = totalPieces <= 14;
+
+  const botInCheck = isInCheck(board, botColor);
+  const playerInCheck = isInCheck(board, playerColor);
+
+  const botMoves = getAllLegalMoves(board, botColor, castlingRights, enPassantTarget);
+  const playerMoves = getAllLegalMoves(board, playerColor, castlingRights, enPassantTarget);
+
+  const isMateInOne = botMoves.some(m => {
+    const next = board.map(r => r.map(c => c ? { ...c } : null));
+    const p = next[m.from.row][m.from.col];
+    next[m.to.row][m.to.col] = p;
+    next[m.from.row][m.from.col] = null;
+    const opp = getAllLegalMoves(next, playerColor, castlingRights, enPassantTarget);
+    return opp.length === 0 && isInCheck(next, playerColor);
+  });
+
+  const botFacingMate = playerMoves.some(m => {
+    const next = board.map(r => r.map(c => c ? { ...c } : null));
+    const p = next[m.from.row][m.from.col];
+    next[m.to.row][m.to.col] = p;
+    next[m.from.row][m.from.col] = null;
+    const opp = getAllLegalMoves(next, botColor, castlingRights, enPassantTarget);
+    return opp.length === 0 && isInCheck(next, botColor);
+  });
+
+  const isCapture = (moveCount > 0);
+  const simpleExchange = isCapture && !botInCheck && !playerInCheck && !isEndgame;
+
+  if (difficulty === 'easy') {
+    if (isOpening || simpleExchange) return rand(3, 6);
+    if (botFacingMate) return rand(35, 45);
+    return rand(6, 20);
+  }
+
+  if (difficulty === 'medium') {
+    if (isOpening) return rand(2, 5);
+    if (simpleExchange) return rand(4, 8);
+    if (botFacingMate) return rand(35, 45);
+    if (isEndgame) return rand(25, 35);
+    return rand(8, 22);
+  }
+
+  if (difficulty === 'hard') {
+    if (isOpening) return rand(2, 4);
+    if (simpleExchange) return rand(3, 6);
+    if (isMateInOne) return rand(5, 10);
+    if (botFacingMate) return rand(38, 48);
+    if (isEndgame) return rand(28, 40);
+    if (timeRatio < 0.3) return rand(15, 25);
+    return rand(10, 30);
+  }
+
+  // master
+  if (isOpening) return rand(2, 4);
+  if (simpleExchange) return rand(2, 5);
+  if (isMateInOne) return rand(4, 8);
+  if (botFacingMate) return rand(40, 55);
+  if (isEndgame) return rand(30, 45);
+  if (timeRatio < 0.3) return rand(10, 20);
+  return rand(12, 35);
+}
+
 function replayMoves(moves: string[]): {
   board: Board;
   boardHistory: Board[];
@@ -451,7 +538,18 @@ export const useGameLogic = (
     if (isOnlineGame) return;
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
-      const delay = difficulty === 'easy' ? 1500 : difficulty === 'medium' ? 2500 : difficulty === 'hard' ? 2000 : 1000;
+
+      const delay = calcBotDelay({
+        difficulty,
+        board,
+        botColor,
+        moveCount: moveHistory.length,
+        botTime: botColor === 'white' ? whiteTime : blackTime,
+        totalTime: getInitialTime(timeControl),
+        castlingRights,
+        enPassantTarget,
+      });
+
       const timer = setTimeout(() => makeComputerMove(), delay);
       return () => {
         clearTimeout(timer);

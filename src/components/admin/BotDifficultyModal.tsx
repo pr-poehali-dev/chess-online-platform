@@ -49,7 +49,7 @@ const levels = [
 ];
 
 export const BotDifficultyModal = ({ onClose }: Props) => {
-  const [tab, setTab] = useState<'levels' | 'bots'>('levels');
+  const [tab, setTab] = useState<'levels' | 'behavior' | 'bots'>('levels');
   const [bots, setBots] = useState<Bot[]>([]);
   const [loading, setLoading] = useState(false);
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -118,6 +118,12 @@ export const BotDifficultyModal = ({ onClose }: Props) => {
             Уровни сложности
           </button>
           <button
+            onClick={() => setTab('behavior')}
+            className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${tab === 'behavior' ? 'border-purple-400 text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
+          >
+            Поведение
+          </button>
+          <button
             onClick={() => setTab('bots')}
             className={`px-4 py-3 text-sm font-medium border-b-2 transition-colors ${tab === 'bots' ? 'border-purple-400 text-purple-400' : 'border-transparent text-slate-400 hover:text-slate-300'}`}
           >
@@ -156,6 +162,71 @@ export const BotDifficultyModal = ({ onClose }: Props) => {
                   тот же принцип, что в классических шахматных движках. Он просчитывает все возможные ходы на N уровней вперёд
                   и выбирает позицию с максимальной оценкой. Чем глубже поиск — тем сильнее игра.
                 </p>
+              </div>
+            </div>
+          )}
+
+          {tab === 'behavior' && (
+            <div className="space-y-3">
+              <div className="rounded-xl border border-blue-500/30 bg-blue-500/10 p-4">
+                <div className="flex items-center gap-2 mb-3 font-bold text-sm text-blue-400">
+                  <Icon name="Clock" size={15} />
+                  Принципы поведения бота во время партии
+                </div>
+                <p className="text-slate-300 text-xs leading-relaxed mb-3">
+                  Бот имитирует поведение живого игрока — перед каждым ходом выдерживает паузу,
+                  зависящую от ситуации на доске, уровня сложности и оставшегося времени.
+                </p>
+                <div className="space-y-2">
+                  {[
+                    { icon: 'Sunrise', color: 'text-amber-400', title: 'Начало партии (первые 10 ходов)', desc: 'Быстрые ответы 2–6 сек — дебют хорошо изучен, раздумывать не нужно' },
+                    { icon: 'ArrowLeftRight', color: 'text-cyan-400', title: 'Простые размены фигур', desc: 'Короткая пауза 3–8 сек — ход очевидный, долго думать незачем' },
+                    { icon: 'Sword', color: 'text-orange-400', title: 'Сложные позиции / миттельшпиль', desc: 'Средняя пауза 10–35 сек в зависимости от уровня сложности бота' },
+                    { icon: 'Flag', color: 'text-purple-400', title: 'Эндшпиль (мало фигур на доске)', desc: 'Долгое обдумывание 25–45 сек — каждый ход критически важен' },
+                    { icon: 'AlertTriangle', color: 'text-red-400', title: 'Угроза мата боту', desc: 'Максимальная пауза 35–55 сек — бот "думает", как спастись' },
+                    { icon: 'Zap', color: 'text-green-400', title: 'Мат в один ход (бот атакует)', desc: 'Короткая пауза 4–10 сек — бот "замечает" выигрыш и бьёт' },
+                    { icon: 'Timer', color: 'text-rose-400', title: 'Нехватка времени (< 30 сек)', desc: 'Всегда быстро 2–3 сек — когда время на исходе, думать некогда' },
+                  ].map((item, i) => (
+                    <div key={i} className="flex items-start gap-3 rounded-lg bg-slate-700/30 p-3">
+                      <Icon name={item.icon as 'Clock'} size={15} className={`mt-0.5 flex-shrink-0 ${item.color}`} />
+                      <div>
+                        <div className={`text-xs font-semibold ${item.color} mb-0.5`}>{item.title}</div>
+                        <div className="text-slate-400 text-xs leading-relaxed">{item.desc}</div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              <div className="rounded-xl border border-slate-600/30 bg-slate-700/20 p-4 space-y-2">
+                <div className="flex items-center gap-2 mb-1 text-sm font-semibold text-slate-300">
+                  <Icon name="Layers" size={15} />
+                  Паузы по уровням (типичные ходы)
+                </div>
+                {[
+                  { emoji: '🟢', label: 'Лёгкий',  range: '6–20 сек', color: 'text-green-400',  note: 'Слабый бот "долго думает" даже над простыми позициями' },
+                  { emoji: '🟡', label: 'Средний', range: '8–22 сек', color: 'text-yellow-400', note: 'Чуть быстрее, но тоже нерешителен' },
+                  { emoji: '🟠', label: 'Сложный', range: '10–30 сек', color: 'text-orange-400', note: 'Думает дольше, так как считает глубже' },
+                  { emoji: '🔴', label: 'Мастер',  range: '12–35 сек', color: 'text-red-400',    note: 'Самый долгий расчёт в сложных позициях' },
+                ].map((lvl, i) => (
+                  <div key={i} className="flex items-center gap-3 text-xs">
+                    <span className="w-4">{lvl.emoji}</span>
+                    <span className={`font-semibold w-16 ${lvl.color}`}>{lvl.label}</span>
+                    <span className="text-white font-mono w-20">{lvl.range}</span>
+                    <span className="text-slate-400">{lvl.note}</span>
+                  </div>
+                ))}
+              </div>
+
+              <div className="rounded-xl border border-slate-600/30 bg-slate-700/20 p-4">
+                <div className="flex items-center gap-2 mb-2 text-sm font-semibold text-slate-400">
+                  <Icon name="Gauge" size={15} />
+                  Режимы игры и скорость ходов
+                </div>
+                <div className="space-y-1.5 text-xs text-slate-400 leading-relaxed">
+                  <div className="flex items-start gap-2"><span className="text-yellow-400 font-semibold flex-shrink-0">⚡ Пуля / Блиц:</span><span>Все паузы сокращаются — боты ходят быстро 2–3 сек, имитируя реальную игру в цейтноте</span></div>
+                  <div className="flex items-start gap-2"><span className="text-blue-400 font-semibold flex-shrink-0">🕐 Рапид / Классика:</span><span>Полные паузы — боты думают от 5 до 55 сек в зависимости от позиции и уровня</span></div>
+                </div>
               </div>
             </div>
           )}
