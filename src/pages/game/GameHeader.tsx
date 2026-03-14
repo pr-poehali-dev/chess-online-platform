@@ -392,9 +392,9 @@ export const GameControls = ({
                 </div>
               )}
             </div>
-            {rematchCooldown && isOnline ? (
+            {rematchCooldown ? (
               <button
-                onClick={() => onNewOnlineGame?.()}
+                onClick={() => onNewOnlineGame ? onNewOnlineGame() : window.location.reload()}
                 className="border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white"
               >
                 <Icon name="Search" size={14} />
@@ -403,11 +403,11 @@ export const GameControls = ({
             ) : (
               <button
                 onClick={() => {
-                  if (rematchSent || rematchCooldown) return;
+                  if (rematchSent) return;
                   if (onOfferRematch) { onOfferRematch(); }
                   else if (setShowRematchOffer) { setTimeout(() => { setShowRematchOffer(true); }, 500); }
                 }}
-                disabled={rematchSent || rematchCooldown}
+                disabled={rematchSent}
                 className={`border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold ${
                   rematchSent
                     ? "bg-amber-500/20 border-amber-500/50 text-amber-400 cursor-not-allowed"

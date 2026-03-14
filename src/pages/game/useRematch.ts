@@ -43,11 +43,15 @@ export const useRematch = ({
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
     if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
-    if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null; }
     setRematchTimeoutLeft(null);
   }, []);
 
-  useEffect(() => { return stopAll; }, []);
+  useEffect(() => {
+    return () => {
+      stopAll();
+      if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null; }
+    };
+  }, []);
 
   const startPoll = useCallback((inviteId: number) => {
     stopAll();
@@ -85,17 +89,30 @@ export const useRematch = ({
     }, POLL_INTERVAL_MS);
   }, [myUserId, playerColor, timeControl, opponentName, opponentRating, opponentAvatar, stopAll]);
 
+  const isOnlineRef = useRef(isOnline);
+  const timeControlRef = useRef(timeControl);
+  const playerColorRef = useRef(playerColor);
+  const opponentNameRef = useRef(opponentName);
+  const opponentAvatarRef = useRef(opponentAvatar);
+  isOnlineRef.current = isOnline;
+  timeControlRef.current = timeControl;
+  playerColorRef.current = playerColor;
+  opponentNameRef.current = opponentName;
+  opponentAvatarRef.current = opponentAvatar;
+
   const offerRematch = useCallback(async () => {
-    if (!isOnline) {
+    if (!isOnlineRef.current) {
       setBotRematchPending(true);
       const delay = 3000 + Math.random() * 4000;
       const accepted = Math.random() < 0.5;
       botTimerRef.current = setTimeout(() => {
-        setBotRematchPending(false);
+        botTimerRef.current = null;
         if (accepted) {
-          navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${playerColor === 'white' ? 'black' : 'white'}&opponent_name=${encodeURIComponent(opponentName)}&opponent_avatar=${encodeURIComponent(opponentAvatar)}`);
+          setBotRematchPending(false);
+          navigate(`/game?time=${encodeURIComponent(timeControlRef.current)}&color=${playerColorRef.current === 'white' ? 'black' : 'white'}&opponent_name=${encodeURIComponent(opponentNameRef.current)}&opponent_avatar=${encodeURIComponent(opponentAvatarRef.current)}`);
         } else {
           setRematchCooldown(true);
+          setBotRematchPending(false);
           setRematchError('Соперник отклонил реванш');
         }
       }, delay);
@@ -110,7 +127,7 @@ export const useRematch = ({
     } else if (result.inviteId) {
       startPoll(result.inviteId);
     }
-  }, [isOnline, opponentUserId, timeControl, handleOfferRematch, startPoll]);
+  }, [navigate, opponentUserId, timeControl, handleOfferRematch, startPoll]);
 
   const cancelBotRematch = useCallback(() => {
     if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null; }
