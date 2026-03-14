@@ -80,8 +80,14 @@ def handler(event, context):
         )
         online_users = cur.fetchone()[0]
 
+        # Закрываем зависшие партии (нет активности более 10 минут)
         cur.execute(
-            "SELECT COUNT(*) FROM {s}.online_games WHERE status = 'playing' AND created_at > NOW() - INTERVAL '1 hour'".format(s=schema)
+            "UPDATE {s}.online_games SET status = 'finished' WHERE status = 'playing' AND updated_at < NOW() - INTERVAL '10 minutes'".format(s=schema)
+        )
+        conn.commit()
+
+        cur.execute(
+            "SELECT COUNT(*) FROM {s}.online_games WHERE status = 'playing' AND updated_at > NOW() - INTERVAL '10 minutes'".format(s=schema)
         )
         active_games = cur.fetchone()[0]
 
