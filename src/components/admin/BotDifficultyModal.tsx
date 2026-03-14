@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import Icon from '@/components/ui/icon';
 import API from '@/config/api';
 
@@ -56,6 +56,8 @@ export const BotDifficultyModal = ({ onClose }: Props) => {
   const [editValues, setEditValues] = useState<Partial<Bot>>({});
   const [saving, setSaving] = useState<string | null>(null);
   const [saved, setSaved] = useState<string | null>(null);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   useEffect(() => {
     if (tab === 'bots' && bots.length === 0) {
@@ -73,6 +75,26 @@ export const BotDifficultyModal = ({ onClose }: Props) => {
   };
 
   const cancelEdit = () => { setEditingId(null); setEditValues({}); };
+
+  const handleAvatarFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    setUploadingAvatar(true);
+    const reader = new FileReader();
+    reader.onload = async () => {
+      const base64 = reader.result as string;
+      const res = await fetch(API.uploadAvatar, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ image: base64, filename: file.name }),
+      });
+      const data = await res.json();
+      if (data.url) setEditValues(v => ({ ...v, avatar: data.url }));
+      setUploadingAvatar(false);
+    };
+    reader.readAsDataURL(file);
+    e.target.value = '';
+  };
 
   const saveBot = async (bot: Bot) => {
     setSaving(bot.id);
@@ -276,12 +298,26 @@ export const BotDifficultyModal = ({ onClose }: Props) => {
                         ) : (
                           <div className="space-y-3">
                             <div className="flex items-center gap-3">
-                              <img
-                                src={editValues.avatar || bot.avatar}
-                                alt=""
-                                className="w-9 h-9 rounded-full object-cover flex-shrink-0 bg-slate-600"
-                                onError={(e) => { (e.target as HTMLImageElement).src = ''; }}
-                              />
+                              <div className="relative flex-shrink-0 group cursor-pointer" onClick={() => fileInputRef.current?.click()}>
+                                <img
+                                  src={editValues.avatar || bot.avatar}
+                                  alt=""
+                                  className="w-12 h-12 rounded-full object-cover bg-slate-600"
+                                  onError={(e) => { (e.target as HTMLImageElement).src = ''; }}
+                                />
+                                <div className="absolute inset-0 rounded-full bg-black/50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity">
+                                  {uploadingAvatar
+                                    ? <Icon name="Loader2" size={14} className="text-white animate-spin" />
+                                    : <Icon name="Camera" size={14} className="text-white" />}
+                                </div>
+                                <input
+                                  ref={fileInputRef}
+                                  type="file"
+                                  accept="image/*"
+                                  className="hidden"
+                                  onChange={handleAvatarFileChange}
+                                />
+                              </div>
                               <div className="flex-1">
                                 <label className="text-xs text-slate-400 mb-1 block">Имя</label>
                                 <input
@@ -292,7 +328,10 @@ export const BotDifficultyModal = ({ onClose }: Props) => {
                               </div>
                             </div>
                             <div>
-                              <label className="text-xs text-slate-400 mb-1 block">URL аватарки</label>
+                              <label className="text-xs text-slate-400 mb-1 flex items-center gap-1.5">
+                                URL аватарки
+                                <span className="text-slate-500">· или нажми на фото для загрузки</span>
+                              </label>
                               <input
                                 value={editValues.avatar ?? bot.avatar}
                                 onChange={e => setEditValues(v => ({ ...v, avatar: e.target.value }))}

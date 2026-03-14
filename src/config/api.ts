@@ -19,6 +19,7 @@ export const API = {
   adminStats: urls['admin-stats'],
   leaderboard: urls['leaderboard'],
   adminBots: urls['admin-bots'],
+  uploadAvatar: urls['upload-avatar'],
 } as const;
 
 export default API;
