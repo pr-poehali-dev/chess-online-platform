@@ -58,7 +58,7 @@ const Game = () => {
   const opponentName = isOnlineReal || isBotFromMatchmaking
     ? (paramOpponentName || 'Соперник')
     : isPlayingWithBot ? (paramOpponentName || 'Бот') : 'Соперник';
-  const opponentRating = isOnlineReal
+  const opponentRating = (isOnlineReal || isBotFromMatchmaking)
     ? (paramOpponentRating || undefined)
     : (isPlayingWithBot ? undefined : paramOpponentRating || undefined);
 
@@ -95,7 +95,13 @@ const Game = () => {
     sendPeerMessage, onChatMessageRef, historyRef,
     handleSquareClick, isSquareSelected, isSquarePossibleMove,
     handlePreviousMove, handleNextMove,
-  } = useGameLogic(difficulty, timeControl, playerColor, isOnlineReal ? Number(onlineGameId) : undefined);
+  } = useGameLogic(
+    difficulty, timeControl, playerColor,
+    isOnlineReal ? Number(onlineGameId) : undefined,
+    isBotFromMatchmaking,
+    paramOpponentName || 'Бот',
+    paramOpponentRating || undefined
+  );
 
   const {
     isDragging, showExitDialog, showChat, setShowChat,

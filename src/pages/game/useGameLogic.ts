@@ -211,7 +211,10 @@ export const useGameLogic = (
   difficulty: 'easy' | 'medium' | 'hard' | 'master',
   timeControl: string,
   playerColor: 'white' | 'black' = 'white',
-  onlineGameId?: number
+  onlineGameId?: number,
+  isBotFromMatchmaking = false,
+  botOpponentName = 'Бот',
+  botOpponentRating?: number
 ) => {
   const isOnlineGame = !!onlineGameId;
   const botColor = playerColor === 'white' ? 'black' : 'white';
@@ -857,25 +860,29 @@ export const useGameLogic = (
     }
     const durationSeconds = Math.floor((Date.now() - gameStartTime.current) / 1000);
     try {
+      const opponentType = isBotFromMatchmaking ? 'matchmaking_bot' : 'bot';
+      const opponentName = isBotFromMatchmaking ? botOpponentName : 'bot';
+      const payload = {
+        user_id: userId,
+        username: userData.name || 'Player',
+        avatar: userData.avatar || '',
+        result,
+        opponent_name: opponentName,
+        opponent_type: opponentType,
+        opponent_rating: botOpponentRating,
+        user_color: playerColor,
+        time_control: timeControl,
+        difficulty,
+        moves_count: moveHistory.length,
+        move_history: moveHistory.join(','),
+        move_times: moveTimes.join(','),
+        duration_seconds: durationSeconds,
+        end_reason: status
+      };
       const res = await fetch(FINISH_GAME_URL, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({
-          user_id: userId,
-          username: userData.name || 'Player',
-          avatar: userData.avatar || '',
-          result,
-          opponent_name: 'bot',
-          opponent_type: 'bot',
-          user_color: playerColor,
-          time_control: timeControl,
-          difficulty,
-          moves_count: moveHistory.length,
-          move_history: moveHistory.join(','),
-          move_times: moveTimes.join(','),
-          duration_seconds: durationSeconds,
-          end_reason: status
-        })
+        body: JSON.stringify(payload)
       });
       const data = await res.json();
       invalidateGameHistory();
@@ -892,8 +899,9 @@ export const useGameLogic = (
         username: userData.name || 'Player',
         avatar: userData.avatar || '',
         result,
-        opponent_name: 'bot',
-        opponent_type: 'bot',
+        opponent_name: isBotFromMatchmaking ? botOpponentName : 'bot',
+        opponent_type: isBotFromMatchmaking ? 'matchmaking_bot' : 'bot',
+        opponent_rating: botOpponentRating,
         user_color: playerColor,
         time_control: timeControl,
         difficulty,
@@ -904,7 +912,7 @@ export const useGameLogic = (
         end_reason: status
       });
     }
-  }, [playerColor, timeControl, difficulty, moveHistory, moveTimes]);
+  }, [playerColor, timeControl, difficulty, moveHistory, moveTimes, isBotFromMatchmaking, botOpponentName, botOpponentRating]);
 
   useEffect(() => {
     if (gameStatus !== 'playing' && !gameFinished.current && moveHistory.length > 2) {

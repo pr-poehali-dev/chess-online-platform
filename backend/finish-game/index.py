@@ -92,7 +92,7 @@ def handler(event: dict, context) -> dict:
     initial_rating = int(settings.get('initial_rating', '1200'))
     min_rating = int(settings.get('min_rating', '500'))
 
-    # Рейтинг меняется только в онлайн-играх (не в режиме "Играть с компьютером")
+    # Рейтинг меняется в онлайн-играх и при игре с ботом через матчмейкинг
     rating_active = opponent_type != 'bot'
 
     cur.execute("SELECT id, rating, games_played, wins, losses, draws FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
