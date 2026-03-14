@@ -85,20 +85,18 @@ def handler(event: dict, context) -> dict:
     conn = psycopg2.connect(os.environ['DATABASE_URL'])
     cur = conn.cursor()
 
-    cur.execute("SELECT id, rating, games_played, wins, losses, draws FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
-    user = cur.fetchone()
-
     cur.execute("SELECT key, value FROM rating_settings")
     settings_rows = cur.fetchall()
     settings = {r[0]: r[1] for r in settings_rows}
 
-    win_points = int(settings.get('win_points', '25'))
-    loss_points = int(settings.get('loss_points', '15'))
-    draw_points = int(settings.get('draw_points', '5'))
     initial_rating = int(settings.get('initial_rating', '1200'))
     min_rating = int(settings.get('min_rating', '500'))
-    streak_bonus_3 = int(settings.get('streak_bonus_3', '15'))
-    streak_bonus_5 = int(settings.get('streak_bonus_5', '25'))
+
+    # Рейтинг меняется только в онлайн-играх (не в режиме "Играть с компьютером")
+    rating_active = opponent_type != 'bot'
+
+    cur.execute("SELECT id, rating, games_played, wins, losses, draws FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
+    user = cur.fetchone()
 
     if not user:
         cur.execute(
@@ -124,28 +122,44 @@ def handler(event: dict, context) -> dict:
 
     streak_bonus = 0
     if result == 'win':
-        rating_change = win_points
         wins += 1
-        win_streak += 1
-        if win_streak == 5:
-            streak_bonus = streak_bonus_5
-        elif win_streak == 3:
-            streak_bonus = streak_bonus_3
+        if rating_active:
+            win_streak += 1
     elif result == 'loss':
-        rating_change = -loss_points
         losses += 1
-        win_streak = 0
+        if rating_active:
+            win_streak = 0
     else:
-        rating_change = draw_points
         draws += 1
-        win_streak = 0
+        if rating_active:
+            win_streak = 0
 
-    rating_change += streak_bonus
+    if rating_active:
+        win_points = int(settings.get('win_points', '25'))
+        loss_points = int(settings.get('loss_points', '15'))
+        draw_points = int(settings.get('draw_points', '5'))
+        streak_bonus_3 = int(settings.get('streak_bonus_3', '15'))
+        streak_bonus_5 = int(settings.get('streak_bonus_5', '25'))
 
-    new_rating = current_rating + rating_change
-    if new_rating < min_rating:
-        new_rating = min_rating
-        rating_change = new_rating - current_rating
+        if result == 'win':
+            rating_change = win_points
+            if win_streak == 5:
+                streak_bonus = streak_bonus_5
+            elif win_streak == 3:
+                streak_bonus = streak_bonus_3
+        elif result == 'loss':
+            rating_change = -loss_points
+        else:
+            rating_change = draw_points
+
+        rating_change += streak_bonus
+        new_rating = current_rating + rating_change
+        if new_rating < min_rating:
+            new_rating = min_rating
+            rating_change = new_rating - current_rating
+    else:
+        rating_change = 0
+        new_rating = current_rating
 
     games_played += 1
 

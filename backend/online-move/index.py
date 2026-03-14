@@ -11,6 +11,75 @@ def get_bot_strength(cur, bot_uid: str) -> int:
     return row[0] if row else 1200
 
 
+def update_online_ratings(cur, conn, white_uid: str, black_uid: str, winner_uid: str | None, end_reason: str):
+    """Обновляем рейтинги обоих участников онлайн-игры (включая ботов)"""
+    cur.execute("SELECT key, value FROM rating_settings")
+    settings = {r[0]: r[1] for r in cur.fetchall()}
+
+    win_points = int(settings.get('win_points', '25'))
+    loss_points = int(settings.get('loss_points', '15'))
+    draw_points = int(settings.get('draw_points', '5'))
+    min_rating = int(settings.get('min_rating', '500'))
+    initial_rating = int(settings.get('initial_rating', '500'))
+    streak_bonus_3 = int(settings.get('streak_bonus_3', '15'))
+    streak_bonus_5 = int(settings.get('streak_bonus_5', '25'))
+
+    is_draw = (winner_uid is None or end_reason in ('stalemate', 'draw'))
+
+    for uid in (white_uid, black_uid):
+        is_bot_uid = uid.startswith('bot_')
+        if is_bot_uid:
+            cur.execute("SELECT rating FROM bots WHERE id = '%s'" % uid.replace("'", "''"))
+            row = cur.fetchone()
+            current_rating = row[0] if row else initial_rating
+        else:
+            cur.execute("SELECT rating, win_streak FROM users WHERE id = '%s'" % uid.replace("'", "''"))
+            row = cur.fetchone()
+            if not row:
+                continue
+            current_rating, win_streak = row[0], row[1] or 0
+
+        if is_draw:
+            result = 'draw'
+        elif winner_uid == uid:
+            result = 'win'
+        else:
+            result = 'loss'
+
+        streak_bonus = 0
+        if not is_bot_uid:
+            if result == 'win':
+                win_streak += 1
+                if win_streak == 5:
+                    streak_bonus = streak_bonus_5
+                elif win_streak == 3:
+                    streak_bonus = streak_bonus_3
+            else:
+                win_streak = 0
+
+        if result == 'win':
+            rating_change = win_points + streak_bonus
+        elif result == 'loss':
+            rating_change = -loss_points
+        else:
+            rating_change = draw_points
+
+        new_rating = max(min_rating, current_rating + rating_change)
+
+        if is_bot_uid:
+            cur.execute(
+                "UPDATE bots SET rating = %d, updated_at = NOW() WHERE id = '%s'"
+                % (new_rating, uid.replace("'", "''"))
+            )
+        else:
+            cur.execute(
+                "UPDATE users SET rating = %d, win_streak = %d, updated_at = NOW() WHERE id = '%s'"
+                % (new_rating, win_streak, uid.replace("'", "''"))
+            )
+
+    conn.commit()
+
+
 def moves_to_board(move_history_str: str) -> chess.Board:
     """Воссоздаём шахматную доску из истории ходов в формате 'e2-e4,e7-e5,...'"""
     board = chess.Board()
@@ -549,6 +618,7 @@ def handler(event: dict, context) -> dict:
             % (winner.replace("'", "''"), g_id)
         )
         conn.commit()
+        update_online_ratings(cur, conn, white_uid, black_uid, winner, 'resign')
         cur.close()
         conn.close()
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'finished', 'winner': winner, 'end_reason': 'resign'})}
@@ -558,6 +628,7 @@ def handler(event: dict, context) -> dict:
             "UPDATE online_games SET status = 'finished', end_reason = 'draw', draw_offered_by = NULL, updated_at = NOW() WHERE id = %d" % g_id
         )
         conn.commit()
+        update_online_ratings(cur, conn, white_uid, black_uid, None, 'draw')
         cur.close()
         conn.close()
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'finished', 'end_reason': 'draw'})}
@@ -570,6 +641,7 @@ def handler(event: dict, context) -> dict:
             % (winner.replace("'", "''"), g_id)
         )
         conn.commit()
+        update_online_ratings(cur, conn, white_uid, black_uid, winner, 'timeout')
         cur.close()
         conn.close()
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'finished', 'winner': winner, 'end_reason': 'timeout'})}
@@ -662,6 +734,13 @@ def handler(event: dict, context) -> dict:
 
     rows_updated = cur.rowcount
     conn.commit()
+
+    # Если игра завершена ходом игрока (мат, пат) — обновляем рейтинги
+    if rows_updated > 0 and new_status == 'finished':
+        actual_winner = winner_id if (winner_val != 'NULL' and winner_id) else None
+        actual_end_reason = end_reason_val.strip("'") if end_reason_val != 'NULL' else 'draw'
+        update_online_ratings(cur, conn, white_uid, black_uid, actual_winner, actual_end_reason)
+
     cur.close()
     conn.close()
 
@@ -694,6 +773,7 @@ def handler(event: dict, context) -> dict:
                 % (player_uid.replace("'", "''"), g_id)
             )
             conn2.commit()
+            update_online_ratings(cur2, conn2, white_uid, black_uid, player_uid, 'resign')
             cur2.close()
             conn2.close()
         else:
@@ -753,6 +833,10 @@ def handler(event: dict, context) -> dict:
                            new_move_number + 1, g_id, new_move_number)
                     )
                     conn2.commit()
+                    if bot_game_over:
+                        bot_winner_uid = (white_uid if bot_is_white else black_uid) if bot_is_checkmate else None
+                        bot_er = bot_end_reason.strip("'")
+                        update_online_ratings(cur2, conn2, white_uid, black_uid, bot_winner_uid, bot_er)
             cur2.close()
             conn2.close()
 
