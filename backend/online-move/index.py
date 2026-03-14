@@ -436,6 +436,60 @@ def handler(event: dict, context) -> dict:
             % (esc(user_id), g_id)
         )
         conn.commit()
+
+        # Если игра с ботом — бот сам решает принять или отклонить с задержкой
+        if is_bot:
+            cur.close()
+            conn.close()
+            time_module.sleep(random.randint(3, 7))
+            accepts = random.random() < 0.5
+
+            conn3 = psycopg2.connect(os.environ['DATABASE_URL'])
+            cur3 = conn3.cursor()
+            if accepts:
+                # Создаём новую партию (цвета меняются)
+                cur3.execute(
+                    """SELECT white_user_id, white_username, white_avatar, white_rating,
+                              black_user_id, black_username, black_avatar, black_rating,
+                              time_control, opponent_type, is_bot_game
+                    FROM online_games WHERE id = %d""" % g_id
+                )
+                old = cur3.fetchone()
+                if old:
+                    ow_uid, ow_name, ow_avatar, ow_rating = old[0], old[1], old[2] or '', old[3]
+                    ob_uid, ob_name, ob_avatar, ob_rating = old[4], old[5], old[6] or '', old[7]
+                    otc, oop, o_is_bot = old[8], old[9], old[10]
+
+                    def _get_init_time(tc):
+                        if '+' in tc:
+                            return int(tc.split('+')[0]) * 60
+                        return {'blitz': 180, 'rapid': 600, 'classic': 900}.get(tc, 600)
+
+                    init_time = _get_init_time(otc)
+                    cur3.execute(
+                        """INSERT INTO online_games (white_user_id, white_username, white_avatar, white_rating,
+                            black_user_id, black_username, black_avatar, black_rating,
+                            time_control, opponent_type, is_bot_game, white_time, black_time)
+                        VALUES ('%s', '%s', '%s', %d, '%s', '%s', '%s', %d, '%s', '%s', %s, %d, %d) RETURNING id"""
+                        % (esc(ob_uid), esc(ob_name), esc(ob_avatar), ob_rating,
+                           esc(ow_uid), esc(ow_name), esc(ow_avatar), ow_rating,
+                           esc(otc), esc(oop), 'TRUE' if o_is_bot else 'FALSE', init_time, init_time)
+                    )
+                    new_game_id = cur3.fetchone()[0]
+                    cur3.execute(
+                        "UPDATE online_games SET rematch_status = 'accepted', rematch_game_id = %d, updated_at = NOW() WHERE id = %d"
+                        % (new_game_id, g_id)
+                    )
+                    conn3.commit()
+            else:
+                cur3.execute(
+                    "UPDATE online_games SET rematch_status = 'declined', updated_at = NOW() WHERE id = %d" % g_id
+                )
+                conn3.commit()
+            cur3.close()
+            conn3.close()
+            return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_offered'})}
+
         cur.close()
         conn.close()
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps({'status': 'rematch_offered'})}
@@ -662,6 +716,8 @@ def handler(event: dict, context) -> dict:
 
         # Проверяем: должен ли бот сдаться
         if board.turn == bot_chess_color and should_bot_resign(board, bot_chess_color, new_move_number):
+            # Бот «думает» перед сдачей — 3-5 секунд
+            time_module.sleep(random.randint(3, 5))
             player_uid = black_uid if bot_is_white else white_uid
             cur2.execute(
                 "UPDATE online_games SET status = 'finished', winner = '%s', end_reason = 'resign', updated_at = NOW() WHERE id = %d"
