@@ -163,7 +163,12 @@ export const GameControls = ({
 
   return (
     <div className="w-full md:w-auto">
-      <div className="flex items-center gap-1 sm:gap-1.5 h-[32px] sm:h-[38px]">
+      {isGameOver && (
+        <div className={`flex md:hidden items-center justify-center gap-1 px-2 h-[28px] rounded-lg border text-[11px] font-bold whitespace-nowrap w-full mb-1 ${resultColor}`}>
+          {resultLabel}
+        </div>
+      )}
+      <div className="flex items-center gap-1 sm:gap-1.5 h-[32px] sm:h-[38px] w-full md:w-auto justify-between md:justify-start">
         <button onClick={handleExitClick} className={btnCls} title="Выход из игры">
           <div className="rotate-180"><Icon name="LogOut" size={16} /></div>
         </button>
@@ -179,7 +184,7 @@ export const GameControls = ({
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
             className={btnCls}
-            title="Опции"
+            title="Настройки"
           >
             <Icon name="Settings" size={16} />
           </button>
@@ -376,7 +381,7 @@ export const GameControls = ({
         <P2PIndicator isOnline={isOnline} p2pConnected={p2pConnected} p2pQuality={p2pQuality} p2pLatency={p2pLatency} connectionLost={connectionLost} theme={theme} />
         {isGameOver && (
           <>
-            <div className={`flex items-center gap-1 px-2 sm:px-3 h-[32px] sm:h-[38px] rounded-lg border text-[11px] sm:text-xs font-bold whitespace-nowrap flex-shrink-0 ${resultColor}`}>
+            <div className={`hidden md:flex items-center gap-1 px-2 sm:px-3 h-[32px] sm:h-[38px] rounded-lg border text-[11px] sm:text-xs font-bold whitespace-nowrap flex-shrink-0 ${resultColor}`}>
               {resultLabel}
             </div>
             <div className="relative flex-shrink-0">
@@ -400,7 +405,7 @@ export const GameControls = ({
             </div>
             <button
               onClick={() => onNewOnlineGame ? onNewOnlineGame() : window.location.reload()}
-              className="border rounded-lg transition-colors flex items-center gap-1.5 px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white"
+              className="border rounded-lg transition-colors flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[10px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white min-w-0"
             >
               <Icon name="Search" size={14} />
               <span className="whitespace-nowrap">Новая игра</span>
@@ -413,7 +418,7 @@ export const GameControls = ({
                   else if (setShowRematchOffer) { setTimeout(() => { setShowRematchOffer(true); }, 500); }
                 }}
                 disabled={rematchSent}
-                className={`border rounded-lg transition-colors flex items-center gap-1.5 px-2 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[11px] sm:text-xs font-semibold ${
+                className={`border rounded-lg transition-colors flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 font-semibold min-w-0 ${
                   rematchSent
                     ? "bg-amber-500/20 border-amber-500/50 text-amber-400 cursor-not-allowed"
                     : "bg-green-600 hover:bg-green-700 border-green-700 text-white"
@@ -421,7 +426,7 @@ export const GameControls = ({
                 title={rematchSent ? "Ожидание ответа..." : "Реванш"}
               >
                 <Icon name={rematchSent ? "Loader2" : "RotateCcw"} size={14} className={rematchSent ? "animate-spin" : ""} />
-                <span className="hidden sm:inline whitespace-nowrap">
+                <span className="whitespace-nowrap text-[10px] sm:text-xs">
                   {rematchSent
                     ? `Ожидание${rematchTimeoutLeft ? ` (${rematchTimeoutLeft}с)` : "..."}`
                     : "Реванш"}
