@@ -341,7 +341,7 @@ const Game = () => {
           {/* Нижняя панель + игрок */}
           <div className="flex flex-col gap-0.5 sm:gap-1">
             <PlayerInfo
-              playerName="Вы"
+              playerName={userData?.name || 'Вы'}
               playerColor={playerColor}
               icon={playerColor === 'white' ? '♔' : '♚'}
               time={playerColor === 'white' ? whiteTime : blackTime}
