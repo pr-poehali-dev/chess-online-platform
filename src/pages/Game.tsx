@@ -296,7 +296,7 @@ const Game = () => {
               rematchSent={rematchSent}
               rematchCooldown={rematchCooldown}
               rematchTimeoutLeft={rematchTimeoutLeft}
-              isOnline={isOnlineReal}
+              isOnline={isOnlineReal || isBotFromMatchmaking}
               onNewOnlineGame={() => navigate(`/online-game?opponent=country&time=${encodeURIComponent(timeControl)}&color=random`)}
               p2pConnected={p2pConnected}
               p2pQuality={p2pQuality}
