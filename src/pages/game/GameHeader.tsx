@@ -168,7 +168,7 @@ export const GameControls = ({
           {resultLabel}
         </div>
       )}
-      <div className="flex items-center gap-1 sm:gap-1.5 h-[32px] sm:h-[38px] w-full md:w-auto justify-between md:justify-start">
+      <div className={`flex items-center gap-1 sm:gap-1.5 h-[32px] sm:h-[38px] md:w-auto ${isGameOver ? "w-full justify-between md:justify-start" : "w-auto justify-start"}`}>
         <button onClick={handleExitClick} className={btnCls} title="Выход из игры">
           <div className="rotate-180"><Icon name="LogOut" size={16} /></div>
         </button>
