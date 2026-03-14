@@ -1,7 +1,6 @@
 import { Card, CardContent } from '@/components/ui/card';
 import useMatchmaking from './online-game/useMatchmaking';
 import SearchingScreen from './online-game/SearchingScreen';
-import NoMatchScreen from './online-game/NoMatchScreen';
 import MatchFoundScreen from './online-game/MatchFoundScreen';
 
 const getTimeLabel = (time: string | null) => {
@@ -30,7 +29,6 @@ const getOpponentTypeLabel = (type: string | null) => {
 const OnlineGame = () => {
   const {
     searchStatus,
-    searchStage,
     opponent,
     playerColor,
     countdown,
@@ -38,8 +36,6 @@ const OnlineGame = () => {
     opponentType,
     timeControl,
     cancelSearch,
-    handlePlayBot,
-    handleContinueSearch
   } = useMatchmaking();
 
   return (
@@ -51,18 +47,9 @@ const OnlineGame = () => {
               opponentType={opponentType}
               timeControl={timeControl}
               searchTime={searchTime}
-              searchStage={searchStage}
               onCancel={cancelSearch}
               getTimeLabel={getTimeLabel}
               getOpponentTypeLabel={getOpponentTypeLabel}
-            />
-          )}
-
-          {searchStatus === 'no_opponents' && (
-            <NoMatchScreen
-              onPlayBot={handlePlayBot}
-              onContinueSearch={handleContinueSearch}
-              onCancel={cancelSearch}
             />
           )}
 

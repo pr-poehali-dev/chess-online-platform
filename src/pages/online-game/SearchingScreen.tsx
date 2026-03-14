@@ -1,85 +1,59 @@
-import Icon from '@/components/ui/icon';
 import { Button } from '@/components/ui/button';
-import type { SearchStage } from './useMatchmaking';
 
 interface SearchingScreenProps {
   opponentType: string | null;
   timeControl: string;
   searchTime: number;
-  searchStage: SearchStage;
   onCancel: () => void;
   getTimeLabel: (time: string | null) => string;
   getOpponentTypeLabel: (type: string | null) => string;
 }
 
-const STAGE_LABELS: Record<SearchStage, string> = {
-  city: 'в вашем городе',
-  region: 'в вашем регионе',
-  rating: 'с рейтингом ±50',
-  any: 'любого соперника онлайн'
-};
-
-const STAGE_ORDER: SearchStage[] = ['city', 'region', 'rating', 'any'];
-
 const SearchingScreen = ({
-  opponentType,
   timeControl,
   searchTime,
-  searchStage,
   onCancel,
   getTimeLabel,
 }: SearchingScreenProps) => {
-  const startStageIdx = opponentType === 'city' ? 0 : opponentType === 'region' ? 1 : 2;
-  const stages = STAGE_ORDER.slice(startStageIdx);
-  const currentIdx = stages.indexOf(searchStage);
-
   return (
     <div className="text-center space-y-6">
       <div className="flex justify-center">
-        <div className="relative">
-          <div className="w-24 h-24 rounded-full border-4 border-amber-500/30 border-t-amber-500 animate-spin"></div>
+        <div className="relative w-28 h-28">
+          {/* Внешнее кольцо */}
+          <div className="absolute inset-0 rounded-full border-4 border-amber-500/20 border-t-amber-500 animate-spin" style={{ animationDuration: '1.4s' }} />
+          {/* Среднее кольцо */}
+          <div className="absolute inset-3 rounded-full border-2 border-amber-400/15 border-b-amber-400/60 animate-spin" style={{ animationDuration: '2.1s', animationDirection: 'reverse' }} />
+          {/* Иконка ферзя по центру */}
           <div className="absolute inset-0 flex items-center justify-center">
-            <Icon name="Search" size={32} className="text-amber-400" />
+            <span className="text-5xl select-none" style={{ filter: 'drop-shadow(0 0 8px rgba(251,191,36,0.6))' }}>♛</span>
           </div>
         </div>
       </div>
 
       <div>
         <h2 className="text-2xl font-bold text-stone-100 mb-2">
-          Поиск соперника
+          Ищем соперника
         </h2>
-        <p className="text-stone-300 text-lg">
-          Ищем {STAGE_LABELS[searchStage]}
-        </p>
-        <p className="text-sm text-stone-500 mt-2">
+        <p className="text-stone-400 text-sm">
           Контроль времени: {getTimeLabel(timeControl)}
         </p>
       </div>
 
-      <div className="flex justify-center gap-2 mt-4">
-        {stages.map((stage, idx) => (
-          <div key={stage} className="flex items-center gap-2">
-            <div className={`w-2.5 h-2.5 rounded-full transition-colors ${
-              idx < currentIdx ? 'bg-amber-500' :
-              idx === currentIdx ? 'bg-amber-400 animate-pulse' :
-              'bg-stone-600'
-            }`} />
-            {idx < stages.length - 1 && (
-              <div className={`w-6 h-0.5 ${idx < currentIdx ? 'bg-amber-500/50' : 'bg-stone-700'}`} />
-            )}
-          </div>
-        ))}
-      </div>
-      <div className="flex justify-between text-[10px] text-stone-500 px-2">
-        {stages.map((stage) => (
-          <span key={stage} className={stage === searchStage ? 'text-amber-400' : ''}>
-            {stage === 'city' ? 'Город' : stage === 'region' ? 'Регион' : stage === 'rating' ? '±50' : 'Все'}
-          </span>
+      <div className="flex justify-center gap-1.5">
+        {[0, 1, 2].map(i => (
+          <div
+            key={i}
+            className="w-2 h-2 rounded-full bg-amber-500"
+            style={{
+              animation: 'bounce 1.2s infinite',
+              animationDelay: `${i * 0.2}s`
+            }}
+          />
         ))}
       </div>
 
       <p className="text-xs text-stone-600">
-        Поиск: {searchTime} сек
+        {searchTime} сек
       </p>
 
       <Button

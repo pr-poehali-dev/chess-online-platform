@@ -95,7 +95,7 @@ export const MatchmakingSettingsModal = ({ settings, onSave, onClose }: Props) =
           <p>
             Когда игрок нажимает «Начать партию», система начинает искать соперника поэтапно — сначала по узкому кругу, потом всё шире. Каждая стадия длится{' '}
             <InlineInput value={stageDuration} onChange={setStageDuration} min={1} max={60} />{' '}
-            секунд, после чего поиск расширяется.
+            секунд, после чего поиск расширяется. Поиск ведётся только среди игроков с рейтингом ±{ratingRange} и одинаковым режимом партии.
           </p>
           <div className="mt-3 space-y-2">
             <div className="flex items-start gap-2">
@@ -115,7 +115,7 @@ export const MatchmakingSettingsModal = ({ settings, onSave, onClose }: Props) =
             <div className="flex items-start gap-2">
               <span className="w-6 h-6 rounded-full bg-amber-500/30 text-amber-300 text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">3</span>
               <div>
-                <span className="text-white font-medium">Похожий рейтинг ±{ratingRange}</span>
+                <span className="text-white font-medium">Вся Россия</span>
                 <span className="text-slate-400"> — ищем любого игрока по всей России с близким рейтингом.</span>
               </div>
             </div>
@@ -123,7 +123,7 @@ export const MatchmakingSettingsModal = ({ settings, onSave, onClose }: Props) =
               <span className="w-6 h-6 rounded-full bg-green-500/30 text-green-300 text-xs flex items-center justify-center flex-shrink-0 mt-0.5 font-bold">4</span>
               <div>
                 <span className="text-white font-medium">Любой онлайн</span>
-                <span className="text-slate-400"> — берём любого игрока с тем же контролем времени. Поиск продолжается бессрочно до нахождения или отмены.</span>
+                <span className="text-slate-400"> — берём любого игрока с наибольшим рейтингом. Если и здесь никого нет — игрок автоматически переходит к игре с ботом.</span>
               </div>
             </div>
           </div>
@@ -192,7 +192,7 @@ export const MatchmakingSettingsModal = ({ settings, onSave, onClose }: Props) =
       title: 'Если соперник не найден',
       content: (
         <p className="text-slate-300 text-sm leading-relaxed">
-          Если после всех стадий живой соперник так и не нашёлся, игроку предлагается сыграть с ботом. Рейтинг бота подбирается случайно в диапазоне ±30 очков от рейтинга игрока, чтобы партия была хоть немного близкой по уровню.
+          Если после всех четырёх стадий живой соперник так и не нашёлся, игрок <span className="text-white font-semibold">автоматически и без уведомлений</span> переходит к игре с ботом. Рейтинг бота подбирается случайно в диапазоне ±30 очков от рейтинга игрока.
         </p>
       )
     },

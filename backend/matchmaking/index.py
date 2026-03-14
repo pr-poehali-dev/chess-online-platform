@@ -99,7 +99,7 @@ def create_game(cur, conn, headers, user_id, username, avatar, user_rating, matc
 
 
 def handler(event: dict, context) -> dict:
-    """Матчмейкинг с каскадным поиском: город → регион → рейтинг ±50 → любой онлайн"""
+    """Матчмейкинг с каскадным поиском: город → регион → вся Россия ±30 → любой онлайн → бот"""
     if event.get('httpMethod') == 'OPTIONS':
         return {'statusCode': 200, 'headers': {'Access-Control-Allow-Origin': '*', 'Access-Control-Allow-Methods': 'GET, POST, PUT, DELETE, OPTIONS', 'Access-Control-Allow-Headers': 'Content-Type, X-User-Id, X-Auth-Token, X-Session-Id', 'Access-Control-Max-Age': '86400'}, 'body': ''}
 
@@ -211,7 +211,7 @@ def handler(event: dict, context) -> dict:
     mm_cfg = {r[0]: r[1] for r in mm_rows}
     HEARTBEAT_TIMEOUT = int(mm_cfg.get('mm_heartbeat_timeout', '10'))
     DEAD_RECORD_TTL = int(mm_cfg.get('mm_dead_record_ttl', '15'))
-    RATING_RANGE = int(mm_cfg.get('mm_rating_range', '50'))
+    RATING_RANGE = int(mm_cfg.get('mm_rating_range', '30'))
 
     if action == 'play_bot':
         cur.execute("DELETE FROM matchmaking_queue WHERE user_id = '%s'" % esc(user_id))

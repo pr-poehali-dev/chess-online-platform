@@ -5,8 +5,8 @@ import API from '@/config/api';
 
 const MATCHMAKING_URL = API.matchmaking;
 const POLL_INTERVAL = 3000;
-const STAGE_DURATION = 5000;
-const FINAL_STAGE_DURATION = 5000;
+const STAGE_DURATION = 2000;
+const FINAL_STAGE_DURATION = 2000;
 
 export type SearchStage = 'city' | 'region' | 'rating' | 'any';
 export type SearchStatus = 'searching' | 'no_opponents' | 'found' | 'starting';
@@ -152,7 +152,25 @@ const useMatchmaking = () => {
     const currentIdx = STAGE_ORDER.indexOf(currentStageRef.current);
     if (currentIdx >= STAGE_ORDER.length - 1) {
       if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-      setSearchStatus('no_opponents');
+      // Соперник не найден на всех стадиях — тихо запускаем бота
+      const u = user;
+      fetch(MATCHMAKING_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          action: 'play_bot',
+          user_id: u.id,
+          username: u.name || 'Player',
+          avatar: u.avatar || '',
+          rating: u.rating || 1200,
+          opponent_type: opponentType || 'country',
+          time_control: timeControl
+        })
+      }).then(r => r.json()).then(data => {
+        if (!abortedRef.current && data.status === 'bot_game') {
+          handleMatchFound(data, true);
+        }
+      }).catch(() => {});
       return;
     }
 
@@ -167,7 +185,7 @@ const useMatchmaking = () => {
 
     const duration = nextStage === 'any' ? FINAL_STAGE_DURATION : STAGE_DURATION;
     stageTimerRef.current = setTimeout(() => advanceToNextStage(user), duration);
-  }, [doSearch]);
+  }, [doSearch, opponentType, timeControl, handleMatchFound]);
 
   const getInitialStage = useCallback((): SearchStage => {
     if (opponentType === 'city') return 'city';
