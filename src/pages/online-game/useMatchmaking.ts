@@ -4,9 +4,9 @@ import { cityRegions } from '@/components/chess/data/cities';
 import API from '@/config/api';
 
 const MATCHMAKING_URL = API.matchmaking;
-const POLL_INTERVAL = 3000;
-const STAGE_DURATION = 2000;
-const FINAL_STAGE_DURATION = 2000;
+const POLL_INTERVAL = 2500;
+const STAGE_DURATION = 3000;
+const FINAL_STAGE_DURATION = 0;
 
 export type SearchStage = 'city' | 'region' | 'rating' | 'any';
 export type SearchStatus = 'searching' | 'no_opponents' | 'found' | 'starting';
@@ -87,7 +87,7 @@ const useMatchmaking = () => {
     setSearchStatus('found');
     setTimeout(() => {
       if (!abortedRef.current) setSearchStatus('starting');
-    }, 4000);
+    }, 1500);
   }, [cleanup]);
 
   const checkActiveGame = useCallback(async (userId: string) => {
@@ -150,9 +150,9 @@ const useMatchmaking = () => {
     if (abortedRef.current || matchFoundRef.current) return;
 
     const currentIdx = STAGE_ORDER.indexOf(currentStageRef.current);
-    if (currentIdx >= STAGE_ORDER.length - 1) {
-      if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-      // Соперник не найден на всех стадиях — тихо запускаем бота
+    // После первой стадии — сразу бот, без дальнейшего поиска
+    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
+    if (currentIdx >= 0) {
       const u = user;
       fetch(MATCHMAKING_URL, {
         method: 'POST',
@@ -171,21 +171,8 @@ const useMatchmaking = () => {
           handleMatchFound(data, true);
         }
       }).catch(() => {});
-      return;
     }
-
-    const nextStage = STAGE_ORDER[currentIdx + 1];
-    currentStageRef.current = nextStage;
-    setSearchStage(nextStage);
-
-    if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
-
-    doSearch(user, nextStage);
-    pollRef.current = setInterval(() => doSearch(user, nextStage), POLL_INTERVAL);
-
-    const duration = nextStage === 'any' ? FINAL_STAGE_DURATION : STAGE_DURATION;
-    stageTimerRef.current = setTimeout(() => advanceToNextStage(user), duration);
-  }, [doSearch, opponentType, timeControl, handleMatchFound]);
+  }, [opponentType, timeControl, handleMatchFound]);
 
   const getInitialStage = useCallback((): SearchStage => {
     if (opponentType === 'city') return 'city';
