@@ -133,6 +133,7 @@ const Game = () => {
     opponentRating,
     opponentAvatar,
     myUserId,
+    difficulty,
     handleOfferRematch,
   });
 
