@@ -22,6 +22,8 @@ export interface RatingSettings {
   daily_decay: { value: string; description: string };
   initial_rating: { value: string; description: string };
   min_rating: { value: string; description: string };
+  streak_bonus_3?: { value: string; description: string };
+  streak_bonus_5?: { value: string; description: string };
   rating_principles?: { value: string; description: string };
 }
 

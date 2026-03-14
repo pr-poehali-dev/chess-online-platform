@@ -17,7 +17,9 @@
         "move_history": "e2-e4,e7-e5",
         "end_reason": "checkmate"
       },
-      "expectedStatus": 200
+      "expectedStatus": 200,
+      "expectedBody": {"win_streak": 1},
+      "bodyMatcher": "partial"
     },
     {
       "name": "Finish game - missing result",

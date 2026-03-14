@@ -97,10 +97,12 @@ def handler(event: dict, context) -> dict:
     draw_points = int(settings.get('draw_points', '5'))
     initial_rating = int(settings.get('initial_rating', '1200'))
     min_rating = int(settings.get('min_rating', '500'))
+    streak_bonus_3 = int(settings.get('streak_bonus_3', '15'))
+    streak_bonus_5 = int(settings.get('streak_bonus_5', '25'))
 
     if not user:
         cur.execute(
-            "INSERT INTO users (id, username, avatar, rating, games_played, wins, losses, draws) VALUES ('%s', '%s', '%s', %d, 0, 0, 0, 0)"
+            "INSERT INTO users (id, username, avatar, rating, games_played, wins, losses, draws, win_streak) VALUES ('%s', '%s', '%s', %d, 0, 0, 0, 0, 0)"
             % (user_id.replace("'", "''"), username.replace("'", "''"), avatar.replace("'", "''"), initial_rating)
         )
         conn.commit()
@@ -109,22 +111,36 @@ def handler(event: dict, context) -> dict:
         wins = 0
         losses = 0
         draws = 0
+        win_streak = 0
     else:
+        cur.execute("SELECT win_streak FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
+        streak_row = cur.fetchone()
         current_rating = user[1]
         games_played = user[2]
         wins = user[3]
         losses = user[4]
         draws = user[5]
+        win_streak = streak_row[0] if streak_row else 0
 
+    streak_bonus = 0
     if result == 'win':
         rating_change = win_points
         wins += 1
+        win_streak += 1
+        if win_streak == 5:
+            streak_bonus = streak_bonus_5
+        elif win_streak == 3:
+            streak_bonus = streak_bonus_3
     elif result == 'loss':
         rating_change = -loss_points
         losses += 1
+        win_streak = 0
     else:
         rating_change = draw_points
         draws += 1
+        win_streak = 0
+
+    rating_change += streak_bonus
 
     new_rating = current_rating + rating_change
     if new_rating < min_rating:
@@ -134,8 +150,8 @@ def handler(event: dict, context) -> dict:
     games_played += 1
 
     cur.execute(
-        "UPDATE users SET rating = %d, games_played = %d, wins = %d, losses = %d, draws = %d, updated_at = NOW() WHERE id = '%s'"
-        % (new_rating, games_played, wins, losses, draws, user_id.replace("'", "''"))
+        "UPDATE users SET rating = %d, games_played = %d, wins = %d, losses = %d, draws = %d, win_streak = %d, updated_at = NOW() WHERE id = '%s'"
+        % (new_rating, games_played, wins, losses, draws, win_streak, user_id.replace("'", "''"))
     )
 
     move_history_escaped = move_history.replace("'", "''") if move_history else ''
@@ -183,6 +199,8 @@ def handler(event: dict, context) -> dict:
             'rating_before': current_rating,
             'rating_after': new_rating,
             'rating_change': rating_change,
+            'streak_bonus': streak_bonus,
+            'win_streak': win_streak,
             'games_played': games_played,
             'wins': wins,
             'losses': losses,

@@ -64,6 +64,8 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
   const [dailyDecay, setDailyDecay] = useState(settings.daily_decay.value);
   const [initialRating, setInitialRating] = useState(settings.initial_rating.value);
   const [minRating, setMinRating] = useState(settings.min_rating.value);
+  const [streakBonus3, setStreakBonus3] = useState(settings.streak_bonus_3?.value ?? '15');
+  const [streakBonus5, setStreakBonus5] = useState(settings.streak_bonus_5?.value ?? '25');
   const [saving, setSaving] = useState(false);
 
   const handleSave = async () => {
@@ -75,6 +77,8 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
       daily_decay: { value: dailyDecay },
       initial_rating: { value: initialRating },
       min_rating: { value: minRating },
+      streak_bonus_3: { value: streakBonus3 },
+      streak_bonus_5: { value: streakBonus5 },
       rating_principles: { value: settings.rating_principles?.value || '' }
     });
     setSaving(false);
@@ -162,6 +166,21 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
           очков — ни за поражения, ни за ежедневное снижение. Это защитный порог, чтобы игрок не уходил в отрицательные значения.
         </p>
       )
+    },
+    {
+      icon: 'Flame',
+      color: 'text-amber-400',
+      bg: 'bg-amber-500/10 border-amber-500/20',
+      title: 'Серийный бонус за победы подряд',
+      content: (
+        <p className="text-slate-300 text-sm leading-relaxed">
+          Если игрок выигрывает <span className="text-white font-semibold">3 партии подряд</span> — он получает дополнительный бонус{' '}
+          <InlineInput value={streakBonus3} onChange={setStreakBonus3} min={0} max={999} />{' '}
+          очков. При <span className="text-white font-semibold">5 победах подряд</span> — ещё{' '}
+          <InlineInput value={streakBonus5} onChange={setStreakBonus5} min={0} max={999} />{' '}
+          очков сверх базовых. Серия сбрасывается при поражении или ничьей.
+        </p>
+      )
     }
   ];
 
@@ -216,7 +235,9 @@ export const RatingSettingsModal = ({ settings, onSave, onClose }: Props) => {
               Победа: <span className="text-green-400 font-bold">+{winPoints}</span> &nbsp;|&nbsp;
               Поражение: <span className="text-red-400 font-bold">−{lossPoints}</span> &nbsp;|&nbsp;
               Ничья: <span className="text-yellow-400 font-bold">{Number(drawPoints) >= 0 ? '+' : ''}{drawPoints}</span> &nbsp;|&nbsp;
-              Без игр в день: <span className="text-orange-400 font-bold">−{dailyDecay}</span>
+              Без игр в день: <span className="text-orange-400 font-bold">−{dailyDecay}</span> &nbsp;|&nbsp;
+              Серия 3: <span className="text-amber-400 font-bold">+{streakBonus3}</span> &nbsp;|&nbsp;
+              Серия 5: <span className="text-amber-400 font-bold">+{streakBonus5}</span>
             </p>
           </div>
         </div>
