@@ -42,7 +42,7 @@ const Game = () => {
   });
 
   const flipped = playerColor === 'black';
-  const isPlayingWithBot = (!opponentType || opponentType === 'random') && !isOnlineReal;
+  const isPlayingWithBot = (!opponentType || opponentType === 'random' || opponentType === 'computer') && !isOnlineReal && !isBotFromMatchmaking;
 
   const savedUser = localStorage.getItem('chessUser');
   const userData = savedUser ? JSON.parse(savedUser) : null;
