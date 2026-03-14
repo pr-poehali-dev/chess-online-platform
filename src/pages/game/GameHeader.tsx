@@ -172,14 +172,16 @@ export const GameControls = ({
         <button onClick={handleExitClick} className={btnCls} title="Выход из игры">
           <div className="rotate-180"><Icon name="LogOut" size={16} /></div>
         </button>
-        <button onClick={() => setShowChat(true)} className={`${btnCls} relative`} title="Чат">
-          <Icon name="MessageCircle" size={16} />
-          {unreadChatCount > 0 && (
-            <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold px-0.5 leading-none">
-              {unreadChatCount > 9 ? '9+' : unreadChatCount}
-            </span>
-          )}
-        </button>
+        {isOnline && (
+          <button onClick={() => setShowChat(true)} className={`${btnCls} relative`} title="Чат">
+            <Icon name="MessageCircle" size={16} />
+            {unreadChatCount > 0 && (
+              <span className="absolute -top-1 -right-1 min-w-[16px] h-[16px] flex items-center justify-center rounded-full bg-red-500 text-white text-[9px] font-bold px-0.5 leading-none">
+                {unreadChatCount > 9 ? '9+' : unreadChatCount}
+              </span>
+            )}
+          </button>
+        )}
         <div className="relative flex-shrink-0">
           <button
             onClick={() => setShowSettingsMenu(!showSettingsMenu)}
