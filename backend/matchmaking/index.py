@@ -251,7 +251,7 @@ def handler(event: dict, context) -> dict:
 
     if action == 'play_bot':
         cur.execute("DELETE FROM matchmaking_queue WHERE user_id = '%s'" % esc(user_id))
-        bot = find_closest_bot(user_rating)
+        bot = random.choice(BOTS)
         result = create_game(cur, conn, headers, user_id, username, avatar, user_rating,
                              (bot['id'], bot['name'], bot['avatar'], bot['rating']),
                              time_control, opponent_type, is_bot=True)

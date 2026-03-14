@@ -141,18 +141,49 @@ def _minimax(board: chess.Board, depth: int, alpha: int, beta: int, maximizing: 
         return best_move, best_val
 
 
-def should_bot_resign(board: chess.Board, bot_color: chess.Color) -> bool:
-    """Проверяем, должен ли бот сдаться — только король или явный проигрыш по материалу"""
+def _can_improve_in_n_moves(board: chess.Board, bot_color: chess.Color, depth: int) -> bool:
+    """Проверяем, есть ли хоть один путь за depth ходов, улучшающий позицию бота."""
+    if depth == 0:
+        return False
+    if board.turn != bot_color:
+        # Ход соперника — рекурсия: нам нужно чтобы хотя бы один его ход НЕ улучшал его позицию
+        for move in list(board.legal_moves)[:20]:
+            board.push(move)
+            result = _can_improve_in_n_moves(board, bot_color, depth - 1)
+            board.pop()
+            if result:
+                return True
+        return False
+    for move in list(board.legal_moves)[:20]:
+        board.push(move)
+        # Проверяем мат/выигрыш бота
+        if board.is_checkmate() and board.turn != bot_color:
+            board.pop()
+            return True
+        board.pop()
+    return False
+
+
+def should_bot_resign(board: chess.Board, bot_color: chess.Color, move_number: int) -> bool:
+    """Логика сдачи бота по трём условиям."""
     values = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3, chess.ROOK: 5, chess.QUEEN: 9}
     bot_material = sum(len(board.pieces(pt, bot_color)) * v for pt, v in values.items())
     opp_material = sum(len(board.pieces(pt, not bot_color)) * v for pt, v in values.items())
+    advantage = opp_material - bot_material
 
-    # Только король остался — сдаёмся
-    if bot_material == 0:
-        return True
+    # 1. Только король + явный перевес: проверяем 2 хода вперёд
+    if bot_material == 0 and advantage >= 5:
+        if not _can_improve_in_n_moves(board, bot_color, 2):
+            return True
 
-    # Серьёзный перевес соперника: ≥18 очков (ферзь + ладья) и у бота практически ничего
-    if opp_material - bot_material >= 18 and bot_material <= 3:
+    # 2. Сильный перевес в конце партии: проверяем 5 ходов вперёд
+    if advantage >= 15 and move_number >= 20:
+        if not _can_improve_in_n_moves(board, bot_color, 5):
+            return True
+
+    # 3. Потеря ферзя в первых 15 ходах
+    bot_queens = len(board.pieces(chess.QUEEN, bot_color))
+    if bot_queens == 0 and move_number <= 30 and advantage >= 9:
         return True
 
     return False
@@ -630,7 +661,7 @@ def handler(event: dict, context) -> dict:
         cur2 = conn2.cursor()
 
         # Проверяем: должен ли бот сдаться
-        if board.turn == bot_chess_color and should_bot_resign(board, bot_chess_color):
+        if board.turn == bot_chess_color and should_bot_resign(board, bot_chess_color, new_move_number):
             player_uid = black_uid if bot_is_white else white_uid
             cur2.execute(
                 "UPDATE online_games SET status = 'finished', winner = '%s', end_reason = 'resign', updated_at = NOW() WHERE id = %d"
