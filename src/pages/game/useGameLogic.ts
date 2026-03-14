@@ -894,8 +894,6 @@ export const useGameLogic = (
     setLastMove({ from, to });
     setBoard(newBoard);
     setCurrentMoveIndex(newBoardHistory.length - 1);
-    setSelectedSquare(null);
-    setPossibleMoves([]);
 
     const increment = getIncrement(timeControl);
     if (currentPlayer === 'white' && increment > 0) {
@@ -906,6 +904,21 @@ export const useGameLogic = (
 
     const nextPlayer = currentPlayer === 'white' ? 'black' : 'white';
     setCurrentPlayer(nextPlayer);
+
+    // Восстановить выбранную фигуру если ход переходит к игроку
+    const prevSel = selectedSquareRef.current;
+    if (prevSel && nextPlayer === playerColor) {
+      const piece = newBoard[prevSel.row][prevSel.col];
+      if (piece && piece.color === playerColor) {
+        setPossibleMoves(getPossibleMoves(newBoard, prevSel, newCastlingRights, newEnPassantTarget));
+      } else {
+        setSelectedSquare(null);
+        setPossibleMoves([]);
+      }
+    } else {
+      setSelectedSquare(null);
+      setPossibleMoves([]);
+    }
 
     setTimeout(() => {
       if (historyRef.current) {
