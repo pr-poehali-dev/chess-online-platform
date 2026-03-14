@@ -403,11 +403,20 @@ const Game = () => {
           <div className="w-full max-w-sm bg-stone-800 border border-stone-700/50 rounded-2xl p-6 flex flex-col items-center gap-4 animate-fade-in">
             {botRematchPending ? (
               <>
-                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
-                  <Icon name="Loader2" size={26} className="text-amber-400 animate-spin" />
+                <div className="relative">
+                  {opponentAvatar ? (
+                    <img src={opponentAvatar} alt={opponentName} className="w-16 h-16 rounded-full object-cover ring-2 ring-amber-400/50" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-stone-700 flex items-center justify-center ring-2 ring-amber-400/50">
+                      <Icon name="User" size={28} className="text-stone-400" />
+                    </div>
+                  )}
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-stone-800 flex items-center justify-center">
+                    <Icon name="Loader2" size={14} className="text-amber-400 animate-spin" />
+                  </div>
                 </div>
                 <div className="text-center">
-                  <p className="text-white font-semibold text-lg">Запрос отправлен</p>
+                  <p className="text-white font-semibold text-lg">Запрос на реванш отправлен</p>
                   <p className="text-stone-400 text-sm mt-1">{opponentName} думает над предложением...</p>
                 </div>
                 <button
@@ -419,8 +428,17 @@ const Game = () => {
               </>
             ) : (
               <>
-                <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
-                  <Icon name="CheckCircle" size={26} className="text-green-400" />
+                <div className="relative">
+                  {opponentAvatar ? (
+                    <img src={opponentAvatar} alt={opponentName} className="w-16 h-16 rounded-full object-cover ring-2 ring-green-400" />
+                  ) : (
+                    <div className="w-16 h-16 rounded-full bg-stone-700 flex items-center justify-center ring-2 ring-green-400">
+                      <Icon name="User" size={28} className="text-stone-400" />
+                    </div>
+                  )}
+                  <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-stone-800 flex items-center justify-center">
+                    <Icon name="Check" size={14} className="text-green-400" />
+                  </div>
                 </div>
                 <div className="text-center">
                   <p className="text-white font-semibold text-lg">{opponentName} принял реванш!</p>

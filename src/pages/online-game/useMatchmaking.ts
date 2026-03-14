@@ -263,16 +263,16 @@ const useMatchmaking = () => {
 
   useEffect(() => {
     if (searchStatus === 'starting') {
+      const isBotGame = opponent?.isBotGame;
+      if (isBotGame) {
+        navigate(`/game?opponent=online_bot&time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&bot_game=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}`);
+        return;
+      }
       const timer = setInterval(() => {
         setCountdown(prev => {
           if (prev <= 1) {
             clearInterval(timer);
-            const isBotGame = opponent?.isBotGame;
-            if (isBotGame) {
-              navigate(`/game?opponent=online_bot&time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&bot_game=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}`);
-            } else {
-              navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&online=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}`);
-            }
+            navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&online=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}`);
             return 0;
           }
           return prev - 1;

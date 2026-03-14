@@ -93,7 +93,7 @@ export const useRematch = ({
         if (accepted) {
           setBotRematchAccepted(true);
         } else {
-          setRematchError('Бот отклонил реванш');
+          setRematchError('Соперник отклонил реванш');
         }
       }, delay);
       return;
