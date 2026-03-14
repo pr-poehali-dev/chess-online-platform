@@ -51,12 +51,12 @@ const Game = () => {
     ? 'u_' + (userData.email || userData.name || 'anonymous').replace(/[^a-zA-Z0-9@._-]/g, '').substring(0, 60)
     : '';
 
-  const opponentAvatar = isOnlineReal
+  const opponentAvatar = isOnlineReal || isBotFromMatchmaking
     ? (paramOpponentAvatar || '')
-    : (isPlayingWithBot || isBotFromMatchmaking) ? BOT_AVATAR : GUEST_AVATAR;
-  const opponentName = isOnlineReal
+    : isPlayingWithBot ? BOT_AVATAR : GUEST_AVATAR;
+  const opponentName = isOnlineReal || isBotFromMatchmaking
     ? (paramOpponentName || 'Соперник')
-    : (isPlayingWithBot || isBotFromMatchmaking) ? (paramOpponentName || 'Бот') : 'Соперник';
+    : isPlayingWithBot ? (paramOpponentName || 'Бот') : 'Соперник';
   const opponentRating = isOnlineReal
     ? (paramOpponentRating || undefined)
     : (isPlayingWithBot ? undefined : paramOpponentRating || undefined);
@@ -308,7 +308,7 @@ const Game = () => {
               time={playerColor === 'white' ? blackTime : whiteTime}
               isCurrentPlayer={currentPlayer !== playerColor}
               formatTime={formatTime}
-              difficulty={(isPlayingWithBot || isBotFromMatchmaking) ? getDifficultyLabel(difficulty) : undefined}
+              difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
               rating={opponentRating}
               avatar={opponentAvatar}
               inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}

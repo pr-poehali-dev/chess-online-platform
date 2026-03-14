@@ -5,6 +5,41 @@ import time as time_module
 import random
 import chess
 
+BASE_CDN = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files'
+BOTS = [
+    {'id': 'bot_anna',      'strength': 810},
+    {'id': 'bot_artem',     'strength': 840},
+    {'id': 'bot_daria',     'strength': 890},
+    {'id': 'bot_timur',     'strength': 930},
+    {'id': 'bot_sofia',     'strength': 980},
+    {'id': 'bot_roman',     'strength': 1010},
+    {'id': 'bot_marina',    'strength': 1060},
+    {'id': 'bot_kostya',    'strength': 1090},
+    {'id': 'bot_olga',      'strength': 1120},
+    {'id': 'bot_alexey',    'strength': 1150},
+    {'id': 'bot_irina',     'strength': 1180},
+    {'id': 'bot_pavel',     'strength': 1210},
+    {'id': 'bot_elena',     'strength': 1240},
+    {'id': 'bot_dmitry',    'strength': 1270},
+    {'id': 'bot_yulia',     'strength': 1310},
+    {'id': 'bot_oleg',      'strength': 1350},
+    {'id': 'bot_tatiana',   'strength': 1390},
+    {'id': 'bot_andrey',    'strength': 1420},
+    {'id': 'bot_nastya',    'strength': 1460},
+    {'id': 'bot_igor',      'strength': 1500},
+    {'id': 'bot_vera',      'strength': 1540},
+    {'id': 'bot_sergey',    'strength': 1580},
+    {'id': 'bot_natalia',   'strength': 1640},
+    {'id': 'bot_vladimir',  'strength': 1700},
+    {'id': 'bot_ekaterina', 'strength': 1750},
+    {'id': 'bot_nikolay',   'strength': 1800},
+    {'id': 'bot_svetlana',  'strength': 1870},
+    {'id': 'bot_maxim',     'strength': 1940},
+    {'id': 'bot_anastasia', 'strength': 2030},
+    {'id': 'bot_viktor',    'strength': 2120},
+    {'id': 'bot_evgenia',   'strength': 2250},
+]
+
 
 def moves_to_board(move_history_str: str) -> chess.Board:
     """Воссоздаём шахматную доску из истории ходов в формате 'e2-e4,e7-e5,...'"""
@@ -104,6 +139,23 @@ def _minimax(board: chess.Board, depth: int, alpha: int, beta: int, maximizing: 
             if beta <= alpha:
                 break
         return best_move, best_val
+
+
+def should_bot_resign(board: chess.Board, bot_color: chess.Color) -> bool:
+    """Проверяем, должен ли бот сдаться — только король или явный проигрыш по материалу"""
+    values = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3, chess.ROOK: 5, chess.QUEEN: 9}
+    bot_material = sum(len(board.pieces(pt, bot_color)) * v for pt, v in values.items())
+    opp_material = sum(len(board.pieces(pt, not bot_color)) * v for pt, v in values.items())
+
+    # Только король остался — сдаёмся
+    if bot_material == 0:
+        return True
+
+    # Серьёзный перевес соперника: ≥18 очков (ферзь + ладья) и у бота практически ничего
+    if opp_material - bot_material >= 18 and bot_material <= 3:
+        return True
+
+    return False
 
 
 def notation_from_uci(uci: str) -> str:
@@ -565,79 +617,87 @@ def handler(event: dict, context) -> dict:
     if is_bot and new_status == 'playing':
         player_is_white = (user_id == white_uid)
         bot_is_white = not player_is_white
-        bot_rating_val = white_rating if bot_is_white else black_rating
+        # Рейтинг бота в БД = 500, но для уровня движка используем strength
+        # Определяем strength по id бота (white/black uid начинается с bot_)
+        bot_uid = white_uid if bot_is_white else black_uid
+        bot_strength = next((b['strength'] for b in BOTS if b['id'] == bot_uid), 1200)
 
-        # Задержка от 1 до 20 секунд — варьируется по ходу и рейтингу
-        move_complexity = min(new_move_number, 40)  # первые 40 ходов разные
-        if bot_rating_val >= 1800:
-            delay = random.randint(3, 15)
-        elif bot_rating_val >= 1400:
-            delay = random.randint(2, 12)
-        else:
-            delay = random.randint(1, 8)
-        # Добавляем случайный разброс независимо от рейтинга
-        delay = min(20, max(1, delay + random.randint(-2, 3)))
-        time_module.sleep(delay)
-
-        # Восстанавливаем доску из истории ходов
+        # Восстанавливаем доску — нужна ДО задержки, чтобы проверить сдачу
         board = moves_to_board(new_move_hist)
-
-        # Вычисляем ход бота
         bot_chess_color = chess.WHITE if bot_is_white else chess.BLACK
-        if board.turn == bot_chess_color:
-            bot_move = choose_bot_move(board, bot_rating_val)
-            if bot_move:
-                bot_notation = notation_from_uci(bot_move.uci())
 
-                # Применяем ход бота на доске для проверки статуса
-                board.push(bot_move)
-                bot_game_over = board.is_game_over()
-                bot_is_checkmate = board.is_checkmate()
-                bot_is_stalemate = board.is_stalemate()
+        conn2 = psycopg2.connect(os.environ['DATABASE_URL'])
+        cur2 = conn2.cursor()
 
-                bot_move_hist = new_move_hist + ',' + bot_notation
-                bot_next_player = next_player  # после хода бота — снова ход игрока
-                if bot_is_white:
-                    bot_next_player = 'black'
-                else:
-                    bot_next_player = 'white'
+        # Проверяем: должен ли бот сдаться
+        if board.turn == bot_chess_color and should_bot_resign(board, bot_chess_color):
+            player_uid = black_uid if bot_is_white else white_uid
+            cur2.execute(
+                "UPDATE online_games SET status = 'finished', winner = '%s', end_reason = 'resign', updated_at = NOW() WHERE id = %d"
+                % (player_uid.replace("'", "''"), g_id)
+            )
+            conn2.commit()
+            cur2.close()
+            conn2.close()
+        else:
+            # Задержка от 1 до 20 секунд — варьируется по силе бота
+            if bot_strength >= 1800:
+                delay = random.randint(4, 18)
+            elif bot_strength >= 1400:
+                delay = random.randint(2, 14)
+            else:
+                delay = random.randint(1, 10)
+            delay = min(20, max(1, delay + random.randint(-2, 3)))
+            time_module.sleep(delay)
 
-                bot_status = 'playing'
-                bot_winner = 'NULL'
-                bot_end_reason = 'NULL'
-                if bot_game_over:
-                    bot_status = 'finished'
-                    if bot_is_checkmate:
-                        # Бот поставил мат — бот победил
-                        winner_uid = white_uid if bot_is_white else black_uid
-                        bot_winner = "'%s'" % winner_uid.replace("'", "''")
-                        bot_end_reason = "'checkmate'"
-                    elif bot_is_stalemate:
-                        bot_end_reason = "'stalemate'"
-                    else:
-                        bot_end_reason = "'draw'"
+            # Вычисляем ход бота
+            if board.turn == bot_chess_color:
+                bot_move = choose_bot_move(board, bot_strength)
+                if bot_move:
+                    bot_notation = notation_from_uci(bot_move.uci())
 
-                conn2 = psycopg2.connect(os.environ['DATABASE_URL'])
-                cur2 = conn2.cursor()
-                cur2.execute(
-                    """UPDATE online_games SET
-                        current_player = '%s',
-                        move_history = '%s',
-                        status = '%s',
-                        winner = %s,
-                        end_reason = %s,
-                        move_number = %d,
-                        last_move_at = NOW(),
-                        updated_at = NOW()
-                    WHERE id = %d AND move_number = %d"""
-                    % (bot_next_player,
-                       bot_move_hist.replace("'", "''"),
-                       bot_status, bot_winner, bot_end_reason,
-                       new_move_number + 1, g_id, new_move_number)
-                )
-                conn2.commit()
-                cur2.close()
-                conn2.close()
+                    # Применяем ход бота на доске для проверки статуса
+                    board.push(bot_move)
+                    bot_game_over = board.is_game_over()
+                    bot_is_checkmate = board.is_checkmate()
+                    bot_is_stalemate = board.is_stalemate()
+
+                    bot_move_hist = new_move_hist + ',' + bot_notation
+                    bot_next_player = 'black' if bot_is_white else 'white'
+
+                    bot_status = 'playing'
+                    bot_winner = 'NULL'
+                    bot_end_reason = 'NULL'
+                    if bot_game_over:
+                        bot_status = 'finished'
+                        if bot_is_checkmate:
+                            winner_uid = white_uid if bot_is_white else black_uid
+                            bot_winner = "'%s'" % winner_uid.replace("'", "''")
+                            bot_end_reason = "'checkmate'"
+                        elif bot_is_stalemate:
+                            bot_end_reason = "'stalemate'"
+                        else:
+                            bot_end_reason = "'draw'"
+
+                    cur2.execute(
+                        """UPDATE online_games SET
+                            current_player = '%s',
+                            move_history = '%s',
+                            status = '%s',
+                            winner = %s,
+                            end_reason = %s,
+                            move_number = %d,
+                            last_move_at = NOW(),
+                            updated_at = NOW()
+                        WHERE id = %d AND move_number = %d"""
+                        % (bot_next_player,
+                           bot_move_hist.replace("'", "''"),
+                           bot_status, bot_winner, bot_end_reason,
+                           new_move_number + 1, g_id, new_move_number)
+                    )
+                    conn2.commit()
+            cur2.close()
+            conn2.close()
 
     return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
         'status': new_status,

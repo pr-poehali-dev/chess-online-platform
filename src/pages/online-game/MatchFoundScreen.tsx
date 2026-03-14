@@ -1,8 +1,6 @@
 import Icon from '@/components/ui/icon';
 import type { OpponentData } from './useMatchmaking';
 
-const BOT_AVATAR = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
-
 interface MatchFoundScreenProps {
   opponent: OpponentData;
   playerColor: 'white' | 'black';
@@ -44,9 +42,7 @@ const MatchFoundScreen = ({
           <div className="text-3xl text-amber-400">VS</div>
 
           <div className="text-center">
-            {opponent.isBotGame ? (
-              <img src={BOT_AVATAR} alt={opponent.name} className="w-12 h-12 rounded-full mx-auto mb-2 object-cover" />
-            ) : opponent.avatar ? (
+            {opponent.avatar ? (
               <img src={opponent.avatar} alt={opponent.name} className="w-12 h-12 rounded-full mx-auto mb-2 object-cover" />
             ) : (
               <div className="text-4xl mb-2">{playerColor === 'white' ? '♚' : '♔'}</div>
@@ -67,13 +63,11 @@ const MatchFoundScreen = ({
 
       <div>
         <h2 className="text-2xl font-bold text-stone-100 mb-4">
-          {opponent.isBotGame ? 'Играем с ботом!' : 'Соперник найден!'}
+          Соперник найден!
         </h2>
 
         <div className="flex flex-col items-center gap-4 p-6 rounded-lg bg-stone-800/50 border border-stone-700">
-          {opponent.isBotGame ? (
-            <img src={BOT_AVATAR} alt={opponent.name} className="w-24 h-24 rounded-full ring-4 ring-amber-400 object-cover" />
-          ) : opponent.avatar ? (
+          {opponent.avatar ? (
             <img src={opponent.avatar} alt={opponent.name} className="w-24 h-24 rounded-full ring-4 ring-amber-400 object-cover" />
           ) : (
             <div className="w-24 h-24 rounded-full ring-4 ring-amber-400 bg-stone-700 flex items-center justify-center">
