@@ -2,6 +2,113 @@ import json
 import os
 import psycopg2
 import time as time_module
+import random
+import chess
+
+
+def moves_to_board(move_history_str: str) -> chess.Board:
+    """Воссоздаём шахматную доску из истории ходов в формате 'e2-e4,e7-e5,...'"""
+    board = chess.Board()
+    if not move_history_str:
+        return board
+    for notation in move_history_str.split(','):
+        notation = notation.strip()
+        if not notation:
+            continue
+        parts = notation.split('-')
+        if len(parts) != 2:
+            continue
+        uci = parts[0] + parts[1]
+        try:
+            move = chess.Move.from_uci(uci)
+            if move in board.legal_moves:
+                board.push(move)
+        except Exception:
+            continue
+    return board
+
+
+def choose_bot_move(board: chess.Board, bot_rating: int) -> chess.Move | None:
+    """Выбираем ход бота: чем выше рейтинг — тем глубже поиск"""
+    legal = list(board.legal_moves)
+    if not legal:
+        return None
+
+    if bot_rating < 1000:
+        # Почти случайный ход
+        return random.choice(legal)
+
+    if bot_rating < 1400:
+        # Жадный ход: берём фигуру если можем, иначе случайно
+        captures = [m for m in legal if board.is_capture(m)]
+        if captures and random.random() < 0.7:
+            return random.choice(captures)
+        return random.choice(legal)
+
+    if bot_rating < 1800:
+        # Простой минимакс глубина 2
+        best_move = None
+        best_score = -99999
+        for move in legal:
+            board.push(move)
+            score = _material_score(board, not board.turn)
+            board.pop()
+            if score > best_score or best_move is None:
+                best_score = score
+                best_move = move
+        return best_move
+
+    # Высокий рейтинг: минимакс глубина 3 с alpha-beta
+    move, _ = _minimax(board, 3, -99999, 99999, True)
+    return move if move else random.choice(legal)
+
+
+def _material_score(board: chess.Board, color: chess.Color) -> int:
+    values = {chess.PAWN: 1, chess.KNIGHT: 3, chess.BISHOP: 3,
+              chess.ROOK: 5, chess.QUEEN: 9, chess.KING: 0}
+    score = 0
+    for piece_type, val in values.items():
+        score += len(board.pieces(piece_type, color)) * val
+        score -= len(board.pieces(piece_type, not color)) * val
+    return score
+
+
+def _minimax(board: chess.Board, depth: int, alpha: int, beta: int, maximizing: bool):
+    if depth == 0 or board.is_game_over():
+        return None, _material_score(board, chess.WHITE if maximizing else chess.BLACK)
+
+    best_move = None
+    if maximizing:
+        best_val = -99999
+        for move in board.legal_moves:
+            board.push(move)
+            _, val = _minimax(board, depth - 1, alpha, beta, False)
+            board.pop()
+            if val > best_val:
+                best_val = val
+                best_move = move
+            alpha = max(alpha, val)
+            if beta <= alpha:
+                break
+        return best_move, best_val
+    else:
+        best_val = 99999
+        for move in board.legal_moves:
+            board.push(move)
+            _, val = _minimax(board, depth - 1, alpha, beta, True)
+            board.pop()
+            if val < best_val:
+                best_val = val
+                best_move = move
+            beta = min(beta, val)
+            if beta <= alpha:
+                break
+        return best_move, best_val
+
+
+def notation_from_uci(uci: str) -> str:
+    """Конвертируем UCI 'e2e4' → наш формат 'e2-e4'"""
+    return uci[:2] + '-' + uci[2:4]
 
 
 def get_client_ip(event):
@@ -175,7 +282,7 @@ def handler(event: dict, context) -> dict:
         """SELECT id, white_user_id, black_user_id, current_player, status,
                   white_time, black_time, move_history, is_bot_game, time_control,
                   EXTRACT(EPOCH FROM (NOW() - last_move_at))::int as seconds_since_move,
-                  move_number
+                  move_number, white_rating, black_rating
         FROM online_games WHERE id = %d""" % int(game_id)
     )
     game = cur.fetchone()
@@ -185,7 +292,7 @@ def handler(event: dict, context) -> dict:
         conn.close()
         return {'statusCode': 404, 'headers': headers, 'body': json.dumps({'error': 'game not found'})}
 
-    g_id, white_uid, black_uid, current_player, status, white_time, black_time, move_hist, is_bot, tc, secs_since, db_move_number = game
+    g_id, white_uid, black_uid, current_player, status, white_time, black_time, move_hist, is_bot, tc, secs_since, db_move_number, white_rating, black_rating = game
     db_move_number = db_move_number or 0
 
     if user_id != white_uid and user_id != black_uid:
@@ -453,6 +560,84 @@ def handler(event: dict, context) -> dict:
 
     if rows_updated == 0:
         return {'statusCode': 409, 'headers': headers, 'body': json.dumps({'error': 'concurrent move detected, retry'})}
+
+    # Если игра с ботом и она ещё идёт — бот делает свой ход с задержкой
+    if is_bot and new_status == 'playing':
+        player_is_white = (user_id == white_uid)
+        bot_is_white = not player_is_white
+        bot_rating_val = white_rating if bot_is_white else black_rating
+
+        # Задержка от 1 до 20 секунд — варьируется по ходу и рейтингу
+        move_complexity = min(new_move_number, 40)  # первые 40 ходов разные
+        if bot_rating_val >= 1800:
+            delay = random.randint(3, 15)
+        elif bot_rating_val >= 1400:
+            delay = random.randint(2, 12)
+        else:
+            delay = random.randint(1, 8)
+        # Добавляем случайный разброс независимо от рейтинга
+        delay = min(20, max(1, delay + random.randint(-2, 3)))
+        time_module.sleep(delay)
+
+        # Восстанавливаем доску из истории ходов
+        board = moves_to_board(new_move_hist)
+
+        # Вычисляем ход бота
+        bot_chess_color = chess.WHITE if bot_is_white else chess.BLACK
+        if board.turn == bot_chess_color:
+            bot_move = choose_bot_move(board, bot_rating_val)
+            if bot_move:
+                bot_notation = notation_from_uci(bot_move.uci())
+
+                # Применяем ход бота на доске для проверки статуса
+                board.push(bot_move)
+                bot_game_over = board.is_game_over()
+                bot_is_checkmate = board.is_checkmate()
+                bot_is_stalemate = board.is_stalemate()
+
+                bot_move_hist = new_move_hist + ',' + bot_notation
+                bot_next_player = next_player  # после хода бота — снова ход игрока
+                if bot_is_white:
+                    bot_next_player = 'black'
+                else:
+                    bot_next_player = 'white'
+
+                bot_status = 'playing'
+                bot_winner = 'NULL'
+                bot_end_reason = 'NULL'
+                if bot_game_over:
+                    bot_status = 'finished'
+                    if bot_is_checkmate:
+                        # Бот поставил мат — бот победил
+                        winner_uid = white_uid if bot_is_white else black_uid
+                        bot_winner = "'%s'" % winner_uid.replace("'", "''")
+                        bot_end_reason = "'checkmate'"
+                    elif bot_is_stalemate:
+                        bot_end_reason = "'stalemate'"
+                    else:
+                        bot_end_reason = "'draw'"
+
+                conn2 = psycopg2.connect(os.environ['DATABASE_URL'])
+                cur2 = conn2.cursor()
+                cur2.execute(
+                    """UPDATE online_games SET
+                        current_player = '%s',
+                        move_history = '%s',
+                        status = '%s',
+                        winner = %s,
+                        end_reason = %s,
+                        move_number = %d,
+                        last_move_at = NOW(),
+                        updated_at = NOW()
+                    WHERE id = %d AND move_number = %d"""
+                    % (bot_next_player,
+                       bot_move_hist.replace("'", "''"),
+                       bot_status, bot_winner, bot_end_reason,
+                       new_move_number + 1, g_id, new_move_number)
+                )
+                conn2.commit()
+                cur2.close()
+                conn2.close()
 
     return {'statusCode': 200, 'headers': headers, 'body': json.dumps({
         'status': new_status,
