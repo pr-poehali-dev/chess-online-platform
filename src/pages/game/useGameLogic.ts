@@ -145,6 +145,7 @@ export const useGameLogic = (
 
   const [board, setBoard] = useState<Board>(savedState?.board || initialBoard);
   const [selectedSquare, setSelectedSquare] = useState<Position | null>(null);
+  const selectedSquareRef = useRef<Position | null>(null);
   const [currentPlayer, setCurrentPlayer] = useState<'white' | 'black'>(savedState?.currentPlayer || 'white');
   const [possibleMoves, setPossibleMoves] = useState<Position[]>([]);
   const [whiteTime, setWhiteTime] = useState(savedState?.whiteTime || getInitialTime(timeControl));
@@ -189,6 +190,7 @@ export const useGameLogic = (
   });
   const [onlineReady, setOnlineReady] = useState(!isOnlineGame);
   const onlineReadyRef = useRef(!isOnlineGame);
+  selectedSquareRef.current = selectedSquare;
   const [connectionLost, setConnectionLost] = useState(false);
   const [connectionRestored, setConnectionRestored] = useState(false);
   const [opponentReconnecting, setOpponentReconnecting] = useState(false);
@@ -242,17 +244,16 @@ export const useGameLogic = (
       setCapturedByWhite(result.capturedByWhite);
       setCapturedByBlack(result.capturedByBlack);
       setKingInCheckPosition(result.kingInCheck);
-      setSelectedSquare(prev => {
-        if (prev) {
-          const piece = result.board[prev.row][prev.col];
-          if (piece && piece.color === playerColor) {
-            setPossibleMoves(getPossibleMoves(result.board, prev, result.castlingRights, result.enPassantTarget));
-            return prev;
-          }
+      const prevSel = selectedSquareRef.current;
+      if (prevSel) {
+        const piece = result.board[prevSel.row][prevSel.col];
+        if (piece && piece.color === playerColor) {
+          setPossibleMoves(getPossibleMoves(result.board, prevSel, result.castlingRights, result.enPassantTarget));
+        } else {
+          setSelectedSquare(null);
+          setPossibleMoves([]);
         }
-        setPossibleMoves([]);
-        return null;
-      });
+      }
       setWhiteTime(moveData.whiteTime);
       setBlackTime(moveData.blackTime);
 
@@ -554,17 +555,16 @@ export const useGameLogic = (
       setCapturedByWhite(result.capturedByWhite);
       setCapturedByBlack(result.capturedByBlack);
       setKingInCheckPosition(result.kingInCheck);
-      setSelectedSquare(prev => {
-        if (prev) {
-          const piece = result.board[prev.row][prev.col];
-          if (piece && piece.color === playerColor) {
-            setPossibleMoves(getPossibleMoves(result.board, prev, result.castlingRights, result.enPassantTarget));
-            return prev;
-          }
+      const prevSelServer = selectedSquareRef.current;
+      if (prevSelServer) {
+        const piece = result.board[prevSelServer.row][prevSelServer.col];
+        if (piece && piece.color === playerColor) {
+          setPossibleMoves(getPossibleMoves(result.board, prevSelServer, result.castlingRights, result.enPassantTarget));
+        } else {
+          setSelectedSquare(null);
+          setPossibleMoves([]);
         }
-        setPossibleMoves([]);
-        return null;
-      });
+      }
 
       if (serverStatus === 'finished' || result.status !== 'playing') {
         if (result.status === 'checkmate') setGameStatus('checkmate');
