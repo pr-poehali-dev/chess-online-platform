@@ -71,30 +71,15 @@ export const PlayerInfo = ({
             <div className={`text-[9px] sm:text-xs font-medium truncate ${
               theme === 'light'
                 ? 'text-slate-800'
-                : (playerColor === 'white' ? 'text-stone-800' : 'text-stone-200')
+                : 'text-white'
             }`}>
               {playerName}{difficulty && ` (${difficulty})`}
             </div>
             <div className="flex items-center gap-2">
-              <div
-                className={`text-[8px] sm:text-[11px] whitespace-nowrap ${
-                  playerColor === 'black' 
-                    ? (theme === 'dark' ? 'text-stone-900 font-semibold' : 'text-stone-900 font-semibold')
-                    : (theme === 'light' ? 'text-slate-600' : 'text-stone-600')
-                }`}
-                style={playerColor === 'black' && theme === 'dark' ? {
-                  WebkitTextStroke: '0.3px rgba(255,255,255,0.5)',
-                  paintOrder: 'stroke fill'
-                } : undefined}
-              >
-                {playerColor === 'white' ? 'Белые' : 'Черные'}
-              </div>
               {rating && (
                 <div className="flex items-center gap-1">
                   <div className={`text-[8px] sm:text-[10px] font-semibold whitespace-nowrap ${
-                    theme === 'light'
-                      ? 'text-blue-600'
-                      : (playerColor === 'white' ? 'text-blue-600' : 'text-blue-400')
+                    theme === 'light' ? 'text-orange-600' : 'text-orange-400'
                   }`}>
                     {rating}
                   </div>
@@ -132,6 +117,13 @@ export const PlayerInfo = ({
         </div>
         <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
           <div className="flex items-center gap-1 sm:gap-2">
+            {inactivityTimer !== undefined && inactivityTimer <= 20 && (
+              <div className={`text-[8px] sm:text-[10px] font-semibold whitespace-nowrap ${
+                inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
+              }`}>
+                {inactivityTimer <= 20 ? 'До поражения' : 'Бездействует...'}
+              </div>
+            )}
             <div className={`text-sm sm:text-lg md:text-xl font-bold whitespace-nowrap ${
               time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer
                 ? (theme === 'dark' && playerColor === 'white' ? 'text-green-600' : 'text-green-400')
@@ -147,13 +139,6 @@ export const PlayerInfo = ({
               </div>
             )}
           </div>
-          {inactivityTimer !== undefined && inactivityTimer <= 30 && (
-            <div className={`text-[8px] sm:text-[10px] md:text-xs text-right whitespace-nowrap ${
-              inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
-            }`}>
-              {inactivityTimer <= 20 ? 'До поражения' : 'Бездействует...'}
-            </div>
-          )}
         </div>
       </div>
     </div>
