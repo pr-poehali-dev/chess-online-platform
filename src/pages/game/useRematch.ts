@@ -62,6 +62,7 @@ export const useRematch = ({
     timeoutRef.current = setTimeout(() => {
       stopAll();
       setRematchSent(false);
+      setRematchCooldown(true);
       setRematchError('Соперник не ответил на приглашение');
     }, REMATCH_TIMEOUT_MS);
 
@@ -77,6 +78,7 @@ export const useRematch = ({
         } else if (data.status === 'declined') {
           stopAll();
           setRematchSent(false);
+          setRematchCooldown(true);
           setRematchError('Соперник отклонил реванш');
         }
       } catch { /* ignore */ }
@@ -93,6 +95,7 @@ export const useRematch = ({
         if (accepted) {
           navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${playerColor === 'white' ? 'black' : 'white'}&opponent_name=${encodeURIComponent(opponentName)}&opponent_avatar=${encodeURIComponent(opponentAvatar)}`);
         } else {
+          setRematchCooldown(true);
           setRematchError('Соперник отклонил реванш');
         }
       }, delay);
