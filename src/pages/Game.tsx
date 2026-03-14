@@ -123,7 +123,7 @@ const Game = () => {
     isOnlineReal ? opponentUserId : undefined,
   );
 
-  const { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch } = useRematch({
+  const { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch, botRematchPending, botRematchAccepted, setBotRematchAccepted, cancelBotRematch } = useRematch({
     isOnline: isOnlineReal,
     opponentUserId,
     timeControl,
@@ -397,6 +397,46 @@ const Game = () => {
       <NotificationsModal showModal={showNotifications} onClose={() => setShowNotifications(false)} />
 
       <RematchModal showModal={showRematchOffer} onAccept={handleAcceptRematch} onDecline={handleDeclineRematch} />
+
+      {(botRematchPending || botRematchAccepted) && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="w-full max-w-sm bg-stone-800 border border-stone-700/50 rounded-2xl p-6 flex flex-col items-center gap-4 animate-fade-in">
+            {botRematchPending ? (
+              <>
+                <div className="w-12 h-12 rounded-full bg-amber-500/20 flex items-center justify-center">
+                  <Icon name="Loader2" size={26} className="text-amber-400 animate-spin" />
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-semibold text-lg">Запрос отправлен</p>
+                  <p className="text-stone-400 text-sm mt-1">{opponentName} думает над предложением...</p>
+                </div>
+                <button
+                  onClick={cancelBotRematch}
+                  className="mt-1 px-4 py-2 rounded-lg bg-stone-700 hover:bg-stone-600 text-stone-300 text-sm transition-colors"
+                >
+                  Отмена
+                </button>
+              </>
+            ) : (
+              <>
+                <div className="w-12 h-12 rounded-full bg-green-500/20 flex items-center justify-center">
+                  <Icon name="CheckCircle" size={26} className="text-green-400" />
+                </div>
+                <div className="text-center">
+                  <p className="text-white font-semibold text-lg">{opponentName} принял реванш!</p>
+                  <p className="text-stone-400 text-sm mt-1">Начинаем новую партию</p>
+                </div>
+                <button
+                  onClick={() => { setBotRematchAccepted(false); window.location.reload(); }}
+                  className="mt-1 px-6 py-2.5 rounded-lg bg-green-600 hover:bg-green-700 text-white text-sm font-semibold transition-colors"
+                >
+                  Играть
+                </button>
+              </>
+            )}
+          </div>
+        </div>
+      )}
 
       <OpponentLeftModal
         showModal={showOpponentLeft}

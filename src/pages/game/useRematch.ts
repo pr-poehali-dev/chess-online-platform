@@ -31,14 +31,18 @@ export const useRematch = ({
   const [rematchCooldown, setRematchCooldown] = useState(false);
   const [rematchError, setRematchError] = useState<string | null>(null);
   const [rematchTimeoutLeft, setRematchTimeoutLeft] = useState<number | null>(null);
+  const [botRematchPending, setBotRematchPending] = useState(false);
+  const [botRematchAccepted, setBotRematchAccepted] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stopAll = useCallback(() => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
     if (timeoutRef.current) { clearTimeout(timeoutRef.current); timeoutRef.current = null; }
     if (countdownRef.current) { clearInterval(countdownRef.current); countdownRef.current = null; }
+    if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null; }
     setRematchTimeoutLeft(null);
   }, []);
 
@@ -79,7 +83,21 @@ export const useRematch = ({
   }, [myUserId, playerColor, timeControl, opponentName, opponentRating, opponentAvatar, stopAll]);
 
   const offerRematch = useCallback(async () => {
-    if (!isOnline) { window.location.reload(); return; }
+    if (!isOnline) {
+      setBotRematchPending(true);
+      setBotRematchAccepted(false);
+      const delay = 3000 + Math.random() * 4000;
+      const accepted = Math.random() < 0.5;
+      botTimerRef.current = setTimeout(() => {
+        setBotRematchPending(false);
+        if (accepted) {
+          setBotRematchAccepted(true);
+        } else {
+          setRematchError('Бот отклонил реванш');
+        }
+      }, delay);
+      return;
+    }
     setRematchSent(true);
     const result = await handleOfferRematch(opponentUserId, timeControl);
     if (result.error) {
@@ -91,5 +109,11 @@ export const useRematch = ({
     }
   }, [isOnline, opponentUserId, timeControl, handleOfferRematch, startPoll]);
 
-  return { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch };
+  const cancelBotRematch = useCallback(() => {
+    if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null; }
+    setBotRematchPending(false);
+    setBotRematchAccepted(false);
+  }, []);
+
+  return { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch, botRematchPending, botRematchAccepted, setBotRematchAccepted, cancelBotRematch };
 };
