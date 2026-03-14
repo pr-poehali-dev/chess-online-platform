@@ -242,8 +242,17 @@ export const useGameLogic = (
       setCapturedByWhite(result.capturedByWhite);
       setCapturedByBlack(result.capturedByBlack);
       setKingInCheckPosition(result.kingInCheck);
-      setSelectedSquare(null);
-      setPossibleMoves([]);
+      setSelectedSquare(prev => {
+        if (prev) {
+          const piece = result.board[prev.row][prev.col];
+          if (piece && piece.color === playerColor) {
+            setPossibleMoves(getPossibleMoves(result.board, prev, result.castlingRights, result.enPassantTarget));
+            return prev;
+          }
+        }
+        setPossibleMoves([]);
+        return null;
+      });
       setWhiteTime(moveData.whiteTime);
       setBlackTime(moveData.blackTime);
 
@@ -545,8 +554,17 @@ export const useGameLogic = (
       setCapturedByWhite(result.capturedByWhite);
       setCapturedByBlack(result.capturedByBlack);
       setKingInCheckPosition(result.kingInCheck);
-      setSelectedSquare(null);
-      setPossibleMoves([]);
+      setSelectedSquare(prev => {
+        if (prev) {
+          const piece = result.board[prev.row][prev.col];
+          if (piece && piece.color === playerColor) {
+            setPossibleMoves(getPossibleMoves(result.board, prev, result.castlingRights, result.enPassantTarget));
+            return prev;
+          }
+        }
+        setPossibleMoves([]);
+        return null;
+      });
 
       if (serverStatus === 'finished' || result.status !== 'playing') {
         if (result.status === 'checkmate') setGameStatus('checkmate');
