@@ -162,7 +162,12 @@ export const GameControls = ({
   }`;
 
   return (
-    <div className="w-full md:w-auto">
+    <div className="w-full md:w-auto flex flex-col gap-0.5">
+      {isGameOver && (
+        <div className={`flex items-center justify-center gap-1 px-2 py-0.5 rounded-lg border text-xs sm:text-sm font-bold whitespace-nowrap ${resultColor}`}>
+          {resultLabel}
+        </div>
+      )}
       <div className="flex items-center gap-1 sm:gap-1.5 h-[32px] sm:h-[38px]">
         <button onClick={handleExitClick} className={btnCls} title="Выход из игры">
           <div className="rotate-180"><Icon name="LogOut" size={16} /></div>
@@ -374,11 +379,6 @@ export const GameControls = ({
           )}
         </div>
         <P2PIndicator isOnline={isOnline} p2pConnected={p2pConnected} p2pQuality={p2pQuality} p2pLatency={p2pLatency} connectionLost={connectionLost} theme={theme} />
-        {isGameOver && (
-          <div className={`flex items-center gap-1 px-1.5 sm:px-2 h-full rounded-lg border text-[9px] sm:text-[11px] font-bold flex-shrink-0 whitespace-nowrap ${resultColor}`}>
-            {resultLabel}
-          </div>
-        )}
         {isGameOver && (
           <>
             <div className="relative flex-shrink-0">
