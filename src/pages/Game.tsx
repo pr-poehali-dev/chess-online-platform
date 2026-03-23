@@ -130,8 +130,9 @@ const Game = () => {
     isOnlineReal ? opponentUserId : undefined,
   );
 
-  const { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch } = useRematch({
+  const { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch, botRematchPending, cancelBotRematch } = useRematch({
     isOnline: isOnlineReal,
+    isBotMatchmaking: isBotFromMatchmaking,
     opponentUserId,
     timeControl,
     playerColor,
@@ -407,6 +408,32 @@ const Game = () => {
       <NotificationsModal showModal={showNotifications} onClose={() => setShowNotifications(false)} />
 
       <RematchModal showModal={showRematchOffer} onAccept={handleAcceptRematch} onDecline={handleDeclineRematch} />
+
+      {botRematchPending && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
+          <div className="w-full max-w-sm bg-stone-800 border border-stone-700/50 rounded-2xl p-6 flex flex-col items-center gap-4">
+            <div className="relative">
+              {opponentAvatar ? (
+                <img src={opponentAvatar} alt={opponentName} className="w-16 h-16 rounded-full object-cover ring-2 ring-amber-400/50" />
+              ) : (
+                <div className="w-16 h-16 rounded-full bg-stone-700 flex items-center justify-center ring-2 ring-amber-400/50">
+                  <Icon name="User" size={28} className="text-stone-400" />
+                </div>
+              )}
+              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-stone-800 flex items-center justify-center">
+                <Icon name="Loader2" size={14} className="text-amber-400 animate-spin" />
+              </div>
+            </div>
+            <div className="text-center">
+              <p className="text-white font-semibold text-lg">Запрос на реванш отправлен</p>
+              <p className="text-stone-400 text-sm mt-1">{opponentName} думает над предложением...</p>
+            </div>
+            <button onClick={cancelBotRematch} className="mt-1 px-4 py-2 rounded-lg bg-stone-700 hover:bg-stone-600 text-stone-300 text-sm transition-colors">
+              Отмена
+            </button>
+          </div>
+        </div>
+      )}
 
       <OpponentLeftModal
         showModal={showOpponentLeft}

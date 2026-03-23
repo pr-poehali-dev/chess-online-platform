@@ -418,7 +418,8 @@ export const GameControls = ({
             )}
             {(isComputerGame ? (!rematchCooldown) : (!rematchCooldown && !rematchExpired)) && (
               <button
-                onClick={() => {
+                onClick={(e) => {
+                  e.stopPropagation();
                   if (rematchSent) return;
                   if (onOfferRematch) { onOfferRematch(); }
                   else if (setShowRematchOffer) { setTimeout(() => { setShowRematchOffer(true); }, 500); }
