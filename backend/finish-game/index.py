@@ -95,12 +95,12 @@ def handler(event: dict, context) -> dict:
     # Рейтинг меняется в онлайн-играх и при игре с ботом через матчмейкинг
     rating_active = opponent_type != 'bot'
 
-    cur.execute("SELECT id, rating, games_played, wins, losses, draws FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
+    cur.execute("SELECT id, rating, games_played, wins, losses, draws, win_streak, streak_opponents FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
     user = cur.fetchone()
 
     if not user:
         cur.execute(
-            "INSERT INTO users (id, username, avatar, rating, games_played, wins, losses, draws, win_streak) VALUES ('%s', '%s', '%s', %d, 0, 0, 0, 0, 0)"
+            "INSERT INTO users (id, username, avatar, rating, games_played, wins, losses, draws, win_streak, streak_opponents) VALUES ('%s', '%s', '%s', %d, 0, 0, 0, 0, 0, '')"
             % (user_id.replace("'", "''"), username.replace("'", "''"), avatar.replace("'", "''"), initial_rating)
         )
         conn.commit()
@@ -110,49 +110,59 @@ def handler(event: dict, context) -> dict:
         losses = 0
         draws = 0
         win_streak = 0
+        streak_opponents = []
     else:
-        cur.execute("SELECT win_streak FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
-        streak_row = cur.fetchone()
         current_rating = user[1]
         games_played = user[2]
         wins = user[3]
         losses = user[4]
         draws = user[5]
-        win_streak = streak_row[0] if streak_row else 0
+        win_streak = user[6] if user[6] is not None else 0
+        streak_opponents_str = user[7] or ''
+        streak_opponents = [x for x in streak_opponents_str.split(',') if x] if streak_opponents_str else []
 
     streak_bonus = 0
+    diverse_streak_bonus = 0  # бонус за 3 победы с разными соперниками
+    diverse_streak_triggered = False
+
     if result == 'win':
         wins += 1
         if rating_active:
             win_streak += 1
+            # Добавляем соперника в список серии (по имени)
+            opp_key = (opponent_name or 'unknown').strip()
+            streak_opponents.append(opp_key)
+            # Проверяем: последние 3 победы с разными соперниками
+            if len(streak_opponents) >= 3:
+                last_3 = streak_opponents[-3:]
+                if len(set(last_3)) == 3:  # все три разные
+                    diverse_streak_bonus = int(settings.get('streak_bonus_3', '25'))
+                    diverse_streak_triggered = True
+                    streak_opponents = []  # сбрасываем счётчик после начисления
     elif result == 'loss':
         losses += 1
         if rating_active:
             win_streak = 0
+            streak_opponents = []
     else:
         draws += 1
         if rating_active:
             win_streak = 0
+            streak_opponents = []
 
     if rating_active:
         win_points = int(settings.get('win_points', '25'))
         loss_points = int(settings.get('loss_points', '15'))
         draw_points = int(settings.get('draw_points', '5'))
-        streak_bonus_3 = int(settings.get('streak_bonus_3', '15'))
-        streak_bonus_5 = int(settings.get('streak_bonus_5', '25'))
 
         if result == 'win':
-            rating_change = win_points
-            if win_streak == 5:
-                streak_bonus = streak_bonus_5
-            elif win_streak == 3:
-                streak_bonus = streak_bonus_3
+            rating_change = win_points + diverse_streak_bonus
+            streak_bonus = diverse_streak_bonus
         elif result == 'loss':
             rating_change = -loss_points
         else:
             rating_change = draw_points
 
-        rating_change += streak_bonus
         new_rating = current_rating + rating_change
         if new_rating < min_rating:
             new_rating = min_rating
@@ -162,10 +172,11 @@ def handler(event: dict, context) -> dict:
         new_rating = current_rating
 
     games_played += 1
+    streak_opponents_str = ','.join(streak_opponents[-10:])  # храним не более 10
 
     cur.execute(
-        "UPDATE users SET rating = %d, games_played = %d, wins = %d, losses = %d, draws = %d, win_streak = %d, updated_at = NOW() WHERE id = '%s'"
-        % (new_rating, games_played, wins, losses, draws, win_streak, user_id.replace("'", "''"))
+        "UPDATE users SET rating = %d, games_played = %d, wins = %d, losses = %d, draws = %d, win_streak = %d, streak_opponents = '%s', updated_at = NOW() WHERE id = '%s'"
+        % (new_rating, games_played, wins, losses, draws, win_streak, streak_opponents_str.replace("'", "''"), user_id.replace("'", "''"))
     )
 
     # Обновляем рейтинг бота (обратно результату игрока) при игре через матчмейкинг
@@ -228,6 +239,7 @@ def handler(event: dict, context) -> dict:
         'rating_after': new_rating,
         'rating_change': rating_change,
         'streak_bonus': streak_bonus,
+        'diverse_streak_triggered': diverse_streak_triggered,
         'win_streak': win_streak,
         'games_played': games_played,
         'wins': wins,

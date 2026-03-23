@@ -90,7 +90,7 @@ const Game = () => {
     rematchOfferedBy, rematchStatus, rematchGameId, drawOfferedBy,
     setCurrentPlayer, showPossibleMoves, setShowPossibleMoves,
     theme, setTheme, boardTheme, setBoardTheme,
-    ratingChange, newRating, userRating, opponentRatingAfter,
+    ratingChange, newRating, userRating, opponentRatingAfter, diverseStreakTriggered,
     connectionLost, connectionRestored, opponentReconnecting,
     opponentUserId, p2pConnected, p2pLatency, p2pQuality,
     sendPeerMessage, onChatMessageRef, historyRef,
@@ -406,6 +406,19 @@ const Game = () => {
           chatEndRef={chatEndRef}
           theme={theme}
         />
+      )}
+
+      {diverseStreakTriggered && (
+        <div className="fixed top-4 left-1/2 -translate-x-1/2 z-[200] animate-in slide-in-from-top-2 duration-300">
+          <div className="bg-gradient-to-r from-amber-500 to-yellow-400 text-stone-900 rounded-2xl px-6 py-4 shadow-2xl flex items-center gap-3 max-w-sm">
+            <span className="text-3xl">🔥</span>
+            <div>
+              <div className="font-bold text-base leading-tight">Серия побед!</div>
+              <div className="text-sm font-medium opacity-90">3 победы с разными соперниками</div>
+              <div className="text-lg font-black">+25 к рейтингу</div>
+            </div>
+          </div>
+        </div>
       )}
 
       <DrawOfferModal showModal={showDrawOffer} onAccept={handleAcceptDraw} onDecline={handleDeclineDraw} />

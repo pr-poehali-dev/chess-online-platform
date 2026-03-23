@@ -275,6 +275,7 @@ export const useGameLogic = (
   const [ratingChange, setRatingChange] = useState<number | null>(null);
   const [newRating, setNewRating] = useState<number | null>(null);
   const [opponentRatingAfter, setOpponentRatingAfter] = useState<number | null>(null);
+  const [diverseStreakTriggered, setDiverseStreakTriggered] = useState(false);
   const [userRating, setUserRating] = useState<number | null>(() => {
     const saved = localStorage.getItem('chessUser');
     return saved ? JSON.parse(saved).rating || null : null;
@@ -938,6 +939,10 @@ export const useGameLogic = (
         if (data.opponent_rating_after !== undefined) {
           setOpponentRatingAfter(data.opponent_rating_after);
         }
+        // Бонус за 3 победы подряд с разными соперниками
+        if (data.diverse_streak_triggered) {
+          setDiverseStreakTriggered(true);
+        }
       }
     } catch (e) {
       console.error('Failed to submit game result:', e);
@@ -1278,6 +1283,7 @@ export const useGameLogic = (
     newRating,
     userRating,
     opponentRatingAfter,
+    diverseStreakTriggered,
     connectionLost,
     connectionRestored,
     opponentReconnecting,
