@@ -34,6 +34,7 @@ interface GameHeaderProps {
   p2pQuality?: P2PQuality;
   p2pLatency?: number | null;
   connectionLost?: boolean;
+  isComputerGame?: boolean;
 }
 
 export const GameHeader = ({
@@ -118,6 +119,7 @@ export const GameControls = ({
   p2pQuality,
   p2pLatency,
   connectionLost,
+  isComputerGame,
 }: GameHeaderProps) => {
   const isGameOver = gameStatus && gameStatus !== "playing";
   const themeKeys: BoardTheme[] = ["classic", "flat", "wood"];
@@ -405,14 +407,16 @@ export const GameControls = ({
                 </div>
               )}
             </div>
-            <button
-              onClick={() => onNewOnlineGame ? onNewOnlineGame() : window.location.reload()}
-              className="border rounded-lg transition-colors flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[10px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white min-w-0"
-            >
-              <Icon name="Search" size={14} />
-              <span className="whitespace-nowrap">Новая игра</span>
-            </button>
-            {!rematchCooldown && !rematchExpired && (
+            {!isComputerGame && (
+              <button
+                onClick={() => onNewOnlineGame ? onNewOnlineGame() : window.location.reload()}
+                className="border rounded-lg transition-colors flex items-center gap-1 sm:gap-1.5 px-1.5 sm:px-3 h-[32px] sm:h-[38px] flex-shrink-0 text-[10px] sm:text-xs font-semibold bg-blue-600 hover:bg-blue-700 border-blue-700 text-white min-w-0"
+              >
+                <Icon name="Search" size={14} />
+                <span className="whitespace-nowrap">Новая игра</span>
+              </button>
+            )}
+            {(isComputerGame ? (!rematchCooldown) : (!rematchCooldown && !rematchExpired)) && (
               <button
                 onClick={() => {
                   if (rematchSent) return;

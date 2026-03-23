@@ -35,11 +35,9 @@ export const useRematch = ({
   const [rematchCooldown, setRematchCooldown] = useState(false);
   const [rematchError, setRematchError] = useState<string | null>(null);
   const [rematchTimeoutLeft, setRematchTimeoutLeft] = useState<number | null>(null);
-  const [botRematchPending, setBotRematchPending] = useState(false);
   const pollRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const timeoutRef = useRef<ReturnType<typeof setTimeout> | null>(null);
   const countdownRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const botTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
   const stopAll = useCallback(() => {
     if (pollRef.current) { clearInterval(pollRef.current); pollRef.current = null; }
@@ -49,10 +47,7 @@ export const useRematch = ({
   }, []);
 
   useEffect(() => {
-    return () => {
-      stopAll();
-      if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null; }
-    };
+    return () => { stopAll(); };
   }, []);
 
   const startPoll = useCallback((inviteId: number) => {
@@ -108,20 +103,7 @@ export const useRematch = ({
 
   const offerRematch = useCallback(async () => {
     if (!isOnlineRef.current) {
-      setBotRematchPending(true);
-      const delay = 3000 + Math.random() * 4000;
-      botTimerRef.current = setTimeout(() => {
-        botTimerRef.current = null;
-        const accepted = Math.random() < 0.5;
-        if (accepted) {
-          setBotRematchPending(false);
-          navigateRef.current(`/game?time=${encodeURIComponent(timeControlRef.current)}&color=${playerColorRef.current === 'white' ? 'black' : 'white'}&difficulty=${difficultyRef.current}&opponent_name=${encodeURIComponent(opponentNameRef.current)}&opponent_avatar=${encodeURIComponent(opponentAvatarRef.current)}`);
-        } else {
-          setRematchCooldown(true);
-          setBotRematchPending(false);
-          setRematchError('Соперник отклонил реванш');
-        }
-      }, delay);
+      navigateRef.current(`/game?time=${encodeURIComponent(timeControlRef.current)}&color=${playerColorRef.current === 'white' ? 'black' : 'white'}&difficulty=${difficultyRef.current}&opponent_name=${encodeURIComponent(opponentNameRef.current)}&opponent_avatar=${encodeURIComponent(opponentAvatarRef.current)}`);
       return;
     }
     setRematchSent(true);
@@ -135,10 +117,5 @@ export const useRematch = ({
     }
   }, [opponentUserId, timeControl, handleOfferRematch, startPoll]);
 
-  const cancelBotRematch = useCallback(() => {
-    if (botTimerRef.current) { clearTimeout(botTimerRef.current); botTimerRef.current = null; }
-    setBotRematchPending(false);
-  }, []);
-
-  return { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch, botRematchPending, cancelBotRematch };
+  return { rematchSent, rematchCooldown, rematchError, rematchTimeoutLeft, setRematchError, offerRematch };
 };
