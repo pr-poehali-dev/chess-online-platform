@@ -114,7 +114,7 @@ export const PlayerInfo = ({
           ))}
         </div>
         <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
-          <div className="flex items-center gap-1 sm:gap-2 text-sm sm:text-lg md:text-xl font-bold">
+          <div className="flex items-center gap-2" style={{ fontSize: '1.125rem', fontWeight: 700, lineHeight: 1.2 }}>
             {inactivityTimer !== undefined && inactivityTimer <= 20 && (
               <span className={`whitespace-nowrap ${
                 inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
