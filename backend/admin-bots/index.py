@@ -19,12 +19,12 @@ def handler(event: dict, context) -> dict:
     cur = conn.cursor()
 
     if method == 'GET':
-        cur.execute("SELECT id, name, avatar, rating, strength, difficulty FROM bots ORDER BY strength ASC")
+        cur.execute("SELECT id, name, avatar, rating, strength, difficulty, city, region FROM bots ORDER BY strength ASC")
         rows = cur.fetchall()
         cur.close()
         conn.close()
         bots = [
-            {'id': r[0], 'name': r[1], 'avatar': r[2], 'rating': r[3], 'strength': r[4], 'difficulty': r[5]}
+            {'id': r[0], 'name': r[1], 'avatar': r[2], 'rating': r[3], 'strength': r[4], 'difficulty': r[5], 'city': r[6] or 'Москва', 'region': r[7] or 'Москва'}
             for r in rows
         ]
         return {'statusCode': 200, 'headers': headers, 'body': json.dumps(bots, ensure_ascii=False)}
@@ -52,6 +52,11 @@ def handler(event: dict, context) -> dict:
                 fields.append("strength = %d" % strength_map[diff])
         if 'strength' in body:
             fields.append("strength = %d" % int(body['strength']))
+        if 'city' in body:
+            city = esc(body['city'])
+            fields.append("city = '%s'" % city)
+        if 'region' in body:
+            fields.append("region = '%s'" % esc(body['region']))
 
         if not fields:
             cur.close()

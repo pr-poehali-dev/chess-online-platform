@@ -1,6 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 import Icon from '@/components/ui/icon';
 import API from '@/config/api';
+import { cityRegions } from '@/components/chess/data/cities';
 
 interface Props {
   onClose: () => void;
@@ -13,6 +14,8 @@ interface Bot {
   rating: number;
   strength: number;
   difficulty: 'easy' | 'medium' | 'hard' | 'master';
+  city: string;
+  region: string;
 }
 
 const DIFFICULTY_OPTIONS = [
@@ -69,9 +72,28 @@ export const BotDifficultyModal = ({ onClose }: Props) => {
     }
   }, [tab]);
 
+  const [citySuggestions, setCitySuggestions] = useState<string[]>([]);
+  const allCities = Object.keys(cityRegions);
+
+  const handleCityInput = (val: string) => {
+    setEditValues(v => ({ ...v, city: val }));
+    if (val.length >= 1) {
+      const filtered = allCities.filter(c => c.toLowerCase().startsWith(val.toLowerCase())).slice(0, 6);
+      setCitySuggestions(filtered);
+    } else {
+      setCitySuggestions([]);
+    }
+  };
+
+  const selectCity = (city: string) => {
+    setEditValues(v => ({ ...v, city, region: cityRegions[city] || '' }));
+    setCitySuggestions([]);
+  };
+
   const startEdit = (bot: Bot) => {
     setEditingId(bot.id);
-    setEditValues({ name: bot.name, avatar: bot.avatar, rating: bot.rating, difficulty: bot.difficulty, strength: bot.strength });
+    setEditValues({ name: bot.name, avatar: bot.avatar, rating: bot.rating, difficulty: bot.difficulty, strength: bot.strength, city: bot.city || 'Москва', region: bot.region || 'Москва' });
+    setCitySuggestions([]);
   };
 
   const cancelEdit = () => { setEditingId(null); setEditValues({}); };
@@ -360,6 +382,34 @@ export const BotDifficultyModal = ({ onClose }: Props) => {
                                   min={500} max={3000}
                                 />
                               </div>
+                            </div>
+                            <div className="relative">
+                              <label className="text-xs text-slate-400 mb-1 block">Город</label>
+                              <input
+                                value={editValues.city ?? bot.city ?? 'Москва'}
+                                onChange={e => handleCityInput(e.target.value)}
+                                onBlur={() => setTimeout(() => setCitySuggestions([]), 150)}
+                                className="w-full bg-slate-700/50 border border-slate-600/50 rounded-lg px-3 py-1.5 text-sm text-white focus:outline-none focus:border-purple-500/50"
+                                placeholder="Начните вводить город..."
+                                autoComplete="off"
+                              />
+                              {citySuggestions.length > 0 && (
+                                <div className="absolute z-50 left-0 right-0 mt-1 bg-slate-800 border border-slate-600/50 rounded-lg shadow-xl overflow-hidden">
+                                  {citySuggestions.map(city => (
+                                    <button
+                                      key={city}
+                                      onMouseDown={() => selectCity(city)}
+                                      className="w-full text-left px-3 py-2 text-sm text-slate-200 hover:bg-slate-700 transition-colors flex items-center justify-between"
+                                    >
+                                      <span>{city}</span>
+                                      <span className="text-xs text-slate-500">{cityRegions[city]}</span>
+                                    </button>
+                                  ))}
+                                </div>
+                              )}
+                              {editValues.region && (
+                                <p className="mt-1 text-xs text-slate-500">Регион: {editValues.region}</p>
+                              )}
                             </div>
                             <div>
                               <label className="text-xs text-slate-400 mb-1.5 block">Уровень сложности</label>
