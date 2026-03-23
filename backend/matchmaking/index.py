@@ -8,10 +8,17 @@ def load_bots(cur):
     rows = cur.fetchall()
     return [{'id': r[0], 'name': r[1], 'avatar': r[2], 'rating': r[3], 'strength': r[4]} for r in rows]
 
-def find_closest_bot(bots, user_rating):
+def find_closest_bot(bots, user_rating, rating_range=150):
     if not bots:
         return {'id': 'bot_anna', 'name': 'Анна Петрова', 'avatar': '', 'rating': 500, 'strength': 810}
-    return min(bots, key=lambda b: abs(b['strength'] - user_rating))
+    # Сначала ищем ботов с рейтингом близким к игроку (±rating_range)
+    candidates = [b for b in bots if abs(b['rating'] - user_rating) <= rating_range]
+    # Если никого нет — берём всех ботов, отсортированных по близости рейтинга, топ-5
+    if not candidates:
+        sorted_bots = sorted(bots, key=lambda b: abs(b['rating'] - user_rating))
+        candidates = sorted_bots[:5]
+    # Случайно выбираем среди подходящих
+    return random.choice(candidates)
 
 def get_initial_time(time_control):
     if '+' in time_control:
@@ -221,7 +228,7 @@ def handler(event: dict, context) -> dict:
     if action == 'play_bot':
         cur.execute("DELETE FROM matchmaking_queue WHERE user_id = '%s'" % esc(user_id))
         bots = load_bots(cur)
-        bot = find_closest_bot(bots, user_rating)
+        bot = find_closest_bot(bots, user_rating, rating_range=RATING_RANGE)
         result = create_game(cur, conn, headers, user_id, username, avatar, user_rating,
                              (bot['id'], bot['name'], bot['avatar'], bot['rating']),
                              time_control, opponent_type, is_bot=True)
