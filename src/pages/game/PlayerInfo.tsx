@@ -114,22 +114,22 @@ export const PlayerInfo = ({
           ))}
         </div>
         <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
-          <div className="flex items-center gap-1 sm:gap-2">
+          <div className="flex items-center gap-1 sm:gap-2 text-sm sm:text-lg md:text-xl font-bold">
             {inactivityTimer !== undefined && inactivityTimer <= 20 && (
-              <span className={`text-base sm:text-xl font-bold whitespace-nowrap ${
+              <span className={`whitespace-nowrap ${
                 inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
               }`}>
                 До поражения
               </span>
             )}
             {inactivityTimer !== undefined && inactivityTimer <= 30 && (
-              <span className={`text-base sm:text-xl font-bold whitespace-nowrap ${
+              <span className={`whitespace-nowrap ${
                 inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
               }`}>
                 ({inactivityTimer}с)
               </span>
             )}
-            <span className={`text-base sm:text-xl font-bold whitespace-nowrap ${
+            <span className={`whitespace-nowrap ${
               time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer
                 ? (playerColor === 'white' ? 'text-green-600' : 'text-green-400')
                 : (playerColor === 'white' ? 'text-stone-500' : 'text-stone-400')
