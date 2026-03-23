@@ -4,9 +4,9 @@ import psycopg2
 import random
 
 def load_bots(cur):
-    cur.execute("SELECT id, name, avatar, rating, strength FROM bots ORDER BY strength ASC")
+    cur.execute("SELECT id, name, avatar, rating, strength, city FROM bots ORDER BY strength ASC")
     rows = cur.fetchall()
-    return [{'id': r[0], 'name': r[1], 'avatar': r[2], 'rating': r[3], 'strength': r[4]} for r in rows]
+    return [{'id': r[0], 'name': r[1], 'avatar': r[2], 'rating': r[3], 'strength': r[4], 'city': r[5] or 'Москва'} for r in rows]
 
 def find_closest_bot(bots, user_rating, rating_range=150):
     if not bots:
@@ -71,7 +71,7 @@ def check_rate_limit(cur, conn, ip, endpoint, max_requests, window_seconds):
         return False
 
 
-def create_game(cur, conn, headers, user_id, username, avatar, user_rating, matched, time_control, opponent_type, is_bot=False):
+def create_game(cur, conn, headers, user_id, username, avatar, user_rating, matched, time_control, opponent_type, is_bot=False, opponent_city=''):
     matched_uid, matched_name, matched_avatar, matched_rating = matched
 
     assign_white = random.random() < 0.5
@@ -105,7 +105,8 @@ def create_game(cur, conn, headers, user_id, username, avatar, user_rating, matc
             'player_color': player_color,
             'opponent_name': matched_name,
             'opponent_rating': matched_rating,
-            'opponent_avatar': matched_avatar or ''
+            'opponent_avatar': matched_avatar or '',
+            'opponent_city': opponent_city or ''
         })
     }
 
@@ -231,7 +232,8 @@ def handler(event: dict, context) -> dict:
         bot = find_closest_bot(bots, user_rating, rating_range=RATING_RANGE)
         result = create_game(cur, conn, headers, user_id, username, avatar, user_rating,
                              (bot['id'], bot['name'], bot['avatar'], bot['rating']),
-                             time_control, opponent_type, is_bot=True)
+                             time_control, opponent_type, is_bot=True,
+                             opponent_city=bot.get('city', 'Москва'))
         cur.close()
         conn.close()
         return result
@@ -246,7 +248,7 @@ def handler(event: dict, context) -> dict:
 
     if search_stage == 'city' and city:
         cur.execute(
-            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND city = '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
+            "SELECT user_id, username, avatar, rating, time_control, city FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND city = '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
             % (esc(user_id), esc(time_control), esc(city), HEARTBEAT_FILTER, user_rating)
         )
         match = cur.fetchone()
@@ -255,7 +257,7 @@ def handler(event: dict, context) -> dict:
 
     if not match and search_stage in ('city', 'region') and region:
         cur.execute(
-            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND region = '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
+            "SELECT user_id, username, avatar, rating, time_control, city FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND region = '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
             % (esc(user_id), esc(time_control), esc(region), HEARTBEAT_FILTER, user_rating)
         )
         match = cur.fetchone()
@@ -266,7 +268,7 @@ def handler(event: dict, context) -> dict:
         rating_min = user_rating - RATING_RANGE
         rating_max = user_rating + RATING_RANGE
         cur.execute(
-            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND rating >= %d AND rating <= %d %s ORDER BY ABS(rating - %d) LIMIT 1"
+            "SELECT user_id, username, avatar, rating, time_control, city FROM matchmaking_queue WHERE user_id != '%s' AND time_control = '%s' AND rating >= %d AND rating <= %d %s ORDER BY ABS(rating - %d) LIMIT 1"
             % (esc(user_id), esc(time_control), rating_min, rating_max, HEARTBEAT_FILTER, user_rating)
         )
         match = cur.fetchone()
@@ -275,7 +277,7 @@ def handler(event: dict, context) -> dict:
 
     if not match and search_stage == 'any':
         cur.execute(
-            "SELECT user_id, username, avatar, rating, time_control FROM matchmaking_queue WHERE user_id != '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
+            "SELECT user_id, username, avatar, rating, time_control, city FROM matchmaking_queue WHERE user_id != '%s' %s ORDER BY ABS(rating - %d) LIMIT 1"
             % (esc(user_id), HEARTBEAT_FILTER, user_rating)
         )
         match = cur.fetchone()
@@ -287,13 +289,13 @@ def handler(event: dict, context) -> dict:
     conn.commit()
 
     if match:
-        matched_uid, matched_name, matched_avatar, matched_rating, matched_tc = match
+        matched_uid, matched_name, matched_avatar, matched_rating, matched_tc, matched_city = match[0], match[1], match[2], match[3], match[4], match[5] if len(match) > 5 else ''
 
         cur.execute("DELETE FROM matchmaking_queue WHERE user_id IN ('%s', '%s')" % (esc(user_id), esc(matched_uid)))
 
         result = create_game(cur, conn, headers, user_id, username, avatar, user_rating,
                              (matched_uid, matched_name, matched_avatar, matched_rating),
-                             time_control, opponent_type)
+                             time_control, opponent_type, opponent_city=matched_city or '')
         resp = json.loads(result['body'])
         resp['matched_stage'] = matched_stage
         result['body'] = json.dumps(resp)

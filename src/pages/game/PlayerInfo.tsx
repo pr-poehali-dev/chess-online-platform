@@ -7,6 +7,7 @@ interface PlayerInfoProps {
   formatTime: (seconds: number) => string;
   difficulty?: string;
   rating?: number;
+  city?: string;
   avatar?: string;
   inactivityTimer?: number;
   capturedPieces?: {type: string; color: string}[];
@@ -26,6 +27,7 @@ export const PlayerInfo = ({
   formatTime,
   difficulty,
   rating,
+  city,
   avatar,
   inactivityTimer,
   capturedPieces = [],
@@ -88,6 +90,13 @@ export const PlayerInfo = ({
                       {ratingChange > 0 ? `+${ratingChange}` : ratingChange}
                     </div>
                   )}
+                </div>
+              )}
+              {city && (
+                <div className={`text-xs whitespace-nowrap flex-shrink-0 ${
+                  playerColor === 'white' ? 'text-slate-500' : 'text-slate-400'
+                }`}>
+                  📍 {city}
                 </div>
               )}
             </div>

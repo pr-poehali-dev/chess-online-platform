@@ -35,6 +35,7 @@ const Game = () => {
   const paramOpponentName = searchParams.get('opponent_name') ? decodeURIComponent(searchParams.get('opponent_name')!) : '';
   const paramOpponentRating = searchParams.get('opponent_rating') ? Number(searchParams.get('opponent_rating')) : 0;
   const paramOpponentAvatar = searchParams.get('opponent_avatar') ? decodeURIComponent(searchParams.get('opponent_avatar')!) : '';
+  const paramOpponentCity = searchParams.get('opponent_city') ? decodeURIComponent(searchParams.get('opponent_city')!) : '';
 
   const [playerColor] = useState<'white' | 'black'>(() => {
     if (colorParam === 'white') return 'white';
@@ -323,6 +324,7 @@ const Game = () => {
               difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
               rating={opponentRatingAfter ?? opponentRating}
               ratingChange={opponentRatingAfter != null && opponentRating != null ? opponentRatingAfter - opponentRating : undefined}
+              city={(isOnlineReal || isBotFromMatchmaking) ? paramOpponentCity : undefined}
               avatar={opponentAvatar}
               inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}
               capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
@@ -359,6 +361,7 @@ const Game = () => {
               formatTime={formatTime}
               rating={newRating || userRating || undefined}
               ratingChange={ratingChange}
+              city={(isOnlineReal || isBotFromMatchmaking) ? (userData?.city || undefined) : undefined}
               avatar={userAvatar}
               inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
               capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}

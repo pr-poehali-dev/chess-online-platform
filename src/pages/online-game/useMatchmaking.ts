@@ -15,6 +15,7 @@ export interface OpponentData {
   name: string;
   rating: number;
   avatar: string;
+  city: string;
   isBotGame: boolean;
 }
 
@@ -73,13 +74,14 @@ const useMatchmaking = () => {
     navigate('/');
   }, [cleanup, getUserData, navigate]);
 
-  const handleMatchFound = useCallback((data: { opponent_name: string; opponent_rating: number; opponent_avatar?: string; player_color: 'white' | 'black'; game_id: number }, isBotGame = false) => {
+  const handleMatchFound = useCallback((data: { opponent_name: string; opponent_rating: number; opponent_avatar?: string; opponent_city?: string; player_color: 'white' | 'black'; game_id: number }, isBotGame = false) => {
     matchFoundRef.current = true;
     cleanup();
     setOpponent({
       name: data.opponent_name,
       rating: data.opponent_rating,
       avatar: data.opponent_avatar || '',
+      city: data.opponent_city || '',
       isBotGame
     });
     setPlayerColor(data.player_color);
@@ -265,14 +267,14 @@ const useMatchmaking = () => {
     if (searchStatus === 'starting') {
       const isBotGame = opponent?.isBotGame;
       if (isBotGame) {
-        navigate(`/game?opponent=online_bot&time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&bot_game=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}`);
+        navigate(`/game?opponent=online_bot&time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&bot_game=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}&opponent_city=${encodeURIComponent(opponent?.city || '')}`);
         return;
       }
       const timer = setInterval(() => {
         setCountdown(prev => {
           if (prev <= 1) {
             clearInterval(timer);
-            navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&online=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}`);
+            navigate(`/game?time=${encodeURIComponent(timeControl)}&color=${playerColor}&online_game_id=${gameId}&online=true&opponent_name=${encodeURIComponent(opponent?.name || '')}&opponent_rating=${opponent?.rating || 0}&opponent_avatar=${encodeURIComponent(opponent?.avatar || '')}&opponent_city=${encodeURIComponent(opponent?.city || '')}`);
             return 0;
           }
           return prev - 1;
