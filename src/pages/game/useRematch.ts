@@ -115,7 +115,8 @@ export const useRematch = ({
   const offerRematch = useCallback(async () => {
     // Режим "Играть с компьютером" — мгновенный старт
     if (!isOnlineRef.current && !isBotMatchmakingRef.current) {
-      navigateRef.current(`/game?time=${encodeURIComponent(timeControlRef.current)}&color=${playerColorRef.current === 'white' ? 'black' : 'white'}&difficulty=${difficultyRef.current}&opponent_name=${encodeURIComponent(opponentNameRef.current)}&opponent_avatar=${encodeURIComponent(opponentAvatarRef.current)}`);
+      const url = `/game?time=${encodeURIComponent(timeControlRef.current)}&color=${playerColorRef.current === 'white' ? 'black' : 'white'}&difficulty=${difficultyRef.current}&opponent_name=${encodeURIComponent(opponentNameRef.current)}&opponent_avatar=${encodeURIComponent(opponentAvatarRef.current)}`;
+      window.location.href = url;
       return;
     }
     // Режим "Играть онлайн" с ботом — бот думает 3-7 сек, соглашается/отказывается
@@ -127,7 +128,8 @@ export const useRematch = ({
         const accepted = Math.random() < 0.5;
         if (accepted) {
           setBotRematchPending(false);
-          navigateRef.current(`/game?time=${encodeURIComponent(timeControlRef.current)}&color=${playerColorRef.current === 'white' ? 'black' : 'white'}&bot_game=true&opponent_name=${encodeURIComponent(opponentNameRef.current)}&opponent_rating=${opponentRatingRef.current || 0}&opponent_avatar=${encodeURIComponent(opponentAvatarRef.current)}&difficulty=${difficultyRef.current}`);
+          const url = `/game?time=${encodeURIComponent(timeControlRef.current)}&color=${playerColorRef.current === 'white' ? 'black' : 'white'}&bot_game=true&opponent_name=${encodeURIComponent(opponentNameRef.current)}&opponent_rating=${opponentRatingRef.current || 0}&opponent_avatar=${encodeURIComponent(opponentAvatarRef.current)}&difficulty=${difficultyRef.current}`;
+          window.location.href = url;
         } else {
           setBotRematchPending(false);
           setRematchCooldown(true);

@@ -542,7 +542,9 @@ export const useGameLogic = (
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
 
-      const delay = calcBotDelay({
+      // Режим "Играть с компьютером" — фиксированная задержка 4 сек
+      // Режим "Играть онлайн" с ботом — реалистичная задержка по ситуации
+      const delay = !isBotFromMatchmaking ? 4000 : calcBotDelay({
         difficulty,
         board,
         botColor,
