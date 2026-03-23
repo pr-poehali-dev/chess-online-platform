@@ -156,7 +156,7 @@ def handler(event: dict, context) -> dict:
         new_rating = current_rating + rating_change
         if new_rating < min_rating:
             new_rating = min_rating
-            rating_change = new_rating - current_rating
+            # rating_change сохраняем оригинальным (не 0), чтобы показать игроку реальное изменение
     else:
         rating_change = 0
         new_rating = current_rating
