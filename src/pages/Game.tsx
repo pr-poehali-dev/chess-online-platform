@@ -306,6 +306,7 @@ const Game = () => {
               rematchTimeoutLeft={rematchTimeoutLeft}
               isOnline={isOnlineReal || isBotFromMatchmaking}
               isComputerGame={isPlayingWithBot}
+              isBotGame={isBotFromMatchmaking}
               onNewOnlineGame={() => navigate(`/online-game?opponent=country&time=${encodeURIComponent(timeControl)}&color=random`)}
               p2pConnected={p2pConnected}
               p2pQuality={p2pQuality}

@@ -35,6 +35,7 @@ interface GameHeaderProps {
   p2pLatency?: number | null;
   connectionLost?: boolean;
   isComputerGame?: boolean;
+  isBotGame?: boolean;
 }
 
 export const GameHeader = ({
@@ -120,6 +121,7 @@ export const GameControls = ({
   p2pLatency,
   connectionLost,
   isComputerGame,
+  isBotGame,
 }: GameHeaderProps) => {
   const isGameOver = gameStatus && gameStatus !== "playing";
   const themeKeys: BoardTheme[] = ["classic", "flat", "wood"];
@@ -416,7 +418,7 @@ export const GameControls = ({
                 <span className="whitespace-nowrap">Новая игра</span>
               </button>
             )}
-            {(isComputerGame ? (!rematchCooldown) : (!rematchCooldown && !rematchExpired)) && (
+            {(!rematchCooldown && (isComputerGame || isBotGame || !rematchExpired)) && (
               <button
                 onClick={(e) => {
                   e.stopPropagation();

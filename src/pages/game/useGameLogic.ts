@@ -542,24 +542,81 @@ export const useGameLogic = (
     if (currentPlayer === botColor && gameStatus === 'playing') {
       setCurrentMoveIndex(boardHistory.length - 1);
 
-      // Режим "Играть с компьютером" — фиксированная задержка 4 сек
-      // Режим "Играть онлайн" с ботом — реалистичная задержка по ситуации
-      const delay = !isBotFromMatchmaking ? 4000 : calcBotDelay({
-        difficulty,
-        board,
-        botColor,
-        moveCount: moveHistory.length,
-        botTime: botColor === 'white' ? whiteTime : blackTime,
-        totalTime: getInitialTime(timeControl),
-        castlingRights,
-        enPassantTarget,
-      });
+      if (!isBotFromMatchmaking) {
+        // Режим "Играть с компьютером": вычисление сразу, ход ровно через 4 сек
+        const FIXED_DELAY = 4000;
+        const moves = getAllLegalMoves(board, botColor, castlingRights, enPassantTarget);
 
-      const timer = setTimeout(() => makeComputerMove(), delay);
-      return () => {
-        clearTimeout(timer);
-        if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
-      };
+        if (moves.length === 0) {
+          const timer = setTimeout(() => {
+            if (isCheckmate(board, botColor, castlingRights, enPassantTarget)) {
+              setGameStatus('checkmate');
+            } else {
+              setGameStatus('stalemate');
+            }
+          }, FIXED_DELAY);
+          return () => clearTimeout(timer);
+        }
+
+        const pendingMoveBox = { move: null as { from: { row: number; col: number }; to: { row: number; col: number } } | null };
+        const timerBox = { fired: false, done: false };
+
+        const applyIfReady = () => {
+          if (timerBox.done || !pendingMoveBox.move || !timerBox.fired) return;
+          timerBox.done = true;
+          makeMove(pendingMoveBox.move.from, pendingMoveBox.move.to);
+        };
+
+        if (difficulty === 'easy') {
+          pendingMoveBox.move = moves[Math.floor(Math.random() * moves.length)];
+        } else {
+          const workerDiff = difficulty as 'medium' | 'hard' | 'master';
+          if (workerRef.current) workerRef.current.terminate();
+          const worker = new Worker(new URL('./chessWorker.ts', import.meta.url), { type: 'module' });
+          workerRef.current = worker;
+          worker.postMessage({ board, moves, difficulty: workerDiff, botColor });
+          worker.onmessage = (e) => {
+            pendingMoveBox.move = e.data;
+            worker.terminate();
+            workerRef.current = null;
+            applyIfReady();
+          };
+          worker.onerror = () => {
+            pendingMoveBox.move = getBestMove(board, moves, workerDiff, botColor);
+            worker.terminate();
+            workerRef.current = null;
+            applyIfReady();
+          };
+        }
+
+        const timer = setTimeout(() => {
+          timerBox.fired = true;
+          applyIfReady();
+        }, FIXED_DELAY);
+
+        return () => {
+          clearTimeout(timer);
+          timerBox.done = true;
+          if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
+        };
+      } else {
+        // Режим "Играть онлайн" с ботом — реалистичная задержка по ситуации
+        const delay = calcBotDelay({
+          difficulty,
+          board,
+          botColor,
+          moveCount: moveHistory.length,
+          botTime: botColor === 'white' ? whiteTime : blackTime,
+          totalTime: getInitialTime(timeControl),
+          castlingRights,
+          enPassantTarget,
+        });
+        const timer = setTimeout(() => makeComputerMove(), delay);
+        return () => {
+          clearTimeout(timer);
+          if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
+        };
+      }
     }
   }, [currentPlayer, gameStatus]);
 
