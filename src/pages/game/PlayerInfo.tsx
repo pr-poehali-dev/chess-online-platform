@@ -113,27 +113,20 @@ export const PlayerInfo = ({
             </div>
           ))}
         </div>
-        <div className="flex flex-col items-end gap-0.5 flex-shrink-0">
-          <div className="flex items-center gap-2" style={{ fontSize: '1.125rem', fontWeight: 700, lineHeight: 1.2 }}>
+        <div className="flex-shrink-0">
+          <div style={{ display: 'flex', alignItems: 'center', gap: '6px', fontSize: '1.125rem', fontWeight: 700 }}>
             {inactivityTimer !== undefined && inactivityTimer <= 20 && (
-              <span className={`whitespace-nowrap ${
-                inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : 'text-orange-400'
-              }`}>
+              <span style={{ whiteSpace: 'nowrap', color: inactivityTimer <= 10 ? '#ef4444' : '#fb923c' }}>
                 До поражения
               </span>
             )}
             {inactivityTimer !== undefined && inactivityTimer <= 30 && (
-              <span className={`whitespace-nowrap ${
-                inactivityTimer <= 10 ? 'text-red-500 animate-pulse' : inactivityTimer <= 20 ? 'text-orange-400' : 'text-yellow-500'
-              }`}>
+              <span style={{ whiteSpace: 'nowrap', color: inactivityTimer <= 10 ? '#ef4444' : inactivityTimer <= 20 ? '#fb923c' : '#eab308' }}>
                 ({inactivityTimer}с)
               </span>
             )}
-            <span className={`whitespace-nowrap ${
-              time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer
-                ? (playerColor === 'white' ? 'text-green-600' : 'text-green-400')
-                : (playerColor === 'white' ? 'text-stone-500' : 'text-stone-400')
-            }`}>
+            <span style={{ whiteSpace: 'nowrap', color: time <= 60 ? '#ef4444' : isCurrentPlayer ? (playerColor === 'white' ? '#16a34a' : '#4ade80') : (playerColor === 'white' ? '#78716c' : '#a8a29e') }}
+              className={time <= 30 ? 'animate-pulse' : ''}>
               {formatTime(time)}
             </span>
           </div>
