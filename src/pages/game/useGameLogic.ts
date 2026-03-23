@@ -543,60 +543,42 @@ export const useGameLogic = (
       setCurrentMoveIndex(boardHistory.length - 1);
 
       if (!isBotFromMatchmaking) {
-        // Режим "Играть с компьютером": вычисление сразу, ход ровно через 4 сек
+        // Режим "Играть с компьютером": вычисление немедленно, ход ровно через 4 сек
         const FIXED_DELAY = 4000;
+
+        // Запускаем вычисление хода заранее, результат кладём в ref
         const moves = getAllLegalMoves(board, botColor, castlingRights, enPassantTarget);
 
         if (moves.length === 0) {
-          const timer = setTimeout(() => {
-            if (isCheckmate(board, botColor, castlingRights, enPassantTarget)) {
-              setGameStatus('checkmate');
-            } else {
-              setGameStatus('stalemate');
-            }
-          }, FIXED_DELAY);
-          return () => clearTimeout(timer);
+          const t = setTimeout(() => makeComputerMoveRef.current(), FIXED_DELAY);
+          return () => { clearTimeout(t); if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; } };
         }
 
-        const pendingMoveBox = { move: null as { from: { row: number; col: number }; to: { row: number; col: number } } | null };
-        const timerBox = { fired: false, done: false };
-
-        const applyIfReady = () => {
-          if (timerBox.done || !pendingMoveBox.move || !timerBox.fired) return;
-          timerBox.done = true;
-          makeMove(pendingMoveBox.move.from, pendingMoveBox.move.to);
-        };
-
         if (difficulty === 'easy') {
-          pendingMoveBox.move = moves[Math.floor(Math.random() * moves.length)];
+          computerMoveRef.current = moves[Math.floor(Math.random() * moves.length)];
         } else {
+          computerMoveRef.current = null;
           const workerDiff = difficulty as 'medium' | 'hard' | 'master';
           if (workerRef.current) workerRef.current.terminate();
           const worker = new Worker(new URL('./chessWorker.ts', import.meta.url), { type: 'module' });
           workerRef.current = worker;
           worker.postMessage({ board, moves, difficulty: workerDiff, botColor });
           worker.onmessage = (e) => {
-            pendingMoveBox.move = e.data;
+            computerMoveRef.current = e.data;
             worker.terminate();
             workerRef.current = null;
-            applyIfReady();
           };
           worker.onerror = () => {
-            pendingMoveBox.move = getBestMove(board, moves, workerDiff, botColor);
+            computerMoveRef.current = getBestMove(board, moves, workerDiff, botColor);
             worker.terminate();
             workerRef.current = null;
-            applyIfReady();
           };
         }
 
-        const timer = setTimeout(() => {
-          timerBox.fired = true;
-          applyIfReady();
-        }, FIXED_DELAY);
-
+        // Ровно через 4 сек применяем готовый ход (или пересчитываем если worker не успел)
+        const timer = setTimeout(() => makeComputerMoveRef.current(), FIXED_DELAY);
         return () => {
           clearTimeout(timer);
-          timerBox.done = true;
           if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
         };
       } else {
@@ -611,7 +593,7 @@ export const useGameLogic = (
           castlingRights,
           enPassantTarget,
         });
-        const timer = setTimeout(() => makeComputerMove(), delay);
+        const timer = setTimeout(() => makeComputerMoveRef.current(), delay);
         return () => {
           clearTimeout(timer);
           if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
@@ -1141,8 +1123,18 @@ export const useGameLogic = (
   };
 
   const workerRef = useRef<Worker | null>(null);
+  const computerMoveRef = useRef<{ from: { row: number; col: number }; to: { row: number; col: number } } | null>(null);
+  const makeComputerMoveRef = useRef<() => void>(() => {});
 
-  const makeComputerMove = () => {
+  makeComputerMoveRef.current = () => {
+    // Если уже вычислен ход заранее (режим компьютера) — применяем его
+    if (computerMoveRef.current) {
+      const precomputed = computerMoveRef.current;
+      computerMoveRef.current = null;
+      makeMove(precomputed.from, precomputed.to);
+      return;
+    }
+
     const moves = getAllLegalMoves(board, botColor, castlingRights, enPassantTarget);
     if (moves.length === 0) {
       if (isCheckmate(board, botColor, castlingRights, enPassantTarget)) {
