@@ -168,6 +168,15 @@ def handler(event: dict, context) -> dict:
         % (new_rating, games_played, wins, losses, draws, win_streak, user_id.replace("'", "''"))
     )
 
+    # Обновляем рейтинг бота (обратно результату игрока) при игре через матчмейкинг
+    if rating_active and opponent_type == 'matchmaking_bot' and opponent_name:
+        bot_rating_change = -rating_change
+        cur.execute("SELECT rating FROM bots WHERE name = '%s' LIMIT 1" % opponent_name.replace("'", "''"))
+        bot_row = cur.fetchone()
+        if bot_row:
+            new_bot_rating = max(min_rating, bot_row[0] + bot_rating_change)
+            cur.execute("UPDATE bots SET rating = %d WHERE name = '%s'" % (new_bot_rating, opponent_name.replace("'", "''")))
+
     move_history_escaped = move_history.replace("'", "''") if move_history else ''
     move_times_escaped = move_times.replace("'", "''") if move_times else ''
     opponent_name_escaped = opponent_name.replace("'", "''")
@@ -201,23 +210,35 @@ def handler(event: dict, context) -> dict:
     )
     game_id = cur.fetchone()[0]
 
+    # Получаем актуальный рейтинг бота для возврата фронтенду
+    bot_rating_after = None
+    if opponent_type == 'matchmaking_bot' and opponent_name:
+        cur.execute("SELECT rating FROM bots WHERE name = '%s' LIMIT 1" % opponent_name.replace("'", "''"))
+        bot_row2 = cur.fetchone()
+        if bot_row2:
+            bot_rating_after = bot_row2[0]
+
     conn.commit()
     cur.close()
     conn.close()
 
+    resp = {
+        'game_id': game_id,
+        'rating_before': current_rating,
+        'rating_after': new_rating,
+        'rating_change': rating_change,
+        'streak_bonus': streak_bonus,
+        'win_streak': win_streak,
+        'games_played': games_played,
+        'wins': wins,
+        'losses': losses,
+        'draws': draws
+    }
+    if bot_rating_after is not None:
+        resp['opponent_rating_after'] = bot_rating_after
+
     return {
         'statusCode': 200,
         'headers': headers,
-        'body': json.dumps({
-            'game_id': game_id,
-            'rating_before': current_rating,
-            'rating_after': new_rating,
-            'rating_change': rating_change,
-            'streak_bonus': streak_bonus,
-            'win_streak': win_streak,
-            'games_played': games_played,
-            'wins': wins,
-            'losses': losses,
-            'draws': draws
-        })
+        'body': json.dumps(resp)
     }

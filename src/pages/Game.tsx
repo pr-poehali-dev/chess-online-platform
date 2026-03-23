@@ -89,7 +89,7 @@ const Game = () => {
     rematchOfferedBy, rematchStatus, rematchGameId, drawOfferedBy,
     setCurrentPlayer, showPossibleMoves, setShowPossibleMoves,
     theme, setTheme, boardTheme, setBoardTheme,
-    ratingChange, newRating, userRating,
+    ratingChange, newRating, userRating, opponentRatingAfter,
     connectionLost, connectionRestored, opponentReconnecting,
     opponentUserId, p2pConnected, p2pLatency, p2pQuality,
     sendPeerMessage, onChatMessageRef, historyRef,
@@ -321,7 +321,8 @@ const Game = () => {
               isCurrentPlayer={currentPlayer !== playerColor}
               formatTime={formatTime}
               difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
-              rating={opponentRating}
+              rating={opponentRatingAfter ?? opponentRating}
+              ratingChange={opponentRatingAfter != null && opponentRating != null ? opponentRatingAfter - opponentRating : undefined}
               avatar={opponentAvatar}
               inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}
               capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}

@@ -274,6 +274,7 @@ export const useGameLogic = (
   const [drawOfferedBy, setDrawOfferedBy] = useState<string | null>(null);
   const [ratingChange, setRatingChange] = useState<number | null>(null);
   const [newRating, setNewRating] = useState<number | null>(null);
+  const [opponentRatingAfter, setOpponentRatingAfter] = useState<number | null>(null);
   const [userRating, setUserRating] = useState<number | null>(() => {
     const saved = localStorage.getItem('chessUser');
     return saved ? JSON.parse(saved).rating || null : null;
@@ -932,6 +933,11 @@ export const useGameLogic = (
         setNewRating(data.rating_after);
         const updatedUser = { ...userData, rating: data.rating_after };
         localStorage.setItem('chessUser', JSON.stringify(updatedUser));
+
+        // Показываем обновлённый рейтинг бота если сервер вернул
+        if (data.opponent_rating_after !== undefined) {
+          setOpponentRatingAfter(data.opponent_rating_after);
+        }
       }
     } catch (e) {
       console.error('Failed to submit game result:', e);
@@ -1271,6 +1277,7 @@ export const useGameLogic = (
     ratingChange,
     newRating,
     userRating,
+    opponentRatingAfter,
     connectionLost,
     connectionRestored,
     opponentReconnecting,
