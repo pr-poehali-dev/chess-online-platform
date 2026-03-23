@@ -70,22 +70,20 @@ export const PlayerInfo = ({
           <div className="min-w-0 flex-shrink">
             <div className="flex items-center gap-1.5 flex-wrap">
               <div className={`text-sm sm:text-base font-semibold truncate ${
-                theme === 'light'
-                  ? (playerColor === 'black' ? 'text-white' : 'text-slate-800')
-                  : 'text-white'
+                playerColor === 'white' ? 'text-slate-800' : 'text-white'
               }`}>
                 {playerName}{difficulty && ` (${difficulty})`}
               </div>
               {rating && (
                 <div className="flex items-center gap-1 flex-shrink-0">
                   <div className={`text-sm sm:text-base font-bold whitespace-nowrap ${
-                    theme === 'light' ? 'text-orange-600' : 'text-orange-400'
+                    playerColor === 'white' ? 'text-orange-600' : 'text-orange-400'
                   }`}>
                     {rating}
                   </div>
                   {ratingChange != null && ratingChange !== 0 && (
                     <div className={`text-sm sm:text-base font-bold whitespace-nowrap ${
-                      ratingChange > 0 ? 'text-green-400' : 'text-red-400'
+                      ratingChange > 0 ? 'text-green-600' : 'text-red-500'
                     }`}>
                       {ratingChange > 0 ? `+${ratingChange}` : ratingChange}
                     </div>
@@ -126,8 +124,8 @@ export const PlayerInfo = ({
             )}
             <div className={`text-sm sm:text-lg md:text-xl font-bold whitespace-nowrap ${
               time <= 30 ? 'text-red-500 animate-pulse' : time <= 60 ? 'text-red-500' : isCurrentPlayer
-                ? (theme === 'dark' && playerColor === 'white' ? 'text-green-600' : 'text-green-400')
-                : (theme === 'dark' && playerColor === 'white' ? 'text-stone-500' : 'text-stone-400')
+                ? (playerColor === 'white' ? 'text-green-600' : 'text-green-400')
+                : (playerColor === 'white' ? 'text-stone-500' : 'text-stone-400')
             }`}>
               {formatTime(time)}
             </div>
