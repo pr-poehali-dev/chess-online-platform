@@ -108,13 +108,13 @@ const InstallBanner = () => {
                 <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-2.5">
                   <span className="text-blue-400 font-bold text-xs w-5 text-center">1</span>
                   <span className="text-xs text-gray-300">
-                    Открой меню браузера <span className="text-blue-400 font-medium">⋮</span> (три точки вверху)
+                    Нажми <span className="text-blue-400 font-medium">⋮</span> или <span className="text-blue-400 font-medium">≡</span> в браузере
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-2.5">
                   <span className="text-green-400 font-bold text-xs w-5 text-center">2</span>
                   <span className="text-xs text-gray-300">
-                    Нажми <span className="text-green-400 font-medium">«Установить приложение»</span>
+                    Нажми <span className="text-green-400 font-medium">«Добавить ярлык»</span> или <span className="text-green-400 font-medium">«На главный экран»</span>
                   </span>
                 </div>
               </div>

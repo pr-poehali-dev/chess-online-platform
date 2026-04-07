@@ -363,11 +363,11 @@ const Navbar = ({
             <div className="space-y-3">
               <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
                 <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">1</div>
-                <div className="text-sm text-gray-300">Открой меню браузера <span className="text-blue-400 font-medium">⋮</span></div>
+                <div className="text-sm text-gray-300">Нажми <span className="text-blue-400 font-medium">⋮</span> или <span className="text-blue-400 font-medium">≡</span> в браузере</div>
               </div>
               <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
                 <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400 flex-shrink-0">2</div>
-                <div className="text-sm text-gray-300">Выбери <span className="text-green-400 font-medium">«Добавить на главный экран»</span></div>
+                <div className="text-sm text-gray-300">Нажми <span className="text-green-400 font-medium">«Добавить ярлык»</span> или <span className="text-green-400 font-medium">«На главный экран»</span></div>
               </div>
             </div>
           ) : (
