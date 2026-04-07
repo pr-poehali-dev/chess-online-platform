@@ -361,6 +361,9 @@ const Navbar = ({
             </div>
           ) : /Android/i.test(navigator.userAgent) ? (
             <div className="space-y-3">
+              <div className="bg-amber-500/10 border border-amber-500/20 rounded-xl p-3">
+                <div className="text-xs text-amber-300">Для лучшей установки откройте <span className="font-bold">ligachess.ru</span> в <span className="font-bold">Google Chrome</span></div>
+              </div>
               <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
                 <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">1</div>
                 <div className="text-sm text-gray-300">Нажми <span className="text-blue-400 font-medium">⋮</span> или <span className="text-blue-400 font-medium">≡</span> в браузере</div>
@@ -369,6 +372,7 @@ const Navbar = ({
                 <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400 flex-shrink-0">2</div>
                 <div className="text-sm text-gray-300">Нажми <span className="text-green-400 font-medium">«Добавить ярлык»</span> или <span className="text-green-400 font-medium">«На главный экран»</span></div>
               </div>
+              <div className="text-[11px] text-gray-500 text-center">Ярлык может появиться в списке всех приложений</div>
             </div>
           ) : (
             <div className="space-y-3">

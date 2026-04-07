@@ -105,6 +105,9 @@ const InstallBanner = () => {
               </div>
             ) : (
               <div className="space-y-2">
+                <div className="bg-amber-500/10 border border-amber-500/20 rounded-lg p-2.5">
+                  <span className="text-xs text-amber-300">Для лучшей установки откройте сайт в <span className="font-bold">Google Chrome</span></span>
+                </div>
                 <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-2.5">
                   <span className="text-blue-400 font-bold text-xs w-5 text-center">1</span>
                   <span className="text-xs text-gray-300">
@@ -115,6 +118,12 @@ const InstallBanner = () => {
                   <span className="text-green-400 font-bold text-xs w-5 text-center">2</span>
                   <span className="text-xs text-gray-300">
                     Нажми <span className="text-green-400 font-medium">«Добавить ярлык»</span> или <span className="text-green-400 font-medium">«На главный экран»</span>
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 bg-slate-800/50 rounded-lg p-2.5">
+                  <span className="text-gray-500 font-bold text-xs w-5 text-center">💡</span>
+                  <span className="text-[11px] text-gray-500">
+                    Ярлык может появиться в списке всех приложений
                   </span>
                 </div>
               </div>
