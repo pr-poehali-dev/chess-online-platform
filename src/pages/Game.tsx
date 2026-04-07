@@ -11,7 +11,7 @@ import { useRematch } from './game/useRematch';
 import API from '@/config/api';
 
 const BOT_AVATAR = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
-const GUEST_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=Opponent';
+const GUEST_AVATAR = '';
 
 const Game = () => {
   const [searchParams] = useSearchParams();
