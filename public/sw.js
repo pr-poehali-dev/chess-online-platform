@@ -1,14 +1,43 @@
-const CACHE_NAME = 'chess-game-v3';
-const STATIC_CACHE = 'chess-static-v3';
+const CACHE_NAME = 'chess-game-v4';
+const STATIC_CACHE = 'chess-static-v4';
 
 const PRECACHE_URLS = [
   '/',
   '/index.html',
 ];
 
+const GAME_ASSETS = [
+  'https://upload.wikimedia.org/wikipedia/commons/4/42/Chess_klt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/1/15/Chess_qlt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/7/72/Chess_rlt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/b/b1/Chess_blt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/7/70/Chess_nlt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/4/45/Chess_plt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/f/f0/Chess_kdt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/4/47/Chess_qdt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/f/ff/Chess_rdt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/9/98/Chess_bdt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/e/ef/Chess_ndt45.svg',
+  'https://upload.wikimedia.org/wikipedia/commons/c/c7/Chess_pdt45.svg',
+  'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/79c4520d-63b3-4e07-8bba-0b7b41c53435.jpg',
+  'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg',
+  'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png',
+];
+
 self.addEventListener('install', (event) => {
   event.waitUntil(
-    caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS))
+    Promise.all([
+      caches.open(STATIC_CACHE).then((cache) => cache.addAll(PRECACHE_URLS)),
+      caches.open(CACHE_NAME).then((cache) =>
+        Promise.allSettled(
+          GAME_ASSETS.map((url) =>
+            fetch(url, { mode: 'no-cors' }).then((res) => {
+              if (res.status === 0 || res.ok) cache.put(url, res);
+            }).catch(() => {})
+          )
+        )
+      )
+    ])
   );
   self.skipWaiting();
 });
@@ -30,7 +59,23 @@ self.addEventListener('fetch', (event) => {
 
   if (event.request.method !== 'GET') return;
 
-  if (url.origin === 'https://cdn.poehali.dev') {
+  if (url.hostname === 'upload.wikimedia.org' || url.hostname === 'cdn.poehali.dev') {
+    event.respondWith(
+      caches.match(event.request).then((cached) => {
+        if (cached) return cached;
+        return fetch(event.request).then((response) => {
+          if (response.ok) {
+            const clone = response.clone();
+            caches.open(CACHE_NAME).then((cache) => cache.put(event.request, clone));
+          }
+          return response;
+        }).catch(() => cached || new Response('', { status: 404 }));
+      })
+    );
+    return;
+  }
+
+  if (url.hostname === 'fonts.googleapis.com' || url.hostname === 'fonts.gstatic.com') {
     event.respondWith(
       caches.match(event.request).then((cached) => {
         if (cached) return cached;
