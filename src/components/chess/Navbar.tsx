@@ -2,12 +2,8 @@ import { useState, useEffect, useRef, useCallback } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
 import Icon from '@/components/ui/icon';
 import { onBadge, emitBadge } from '@/lib/badgeEvents';
+import { getInstallPrompt, triggerInstall, onInstallPromptChange, isStandalone } from '@/lib/installPrompt';
 import API from '@/config/api';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
 
 interface NavbarProps {
   activeSection: string;
@@ -49,31 +45,26 @@ const Navbar = ({
   stats 
 }: NavbarProps) => {
   const [showMenu, setShowMenu] = useState(false);
-  const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
-  const [isInstalled, setIsInstalled] = useState(false);
+  const [canPrompt, setCanPrompt] = useState(!!getInstallPrompt());
+  const [isInstalled, setIsInstalled] = useState(isStandalone());
   const [showInstallHelp, setShowInstallHelp] = useState(false);
 
   useEffect(() => {
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e);
-    };
-    window.addEventListener('beforeinstallprompt', handler);
-    window.addEventListener('appinstalled', () => setIsInstalled(true));
-    if (window.matchMedia('(display-mode: standalone)').matches) setIsInstalled(true);
-    return () => window.removeEventListener('beforeinstallprompt', handler);
+    const unsub = onInstallPromptChange((prompt) => {
+      setCanPrompt(!!prompt);
+      if (!prompt && !getInstallPrompt()) setIsInstalled(true);
+    });
+    return unsub;
   }, []);
 
   const handleInstall = useCallback(async () => {
-    if (deferredPrompt) {
-      (deferredPrompt as BeforeInstallPromptEvent).prompt();
-      const { outcome } = await (deferredPrompt as BeforeInstallPromptEvent).userChoice;
-      if (outcome === 'accepted') setIsInstalled(true);
-      setDeferredPrompt(null);
+    if (canPrompt) {
+      const accepted = await triggerInstall();
+      if (accepted) setIsInstalled(true);
     } else {
       setShowInstallHelp(true);
     }
-  }, [deferredPrompt]);
+  }, [canPrompt]);
   const [hasActiveGame, setHasActiveGame] = useState(false);
   const [activeGameUrl, setActiveGameUrl] = useState('');
   const [activeGameLabel, setActiveGameLabel] = useState('');

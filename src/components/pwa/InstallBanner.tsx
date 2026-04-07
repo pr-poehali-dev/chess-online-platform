@@ -1,20 +1,15 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect } from 'react';
 import Icon from '@/components/ui/icon';
-
-interface BeforeInstallPromptEvent extends Event {
-  prompt(): Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
+import { getInstallPrompt, triggerInstall, onInstallPromptChange, isStandalone, isIOS, isMobile } from '@/lib/installPrompt';
 
 const InstallBanner = () => {
-  const [deferredPrompt, setDeferredPrompt] = useState<BeforeInstallPromptEvent | null>(null);
+  const [canPrompt, setCanPrompt] = useState(!!getInstallPrompt());
   const [showBanner, setShowBanner] = useState(false);
-  const [isIOS, setIsIOS] = useState(false);
   const [dismissed, setDismissed] = useState(false);
+  const iosDevice = isIOS();
 
   useEffect(() => {
-    if (window.matchMedia('(display-mode: standalone)').matches) return;
-    if ('standalone' in navigator && (navigator as Navigator & { standalone: boolean }).standalone) return;
+    if (isStandalone()) return;
 
     const lastDismiss = localStorage.getItem('pwa_banner_dismissed');
     if (lastDismiss) {
@@ -22,44 +17,25 @@ const InstallBanner = () => {
       if (diff < 3 * 24 * 60 * 60 * 1000) return;
     }
 
-    const isMobile = /Android|iPhone|iPad|iPod/i.test(navigator.userAgent);
-    if (!isMobile) return;
+    if (!isMobile()) return;
 
-    const ios = /iPhone|iPad|iPod/.test(navigator.userAgent) || (navigator.platform === 'MacIntel' && navigator.maxTouchPoints > 1);
-    setIsIOS(ios);
-
-    const handler = (e: Event) => {
-      e.preventDefault();
-      setDeferredPrompt(e as BeforeInstallPromptEvent);
-      setTimeout(() => setShowBanner(true), 2000);
-    };
-
-    window.addEventListener('beforeinstallprompt', handler);
-    window.addEventListener('appinstalled', () => {
-      setShowBanner(false);
-      setDeferredPrompt(null);
+    const unsub = onInstallPromptChange((prompt) => {
+      setCanPrompt(!!prompt);
+      if (prompt) setShowBanner(true);
     });
 
-    const showTimer = setTimeout(() => {
-      setShowBanner(true);
-    }, 3000);
+    const timer = setTimeout(() => setShowBanner(true), 3000);
 
     return () => {
-      window.removeEventListener('beforeinstallprompt', handler);
-      clearTimeout(showTimer);
+      unsub();
+      clearTimeout(timer);
     };
   }, []);
 
-  const handleInstall = useCallback(async () => {
-    if (deferredPrompt) {
-      deferredPrompt.prompt();
-      const { outcome } = await deferredPrompt.userChoice;
-      if (outcome === 'accepted') {
-        setShowBanner(false);
-      }
-      setDeferredPrompt(null);
-    }
-  }, [deferredPrompt]);
+  const handleInstall = async () => {
+    const accepted = await triggerInstall();
+    if (accepted) setShowBanner(false);
+  };
 
   const handleDismiss = () => {
     setDismissed(true);
@@ -68,8 +44,6 @@ const InstallBanner = () => {
   };
 
   if (!showBanner) return null;
-
-  const canPrompt = !!deferredPrompt;
 
   return (
     <div
@@ -114,7 +88,7 @@ const InstallBanner = () => {
                   Позже
                 </button>
               </div>
-            ) : isIOS ? (
+            ) : iosDevice ? (
               <div className="space-y-2">
                 <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-2.5">
                   <span className="text-blue-400 font-bold text-xs w-5 text-center">1</span>
@@ -134,13 +108,13 @@ const InstallBanner = () => {
                 <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-2.5">
                   <span className="text-blue-400 font-bold text-xs w-5 text-center">1</span>
                   <span className="text-xs text-gray-300">
-                    Открой меню браузера <span className="text-blue-400 font-medium">⋮</span>
+                    Открой меню браузера <span className="text-blue-400 font-medium">⋮</span> (три точки вверху)
                   </span>
                 </div>
                 <div className="flex items-center gap-2 bg-slate-800 rounded-lg p-2.5">
                   <span className="text-green-400 font-bold text-xs w-5 text-center">2</span>
                   <span className="text-xs text-gray-300">
-                    Выбери <span className="text-green-400 font-medium">«Установить приложение»</span> или <span className="text-green-400 font-medium">«Добавить на главный экран»</span>
+                    Нажми <span className="text-green-400 font-medium">«Установить приложение»</span>
                   </span>
                 </div>
               </div>
