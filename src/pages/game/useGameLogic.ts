@@ -547,10 +547,7 @@ export const useGameLogic = (
       setCurrentMoveIndex(boardHistory.length - 1);
 
       if (!isBotFromMatchmaking) {
-        // Режим "Играть с компьютером": вычисление немедленно, ход ровно через 4 сек
         const FIXED_DELAY = 4000;
-
-        // Запускаем вычисление хода заранее, результат кладём в ref
         const moves = getAllLegalMoves(board, botColor, castlingRights, enPassantTarget);
 
         if (moves.length === 0) {
@@ -560,27 +557,58 @@ export const useGameLogic = (
 
         if (difficulty === 'easy') {
           computerMoveRef.current = moves[Math.floor(Math.random() * moves.length)];
-        } else {
-          computerMoveRef.current = null;
-          const workerDiff = difficulty as 'medium' | 'hard' | 'master';
-          if (workerRef.current) workerRef.current.terminate();
-          const worker = new Worker(new URL('./chessWorker.ts', import.meta.url), { type: 'module' });
-          workerRef.current = worker;
-          worker.postMessage({ board, moves, difficulty: workerDiff, botColor });
-          worker.onmessage = (e) => {
-            computerMoveRef.current = e.data;
-            worker.terminate();
-            workerRef.current = null;
-          };
-          worker.onerror = () => {
-            computerMoveRef.current = getBestMove(board, moves, workerDiff, botColor);
-            worker.terminate();
-            workerRef.current = null;
-          };
+          const timer = setTimeout(() => makeComputerMoveRef.current(), FIXED_DELAY);
+          return () => clearTimeout(timer);
         }
 
-        // Ровно через 4 сек применяем готовый ход (или пересчитываем если worker не успел)
-        const timer = setTimeout(() => makeComputerMoveRef.current(), FIXED_DELAY);
+        computerMoveRef.current = null;
+        const workerDiff = difficulty as 'medium' | 'hard' | 'master';
+        if (workerRef.current) workerRef.current.terminate();
+        const worker = new Worker(new URL('./chessWorker.ts', import.meta.url), { type: 'module' });
+        workerRef.current = worker;
+        const startTime = Date.now();
+        let workerDone = false;
+
+        const applyMove = (move: { from: Position; to: Position }) => {
+          computerMoveRef.current = null;
+          makeMove(move.from, move.to);
+        };
+
+        worker.postMessage({ board, moves, difficulty: workerDiff, botColor });
+        worker.onmessage = (e) => {
+          workerDone = true;
+          worker.terminate();
+          workerRef.current = null;
+          const elapsed = Date.now() - startTime;
+          const remaining = FIXED_DELAY - elapsed;
+          if (remaining > 0) {
+            computerMoveRef.current = e.data;
+          } else {
+            applyMove(e.data);
+          }
+        };
+        worker.onerror = () => {
+          workerDone = true;
+          const fallback = getBestMove(board, moves, workerDiff, botColor);
+          worker.terminate();
+          workerRef.current = null;
+          const elapsed = Date.now() - startTime;
+          const remaining = FIXED_DELAY - elapsed;
+          if (remaining > 0) {
+            computerMoveRef.current = fallback;
+          } else {
+            applyMove(fallback);
+          }
+        };
+
+        const timer = setTimeout(() => {
+          if (computerMoveRef.current) {
+            const precomputed = computerMoveRef.current;
+            computerMoveRef.current = null;
+            makeMove(precomputed.from, precomputed.to);
+          }
+        }, FIXED_DELAY);
+
         return () => {
           clearTimeout(timer);
           if (workerRef.current) { workerRef.current.terminate(); workerRef.current = null; }
