@@ -38,6 +38,9 @@ def handler(event, context):
         result = []
         for i, row in enumerate(rows):
             avatar = row[3] or ''
+            if not avatar:
+                seed = row[0].replace(' ', '')
+                avatar = 'https://api.dicebear.com/7.x/avataaars/svg?seed=%s' % seed
             result.append({
                 'rank': i + 1,
                 'name': row[0],
