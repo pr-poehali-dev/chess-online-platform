@@ -7,7 +7,7 @@ interface HomeActionButtonsProps {
   setShowGameSettings: (value: boolean) => void;
   setShowAuthModal: (value: boolean) => void;
   setShowOfflineGameModal: (value: boolean) => void;
-  setInitialOpponent: (value: 'friend' | 'computer' | null) => void;
+  setInitialOpponent: (value: "friend" | "computer" | null) => void;
   siteSettings: SiteSettingsData | null;
   isButtonVisible: (btnKey: string) => boolean;
   isLevelAllowed: (levelKey: string) => boolean;
@@ -27,8 +27,8 @@ export const HomeActionButtons = ({
   lockedMessage,
   setLockedMessage,
 }: HomeActionButtonsProps) => {
-  const handleOpenGame = (opponent: 'friend' | 'computer' | null = null) => {
-    if (isAuthenticated || opponent === 'computer') {
+  const handleOpenGame = (opponent: "friend" | "computer" | null = null) => {
+    if (isAuthenticated || opponent === "computer") {
       setInitialOpponent(opponent);
       setShowGameSettings(true);
     } else {
@@ -57,7 +57,7 @@ export const HomeActionButtons = ({
             <Button
               size="lg"
               className="w-full bg-blue-500 hover:bg-blue-600 dark:bg-blue-500 dark:hover:bg-blue-600 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
-              onClick={() => handleOpenGame('friend')}
+              onClick={() => handleOpenGame("friend")}
             >
               <Icon name="Users" className="mr-2" size={24} />
               Играть с другом
@@ -70,7 +70,7 @@ export const HomeActionButtons = ({
             <Button
               size="lg"
               className="w-full bg-orange-500 hover:bg-orange-600 dark:bg-orange-500 dark:hover:bg-orange-600 text-white border-0 px-4 sm:px-12 py-3 sm:py-5 lg:py-3 text-sm sm:text-base lg:text-sm font-semibold rounded-xl transition-all shadow-lg min-h-[44px] lg:min-h-[40px] hover:scale-105"
-              onClick={() => handleOpenGame('computer')}
+              onClick={() => handleOpenGame("computer")}
             >
               <Icon name="Bot" className="mr-2" size={24} />
               Играть с компьютером
@@ -148,7 +148,7 @@ export const HomeActionButtons = ({
         className="text-2xl sm:text-3xl md:text-4xl lg:text-5xl font-bold mb-2 sm:mb-3 text-slate-900 dark:bg-gradient-to-r dark:from-blue-400 dark:via-purple-500 dark:to-orange-500 dark:bg-clip-text dark:text-transparent animate-slide-up px-2"
         style={{ animationDelay: "0.1s" }}
       >
-        Шахматный мир ждет тебя
+        Российская Лига Шахмат
       </h2>
       <p
         className="text-sm sm:text-base md:text-lg lg:text-xl text-gray-600 dark:text-gray-400 mb-0 animate-slide-up px-3 sm:px-2"

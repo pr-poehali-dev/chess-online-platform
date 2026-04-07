@@ -95,7 +95,7 @@ def handler(event: dict, context) -> dict:
     # Рейтинг меняется в онлайн-играх и при игре с ботом через матчмейкинг
     rating_active = opponent_type != 'bot'
 
-    cur.execute("SELECT id, rating, games_played, wins, losses, draws FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
+    cur.execute("SELECT id, rating, games_played, wins, losses, draws, win_streak FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
     user = cur.fetchone()
 
     if not user:
@@ -111,16 +111,15 @@ def handler(event: dict, context) -> dict:
         draws = 0
         win_streak = 0
     else:
-        cur.execute("SELECT win_streak FROM users WHERE id = '%s'" % user_id.replace("'", "''"))
-        streak_row = cur.fetchone()
         current_rating = user[1]
         games_played = user[2]
         wins = user[3]
         losses = user[4]
         draws = user[5]
-        win_streak = streak_row[0] if streak_row else 0
+        win_streak = user[6] if user[6] is not None else 0
 
     streak_bonus = 0
+
     if result == 'win':
         wins += 1
         if rating_active:

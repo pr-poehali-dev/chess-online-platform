@@ -1,26 +1,17 @@
 import { useState, useEffect, useRef } from 'react';
 import { useSearchParams, useNavigate } from 'react-router-dom';
-import Icon from '@/components/ui/icon';
-import { getDifficultyLabel, formatTime } from './game/gameTypes';
-import { GameBoard, GameResult } from './game/GameBoard';
-import { PlayerInfo } from './game/PlayerInfo';
-import { MoveHistory } from './game/MoveHistory';
-import { ExitDialog } from './game/ExitDialog';
-import { GameChatModal } from './game/GameChatModal';
-import { DrawOfferModal } from './game/DrawOfferModal';
-import { NotificationsModal } from './game/NotificationsModal';
-import { RematchModal } from './game/RematchModal';
-import { OpponentLeftModal } from './game/OpponentLeftModal';
-import { GameHeader, GameControls } from './game/GameHeader';
-import { ConfirmDialog } from './game/ConfirmDialog';
+import { GameHeader } from './game/GameHeader';
+import { GameLayout } from './game/GameLayout';
+import { GameNetworkBanners } from './game/GameNetworkBanners';
+import { GameModals } from './game/GameModals';
+import { GameResult } from './game/GameBoard';
 import { useGameLogic } from './game/useGameLogic';
 import { useGameHandlers } from './game/useGameHandlers';
 import { useRematch } from './game/useRematch';
 import API from '@/config/api';
-import PlayerProfileModal from '@/components/chess/PlayerProfileModal';
 
 const BOT_AVATAR = 'https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/files/5a37bc71-a83e-4a96-b899-abd4e284ef6e.jpg';
-const GUEST_AVATAR = 'https://api.dicebear.com/7.x/avataaars/svg?seed=Opponent';
+const GUEST_AVATAR = '';
 
 const Game = () => {
   const [searchParams] = useSearchParams();
@@ -90,7 +81,7 @@ const Game = () => {
     rematchOfferedBy, rematchStatus, rematchGameId, drawOfferedBy,
     setCurrentPlayer, showPossibleMoves, setShowPossibleMoves,
     theme, setTheme, boardTheme, setBoardTheme,
-    ratingChange, newRating, userRating, opponentRatingAfter,
+    ratingChange, newRating, userRating, opponentRatingAfter, diverseStreakTriggered, streakBonusAmount, streakCount,
     connectionLost, connectionRestored, opponentReconnecting,
     opponentUserId, p2pConnected, p2pLatency, p2pQuality,
     sendPeerMessage, onChatMessageRef, historyRef,
@@ -256,232 +247,142 @@ const Game = () => {
         setBoardTheme={setBoardTheme}
       />
 
-      {/* Сетевые баннеры */}
-      {isOnlineReal && connectionLost && (
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-red-600 text-white text-center text-sm py-2 font-semibold animate-pulse">
-          <Icon name="WifiOff" size={16} className="inline mr-2 -mt-0.5" />
-          Потеря связи с сервером...
-        </div>
-      )}
-      {isOnlineReal && connectionRestored && !connectionLost && (
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-green-600 text-white text-center text-sm py-2 font-semibold">
-          <Icon name="Wifi" size={16} className="inline mr-2 -mt-0.5" />
-          Связь восстановлена
-        </div>
-      )}
-      {isOnlineReal && opponentReconnecting && !connectionLost && gameStatus === 'playing' && (
-        <div className="fixed top-0 left-0 right-0 z-[100] bg-amber-500 text-white text-center text-sm py-2 font-semibold animate-pulse">
-          <Icon name="RefreshCw" size={16} className="inline mr-2 -mt-0.5" />
-          Соперник переподключается...
-        </div>
-      )}
-
-      <main className="flex-1 flex flex-col items-center justify-center py-0.5 px-1 sm:px-2 overflow-visible min-h-0">
-        <div className="flex flex-col gap-0.5 sm:gap-1 w-full" style={{ maxWidth: 'min(100%, min(100vw - 8px, 100dvh - 250px))' }}>
-
-          {/* Верхняя панель + противник */}
-          <div className="flex flex-col gap-0.5 sm:gap-1">
-            <GameControls
-              showSettingsMenu={showSettingsMenu}
-              setShowSettingsMenu={setShowSettingsMenu}
-              setShowChat={openChat}
-              unreadChatCount={unreadChatCount}
-              handleExitClick={handleExitClick}
-              handleOfferDraw={handleOfferDraw}
-              handleSurrender={handleSurrender}
-              handleNewGame={handleNewGame}
-              setShowNotifications={setShowNotifications}
-              showPossibleMoves={showPossibleMoves}
-              setShowPossibleMoves={setShowPossibleMoves}
-              theme={theme}
-              setTheme={setTheme}
-              boardTheme={boardTheme}
-              setBoardTheme={setBoardTheme}
-              gameStatus={gameStatus}
-              currentPlayer={currentPlayer}
-              playerColor={playerColor}
-              setShowRematchOffer={setShowRematchOffer}
-              onOfferRematch={offerRematch}
-              rematchSent={rematchSent}
-              rematchCooldown={rematchCooldown}
-              rematchTimeoutLeft={rematchTimeoutLeft}
-              isOnline={isOnlineReal || isBotFromMatchmaking}
-              isComputerGame={isPlayingWithBot}
-              isBotGame={isBotFromMatchmaking}
-              onNewOnlineGame={() => navigate(`/online-game?opponent=country&time=${encodeURIComponent(timeControl)}&color=random`)}
-              p2pConnected={p2pConnected}
-              p2pQuality={p2pQuality}
-              p2pLatency={p2pLatency}
-              connectionLost={connectionLost}
-            />
-            <PlayerInfo
-              playerName={opponentName}
-              playerColor={playerColor === 'white' ? 'black' : 'white'}
-              icon={playerColor === 'white' ? '♚' : '♔'}
-              time={playerColor === 'white' ? blackTime : whiteTime}
-              isCurrentPlayer={currentPlayer !== playerColor}
-              formatTime={formatTime}
-              difficulty={isPlayingWithBot ? getDifficultyLabel(difficulty) : undefined}
-              rating={opponentRatingAfter ?? opponentRating}
-              ratingChange={opponentRatingAfter != null && opponentRating != null ? opponentRatingAfter - opponentRating : undefined}
-              city={(isOnlineReal || isBotFromMatchmaking) ? paramOpponentCity : undefined}
-              avatar={opponentAvatar}
-              inactivityTimer={isOnlineReal && currentPlayer !== playerColor ? opponentInactivityTimer : undefined}
-              capturedPieces={playerColor === 'white' ? capturedByBlack : capturedByWhite}
-              theme={theme}
-              onClickProfile={() => setShowOpponentProfile(true)}
-            />
-          </div>
-
-          {/* Доска */}
-          <div style={{ width: '100%', margin: '0 auto' }}>
-            <GameBoard
-              board={displayBoard}
-              onSquareClick={handleSquareClick}
-              isSquareSelected={isSquareSelected}
-              isSquarePossibleMove={isSquarePossibleMove}
-              kingInCheckPosition={kingInCheckPosition}
-              showPossibleMoves={showPossibleMoves}
-              flipped={flipped}
-              boardTheme={boardTheme}
-              lastMove={lastMove}
-              gameResult={gameResult}
-              onResultClick={() => setResultDismissed(true)}
-            />
-          </div>
-
-          {/* Нижняя панель + игрок */}
-          <div className="flex flex-col gap-0.5 sm:gap-1">
-            <PlayerInfo
-              playerName={userData?.name || 'Вы'}
-              playerColor={playerColor}
-              icon={playerColor === 'white' ? '♔' : '♚'}
-              time={playerColor === 'white' ? whiteTime : blackTime}
-              isCurrentPlayer={currentPlayer === playerColor}
-              formatTime={formatTime}
-              rating={newRating || userRating || undefined}
-              ratingChange={ratingChange}
-              city={(isOnlineReal || isBotFromMatchmaking) ? (userData?.city || undefined) : undefined}
-              avatar={userAvatar}
-              inactivityTimer={currentPlayer === playerColor ? inactivityTimer : undefined}
-              capturedPieces={playerColor === 'white' ? capturedByWhite : capturedByBlack}
-              theme={theme}
-              onClickProfile={() => setShowMyProfile(true)}
-            />
-            <MoveHistory
-              moveHistory={moveHistory}
-              currentMoveIndex={currentMoveIndex}
-              isDragging={isDragging}
-              onMouseDown={(e) => handleMouseDown(e, historyRef)}
-              onMouseMove={(e) => handleMouseMove(e, historyRef)}
-              onMouseUpOrLeave={handleMouseUpOrLeave}
-              onPreviousMove={handlePreviousMove}
-              onNextMove={handleNextMove}
-              historyRef={historyRef}
-              theme={theme}
-            />
-          </div>
-
-        </div>
-      </main>
-
-      {/* Модалки */}
-      {showExitDialog && <ExitDialog onContinue={handleContinue} onSurrender={handleSurrender} />}
-
-      {showChat && (
-        <GameChatModal
-          opponentName={(isPlayingWithBot || isBotFromMatchmaking) ? `${opponentName} (${getDifficultyLabel(difficulty)})` : opponentName}
-          opponentIcon="♚"
-          opponentInfo="Соперник"
-          chatMessages={chatMessages}
-          chatMessage={chatMessage}
-          onChatMessageChange={setChatMessage}
-          onSendMessage={handleSendMessage}
-          onChatKeyPress={handleChatKeyPress}
-          onBlock={handleBlockOpponent}
-          onUnblock={handleUnblockOpponent}
-          isBlocked={isChatBlocked}
-          isBlockedByOpponent={isChatBlockedByOpponent}
-          onClose={() => setShowChat(false)}
-          chatEndRef={chatEndRef}
-          theme={theme}
-        />
-      )}
-
-      <DrawOfferModal showModal={showDrawOffer} onAccept={handleAcceptDraw} onDecline={handleDeclineDraw} />
-
-      <NotificationsModal showModal={showNotifications} onClose={() => setShowNotifications(false)} />
-
-      <RematchModal showModal={showRematchOffer} onAccept={handleAcceptRematch} onDecline={handleDeclineRematch} />
-
-      {botRematchPending && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-[100] p-4">
-          <div className="w-full max-w-sm bg-stone-800 border border-stone-700/50 rounded-2xl p-6 flex flex-col items-center gap-4">
-            <div className="relative">
-              {opponentAvatar ? (
-                <img src={opponentAvatar} alt={opponentName} className="w-16 h-16 rounded-full object-cover ring-2 ring-amber-400/50" />
-              ) : (
-                <div className="w-16 h-16 rounded-full bg-stone-700 flex items-center justify-center ring-2 ring-amber-400/50">
-                  <Icon name="User" size={28} className="text-stone-400" />
-                </div>
-              )}
-              <div className="absolute -bottom-1 -right-1 w-6 h-6 rounded-full bg-stone-800 flex items-center justify-center">
-                <Icon name="Loader2" size={14} className="text-amber-400 animate-spin" />
-              </div>
-            </div>
-            <div className="text-center">
-              <p className="text-white font-semibold text-lg">Запрос на реванш отправлен</p>
-              <p className="text-stone-400 text-sm mt-1">{opponentName} думает над предложением...</p>
-            </div>
-            <button onClick={cancelBotRematch} className="mt-1 px-4 py-2 rounded-lg bg-stone-700 hover:bg-stone-600 text-stone-300 text-sm transition-colors">
-              Отмена
-            </button>
-          </div>
-        </div>
-      )}
-
-      <OpponentLeftModal
-        showModal={showOpponentLeft}
-        onClose={() => setShowOpponentLeft(false)}
-        isEarlyExit={opponentLeftReason === 'early'}
-        isSurrender={opponentLeftReason === 'surrender'}
+      <GameNetworkBanners
+        isOnlineReal={isOnlineReal}
+        connectionLost={connectionLost}
+        connectionRestored={connectionRestored}
+        opponentReconnecting={opponentReconnecting}
+        gameStatus={gameStatus}
+        diverseStreakTriggered={diverseStreakTriggered}
+        streakCount={streakCount}
+        streakBonusAmount={streakBonusAmount}
       />
 
-      <PlayerProfileModal
-        open={showOpponentProfile}
-        onClose={() => setShowOpponentProfile(false)}
+      <GameLayout
+        theme={theme}
+        boardTheme={boardTheme}
+        setBoardTheme={setBoardTheme}
+        setTheme={setTheme}
+        displayBoard={displayBoard}
+        handleSquareClick={handleSquareClick}
+        isSquareSelected={isSquareSelected}
+        isSquarePossibleMove={isSquarePossibleMove}
+        kingInCheckPosition={kingInCheckPosition}
+        showPossibleMoves={showPossibleMoves}
+        setShowPossibleMoves={setShowPossibleMoves}
+        flipped={flipped}
+        lastMove={lastMove}
+        gameResult={gameResult}
+        setResultDismissed={setResultDismissed}
+        gameStatus={gameStatus}
+        currentPlayer={currentPlayer}
+        playerColor={playerColor}
+        whiteTime={whiteTime}
+        blackTime={blackTime}
+        moveHistory={moveHistory}
+        currentMoveIndex={currentMoveIndex}
+        capturedByWhite={capturedByWhite}
+        capturedByBlack={capturedByBlack}
+        inactivityTimer={inactivityTimer}
+        opponentInactivityTimer={opponentInactivityTimer}
+        opponentName={opponentName}
+        opponentAvatar={opponentAvatar}
+        opponentRating={opponentRating}
+        opponentRatingAfter={opponentRatingAfter}
+        paramOpponentCity={paramOpponentCity}
+        isPlayingWithBot={isPlayingWithBot}
+        isBotFromMatchmaking={isBotFromMatchmaking}
+        isOnlineReal={isOnlineReal}
+        difficulty={difficulty}
+        userData={userData}
+        userAvatar={userAvatar}
+        newRating={newRating}
+        userRating={userRating}
+        ratingChange={ratingChange}
+        showSettingsMenu={showSettingsMenu}
+        setShowSettingsMenu={setShowSettingsMenu}
+        openChat={openChat}
+        unreadChatCount={unreadChatCount}
+        handleExitClick={handleExitClick}
+        handleOfferDraw={handleOfferDraw}
+        handleSurrender={handleSurrender}
+        handleNewGame={handleNewGame}
+        setShowNotifications={setShowNotifications}
+        setShowRematchOffer={setShowRematchOffer}
+        offerRematch={offerRematch}
+        rematchSent={rematchSent}
+        rematchCooldown={rematchCooldown}
+        rematchTimeoutLeft={rematchTimeoutLeft}
+        onNewOnlineGame={() => navigate(`/online-game?opponent=country&time=${encodeURIComponent(timeControl)}&color=random`)}
+        p2pConnected={p2pConnected}
+        p2pQuality={p2pQuality}
+        p2pLatency={p2pLatency}
+        connectionLost={connectionLost}
+        isComputerGame={isPlayingWithBot}
+        isBotGame={isBotFromMatchmaking}
+        isDragging={isDragging}
+        handleMouseDown={handleMouseDown}
+        handleMouseMove={handleMouseMove}
+        handleMouseUpOrLeave={handleMouseUpOrLeave}
+        handlePreviousMove={handlePreviousMove}
+        handleNextMove={handleNextMove}
+        historyRef={historyRef}
+        setShowOpponentProfile={setShowOpponentProfile}
+        setShowMyProfile={setShowMyProfile}
+      />
+
+      <GameModals
+        showExitDialog={showExitDialog}
+        handleContinue={handleContinue}
+        handleSurrender={handleSurrender}
+        showChat={showChat}
+        setShowChat={setShowChat}
+        isPlayingWithBot={isPlayingWithBot}
+        isBotFromMatchmaking={isBotFromMatchmaking}
+        opponentName={opponentName}
+        difficulty={difficulty}
+        chatMessages={chatMessages}
+        chatMessage={chatMessage}
+        setChatMessage={setChatMessage}
+        handleSendMessage={handleSendMessage}
+        handleChatKeyPress={handleChatKeyPress}
+        handleBlockOpponent={handleBlockOpponent}
+        handleUnblockOpponent={handleUnblockOpponent}
+        isChatBlocked={isChatBlocked}
+        isChatBlockedByOpponent={isChatBlockedByOpponent}
+        chatEndRef={chatEndRef}
+        theme={theme}
+        showDrawOffer={showDrawOffer}
+        handleAcceptDraw={handleAcceptDraw}
+        handleDeclineDraw={handleDeclineDraw}
+        showNotifications={showNotifications}
+        setShowNotifications={setShowNotifications}
+        showRematchOffer={showRematchOffer}
+        handleAcceptRematch={handleAcceptRematch}
+        handleDeclineRematch={handleDeclineRematch}
+        botRematchPending={botRematchPending}
+        opponentAvatar={opponentAvatar}
+        cancelBotRematch={cancelBotRematch}
+        showOpponentLeft={showOpponentLeft}
+        setShowOpponentLeft={setShowOpponentLeft}
+        opponentLeftReason={opponentLeftReason}
+        showOpponentProfile={showOpponentProfile}
+        setShowOpponentProfile={setShowOpponentProfile}
+        showMyProfile={showMyProfile}
+        setShowMyProfile={setShowMyProfile}
         playerName={opponentName}
         playerAvatar={opponentAvatar}
-        playerRating={opponentRating}
-      />
-
-      <PlayerProfileModal
-        open={showMyProfile}
-        onClose={() => setShowMyProfile(false)}
-        userId={myUserId}
-        playerName={userData?.name || 'Вы'}
-        playerAvatar={userAvatar}
-        playerRating={newRating || userRating || undefined}
-      />
-
-      <ConfirmDialog
-        open={confirmDialog.open}
-        message={confirmDialog.message}
-        title={confirmDialog.title}
-        variant={confirmDialog.variant}
-        alertOnly={confirmDialog.alertOnly}
-        onConfirm={handleConfirmDialogConfirm}
-        onCancel={handleConfirmDialogCancel}
-      />
-
-      <ConfirmDialog
-        open={!!rematchError}
-        message={rematchError || ''}
-        title="Реванш"
-        variant="info"
-        alertOnly
-        onConfirm={() => setRematchError(null)}
-        onCancel={() => setRematchError(null)}
+        opponentRating={opponentRating}
+        myUserId={myUserId}
+        userData={userData}
+        userAvatar={userAvatar}
+        newRating={newRating}
+        userRating={userRating}
+        confirmDialog={confirmDialog}
+        handleConfirmDialogConfirm={handleConfirmDialogConfirm}
+        handleConfirmDialogCancel={handleConfirmDialogCancel}
+        rematchError={rematchError}
+        setRematchError={setRematchError}
       />
     </div>
   );

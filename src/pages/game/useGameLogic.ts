@@ -275,6 +275,9 @@ export const useGameLogic = (
   const [ratingChange, setRatingChange] = useState<number | null>(null);
   const [newRating, setNewRating] = useState<number | null>(null);
   const [opponentRatingAfter, setOpponentRatingAfter] = useState<number | null>(null);
+  const [diverseStreakTriggered, setDiverseStreakTriggered] = useState(false);
+  const [streakBonusAmount, setStreakBonusAmount] = useState(0);
+  const [streakCount, setStreakCount] = useState(0);
   const [userRating, setUserRating] = useState<number | null>(() => {
     const saved = localStorage.getItem('chessUser');
     return saved ? JSON.parse(saved).rating || null : null;
@@ -938,6 +941,12 @@ export const useGameLogic = (
         if (data.opponent_rating_after !== undefined) {
           setOpponentRatingAfter(data.opponent_rating_after);
         }
+        // Бонус за серию побед подряд
+        if (data.streak_bonus && data.streak_bonus > 0) {
+          setDiverseStreakTriggered(true);
+          setStreakBonusAmount(data.streak_bonus);
+          setStreakCount(data.win_streak || 0);
+        }
       }
     } catch (e) {
       console.error('Failed to submit game result:', e);
@@ -1278,6 +1287,9 @@ export const useGameLogic = (
     newRating,
     userRating,
     opponentRatingAfter,
+    diverseStreakTriggered,
+    streakBonusAmount,
+    streakCount,
     connectionLost,
     connectionRestored,
     opponentReconnecting,
