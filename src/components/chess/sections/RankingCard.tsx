@@ -125,7 +125,7 @@ export const RankingCard = ({
               1 место
             </div>
           </div>
-          <div className="text-center" style={{ flex: '0 0 42.5%' }}>
+          <div className="text-center" style={{ flex: '0 0 45%' }}>
             <div className="text-base sm:text-lg lg:text-xl font-bold text-yellow-400 animate-glow-text">
               2 место
             </div>
@@ -176,7 +176,7 @@ export const RankingCard = ({
           </div>
 
           {/* Карточка 2 + надпись 3 + карточка 3 + надпись 4 + карточка 4 */}
-          <div className="flex flex-col gap-0.5 min-w-0" style={{ flex: '0 0 42.5%' }}>
+          <div className="flex flex-col gap-0.5 min-w-0" style={{ flex: '0 0 45%' }}>
             {rest.map((player, idx) => (
               <div key={player.rank} className="flex flex-col items-center flex-1 min-h-0">
                 {idx > 0 && (
@@ -209,11 +209,11 @@ export const RankingCard = ({
                       {getInitials(player.name)}
                     </div>
                   )}
-                  <div className="font-semibold text-[8px] sm:text-[10px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center">
+                  <div className="font-semibold text-[9px] sm:text-[11px] lg:text-xs text-gray-900 dark:text-white leading-tight w-full text-center break-words">
                     {splitName(player.name)}
                   </div>
                   <div
-                    className={`text-[8px] sm:text-[10px] lg:text-xs font-bold ${colors.text}`}
+                    className={`text-[9px] sm:text-[11px] lg:text-xs font-bold ${colors.text}`}
                   >
                     {player.rating}
                   </div>
