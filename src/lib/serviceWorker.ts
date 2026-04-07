@@ -1,19 +1,30 @@
+let updateCallback: (() => void) | null = null;
+
+export function onUpdateAvailable(cb: () => void) {
+  updateCallback = cb;
+}
+
 export function registerServiceWorker() {
   if (!('serviceWorker' in navigator)) return;
 
   window.addEventListener('load', async () => {
     try {
       const reg = await navigator.serviceWorker.register('/sw.js');
+
       reg.addEventListener('updatefound', () => {
         const newWorker = reg.installing;
-        if (newWorker) {
-          newWorker.addEventListener('statechange', () => {
-            if (newWorker.state === 'activated') {
-              console.log('[SW] New version activated');
-            }
-          });
-        }
+        if (!newWorker) return;
+
+        newWorker.addEventListener('statechange', () => {
+          if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+            if (updateCallback) updateCallback();
+          }
+        });
       });
+
+      setInterval(() => {
+        reg.update().catch(() => {});
+      }, 60 * 60 * 1000);
     } catch (e) {
       console.warn('[SW] Registration failed:', e);
     }
@@ -24,6 +35,13 @@ export function registerServiceWorker() {
       console.log('[SW] Pending results flushed, remaining:', event.data.remaining);
     }
   });
+}
+
+export function applyUpdate() {
+  if (navigator.serviceWorker?.controller) {
+    navigator.serviceWorker.controller.postMessage('skipWaiting');
+  }
+  window.location.reload();
 }
 
 export function queueGameResult(url: string, body: Record<string, unknown>) {

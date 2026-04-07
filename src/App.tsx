@@ -4,6 +4,8 @@ import { BrowserRouter, Routes, Route } from "react-router-dom";
 import Index from "./pages/Index";
 import AuthGuard from "./components/AuthGuard";
 import GameInviteNotification from "./components/GameInviteNotification";
+import InstallBanner from "./components/pwa/InstallBanner";
+import UpdateNotification from "./components/pwa/UpdateNotification";
 import API from "@/config/api";
 
 const Game = lazy(() => import("./pages/Game"));
@@ -34,6 +36,7 @@ const App = () => (
     <DailyDecayTrigger />
     <BrowserRouter>
       <GameInviteNotification />
+      <UpdateNotification />
       <Suspense fallback={<Loading />}>
         <Routes>
           <Route path="/" element={<Index />} />
@@ -43,6 +46,7 @@ const App = () => (
           <Route path="*" element={<NotFound />} />
         </Routes>
       </Suspense>
+      <InstallBanner />
     </BrowserRouter>
   </>
 );

@@ -1,13 +1,16 @@
 {
+  "id": "/",
   "name": "Лига Шахмат",
   "short_name": "Лига Шахмат",
-  "description": "Играть в шахматы онлайн бесплатно без регистрации",
+  "description": "Играть в шахматы онлайн бесплатно. Игра с компьютером работает без интернета.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#1c1917",
   "theme_color": "#1c1917",
   "orientation": "any",
   "lang": "ru",
+  "categories": ["games", "entertainment"],
   "icons": [
     {
       "src": "https://cdn.poehali.dev/projects/44b012df-8579-4e50-a646-a3ff586bd941/bucket/82c99961-b454-4287-b988-1e4c6af37144.png",

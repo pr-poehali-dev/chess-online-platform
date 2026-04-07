@@ -51,6 +51,7 @@ const Navbar = ({
   const [showMenu, setShowMenu] = useState(false);
   const [deferredPrompt, setDeferredPrompt] = useState<Event | null>(null);
   const [isInstalled, setIsInstalled] = useState(false);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
 
   useEffect(() => {
     const handler = (e: Event) => {
@@ -70,15 +71,7 @@ const Navbar = ({
       if (outcome === 'accepted') setIsInstalled(true);
       setDeferredPrompt(null);
     } else {
-      const isMobile = /iPhone|iPad|Android/i.test(navigator.userAgent);
-      const isIOS = /iPhone|iPad/i.test(navigator.userAgent);
-      if (isIOS) {
-        alert('Чтобы установить приложение: нажми кнопку «Поделиться» (□↑) внизу Safari, затем «На экран Домой».');
-      } else if (isMobile) {
-        alert('Чтобы установить: откройте меню браузера (⋮) и выберите «Добавить на главный экран».');
-      } else {
-        alert('Чтобы установить ярлык: в адресной строке браузера нажмите на иконку установки (⊕) или откройте меню и выберите «Установить приложение».');
-      }
+      setShowInstallHelp(true);
     }
   }, [deferredPrompt]);
   const [hasActiveGame, setHasActiveGame] = useState(false);
@@ -197,6 +190,7 @@ const Navbar = ({
   };
 
   return (
+    <>
     <nav className="border-b border-slate-200 dark:border-white/10 bg-white dark:bg-slate-900/80 backdrop-blur-lg sticky top-0 z-50 animate-fade-in h-[53px] sm:h-[70px]">
       <div className="container mx-auto px-3 sm:px-4 h-full">
         <div className="flex items-center justify-between gap-2 h-full">
@@ -342,6 +336,68 @@ const Navbar = ({
         </div>
       </div>
     </nav>
+
+    {showInstallHelp && (
+      <div className="fixed inset-0 z-[9999] flex items-end sm:items-center justify-center bg-black/60 animate-fade-in" onClick={() => setShowInstallHelp(false)}>
+        <div className="w-full max-w-sm mx-3 mb-3 sm:mb-0 bg-slate-900 border border-amber-500/30 rounded-2xl shadow-2xl p-5 animate-scale-in" onClick={(e) => e.stopPropagation()}>
+          <div className="flex items-center gap-3 mb-4">
+            <div className="w-12 h-12 rounded-xl bg-amber-500/20 flex items-center justify-center">
+              <span className="text-2xl">♛</span>
+            </div>
+            <div>
+              <div className="font-bold text-white">Установить Лигу Шахмат</div>
+              <div className="text-xs text-gray-400">Играй как в приложении</div>
+            </div>
+            <button onClick={() => setShowInstallHelp(false)} className="ml-auto text-gray-500 hover:text-white p-1">
+              <Icon name="X" size={20} />
+            </button>
+          </div>
+
+          {/iPhone|iPad/i.test(navigator.userAgent) ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">1</div>
+                <div className="text-sm text-gray-300">Нажми <span className="text-blue-400 font-medium">«Поделиться»</span> <Icon name="Share" size={14} className="inline text-blue-400" /> внизу Safari</div>
+              </div>
+              <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">2</div>
+                <div className="text-sm text-gray-300">Выбери <span className="text-blue-400 font-medium">«На экран Домой»</span></div>
+              </div>
+              <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400 flex-shrink-0">3</div>
+                <div className="text-sm text-gray-300">Нажми <span className="text-green-400 font-medium">«Добавить»</span> — готово!</div>
+              </div>
+            </div>
+          ) : /Android/i.test(navigator.userAgent) ? (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0">1</div>
+                <div className="text-sm text-gray-300">Открой меню браузера <span className="text-blue-400 font-medium">⋮</span></div>
+              </div>
+              <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-lg bg-green-500/20 flex items-center justify-center text-green-400 flex-shrink-0">2</div>
+                <div className="text-sm text-gray-300">Выбери <span className="text-green-400 font-medium">«Добавить на главный экран»</span></div>
+              </div>
+            </div>
+          ) : (
+            <div className="space-y-3">
+              <div className="flex items-center gap-3 bg-slate-800 rounded-xl p-3">
+                <div className="w-8 h-8 rounded-lg bg-blue-500/20 flex items-center justify-center text-blue-400 flex-shrink-0"><Icon name="Download" size={16} /></div>
+                <div className="text-sm text-gray-300">Нажми <span className="text-blue-400 font-medium">иконку установки ⊕</span> в адресной строке браузера</div>
+              </div>
+            </div>
+          )}
+
+          <button
+            onClick={() => setShowInstallHelp(false)}
+            className="w-full mt-4 py-2.5 bg-slate-800 hover:bg-slate-700 text-gray-300 text-sm rounded-xl transition-colors"
+          >
+            Понятно
+          </button>
+        </div>
+      </div>
+    )}
+    </>
   );
 };
 
